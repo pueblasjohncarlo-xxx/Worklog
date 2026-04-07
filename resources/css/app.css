@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        font-size: 14px;
+        transition: font-size 0.3s ease;
+    }
+    body {
+        @apply font-sans text-gray-100 antialiased leading-normal;
+        line-height: 1.5;
+        background-color: #1a1a1a; /* Fallback */
+    }
+
+    body, p, span, div, h1, h2, h3, h4, h5, h6, label, li, td, th { font-weight: 500; letter-spacing: -0.005em; }
+    .bg-white, .bg-gray-50, .bg-gray-100, .bg-slate-50 { color: #0f172a !important; }
+
+    /* Inputs - Keep them readable */
+    input, textarea, select {
+        @apply bg-white/10 border-white/20 text-white backdrop-blur-sm;
+        border-width: 2px !important;
+        color: #ffffff !important;
+    }
+    .bg-white input, .bg-white textarea, .bg-white select,
+    .bg-gray-50 input, .bg-gray-50 textarea, .bg-gray-50 select,
+    .bg-gray-100 input, .bg-gray-100 textarea, .bg-gray-100 select {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border-color: #e5e7eb !important;
+    }
+    .bg-white .text-gray-400, .bg-white .text-gray-500, .bg-white .text-gray-600,
+    .bg-gray-50 .text-gray-400, .bg-gray-50 .text-gray-500, .bg-gray-50 .text-gray-600,
+    .bg-gray-100 .text-gray-400, .bg-gray-100 .text-gray-500, .bg-gray-100 .text-gray-600 {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Ensure legibility on dark gradient backgrounds */
+    body.bg-gradient-to-br,
+    body[class*="bg-indigo"], 
+    body[class*="bg-purple"], 
+    .glass-panel {
+        color: #f3f4f6;
+    }
+    body.bg-gradient-to-br .text-gray-900,
+    body.bg-gradient-to-br .text-gray-800,
+    body.bg-gradient-to-br .text-gray-700,
+    body.bg-gradient-to-br .text-slate-900,
+    body.bg-gradient-to-br .text-slate-800,
+    body.bg-gradient-to-br .text-slate-700,
+    body.bg-gradient-to-br .text-black,
+    body.bg-gradient-to-br a {
+        color: #f9fafb !important;
+    }
+    body.bg-gradient-to-br h1, 
+    body.bg-gradient-to-br h2, 
+    body.bg-gradient-to-br h3, 
+    body.bg-gradient-to-br h4 {
+        color: #fafafa !important;
+        font-weight: 800;
+    }
+    .glass-panel .text-gray-900,
+    .glass-panel .text-gray-800,
+    .glass-panel .text-gray-700,
+    .glass-panel .text-slate-900,
+    .glass-panel .text-slate-800,
+    .glass-panel .text-slate-700,
+    .glass-panel .text-black,
+    .glass-panel a {
+        color: #f8fafc !important;
+    }
+
+    /* Improve text visibility in glass panels */
+    .glass-panel .text-gray-300 {
+        @apply text-gray-100 !important;
+    }
+    .glass-panel .text-gray-400 {
+        @apply text-gray-200 !important;
+    }
+    .glass-panel .text-gray-500 {
+        @apply text-gray-300 !important;
+    }
+    .glass-panel .text-gray-600 {
+        @apply text-gray-100 !important;
+    }
+    .glass-panel th {
+        @apply text-white !important;
+    }
+    .glass-panel td {
+        @apply text-gray-200 !important;
+    }
+    
+    /* Label visibility improvements */
+    label {
+        @apply text-gray-200 !important;
+    }
+    .glass-panel label {
+        @apply text-white !important;
+    }
+    .dark label {
+        @apply text-gray-200 !important;
+    }
+
+    /* Form input improvements */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    input[type="search"],
+    select,
+    textarea {
+        @apply bg-gray-900 text-white border-gray-700 !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        @apply text-gray-500 !important;
+    }
+        color: #9ca3af !important; /* Gray 400 */
+        font-weight: 500 !important;
+        opacity: 1 !important;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    p {
+        @apply mb-6;
+    }
+
+    /* Accessibility: High Contrast Focus Indicators */
+    :focus-visible {
+        outline: 3px solid #6366f1;
+        outline-offset: 3px;
+        border-radius: 2px;
+    }
+
+    /* Accessibility: Interactive Element Sizing */
+    button, input, select, textarea, a.btn, .clickable {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Custom Scrollbar for Dark Theme */
+    ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #1e1b4b; /* Indigo 950 */
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #4338ca; /* Indigo 700 */
+        border-radius: 6px;
+        border: 3px solid #1e1b4b;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #6366f1;
+    }
+}
+
+@layer components {
+    /* Accessibility Toggle Button */
+    .a11y-toggle {
+        @apply fixed bottom-6 right-6 z-50 p-4 bg-indigo-900/90 text-white rounded-full shadow-[0_0_20px_rgba(99,102,241,0.6)] border-2 border-indigo-400 hover:scale-110 transition-transform focus:outline-none focus:ring-4 focus:ring-indigo-500 backdrop-blur-md;
+    }
+
+    /* 3D Glass Panel Effect - Tinted Purple for Richer Look */
+    .glass-panel {
+        @apply bg-indigo-900/40 backdrop-blur-md border border-indigo-500/30 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] rounded-xl;
+    }
+
+    /* Glowing Edge Effect */
+    .glow-border-right {
+        box-shadow: 5px 0 15px -3px rgba(129, 140, 248, 0.3);
+        border-right: 1px solid rgba(129, 140, 248, 0.2);
+    }
+    
+    .glow-border-all {
+        box-shadow: 0 0 15px rgba(129, 140, 248, 0.4);
+        border: 1px solid rgba(129, 140, 248, 0.3);
+    }
+
+    /* Shimmer Effect Animation */
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    .shimmer-bg {
+        animation: shimmer 15s linear infinite;
+        background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0) 100%);
+        background-size: 1000px 100%;
+    }
+}
+
+/* Extra Large Text Mode */
+html.text-xl-mode { font-size: 20px; }
