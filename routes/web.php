@@ -79,6 +79,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/messages/{message}', [MessageController::class, 'update'])->name('messages.update');
     Route::delete('/messages/{message}', [MessageController::class, 'delete'])->name('messages.delete');
     Route::post('/messages/{message}/mark-as-read', [MessageController::class, 'markAsRead'])->name('messages.mark-as-read');
+    
+    // Messages API (for real-time updates via polling)
+    Route::get('/api/messages/conversations', [MessageController::class, 'apiConversations'])->name('api.messages.conversations');
+    Route::get('/api/messages/conversation/{user}', [MessageController::class, 'apiConversation'])->name('api.messages.conversation');
+    Route::post('/api/messages/send', [MessageController::class, 'apiSend'])->name('api.messages.send');
+    Route::post('/api/messages/{message}/read', [MessageController::class, 'apiMarkAsRead'])->name('api.messages.read');
+    Route::get('/api/messages/unread-count', [MessageController::class, 'apiUnreadCount'])->name('api.messages.unread-count');
 });
 
 use App\Http\Controllers\Student\StudentAnnouncementController;

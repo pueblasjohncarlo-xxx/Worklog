@@ -249,4 +249,172 @@ class MessageController extends Controller
             return User::where('id', '!=', $user->id)->orderBy('name')->get();
         }
     }
+
+    // ==================== API Methods for Real-time Updates ====================
+    
+    public function apiConversations(Request $request): JsonResponse
+    {
+        $userId = Auth::id();
+        $q = trim((string) $request->input('q', ''));
+        $roleFilter = $request->input('role', '');
+
+        // Get all unique users that the current user has exchanged messages with
+        $sentTo = Message::where('sender_id', $userId)->pluck('receiver_id');
+        $receivedFrom = Message::where('receiver_id', $userId)->pluck('sender_id');
+
+        $contactIds = $sentTo->merge($receivedFrom)->unique();
+
+        $contacts = User::whereIn('id', $contactIds)->get()->map(function ($contact) use ($userId) {
+            $lastMessage = Message::where(function ($q) use ($userId, $contact) {
+                $q->where('sender_id', $userId)->where('receiver_id', $contact->id);
+            })->orWhere(function ($q) use ($userId, $contact) {
+                $q->where('sender_id', $contact->id)->where('receiver_id', $userId);
+            })->latest()->first();
+
+            return [
+                'id' => $contact->id,
+                'name' => $contact->name,
+                'email' => $contact->email,
+                'role' => $contact->role,
+                'avatar' => sprintf('https://ui-avatars.com/api/?name=%s&background=random', urlencode($contact->name)),
+                'last_message' => $lastMessage ? $lastMessage->body : null,
+                'last_message_time' => $lastMessage ? $lastMessage->created_at : null,
+                'unread_count' => Message::where('sender_id', $contact->id)
+                    ->where('receiver_id', $userId)
+                    ->whereNull('read_at')
+                    ->count(),
+            ];
+        })->sortByDesc('last_message_time');
+
+        // Apply filters
+        if ($q !== '') {
+            $contacts = $contacts->filter(function ($contact) use ($q) {
+                return stripos($contact['name'], $q) !== false || stripos($contact['email'], $q) !== false;
+            });
+        }
+
+        if ($roleFilter !== '') {
+            $contacts = $contacts->filter(function ($contact) use ($roleFilter) {
+                return $contact['role'] === $roleFilter;
+            });
+        }
+
+        return response()->json([
+            'success' => true,
+            'conversations' => $contacts->values(),
+            'total_unread' => Message::where('receiver_id', $userId)
+                ->whereNull('read_at')
+                ->count(),
+        ]);
+    }
+
+    public function apiConversation(User $user, Request $request): JsonResponse
+    {
+        $authId = Auth::id();
+
+        if (!$this->canViewConversation($user->id)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Mark received messages as read
+        Message::where('sender_id', $user->id)
+            ->where('receiver_id', $authId)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        $messages = Message::where(function ($q) use ($authId, $user) {
+            $q->where('sender_id', $authId)->where('receiver_id', $user->id);
+        })->orWhere(function ($q) use ($authId, $user) {
+            $q->where('sender_id', $user->id)->where('receiver_id', $authId);
+        })->with(['sender', 'receiver'])
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($msg) use ($authId) {
+                return [
+                    'id' => $msg->id,
+                    'sender_id' => $msg->sender_id,
+                    'receiver_id' => $msg->receiver_id,
+                    'body' => $msg->body,
+                    'read_at' => $msg->read_at,
+                    'is_edited' => $msg->is_edited,
+                    'created_at' => $msg->created_at,
+                    'attachment_path' => $msg->attachment_path,
+                    'attachment_type' => $msg->attachment_type,
+                    'attachment_name' => $msg->attachment_name,
+                    'is_own' => $msg->sender_id === $authId,
+                    'sender_name' => $msg->sender->name,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'avatar' => sprintf('https://ui-avatars.com/api/?name=%s&background=random', urlencode($user->name)),
+            ],
+            'messages' => $messages,
+        ]);
+    }
+
+    public function apiSend(Request $request): JsonResponse
+    {
+        $request->validate([
+            'receiver_id' => 'required|exists:users,id|not_in:' . Auth::id(),
+            'body' => 'required|string|max:5000',
+        ]);
+
+        if (!$this->canMessageUser($request->receiver_id)) {
+            return response()->json(['error' => 'You cannot message this user'], 403);
+        }
+
+        $message = Message::create([
+            'sender_id' => Auth::id(),
+            'receiver_id' => $request->receiver_id,
+            'body' => $request->body,
+        ]);
+
+        $recipient = User::find($request->receiver_id);
+        if ($recipient) {
+            $recipient->notify(new NewMessageNotification($message));
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => [
+                'id' => $message->id,
+                'sender_id' => $message->sender_id,
+                'receiver_id' => $message->receiver_id,
+                'body' => $message->body,
+                'read_at' => $message->read_at,
+                'created_at' => $message->created_at,
+                'is_own' => true,
+                'sender_name' => Auth::user()->name,
+            ],
+        ]);
+    }
+
+    public function apiMarkAsRead(Message $message): JsonResponse
+    {
+        if ($message->receiver_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $message->markAsRead();
+        return response()->json(['success' => true]);
+    }
+
+    public function apiUnreadCount(): JsonResponse
+    {
+        $unreadCount = Message::where('receiver_id', Auth::id())
+            ->whereNull('read_at')
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $unreadCount,
+        ]);
+    }
 }
