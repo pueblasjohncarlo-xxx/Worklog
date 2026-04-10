@@ -47,19 +47,38 @@
                     @endphp
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td class="px-6 py-4">
-                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $task->title }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ Str::limit($task->description, 50) }}</div>
+                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $task->title }}</div>
+                            <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ Str::limit($task->description, 80) }}</div>
+                            
+                            @if($task->attachment_path)
+                                <div class="mt-3 p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21l-8-8m0 0a8 8 0 1116 0m-8 8l8-8"></path>
+                                        </svg>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">Supervisor Provided File</p>
+                                            <a href="{{ Storage::url($task->attachment_path) }}" target="_blank" download class="text-xs text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-200 font-medium truncate block">
+                                                {{ $task->original_filename ?? 'Download File' }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                             
                             @if($task->status === 'rejected' && ($task->supervisor_note || $task->supervisor_attachment_path))
-                                <div class="mt-2 p-2 bg-red-50 dark:bg-red-900/30 rounded border border-red-100 dark:border-red-800">
-                                    <p class="text-xs font-bold text-red-600 dark:text-red-400 mb-1">Supervisor Feedback:</p>
+                                <div class="mt-3 p-2.5 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-800">
+                                    <p class="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">Supervisor Feedback:</p>
                                     @if($task->supervisor_note)
-                                        <p class="text-xs text-black dark:text-gray-100 font-medium">{{ $task->supervisor_note }}</p>
+                                        <p class="text-xs text-gray-900 dark:text-gray-100">{{ $task->supervisor_note }}</p>
                                     @endif
                                     @if($task->supervisor_attachment_path)
-                                        <div class="mt-1">
-                                            <a href="{{ Storage::url($task->supervisor_attachment_path) }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                                                {{ $task->supervisor_original_filename ?? 'View Attachment' }}
+                                        <div class="mt-1.5">
+                                            <a href="{{ Storage::url($task->supervisor_attachment_path) }}" target="_blank" class="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium inline-flex items-center gap-1">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                </svg>
+                                                {{ $task->supervisor_original_filename ?? 'View Feedback File' }}
                                             </a>
                                         </div>
                                     @endif

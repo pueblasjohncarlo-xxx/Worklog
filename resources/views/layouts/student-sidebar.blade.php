@@ -1,7 +1,12 @@
-<div class="fixed top-0 left-0 h-full w-64 bg-black text-gray-100 flex flex-col z-10 shadow-xl overflow-y-auto glow-border-right">
+<div x-data="{ mobileOpen: false }" x-show="mobileOpen || window.innerWidth >= 768" @window:resize="mobileOpen = window.innerWidth >= 768" class="fixed top-0 left-0 h-full w-64 bg-black text-gray-100 flex flex-col z-20 shadow-xl overflow-y-auto glow-border-right hidden md:flex">
     <!-- Header/Logo -->
-    <div class="p-6 flex items-center justify-center border-b border-indigo-500/30 bg-black/20">
+    <div class="p-6 flex items-center justify-between border-b border-indigo-500/30 bg-black/20">
         <x-wl-sidebar-logo />
+        <button @click="mobileOpen = false" class="md:hidden text-gray-400 hover:text-white">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
 
     <!-- Navigation -->

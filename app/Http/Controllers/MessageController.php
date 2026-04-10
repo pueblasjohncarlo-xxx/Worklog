@@ -61,6 +61,17 @@ class MessageController extends Controller
         $user = Auth::user();
         $potentialRecipients = $this->getPotentialRecipients($user);
 
+        // If user has no potential recipients, provide all users based on role
+        if ($potentialRecipients->isEmpty()) {
+            $potentialRecipients = match ($user->role) {
+                User::ROLE_STUDENT => User::where('role', User::ROLE_COORDINATOR)->orderBy('name')->get(),
+                User::ROLE_COORDINATOR => User::whereIn('role', [User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER])->orderBy('name')->get(),
+                User::ROLE_SUPERVISOR => User::where('role', User::ROLE_COORDINATOR)->orderBy('name')->get(),
+                User::ROLE_ADMIN, User::ROLE_OJT_ADVISER => User::where('id', '!=', $user->id)->orderBy('name')->get(),
+                default => collect(),
+            };
+        }
+
         return view('messages.create', compact('potentialRecipients'));
     }
 

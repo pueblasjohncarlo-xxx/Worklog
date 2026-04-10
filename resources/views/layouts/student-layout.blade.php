@@ -26,25 +26,32 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed shimmer-bg">
-        <div class="min-h-screen flex">
+        <div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
             <!-- Sidebar -->
             @include('layouts.student-sidebar')
 
             <!-- Main Content -->
-            <div class="flex-1 ml-64 min-h-screen flex flex-col">
+            <div class="flex-1 ml-0 md:ml-64 min-h-screen flex flex-col">
                 <!-- Top Header -->
-                <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg sticky top-0 z-10">
-                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-                        <h2 class="font-black text-2xl text-white leading-tight drop-shadow-md tracking-tight">
+                <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg sticky top-0 z-30">
+                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center gap-4">
+                        <!-- Mobile Menu Button -->
+                        <button @click="$dispatch('toggle-sidebar')" class="md:hidden text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-900 flex-shrink-0">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        
+                        <h2 class="font-black text-xl sm:text-2xl text-white leading-tight drop-shadow-md tracking-tight flex-1 sm:flex-none">
                             {{ $header ?? 'Student Dashboard' }}
                         </h2>
                         
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2 sm:gap-4">
                             <x-notification-bell />
                             @include('layouts.partials.language-switcher-compact')
-                            <div class="flex flex-col items-end">
+                            <div class="hidden sm:flex flex-col items-end">
                                 <span class="text-[10px] text-indigo-300 uppercase font-black tracking-[0.2em]">Student</span>
-                                <span class="text-base font-black text-white">{{ Auth::user()->name }}</span>
+                                <span class="text-sm sm:text-base font-black text-white">{{ Auth::user()->name }}</span>
                             </div>
                             <div class="relative">
                                 @if (Auth::user()->profile_photo_path)
@@ -61,11 +68,19 @@
                 </header>
 
                 <!-- Page Content -->
-                <main class="p-6 flex-1">
+                <main class="p-4 sm:p-6 flex-1">
                     {{ $slot }}
                 </main>
             </div>
         </div>
-        <x-loading-screen />
+        <script>
+            // Handle sidebar toggle for mobile
+            const studentSidebar = document.querySelector('[x-data*="mobileOpen"]');
+            document.addEventListener('toggle-sidebar', () => {
+                if (studentSidebar && studentSidebar.__x) {
+                    studentSidebar.__x.unobservedData.mobileOpen = !studentSidebar.__x.unobservedData.mobileOpen;
+                }
+            });
+        </script>
     </body>
 </html>

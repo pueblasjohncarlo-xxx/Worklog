@@ -42,7 +42,6 @@
                 @yield('content')
             </main>
         </div>
-        <x-loading-screen />
         @stack('scripts')
     </body>
 </html>

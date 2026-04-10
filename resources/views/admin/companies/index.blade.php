@@ -3,14 +3,7 @@
         {{ __('Company Management') }}
     </x-slot>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <style>
-        #locationSelectorMap { height: 300px; border-radius: 0.5rem; border: 1px solid #d1d5db; z-index: 1; }
-        .dark #locationSelectorMap { border-color: #374151; }
-        .wl-red-pin { width: 16px; height: 16px; border-radius: 50% 50% 50% 0; background: #ff0000; border: 2px solid #ffffff; transform: rotate(-45deg); box-shadow: 0 0 10px rgba(255,0,0,0.5); margin-top: -8px; margin-left: -8px; }
-        .wl-blue-pin { width: 20px; height: 20px; border-radius: 50% 50% 50% 0; background: #3b82f6; border: 2px solid #ffffff; transform: rotate(-45deg); box-shadow: 0 0 10px rgba(59,130,246,0.45); margin-top: -10px; margin-left: -10px; }
-    </style>
+
 
     <div class="py-12" x-data="{ 
         workOpportunities: [''],
@@ -25,25 +18,6 @@
                     {{ session('status') }}
                 </div>
             @endif
-
-            <!-- Admin Industry Map (same as coordinator map) -->
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Lapu-Lapu City Industry Map') }}</h2>
-                    <div class="flex gap-2">
-                        <button id="adminTogglePinMode" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2 shadow-lg">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span>Pin a Flag</span>
-                        </button>
-                        <button id="adminCancelPinMode" style="display: none;" class="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold rounded-lg transition-colors shadow-lg">Cancel</button>
-                    </div>
-                </div>
-                <div id="adminLapuLapuMap" class="w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700" data-companies='@json($companiesForMap)'></div>
-                <p id="adminPinHelpText" style="display: none;" class="mt-2 text-xs text-rose-500 font-medium italic">* Click anywhere on the map to drop a red flag pin.</p>
-            </div>
 
             <!-- Create Company Form -->
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -362,156 +336,7 @@
                         }
                     });
 
-                    // Admin Lapu-Lapu City Industry Map (same behavior as coordinator)
-                    const adminMapEl = document.getElementById('adminLapuLapuMap');
-                    if (adminMapEl) {
-                        adminMapEl.style.height = '450px';
-                        const companiesMap = JSON.parse(adminMapEl.dataset.companies || '[]');
-                        const savedPinsMap = JSON.parse(adminMapEl.dataset.pins || '[]');
-                        const llccCoords = [10.3098, 123.9448];
-
-                        let pinModeAdmin = false;
-                        const toggleBtnA = document.getElementById('adminTogglePinMode');
-                        const cancelBtnA = document.getElementById('adminCancelPinMode');
-                        const helpTextA = document.getElementById('adminPinHelpText');
-
-                        const mapAdmin = L.map('adminLapuLapuMap', { zoomControl: true, scrollWheelZoom: false }).setView(llccCoords, 14);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(mapAdmin);
-
-                        toggleBtnA.addEventListener('click', () => {
-                            pinModeAdmin = !pinModeAdmin;
-                            if (pinModeAdmin) {
-                                adminMapEl.style.cursor = 'crosshair';
-                                toggleBtnA.classList.replace('bg-rose-600', 'bg-emerald-600');
-                                toggleBtnA.querySelector('span').innerText = 'Click Map to Pin';
-                                cancelBtnA.style.display = 'block';
-                                helpTextA.style.display = 'block';
-                            } else {
-                                resetAdminPinMode();
-                            }
-                        });
-
-                        cancelBtnA.addEventListener('click', resetAdminPinMode);
-
-                        function resetAdminPinMode() {
-                            pinModeAdmin = false;
-                            adminMapEl.style.cursor = '';
-                            toggleBtnA.classList.replace('bg-emerald-600', 'bg-rose-600');
-                            toggleBtnA.querySelector('span').innerText = 'Pin a Flag';
-                            cancelBtnA.style.display = 'none';
-                            helpTextA.style.display = 'none';
-                        }
-
-                        mapAdmin.on('click', async function(e) {
-                            if (!pinModeAdmin) return;
-                            const label = prompt('Enter a label for this flag (optional):');
-                            if (label === null) return;
-
-                            try {
-                                const response = await fetch('{{ route("map-pins.store") }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({
-                                        label: label || 'Custom Flag',
-                                        latitude: e.latlng.lat,
-                                        longitude: e.latlng.lng,
-                                        type: 'flag',
-                                        color: '#ef4444'
-                                    })
-                                });
-
-                                if (response.ok) {
-                                    const pin = await response.json();
-                                    addAdminSavedPinToMap(pin);
-                                    resetAdminPinMode();
-                                }
-                            } catch (err) {
-                                alert('Failed to save pin. Please try again.');
-                            }
-                        });
-
-                        function addAdminSavedPinToMap(pin) {
-                            const icon = L.divIcon({ className: '', html: `<div class="wl-red-pin" style="background: ${pin.color}"></div>`, iconSize: [20, 20], iconAnchor: [10, 10] });
-                            const popupContent = `
-                                <div class="p-1">
-                                    <div class="font-black text-rose-600">${pin.label}</div>
-                                    <div class="text-[10px] text-gray-400 mt-1 italic">Manual Pin</div>
-                                    <button onclick="deleteAdminPin(${pin.id}, this)" class="mt-2 text-[10px] text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-600 transition-colors">Delete Pin</button>
-                                </div>
-                            `;
-
-                            L.marker([pin.latitude, pin.longitude], { icon }).addTo(mapAdmin).bindPopup(popupContent);
-                        }
-
-                        window.deleteAdminPin = async function(id) {
-                            if (!confirm('Are you sure you want to delete this pin?')) return;
-                            try {
-                                const response = await fetch(`/map-pins/${id}`, {
-                                    method: 'DELETE',
-                                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                                });
-                                if (response.ok) {
-                                    location.reload();
-                                }
-                            } catch (err) {
-                                alert('Delete failed.');
-                            }
-                        };
-
-                        savedPinsMap.forEach(addAdminSavedPinToMap);
-
-                        const llccIcon = L.divIcon({ className: '', html: '<div class="wl-blue-pin"></div>', iconSize: [24, 24], iconAnchor: [12, 12] });
-                        L.marker(llccCoords, { icon: llccIcon }).addTo(mapAdmin).bindPopup('<div class="font-bold text-indigo-600 text-center">Lapu-Lapu City College</div><div class="text-[10px] text-gray-500 text-center">OJT Landmark</div>').openPopup();
-
-                        const redIcon = L.divIcon({ className: '', html: '<div class="wl-red-pin"></div>', iconSize: [20, 20], iconAnchor: [10, 10] });
-
-                        const geocode = async (query) => {
-                            const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=3&viewbox=123.8,10.4,124.1,10.2&bounded=1&q=' + encodeURIComponent(query);
-                            const res = await fetch(url, { headers: { Accept: 'application/json' } });
-                            const data = await res.json();
-                            if (Array.isArray(data) && data.length) {
-                                return { lat: Number(data[0].lat), lng: Number(data[0].lon) };
-                            }
-                            return null;
-                        };
-
-                        (async () => {
-                            for (const c of companiesMap) {
-                                let pos = null;
-
-                                if (c.latitude && c.longitude) {
-                                    pos = { lat: Number(c.latitude), lng: Number(c.longitude) };
-                                } else {
-                                    const queries = [`${c.name}, Lapu-Lapu City`, `${c.address}, Lapu-Lapu City`, `${c.name}, Cebu`];
-                                    for (const q of queries) {
-                                        try {
-                                            pos = await geocode(q);
-                                            if (pos) break;
-                                        } catch (err) {}
-                                    }
-                                }
-
-                                if (pos && Number.isFinite(pos.lat) && Number.isFinite(pos.lng)) {
-                                    const companyCoords = [pos.lat, pos.lng];
-                                    const label = `
-                                        <div class="p-1">
-                                            <div class="font-black text-rose-600">${c.name}</div>
-                                            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">${c.industry || 'Industry'}</div>
-                                            <div class="text-[10px] text-gray-400 mt-1 italic truncate max-w-[150px]">${c.address || ''}</div>
-                                        </div>
-                                    `;
-
-                                    L.marker(companyCoords, { icon: redIcon }).addTo(mapAdmin).bindPopup(label);
-                                    L.polyline([llccCoords, companyCoords], {
-                                        color: '#6366f1', weight: 2, opacity: 0.5, dashArray: '5, 10', className: 'map-connection-line'
-                                    }).addTo(mapAdmin);
-                                }
-                            }
-                        })();
-                    }
+                    // Industry map removed - not needed
                 })();
                 </script>
                 @endpush

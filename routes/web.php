@@ -22,7 +22,7 @@ use App\Http\Controllers\SupervisorController;
 use App\Http\Controllers\WorkLogController;
 
 use App\Models\User;
-use App\Models\MapPin;
+// use App\Models\MapPin; // REMOVED - industry map feature disabled
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +68,105 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Debug route - check tasks
+    Route::get('/debug/student-tasks', function () {
+        $user = Auth::user();
+        $assignment = \App\Models\Assignment::where('student_id', $user->id)->first();
+        
+        return response()->json([
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'assignment' => $assignment ? [
+                'id' => $assignment->id,
+                'supervisor_id' => $assignment->supervisor_id,
+                'supervisor_name' => $assignment->supervisor->name ?? 'N/A',
+                'status' => $assignment->status,
+            ] : null,
+            'tasks_count' => $assignment ? \App\Models\Task::where('assignment_id', $assignment->id)->count() : 0,
+            'tasks' => $assignment ? \App\Models\Task::where('assignment_id', $assignment->id)->get(['id', 'title', 'semester', 'status', 'created_at'])->toArray() : [],
+        ]);
+    })->name('debug.student.tasks');
+
+    // Detailed HTML debug page
+    Route::get('/debug/tasks-html', function () {
+        $user = Auth::user();
+        $assignment = \App\Models\Assignment::where('student_id', $user->id)->first();
+        
+        return view('debug.tasks-debug', [
+            'user' => $user,
+            'assignment' => $assignment,
+            'tasks' => $assignment ? \App\Models\Task::where('assignment_id', $assignment->id)->get() : collect(),
+            'allAssignments' => \App\Models\Assignment::where('student_id', $user->id)->get(),
+        ]);
+    })->name('debug.tasks.html');
+
+    // Simple test route to create a task for testing
+    Route::get('/test/create-task', function () {
+        $user = Auth::user();
+        $assignment = \App\Models\Assignment::where('student_id', $user->id)->first();
+        
+        if (!$assignment) {
+            return "No assignment found for user";
+        }
+        
+        $task = \App\Models\Task::create([
+            'assignment_id' => $assignment->id,
+            'title' => 'TEST TASK - ' . now()->toDateTimeString(),
+            'description' => 'This is a test task to verify the system is working',
+            'semester' => '1st',
+            'status' => 'pending',
+            'due_date' => now()->addDays(7),
+        ]);
+        
+        return "Task created successfully! ID: {$task->id}, Assignment: {$assignment->id}, Semester: {$task->semester}";
+    })->name('test.create.task');
+
+    // Raw database inspection
+    Route::get('/debug/raw-data', function () {
+        $user = Auth::user();
+        
+        // Get all assignments for this user
+        $assignments = \App\Models\Assignment::where('student_id', $user->id)->get();
+        
+        $data = [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'role' => $user->role,
+            ],
+            'assignments' => $assignments->map(function ($a) {
+                return [
+                    'id' => $a->id,
+                    'status' => $a->status,
+                    'supervisor_id' => $a->supervisor_id,
+                    'supervisor_name' => $a->supervisor?->name,
+                ];
+            })->toArray(),
+            'all_tasks' => [],
+        ];
+
+        // Get all tasks for all assignments
+        foreach ($assignments as $assignment) {
+            $tasks = \App\Models\Task::where('assignment_id', $assignment->id)
+                ->orderBy('id', 'desc')
+                ->get();
+            
+            foreach ($tasks as $task) {
+                $data['all_tasks'][] = [
+                    'id' => $task->id,
+                    'assignment_id' => $task->assignment_id,
+                    'title' => $task->title,
+                    'semester' => $task->semester,
+                    'status' => $task->status,
+                    'created_at' => $task->created_at->toIso8601String(),
+                    'due_date' => $task->due_date?->toDateString(),
+                ];
+            }
+        }
+
+        return response()->json($data, 200, ['Content-Type' => 'application/json;charset=UTF-8'], JSON_PRETTY_PRINT);
+    })->name('debug.raw.data');
+
     // Notifications
     Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
@@ -81,36 +180,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/messages/{message}', [MessageController::class, 'delete'])->name('messages.delete');
     Route::post('/messages/{message}/mark-as-read', [MessageController::class, 'markAsRead'])->name('messages.mark-as-read');
 
-    // Map Pins
-    Route::post('/map-pins', function (Request $request) {
-        $validated = $request->validate([
-            'label' => 'nullable|string|max:255',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'type' => 'required|string',
-            'color' => 'required|string',
-        ]);
-
-        $pin = MapPin::create([
-            'user_id' => Auth::id(),
-            'label' => $validated['label'],
-            'latitude' => $validated['latitude'],
-            'longitude' => $validated['longitude'],
-            'type' => $validated['type'],
-            'color' => $validated['color'],
-        ]);
-
-        return response()->json($pin);
-    })->name('map-pins.store');
-
-    Route::delete('/map-pins/{mapPin}', function (MapPin $mapPin) {
-        if ($mapPin->user_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-        $mapPin->delete();
-
-        return response()->json(['success' => true]);
-    })->name('map-pins.destroy');
+    // Map Pins - DISABLED (industry map removed)
+    // Route::post('/map-pins', ...)->name('map-pins.store');
+    // Route::delete('/map-pins/{mapPin}', ...)->name('map-pins.destroy');
 });
 
 use App\Http\Controllers\Student\StudentAnnouncementController;

@@ -15,34 +15,45 @@ class TaskController extends Controller
     public function index(Request $request): View
     {
         $user = Auth::user();
-        $sortOrder = $request->query('sort', 'desc'); // Default to newest (descending)
+        $sortOrder = $request->query('sort', 'desc');
 
-        $assignment = Assignment::where('student_id', $user->id)
-            ->where('status', 'active')
+        // Get student's assignment with relationships eager loaded
+        $assignment = Assignment::with(['student', 'supervisor', 'company'])
+            ->where('student_id', $user->id)
             ->first();
 
-        if (! $assignment) {
+        if (!$assignment) {
             return view('student.tasks.index', [
                 'sem1_tasks' => collect(),
                 'sem2_tasks' => collect(),
                 'sortOrder' => $sortOrder,
+                'assignment' => null,
             ]);
         }
 
-        $tasks = Task::where('assignment_id', $assignment->id)
+        // Get ALL tasks for this assignment
+        $allTasks = Task::where('assignment_id', $assignment->id)
             ->orderBy('created_at', $sortOrder)
-            ->get();
+            ->get()
+            ->map(function ($task) {
+                // Ensure every task has a semester (fallback to 1st if NULL)
+                if (empty($task->semester)) {
+                    $task->semester = '1st';
+                }
+                return $task;
+            });
 
-        // Categorize tasks by semester
-        // We re-sort collection because we fetched all and then split.
-        // Or we can just let the DB sort handle it if we want overall created_at sort.
-        // The requirement: "Newest tasks at the top by default" (created_at desc)
-        // "Toggle between ascending and descending order based on timestamp values" (created_at?)
+        // Separate by semester
+        $sem1_tasks = $allTasks->where('semester', '1st');
+        $sem2_tasks = $allTasks->where('semester', '2nd');
 
-        $sem1_tasks = $tasks->where('semester', '1st');
-        $sem2_tasks = $tasks->where('semester', '2nd');
-
-        return view('student.tasks.index', compact('sem1_tasks', 'sem2_tasks', 'sortOrder'));
+        return view('student.tasks.index', [
+            'sem1_tasks' => $sem1_tasks->values()->toArray(),
+            'sem2_tasks' => $sem2_tasks->values()->toArray(),
+            'sortOrder' => $sortOrder,
+            'assignment' => $assignment,
+            'totalTasks' => $allTasks->count(),
+        ]);
     }
 
     public function submit(Request $request, Task $task): RedirectResponse

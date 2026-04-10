@@ -29,32 +29,48 @@ class SupervisorTaskController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'assignment_id' => 'required|exists:assignments,id',
+            'semester' => 'required|in:1st,2nd',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,txt,zip|max:10240',
         ]);
 
         // Verify assignment belongs to supervisor
-        $assignment = Assignment::findOrFail($request->assignment_id);
+        $assignment = Assignment::findOrFail($validated['assignment_id']);
         if ($assignment->supervisor_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
 
+        $attachmentPath = null;
+        $originalFilename = null;
+
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $originalFilename = $file->getClientOriginalName();
+            $attachmentPath = $file->store('task_attachments', 'public');
+        }
+
         $task = Task::create([
-            'assignment_id' => $request->assignment_id,
-            'title' => $request->title,
-            'description' => $request->description,
-            'due_date' => $request->due_date,
+            'assignment_id' => $validated['assignment_id'],
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'due_date' => $validated['due_date'],
+            'attachment_path' => $attachmentPath,
+            'original_filename' => $originalFilename,
+            'semester' => $validated['semester'],
             'status' => 'pending',
         ]);
 
-        // Notify the student
-        $task->student->notify(new NewTaskAssignedNotification($task));
+        // Notify the student through the assignment relationship
+        if ($assignment->student) {
+            $assignment->student->notify(new NewTaskAssignedNotification($task));
+        }
 
         return redirect()->route('supervisor.dashboard')
-            ->with('status', 'Task assigned successfully.');
+            ->with('status', "✓ Task '{$task->title}' assigned successfully to {$assignment->student->name} for {$validated['semester']} semester.");
     }
 
     public function approve(Request $request, Task $task): RedirectResponse
