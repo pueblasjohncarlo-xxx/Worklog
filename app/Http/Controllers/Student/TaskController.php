@@ -97,7 +97,7 @@ class TaskController extends Controller
         $task->update([
             'status' => 'pending', // Revert to pending
             'unsubmitted_at' => now(),
-            // 'attachment_path' => null, // Uncomment to remove file reference
+            // Note: Attachment path is handled separately if needed
             // 'original_filename' => null,
         ]);
 

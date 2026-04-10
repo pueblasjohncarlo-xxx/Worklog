@@ -6,9 +6,11 @@ use App\Http\Requests\Coordinator\StoreCompanyRequest;
 use App\Models\Assignment;
 use App\Models\Company;
 use App\Models\Message;
+use App\Models\PerformanceEvaluation;
 use App\Models\User;
 use App\Models\WorkLog;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -556,11 +558,95 @@ class CoordinatorController extends Controller
     public function supervisorOverview(): View
     {
         $supervisors = User::where('role', User::ROLE_SUPERVISOR)
-            ->with(['supervisorAssignments.student', 'supervisorAssignments.company'])
+            ->with([
+                'supervisorProfile',
+                'supervisorAssignments' => function ($query) {
+                    $query->with(['student.studentProfile', 'company', 'workLogs', 'tasks']);
+                },
+            ])
             ->orderBy('name')
-            ->paginate(10);
+            ->get();
 
-        return view('coordinator.supervisor-overview', compact('supervisors'));
+        // Calculate summary metrics
+        $totalSupervisors = $supervisors->count();
+        $totalCompanies = $supervisors
+            ->flatMap(fn ($s) => $s->supervisorAssignments->pluck('company_id'))
+            ->unique()
+            ->count();
+        $totalStudents = $supervisors
+            ->flatMap(fn ($s) => $s->supervisorAssignments->pluck('student_id'))
+            ->unique()
+            ->count();
+
+        // Prepare supervisor data with metrics
+        $supervisorData = $supervisors->map(function (User $supervisor) {
+            $assignments = $supervisor->supervisorAssignments;
+            
+            $companies = $assignments
+                ->pluck('company')
+                ->unique('id')
+                ->values();
+
+            $totalStudents = $assignments->count();
+            $activeAssignments = $assignments->where('status', 'active');
+            $activeStudents = $activeAssignments->count();
+
+            // Get evaluations for students under this supervisor
+            $studentIds = $assignments->pluck('student_id')->unique();
+            $completedEvaluations = PerformanceEvaluation::whereIn('student_id', $studentIds)
+                ->where('supervisor_id', $supervisor->id)
+                ->where('submitted_at', '!=', null)
+                ->count();
+            
+            $pendingEvaluations = $activeStudents - $completedEvaluations;
+
+            // Get active tasks/monitoring
+            $activeTasks = $assignments
+                ->flatMap(fn ($a) => $a->tasks)
+                ->where('status', '!=', 'submitted')
+                ->count();
+
+            $students = $assignments->map(function ($assignment) {
+                return [
+                    'id' => $assignment->student->id,
+                    'name' => $assignment->student->name,
+                    'email' => $assignment->student->email,
+                    'program' => $assignment->student->studentProfile?->program ?? 'N/A',
+                    'status' => $assignment->status,
+                ];
+            })->values();
+
+            return [
+                'id' => $supervisor->id,
+                'name' => $supervisor->name,
+                'email' => $supervisor->email,
+                'phone' => $supervisor->supervisorProfile?->phone ?? 'N/A',
+                'position_title' => $supervisor->supervisorProfile?->position_title ?? 'N/A',
+                'department' => $supervisor->supervisorProfile?->department ?? 'N/A',
+                'photo_url' => $supervisor->profile_photo_path ? Storage::url($supervisor->profile_photo_path) : null,
+                'companies' => $companies->toArray(),
+                'total_students' => $totalStudents,
+                'active_students' => $activeStudents,
+                'completed_evaluations' => $completedEvaluations,
+                'pending_evaluations' => $pendingEvaluations,
+                'active_tasks' => $activeTasks,
+                'students' => $students->toArray(),
+                'status' => $activeStudents > 0 ? 'Active' : 'Inactive',
+            ];
+        })->values();
+
+        $activeSupervisors = $supervisorData->filter(fn ($s) => $s['status'] === 'Active')->count();
+
+        $companies = Company::orderBy('name')->get();
+
+        return view('coordinator.supervisor-overview', [
+            'supervisors' => $supervisorData,
+            'companies' => $companies,
+            'totalSupervisors' => $totalSupervisors,
+            'totalCompanies' => $totalCompanies,
+            'totalStudents' => $totalStudents,
+            'activeSupervisors' => $activeSupervisors,
+        ]);
     }
 
     public function adviserOverview(): View
@@ -569,54 +655,80 @@ class CoordinatorController extends Controller
             ->with([
                 'ojtAdviserProfile',
                 'ojtAdviserAssignments' => function ($query) {
-                    $query->where('status', 'active')
-                        ->with(['student', 'company', 'supervisor']);
+                    $query->with(['student.studentProfile', 'company', 'supervisor', 'workLogs', 'tasks']);
                 },
             ])
             ->orderBy('name')
             ->get();
 
         $advisersData = $advisers->map(function (User $adviser) {
-            $studentsBySection = $adviser->ojtAdviserAssignments
-                ->groupBy(fn ($assignment) => $assignment->student?->section ?? 'No Section')
-                ->map(function ($assignments) {
-                    return $assignments
-                        ->map(function ($assignment) {
-                            $student = $assignment->student;
+            $assignments = $adviser->ojtAdviserAssignments;
 
-                            return [
-                                'id' => $student?->id,
-                                'name' => $student?->name,
-                                'email' => $student?->email,
-                                'section' => $student?->section ?? 'No Section',
-                                'company' => $assignment->company?->name,
-                                'supervisor' => $assignment->supervisor?->name,
-                            ];
-                        })
-                        ->filter(fn ($row) => ! empty($row['id']))
-                        ->values();
-                })
-                ->toArray();
+            $studentData = $assignments->map(function ($assignment) {
+                $requiredHours = $assignment->required_hours ?? 0;
+                $completedHours = $assignment->workLogs()
+                    ->where('status', '=', 'approved')
+                    ->sum('hours');
+
+                $tasks = $assignment->tasks;
+                $submittedTasks = $tasks->where('status', 'submitted')->count();
+                $totalTasks = $tasks->count();
+
+                $hoursPercentage = $requiredHours > 0 ? ($completedHours / $requiredHours) * 100 : 0;
+                $tasksPercentage = $totalTasks > 0 ? ($submittedTasks / $totalTasks) * 100 : 0;
+
+                $student = $assignment->student;
+
+                return [
+                    'id' => $student?->id,
+                    'name' => $student?->name,
+                    'email' => $student?->email,
+                    'program' => $student->studentProfile?->program ?? 'N/A',
+                    'year_level' => $student->studentProfile?->year_level ?? 'N/A',
+                    'section' => $student?->section ?? 'No Section',
+                    'company' => $assignment->company?->name,
+                    'company_id' => $assignment->company?->id,
+                    'supervisor' => $assignment->supervisor?->name,
+                    'assignment_id' => $assignment->id,
+                    'status' => $assignment->status,
+                    'start_date' => $assignment->start_date?->format('M d, Y'),
+                    'end_date' => $assignment->end_date?->format('M d, Y'),
+                    'required_hours' => $requiredHours,
+                    'completed_hours' => $completedHours,
+                    'hours_percentage' => round($hoursPercentage, 1),
+                    'submitted_tasks' => $submittedTasks,
+                    'total_tasks' => $totalTasks,
+                    'tasks_percentage' => round($tasksPercentage, 1),
+                    'evaluation_status' => $assignment->workLogs->where('status', 'pending')->count() > 0 ? 'Pending' : 'Evaluated',
+                ];
+            })->values()->toArray();
+
+            $totalStudents = count($studentData);
+            $activeStudents = collect($studentData)->filter(fn ($s) => $s['status'] === 'active')->count();
+            $completedStudents = collect($studentData)->filter(fn ($s) => $s['status'] === 'completed')->count();
+            $pendingEvaluations = collect($studentData)->filter(fn ($s) => $s['evaluation_status'] === 'Pending')->count();
 
             return [
                 'id' => $adviser->id,
                 'name' => $adviser->name,
                 'email' => $adviser->email,
                 'department' => $adviser->ojtAdviserProfile?->department ?? 'N/A',
+                'phone' => $adviser->ojtAdviserProfile?->phone ?? 'N/A',
                 'photo_url' => $adviser->profile_photo_path ? Storage::url($adviser->profile_photo_path) : null,
-                'studentsBySection' => $studentsBySection,
+                'total_students' => $totalStudents,
+                'active_students' => $activeStudents,
+                'completed_students' => $completedStudents,
+                'pending_evaluations' => $pendingEvaluations,
+                'students' => $studentData,
+                'companies_supervised' => collect($studentData)->pluck('company_id')->unique()->count(),
             ];
         })->values();
 
-        $sections = $advisersData
-            ->flatMap(fn ($adviser) => array_keys($adviser['studentsBySection'] ?? []))
-            ->unique()
-            ->sort()
-            ->values();
+        $companies = Company::orderBy('name')->get();
 
         return view('coordinator.adviser-overview', [
             'advisersData' => $advisersData,
-            'sections' => $sections,
+            'companies' => $companies,
         ]);
     }
 
@@ -673,7 +785,86 @@ class CoordinatorController extends Controller
 
     public function complianceOverview(): View
     {
-        return view('coordinator.compliance-overview');
+        $assignments = Assignment::with([
+            'student.studentProfile',
+            'company',
+            'workLogs',
+            'tasks'
+        ])->get();
+
+        // Calculate overall metrics
+        $totalStudents = $assignments->count();
+        $onTrackCount = 0;
+        $atRiskCount = 0;
+        $totalHoursRequired = 0;
+        $totalHoursCompleted = 0;
+        $totalTasksSubmitted = 0;
+        $totalTasksOutstanding = 0;
+
+        $studentMetrics = [];
+
+        foreach ($assignments as $assignment) {
+            $requiredHours = $assignment->required_hours ?? 0;
+            $completedHours = $assignment->workLogs()
+                ->where('status', '=', 'approved')
+                ->sum('hours');
+
+            $tasks = $assignment->tasks;
+            $submittedTasks = $tasks->where('status', 'submitted')->count();
+            $totalTasks = $tasks->count();
+
+            $hoursPercentage = $requiredHours > 0 ? ($completedHours / $requiredHours) * 100 : 0;
+            $tasksPercentage = $totalTasks > 0 ? ($submittedTasks / $totalTasks) * 100 : 0;
+
+            $isOnTrack = $hoursPercentage >= 80 && $tasksPercentage >= 80;
+            if ($isOnTrack) {
+                $onTrackCount++;
+            } else {
+                $atRiskCount++;
+            }
+
+            $totalHoursRequired += $requiredHours;
+            $totalHoursCompleted += $completedHours;
+            $totalTasksSubmitted += $submittedTasks;
+            $totalTasksOutstanding += $totalTasks - $submittedTasks;
+
+            $studentMetrics[] = [
+                'assignment' => $assignment,
+                'student' => $assignment->student,
+                'studentProfile' => $assignment->student->studentProfile,
+                'company' => $assignment->company,
+                'requiredHours' => $requiredHours,
+                'completedHours' => $completedHours,
+                'hoursPercentage' => round($hoursPercentage, 1),
+                'submittedTasks' => $submittedTasks,
+                'totalTasks' => $totalTasks,
+                'tasksPercentage' => round($tasksPercentage, 1),
+                'isOnTrack' => $isOnTrack,
+                'status' => $assignment->status,
+                'daysRemaining' => $assignment->end_date ? $assignment->end_date->diffInDays(now(), false) : null,
+            ];
+        }
+
+        $overallHoursPercentage = $totalHoursRequired > 0 ? round(($totalHoursCompleted / $totalHoursRequired) * 100, 1) : 0;
+        $overallTasksPercentage = $totalTasksSubmitted + $totalTasksOutstanding > 0 
+            ? round(($totalTasksSubmitted / ($totalTasksSubmitted + $totalTasksOutstanding)) * 100, 1) 
+            : 0;
+
+        $complianceScore = round(($overallHoursPercentage + $overallTasksPercentage) / 2, 1);
+
+        return view('coordinator.compliance-overview', [
+            'totalStudents' => $totalStudents,
+            'onTrackCount' => $onTrackCount,
+            'atRiskCount' => $atRiskCount,
+            'totalHoursRequired' => $totalHoursRequired,
+            'totalHoursCompleted' => $totalHoursCompleted,
+            'overallHoursPercentage' => $overallHoursPercentage,
+            'totalTasksSubmitted' => $totalTasksSubmitted,
+            'totalTasksOutstanding' => $totalTasksOutstanding,
+            'overallTasksPercentage' => $overallTasksPercentage,
+            'complianceScore' => $complianceScore,
+            'studentMetrics' => collect($studentMetrics),
+        ]);
     }
 
     public function companiesIndex(): View
@@ -695,9 +886,9 @@ class CoordinatorController extends Controller
             ->with('status', 'company-created');
     }
 
-    public function assignmentsIndex(): View
+    public function deploymentIndex(): View
     {
-        $assignments = Assignment::with(['student', 'supervisor', 'company', 'ojtAdviser'])
+        $assignments = Assignment::with(['student.studentProfile', 'supervisor', 'company', 'ojtAdviser'])
             ->orderByDesc('created_at')
             ->get();
 
@@ -714,16 +905,56 @@ class CoordinatorController extends Controller
         $ojtAdvisers = User::where('role', User::ROLE_OJT_ADVISER)->orderBy('name')->get();
         $companies = Company::orderBy('name')->get();
 
-        return view('coordinator.assignments.index', [
+        // Calculate summary metrics
+        $totalDeployed = $assignments->count();
+        $supervisorOnly = $assignments->filter(fn ($a) => $a->supervisor_id && !$a->ojt_adviser_id)->count();
+        $adviserOnly = $assignments->filter(fn ($a) => $a->ojt_adviser_id && !$a->supervisor_id)->count();
+        $fullyAssigned = $assignments->filter(fn ($a) => $a->supervisor_id && $a->ojt_adviser_id)->count();
+        $incomplete = $assignments->filter(fn ($a) => !$a->supervisor_id || !$a->ojt_adviser_id)->count();
+        $active = $assignments->filter(fn ($a) => $a->status === 'active')->count();
+
+        // Prepare detailed deployment data
+        $deploymentData = $assignments->map(function ($assignment) {
+            return [
+                'id' => $assignment->id,
+                'student_id' => $assignment->student->id,
+                'student_name' => $assignment->student->name,
+                'student_email' => $assignment->student->email,
+                'student_program' => $assignment->student->studentProfile?->program ?? 'N/A',
+                'supervisor_id' => $assignment->supervisor_id,
+                'supervisor_name' => $assignment->supervisor?->name ?? 'Not Assigned',
+                'adviser_id' => $assignment->ojt_adviser_id,
+                'adviser_name' => $assignment->ojtAdviser?->name ?? 'Not Assigned',
+                'company_id' => $assignment->company_id,
+                'company_name' => $assignment->company->name ?? 'N/A',
+                'start_date' => $assignment->start_date?->format('Y-m-d'),
+                'end_date' => $assignment->end_date?->format('Y-m-d'),
+                'status' => $assignment->status,
+                'required_hours' => $assignment->required_hours,
+                'is_fully_assigned' => $assignment->supervisor_id && $assignment->ojt_adviser_id,
+                'is_partially_assigned' => ($assignment->supervisor_id || $assignment->ojt_adviser_id) && !($assignment->supervisor_id && $assignment->ojt_adviser_id),
+                'is_unassigned' => !$assignment->supervisor_id && !$assignment->ojt_adviser_id,
+                'deployment_status' => $assignment->supervisor_id && $assignment->ojt_adviser_id ? 'complete' : ($assignment->supervisor_id || $assignment->ojt_adviser_id ? 'incomplete' : 'unassigned'),
+            ];
+        });
+
+        return view('coordinator.deployment.index', [
+            'deploymentData' => $deploymentData,
             'assignments' => $assignments,
             'groupedStudents' => $students,
             'supervisors' => $supervisors,
             'ojtAdvisers' => $ojtAdvisers,
             'companies' => $companies,
+            'totalDeployed' => $totalDeployed,
+            'supervisorOnly' => $supervisorOnly,
+            'adviserOnly' => $adviserOnly,
+            'fullyAssigned' => $fullyAssigned,
+            'incomplete' => $incomplete,
+            'active' => $active,
         ]);
     }
 
-    public function assignmentsStore(Request $request): RedirectResponse
+    public function deploymentStore(Request $request): RedirectResponse
     {
         $request->validate([
             'student_ids' => 'nullable|array',
@@ -772,8 +1003,20 @@ class CoordinatorController extends Controller
             }
         }
 
-        return redirect()->route('coordinator.assignments.index')
-            ->with('status', 'Assignments created successfully.');
+        return redirect()->route('coordinator.deployment.index')
+            ->with('status', 'Deployments created successfully.');
+    }
+
+    public function deploymentUpdate(Request $request, Assignment $assignment): JsonResponse
+    {
+        $request->validate([
+            'supervisor_id' => 'nullable|exists:users,id',
+            'ojt_adviser_id' => 'nullable|exists:users,id',
+        ]);
+
+        $assignment->update($request->only(['supervisor_id', 'ojt_adviser_id']));
+
+        return response()->json(['success' => true]);
     }
 
     public function updateRequiredHours(Request $request, Assignment $assignment): RedirectResponse

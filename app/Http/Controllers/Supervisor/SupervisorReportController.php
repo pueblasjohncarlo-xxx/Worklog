@@ -14,7 +14,7 @@ class SupervisorReportController extends Controller
 {
     public function index(): View
     {
-        // Placeholder for saved reports list
+        // Reports are generated dynamically from task and work log data
         // In a real app, we might save generated PDFs to storage and list them here.
         // For now, let's just show a static list or empty state.
         return view('supervisor.reports.index');

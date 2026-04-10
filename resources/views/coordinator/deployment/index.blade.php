@@ -1,33 +1,36 @@
 <x-coordinator-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Assignments</h2>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Deployment Management</h2>
         </div>
     </x-slot>
 
     <div class="space-y-6" x-data='{
-        assignments: @json($assignmentData),
+        deployments: @json($deploymentData),
         supervisors: @json($supervisors->map(fn($s) => ["id" => $s->id, "name" => $s->name])),
         advisers: @json($ojtAdvisers->map(fn($a) => ["id" => $a->id, "name" => $a->name])),
         companies: @json($companies->map(fn($c) => ["id" => $c->id, "name" => $c->name])),
         searchTerm: "",
         selectedCompany: "",
         selectedStatus: "",
-        selectedAssignmentStatus: "",
+        selectedDeploymentStatus: "",
         selectedSupervisor: "",
         selectedAdviser: "",
+        editingDeployment: null,
+        editSupervisorId: "",
+        editAdviserId: "",
         
-        getFilteredAssignments() {
-            return this.assignments.filter(a => {
+        getFilteredDeployments() {
+            return this.deployments.filter(a => {
                 const matchesSearch = a.student_name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
                                     a.student_email.toLowerCase().includes(this.searchTerm.toLowerCase());
                 const matchesCompany = this.selectedCompany === "" || String(a.company_id) === String(this.selectedCompany);
                 const matchesStatus = this.selectedStatus === "" || a.status === this.selectedStatus;
-                const matchesAssignStatus = this.selectedAssignmentStatus === "" || a.assignment_status === this.selectedAssignmentStatus;
+                const matchesDeployStatus = this.selectedDeploymentStatus === "" || a.deployment_status === this.selectedDeploymentStatus;
                 const matchesSupervisor = this.selectedSupervisor === "" || a.supervisor_id == this.selectedSupervisor;
                 const matchesAdviser = this.selectedAdviser === "" || a.adviser_id == this.selectedAdviser;
                 
-                return matchesSearch && matchesCompany && matchesStatus && matchesAssignStatus && matchesSupervisor && matchesAdviser;
+                return matchesSearch && matchesCompany && matchesStatus && matchesDeployStatus && matchesSupervisor && matchesAdviser;
             });
         },
         
@@ -35,9 +38,59 @@
             this.searchTerm = "";
             this.selectedCompany = "";
             this.selectedStatus = "";
-            this.selectedAssignmentStatus = "";
+            this.selectedDeploymentStatus = "";
             this.selectedSupervisor = "";
             this.selectedAdviser = "";
+        },
+        
+        openEditModal(deployment) {
+            this.editingDeployment = { ...deployment };
+            this.editSupervisorId = deployment.supervisor_id || "";
+            this.editAdviserId = deployment.adviser_id || "";
+            document.getElementById("editDeploymentModal").classList.remove("hidden");
+        },
+        
+        closeEditModal() {
+            this.editingDeployment = null;
+            this.editSupervisorId = "";
+            this.editAdviserId = "";
+            document.getElementById("editDeploymentModal").classList.add("hidden");
+        },
+        
+        saveDeployment() {
+            if (!this.editingDeployment) return;
+            
+            const formData = new FormData();
+            formData.append("supervisor_id", this.editSupervisorId);
+            formData.append("ojt_adviser_id", this.editAdviserId);
+            formData.append("_method", "PATCH");
+            formData.append("_token", document.querySelector("meta[name=csrf-token]").getAttribute("content"));
+            
+            fetch(`/coordinator/deployment-management/${this.editingDeployment.id}`, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Update the deployment in the array
+                    const index = this.deployments.findIndex(d => d.id === this.editingDeployment.id);
+                    if (index !== -1) {
+                        this.deployments[index].supervisor_id = this.editSupervisorId;
+                        this.deployments[index].adviser_id = this.editAdviserId;
+                        this.deployments[index].supervisor_name = this.supervisors.find(s => s.id == this.editSupervisorId)?.name || "Not Assigned";
+                        this.deployments[index].adviser_name = this.advisers.find(a => a.id == this.editAdviserId)?.name || "Not Assigned";
+                        this.deployments[index].deployment_status = (this.editSupervisorId && this.editAdviserId) ? "complete" : ((this.editSupervisorId || this.editAdviserId) ? "incomplete" : "unassigned");
+                    }
+                    this.closeEditModal();
+                    // Show success message
+                    const successMsg = document.createElement("div");
+                    successMsg.className = "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4";
+                    successMsg.innerHTML = `<div class="flex items-start"><svg class="h-5 w-5 text-green-400 dark:text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div class="ml-3"><h3 class="text-sm font-medium text-green-800 dark:text-green-300">Success</h3><p class="text-sm text-green-700 dark:text-green-400 mt-1">Deployment updated successfully.</p></div></div>`;
+                    document.querySelector(".space-y-6").prepend(successMsg);
+                    setTimeout(() => successMsg.remove(), 5000);
+                }
+            })
+            .catch(error => console.error("Error:", error));
         }
     }'>
         <!-- Status Messages -->
@@ -48,7 +101,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800 dark:text-red-300">Assignment Error</h3>
+                        <h3 class="text-sm font-medium text-red-800 dark:text-red-300">Deployment Error</h3>
                         <p class="text-sm text-red-700 dark:text-red-400 mt-1">{{ $errors->first() }}</p>
                     </div>
                 </div>
@@ -74,8 +127,8 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Assignments</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $totalAssigned }}</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Deployments</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $totalDeployed }}</p>
                     </div>
                     <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
                         <svg class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,11 +195,11 @@
             </div>
         </div>
 
-        <!-- Create New Assignment Form -->
+        <!-- Create New Deployment Form -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create New Assignment</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create New Deployment</h3>
             
-            <form id="assignmentForm" method="POST" action="{{ route('coordinator.assignments.store') }}" class="space-y-4">
+            <form id="deploymentForm" method="POST" action="{{ route('coordinator.deployment.store') }}" class="space-y-4">
                 @csrf
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -244,13 +297,13 @@
                 <div class="flex justify-end gap-2 pt-2">
                     <button
                         type="button"
-                        onclick="confirmAssignment()"
+                        onclick="confirmDeployment()"
                         class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-sm font-semibold uppercase tracking-wide text-white hover:bg-indigo-700 transition-colors"
                     >
                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        Create Assignment
+                        Create Deployment
                     </button>
                 </div>
             </form>
@@ -268,7 +321,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 class="ml-4 text-lg font-semibold text-gray-900 dark:text-white">Review Assignment</h3>
+                            <h3 class="ml-4 text-lg font-semibold text-gray-900 dark:text-white">Review Deployment</h3>
                         </div>
                         <div class="space-y-3 text-sm">
                             <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg space-y-2">
@@ -287,7 +340,65 @@
                             Cancel
                         </button>
                         <button type="button" onclick="submitForm()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
-                            Confirm & Create
+                            Confirm & Deploy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Deployment Modal -->
+        <div id="editDeploymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    <div class="bg-white dark:bg-gray-800 px-6 pt-5 pb-4 sm:p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+                                <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                            <h3 class="ml-4 text-lg font-semibold text-gray-900 dark:text-white">Edit Deployment</h3>
+                        </div>
+                        <template x-if="editingDeployment">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Student</label>
+                                    <p class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm" x-text="editingDeployment.student_name"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supervisor *</label>
+                                    <select x-model="editSupervisorId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <option value="">Select supervisor</option>
+                                        <template x-for="supervisor in supervisors" :key="supervisor.id">
+                                            <option :value="supervisor.id" x-text="supervisor.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Adviser</label>
+                                    <select x-model="editAdviserId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <option value="">Select adviser</option>
+                                        <template x-for="adviser in advisers" :key="adviser.id">
+                                            <option :value="adviser.id" x-text="adviser.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
+                                    <p class="text-xs text-blue-800 dark:text-blue-200">
+                                        <strong>Completion Status:</strong> This deployment will be marked as <span x-text="(editSupervisorId && editAdviserId) ? '✓ Complete' : ((editSupervisorId || editAdviserId) ? '⚠ Incomplete' : 'Unassigned')" class="font-bold"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 px-6 py-3 flex gap-2 justify-end">
+                        <button type="button" @click="closeEditModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
+                            Cancel
+                        </button>
+                        <button type="button" @click="saveDeployment()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
+                            Save Changes
                         </button>
                     </div>
                 </div>
@@ -297,7 +408,7 @@
         <!-- Filters Section -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Existing Assignments</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Deployment Records</h3>
                 <button @click="clearFilters()" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Clear Filters</button>
             </div>
 
@@ -329,10 +440,10 @@
                     </select>
                 </div>
 
-                <!-- Assignment Status Filter -->
+                <!-- Deployment Status Filter -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Assignment Status</label>
-                    <select x-model="selectedAssignmentStatus" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Deployment Status</label>
+                    <select x-model="selectedDeploymentStatus" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                         <option value="">All</option>
                         <option value="complete">Complete</option>
                         <option value="incomplete">Incomplete</option>
@@ -364,27 +475,27 @@
             </div>
         </div>
 
-        <!-- Assignments Table -->
+        <!-- Deployments Table -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-            <template x-if="assignments.length === 0">
+            <template x-if="deployments.length === 0">
                 <div class="p-12 text-center">
                     <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">No assignments yet. Create one above!</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">No deployments yet. Create one above!</p>
                 </div>
             </template>
 
-            <template x-if="assignments.length > 0 && getFilteredAssignments().length === 0">
+            <template x-if="deployments.length > 0 && getFilteredDeployments().length === 0">
                 <div class="p-12 text-center">
                     <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">No assignments match your filters</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">No deployments match your filters</p>
                 </div>
             </template>
 
-            <template x-if="getFilteredAssignments().length > 0">
+            <template x-if="getFilteredDeployments().length > 0">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
@@ -396,24 +507,25 @@
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Duration</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Hours</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <template x-for="assignment in getFilteredAssignments()" :key="assignment.id">
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" :class="assignment.assignment_status === 'complete' ? 'bg-white dark:bg-gray-800' : assignment.assignment_status === 'incomplete' ? 'bg-yellow-50/50 dark:bg-yellow-900/10' : 'bg-red-50/50 dark:bg-red-900/10'">
+                            <template x-for="deployment in getFilteredDeployments()" :key="deployment.id">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" :class="deployment.deployment_status === 'complete' ? 'bg-white dark:bg-gray-800' : deployment.deployment_status === 'incomplete' ? 'bg-yellow-50/50 dark:bg-yellow-900/10' : 'bg-red-50/50 dark:bg-red-900/10'">
                                     <!-- Status Indicator -->
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <template x-if="assignment.assignment_status === 'complete'">
+                                        <template x-if="deployment.deployment_status === 'complete'">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
                                                 ✓ Complete
                                             </span>
                                         </template>
-                                        <template x-if="assignment.assignment_status === 'incomplete'">
+                                        <template x-if="deployment.deployment_status === 'incomplete'">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200">
                                                 ⚠ Incomplete
                                             </span>
                                         </template>
-                                        <template x-if="assignment.assignment_status === 'unassigned'">
+                                        <template x-if="deployment.deployment_status === 'unassigned'">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200">
                                                 ✕ Unassigned
                                             </span>
@@ -424,51 +536,66 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="h-9 w-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                                                <span x-text="assignment.student_name.charAt(0).toUpperCase()"></span>
+                                                <span x-text="deployment.student_name.charAt(0).toUpperCase()"></span>
                                             </div>
                                             <div class="ml-3">
-                                                <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="assignment.student_name"></p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400" x-text="assignment.student_program"></p>
+                                                <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="deployment.student_name"></p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400" x-text="deployment.student_program"></p>
                                             </div>
                                         </div>
                                     </td>
 
                                     <!-- Supervisor -->
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <template x-if="assignment.supervisor_name !== 'Not Assigned'">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200" x-text="assignment.supervisor_name"></span>
+                                        <template x-if="deployment.supervisor_name !== 'Not Assigned'">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200" x-text="deployment.supervisor_name"></span>
                                         </template>
-                                        <template x-if="assignment.supervisor_name === 'Not Assigned'">
+                                        <template x-if="deployment.supervisor_name === 'Not Assigned'">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400">Not Assigned</span>
                                         </template>
                                     </td>
 
                                     <!-- OJT Adviser -->
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <template x-if="assignment.adviser_name !== 'Not Assigned'">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200" x-text="assignment.adviser_name"></span>
+                                        <template x-if="deployment.adviser_name !== 'Not Assigned'">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200" x-text="deployment.adviser_name"></span>
                                         </template>
-                                        <template x-if="assignment.adviser_name === 'Not Assigned'">
+                                        <template x-if="deployment.adviser_name === 'Not Assigned'">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400">Not Assigned</span>
                                         </template>
                                     </td>
 
                                     <!-- Company -->
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white" x-text="assignment.company_name"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white" x-text="deployment.company_name"></td>
 
                                     <!-- Duration -->
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                                        <template x-if="assignment.start_date && assignment.end_date">
-                                            <span x-text="`${assignment.start_date} to ${assignment.end_date}`"></span>
+                                        <template x-if="deployment.start_date && deployment.end_date">
+                                            <span x-text="`${deployment.start_date} to ${deployment.end_date}`"></span>
                                         </template>
-                                        <template x-if="!assignment.start_date || !assignment.end_date">
+                                        <template x-if="!deployment.start_date || !deployment.end_date">
                                             <span class="text-gray-400 italic">Not specified</span>
                                         </template>
                                     </td>
 
                                     <!-- Hours -->
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200" x-text="`${assignment.required_hours} hrs`"></span>
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200" x-text="`${deployment.required_hours} hrs`"></span>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <template x-if="deployment.deployment_status !== 'complete'">
+                                            <button @click="openEditModal(deployment)" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors">
+                                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                                Edit
+                                            </button>
+                                        </template>
+                                        <template x-if="deployment.deployment_status === 'complete'">
+                                            <span class="text-gray-400 text-xs">Completed</span>
+                                        </template>
                                     </td>
                                 </tr>
                             </template>
@@ -493,7 +620,7 @@
             $('#company_id').select2({ width: '100%' });
         });
 
-        function confirmAssignment() {
+        function confirmDeployment() {
             const studentIds = $('#student_ids').val();
             const supervisorId = $('#supervisor_id').val();
             const companyId = $('#company_id').val();
@@ -535,7 +662,7 @@
             $('#confirm-duration').text(duration);
 
             if (studentIds.length > 1) {
-                $('#confirm-warning').text(`Note: This will create ${studentIds.length} separate assignments.`);
+                $('#confirm-warning').text(`Note: This will create ${studentIds.length} separate deployments.`);
             } else {
                 $('#confirm-warning').text('');
             }
@@ -548,7 +675,7 @@
         }
 
         function submitForm() {
-            $('#assignmentForm').submit();
+            $('#deploymentForm').submit();
         }
     </script>
     @endpush

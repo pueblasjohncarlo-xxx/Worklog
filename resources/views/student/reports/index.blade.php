@@ -1,17 +1,100 @@
 <x-app-layout>
     <x-slot name="header">
-        Reports & Hours Analytics
+        @if(request('view') === 'reports')
+            Reports & Performance
+        @else
+            Hours Log & Analytics
+        @endif
     </x-slot>
 
     <div class="space-y-6">
-        @php
-            $target = $assignment->required_hours ?? 1600;
-            $percentage = ($target) > 0 
-                ? min(100, ($totalApprovedHours / $target) * 100) 
-                : 0;
-        @endphp
-        <!-- Analytics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Navigation Tabs -->
+        <div class="flex gap-4 border-b border-gray-200 dark:border-gray-700">
+            <a href="{{ route('student.reports.index') }}" 
+               class="px-4 py-3 font-bold text-sm uppercase tracking-wider
+                   {{ !request('view') || request('view') !== 'reports' 
+                       ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600' 
+                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200' 
+                   }}">
+                📊 Hours Log
+            </a>
+            <a href="{{ route('student.reports.index', ['view' => 'reports']) }}" 
+               class="px-4 py-3 font-bold text-sm uppercase tracking-wider
+                   {{ request('view') === 'reports' 
+                       ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600' 
+                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200' 
+                   }}">
+                📋 Reports
+            </a>
+        </div>
+
+        @if(request('view') === 'reports')
+            <!-- Reports View -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Submitted Reports</p>
+                    <p class="text-3xl font-black text-indigo-600">{{ $workLogs->where('type', '!=', 'attendance')->count() }}</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Approved Reports</p>
+                    <p class="text-3xl font-black text-emerald-600">{{ $workLogs->where('status', 'approved')->where('type', '!=', 'attendance')->count() }}</p>
+                </div>
+            </div>
+
+            <!-- Reports List -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">Your Submitted Reports</h3>
+                </div>
+                @php
+                    $reports = $workLogs->where('type', '!=', 'attendance')->sortByDesc('created_at');
+                @endphp
+                @if($reports->count() > 0)
+                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach($reports as $report)
+                            <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-gray-900 dark:text-white capitalize">{{ ucfirst($report->type) }} Report</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                            Date: {{ $report->work_date->format('M d, Y') }}
+                                        </p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Status: 
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider
+                                                {{ $report->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : '' }}
+                                                {{ $report->status === 'submitted' ? 'bg-blue-100 text-blue-700' : '' }}
+                                                {{ $report->status === 'draft' ? 'bg-gray-100 text-gray-700' : '' }}
+                                                {{ $report->status === 'rejected' ? 'bg-rose-100 text-rose-700' : '' }}
+                                            ">
+                                                {{ $report->status }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <a href="{{ route('student.worklogs.print', $report) }}" target="_blank" 
+                                       class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg text-sm hover:bg-indigo-700 transition-colors whitespace-nowrap">
+                                        View Report
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <p>No reports submitted yet. Click on <strong>Accomplishment Report</strong> to submit your first report.</p>
+                    </div>
+                @endif
+            </div>
+        @else
+            <!-- Hours Log View (Original) -->
+            @php
+                $target = $assignment->required_hours ?? 1600;
+                $percentage = ($target) > 0 
+                    ? min(100, ($totalApprovedHours / $target) * 100) 
+                    : 0;
+            @endphp
+            <!-- Analytics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div x-data="{ percentage: {{ (float)$percentage }} }" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Approved Hours</p>
                 <p class="text-3xl font-black text-emerald-600">{{ number_format($totalApprovedHours, 2) }}</p>
@@ -147,6 +230,7 @@
             <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl text-center shadow-sm border border-gray-100 dark:border-gray-700">
                 <p class="text-gray-500 dark:text-gray-400">Select a date range and click "Generate Summary Report" to view data.</p>
             </div>
+        @endif
         @endif
     </div>
 </x-app-layout>
