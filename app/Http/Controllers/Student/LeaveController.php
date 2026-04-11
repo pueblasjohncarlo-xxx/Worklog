@@ -54,9 +54,15 @@ class LeaveController extends Controller
 
         $leaves = $query->paginate(20)->withQueryString();
 
+        // Get leave balance and other enhancements
+        $leaveBalance = $assignment ? $this->getLeaveBalance($assignment) : [];
+        $leaveTypeDescriptions = self::getLeaveTypeDescriptions();
+
         return view('student.leaves.index', [
             'assignment' => $assignment,
             'leaves' => $leaves,
+            'leaveBalance' => $leaveBalance,
+            'leaveTypeDescriptions' => $leaveTypeDescriptions,
         ]);
     }
 
@@ -337,5 +343,77 @@ class LeaveController extends Controller
         if (! $assignmentIds->contains($leave->assignment_id)) {
             abort(403, 'Unauthorized leave access.');
         }
+    }
+
+    /**
+     * Calculate and return leave balance information for the assignment
+     */
+    public function getLeaveBalance(Assignment $assignment): array
+    {
+        $totalApproved = Leave::where('assignment_id', $assignment->id)
+            ->where('status', Leave::STATUS_APPROVED)
+            ->sum('number_of_days') ?? 0;
+
+        $totalPending = Leave::where('assignment_id', $assignment->id)
+            ->where('status', Leave::STATUS_PENDING)
+            ->sum('number_of_days') ?? 0;
+
+        $annualLimit = $assignment->annual_leave_limit ?? 15;
+        $sickLeaveLimit = $assignment->sick_leave_limit ?? 10;
+
+        $approvedAnnual = Leave::where('assignment_id', $assignment->id)
+            ->where('status', Leave::STATUS_APPROVED)
+            ->where('type', 'Annual')
+            ->sum('number_of_days') ?? 0;
+
+        $approvedSick = Leave::where('assignment_id', $assignment->id)
+            ->where('status', Leave::STATUS_APPROVED)
+            ->where('type', 'Sick Leave')
+            ->sum('number_of_days') ?? 0;
+
+        return [
+            'total_approved' => $totalApproved,
+            'total_pending' => $totalPending,
+            'annual_limit' => $annualLimit,
+            'annual_used' => $approvedAnnual,
+            'annual_remaining' => max(0, $annualLimit - $approvedAnnual),
+            'sick_limit' => $sickLeaveLimit,
+            'sick_used' => $approvedSick,
+            'sick_remaining' => max(0, $sickLeaveLimit - $approvedSick),
+            'can_submit' => true,
+        ];
+    }
+
+    /**
+     * Get leave type descriptions for better UX
+     */
+    public static function getLeaveTypeDescriptions(): array
+    {
+        return [
+            'Sick Leave' => 'For illness or medical reasons',
+            'Discretionary' => 'Personal or family matters',
+            'Maternity' => 'Maternity or parental leave',
+            'Exam' => 'Educational examination purposes',
+            'Bereavement' => 'Death of family member',
+            'No Pay Leave' => 'Unpaid leave (deducted from salary)',
+            'Annual' => 'Regular annual leave',
+            'Vacation' => 'Vacation and rest days',
+        ];
+    }
+
+    /**
+     * Get approval timeline estimate
+     */
+    public static function getApprovalTimeline(string $leaveType): string
+    {
+        return match($leaveType) {
+            'Sick Leave' => '1-2 business days',
+            'Exam' => '2-3 business days',
+            'Annual', 'Vacation' => '3-5 business days',
+            'Maternity', 'Bereavement' => 'Same day - 1 business day',
+            'No Pay Leave' => '5-7 business days',
+            'Discretionary' => '3-5 business days',
+            default => '2-3 business days'
+        };
     }
 }
