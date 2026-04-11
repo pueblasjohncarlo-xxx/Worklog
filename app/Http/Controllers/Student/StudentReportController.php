@@ -25,8 +25,11 @@ class StudentReportController extends Controller
         $totalApproved = 0;
         $totalApprovedHours = 0;
         $monthlyApprovedHours = 0;
+        $remainingHours = 0;
+        $progressPercentage = 0;
 
         if ($assignment) {
+            // Build query for filtered work logs
             $query = WorkLog::where('assignment_id', $assignment->id);
 
             if ($request->filled('start_date')) {
@@ -45,7 +48,7 @@ class StudentReportController extends Controller
             $totalHours = $workLogs->sum('hours');
             $totalApproved = $workLogs->where('status', 'approved')->sum('hours');
 
-            // Global Analytics (for the cards)
+            // Global Analytics (for the top cards - not filtered)
             $totalApprovedHours = WorkLog::where('assignment_id', $assignment->id)
                 ->where('status', 'approved')
                 ->sum('hours');
@@ -55,6 +58,13 @@ class StudentReportController extends Controller
                 ->whereMonth('work_date', now()->month)
                 ->whereYear('work_date', now()->year)
                 ->sum('hours');
+
+            // Calculate remaining hours and progress
+            $requiredHours = $assignment->required_hours ?? 1600;
+            $remainingHours = max(0, $requiredHours - $totalApprovedHours);
+            $progressPercentage = $requiredHours > 0 
+                ? min(100, ($totalApprovedHours / $requiredHours) * 100) 
+                : 0;
         }
 
         return view('student.reports.index', compact(
@@ -63,7 +73,9 @@ class StudentReportController extends Controller
             'totalHours',
             'totalApproved',
             'totalApprovedHours',
-            'monthlyApprovedHours'
+            'monthlyApprovedHours',
+            'remainingHours',
+            'progressPercentage'
         ));
     }
 
