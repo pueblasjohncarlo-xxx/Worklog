@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -238,10 +239,19 @@ class AdminUserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::where('status', 'pending')
-            ->where('has_requested_account', true)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Safely handle status column if it exists in production
+        if (Schema::hasColumn('users', 'status')) {
+            $users = User::where('status', 'pending')
+                ->where('has_requested_account', true)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            // Fallback: use is_approved if status doesn't exist
+            $users = User::where('is_approved', false)
+                ->where('has_requested_account', true)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         return view('admin.users.pending', [
             'users' => $users,

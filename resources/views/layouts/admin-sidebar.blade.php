@@ -47,10 +47,20 @@
                 <span class="font-medium sm:hidden text-xs">Pending</span>
             </div>
             @php 
-                $pendingCount = \App\Models\User::where('role', 'student')
-                    ->where('status', 'pending')
-                    ->where('has_requested_account', true)
-                    ->count(); 
+                use Illuminate\Support\Facades\Schema;
+                // Safely handle status column if it exists in production
+                if (Schema::hasColumn('users', 'status')) {
+                    $pendingCount = \App\Models\User::where('role', 'student')
+                        ->where('status', 'pending')
+                        ->where('has_requested_account', true)
+                        ->count();
+                } else {
+                    // Fallback: use is_approved if status doesn't exist
+                    $pendingCount = \App\Models\User::where('role', 'student')
+                        ->where('is_approved', false)
+                        ->where('has_requested_account', true)
+                        ->count();
+                }
             @endphp
             @if($pendingCount > 0)
                 <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex-shrink-0">{{ $pendingCount }}</span>
