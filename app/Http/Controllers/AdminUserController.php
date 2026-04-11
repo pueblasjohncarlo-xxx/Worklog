@@ -4,18 +4,44 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Admin\CreateUserRequest;
 use App\Http\Requests\Admin\UpdateUserRoleRequest;
+use App\Models\AuditLog;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Hash; // Add this line
-use Illuminate\View\View; // Add this line
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminUserController extends Controller
 {
+    /**
+     * Constructor - Authorize all admin user operations
+     */
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            // Verify user is authenticated and has admin role
+            if (!Auth::check() || Auth::user()->role !== User::ROLE_ADMIN) {
+                Log::warning('Unauthorized access attempt to admin user management', [
+                    'user_id' => Auth::id(),
+                    'ip' => $request->ip(),
+                    'route' => $request->path(),
+                ]);
+                throw new AuthorizationException('Unauthorized: User management is restricted to administrators only.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index(): View
     {
+        $this->authorize('viewAny', User::class);
+
         $users = User::orderBy('name')->get();
 
         // Group students by section (or 'No Section' if null)
@@ -35,79 +61,140 @@ class AdminUserController extends Controller
             'coordinators' => $coordinators,
             'supervisors' => $supervisors,
             'ojtAdvisers' => $ojtAdvisers,
-            'allUsers' => $users, // Keep this if needed for other parts
+            'allUsers' => $users,
         ]);
     }
 
     public function store(CreateUserRequest $request): RedirectResponse
     {
+        $this->authorize('create', User::class);
+
         $data = $request->validated();
+        $adminUser = Auth::user();
 
-        // Check if user exists
-        $user = User::where('email', $data['email'])->first();
+        try {
+            // Check if user exists
+            $user = User::where('email', $data['email'])->first();
 
-        if ($user) {
-            // Update existing user
-            $user->update([
-                'name' => $data['name'],
-                'password' => Hash::make($data['password']),
-                'encrypted_password' => Crypt::encryptString($data['password']), // Store encrypted
-                'role' => $data['role'],
-                'is_approved' => true,
-                'has_requested_account' => true,
-            ]);
+            if ($user) {
+                // Update existing user
+                $oldRole = $user->role;
+                $oldApprovalStatus = $user->is_approved;
 
-            if ($data['role'] === User::ROLE_OJT_ADVISER) {
-                $user->ojtAdviserProfile()->updateOrCreate(
-                    ['user_id' => $user->id],
-                    [
+                $user->update([
+                    'name' => $data['name'],
+                    'password' => Hash::make($data['password']),
+                    'encrypted_password' => Crypt::encryptString($data['password']),
+                    'role' => $data['role'],
+                    'is_approved' => true,
+                    'has_requested_account' => true,
+                ]);
+
+                if ($data['role'] === User::ROLE_OJT_ADVISER) {
+                    $user->ojtAdviserProfile()->updateOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'department' => $data['department'] ?? null,
+                            'phone' => $data['phone'] ?? null,
+                            'address' => $data['address'] ?? null,
+                        ]
+                    );
+                }
+
+                // Log user update action
+                $this->logAuditAction('user_updated', $user, [
+                    'old_role' => $oldRole,
+                    'new_role' => $data['role'],
+                    'old_approval_status' => $oldApprovalStatus,
+                    'new_approval_status' => true,
+                    'updated_by_admin' => $adminUser->name,
+                ]);
+
+                $message = 'User account activated and updated.';
+            } else {
+                // Create new user
+                $newUser = User::create([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'password' => Hash::make($data['password']),
+                    'encrypted_password' => Crypt::encryptString($data['password']),
+                    'role' => $data['role'],
+                    'is_approved' => true,
+                    'has_requested_account' => true,
+                ]);
+
+                if ($data['role'] === User::ROLE_OJT_ADVISER) {
+                    $newUser->ojtAdviserProfile()->create([
                         'department' => $data['department'] ?? null,
                         'phone' => $data['phone'] ?? null,
                         'address' => $data['address'] ?? null,
-                    ]
-                );
+                    ]);
+                }
+
+                // Log user creation action
+                $this->logAuditAction('user_created', $newUser, [
+                    'email' => $data['email'],
+                    'role' => $data['role'],
+                    'created_by_admin' => $adminUser->name,
+                    'ip_address' => $request->ip(),
+                ]);
+
+                $message = 'User created successfully.';
             }
 
-            $message = 'User account activated and updated.';
-        } else {
-            // Create new user
-            $newUser = User::create([
-                'name' => $data['name'],
+            return redirect()->route('admin.users.index')
+                ->with('status', $message);
+        } catch (\Exception $e) {
+            Log::error('Error creating/updating user', [
+                'admin_id' => $adminUser->id,
                 'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-                'encrypted_password' => Crypt::encryptString($data['password']), // Store encrypted
-                'role' => $data['role'],
-                'is_approved' => true, // Auto-approve users created by Admin
-                'has_requested_account' => true, // Mark as active account
+                'error' => $e->getMessage(),
             ]);
 
-            if ($data['role'] === User::ROLE_OJT_ADVISER) {
-                $newUser->ojtAdviserProfile()->create([
-                    'department' => $data['department'] ?? null,
-                    'phone' => $data['phone'] ?? null,
-                    'address' => $data['address'] ?? null,
-                ]);
-            }
-
-            $message = 'User created successfully.';
+            return redirect()->back()
+                ->withErrors(['error' => 'An error occurred while processing the user.']);
         }
-
-        return redirect()->route('admin.users.index')
-            ->with('status', $message);
     }
 
     public function updateRole(UpdateUserRoleRequest $request, User $user): RedirectResponse
     {
-        $user->update([
-            'role' => $request->validated()['role'],
-        ]);
+        $this->authorize('changeRole', $user);
 
-        return redirect()->route('admin.users.index')
-            ->with('status', 'user-role-updated');
+        $adminUser = Auth::user();
+        $oldRole = $user->role;
+        $newRole = $request->validated()['role'];
+
+        try {
+            $user->update([
+                'role' => $newRole,
+            ]);
+
+            // Log role change action
+            $this->logAuditAction('user_role_changed', $user, [
+                'old_role' => $oldRole,
+                'new_role' => $newRole,
+                'changed_by_admin' => $adminUser->name,
+                'ip_address' => $request->ip(),
+            ]);
+
+            return redirect()->route('admin.users.index')
+                ->with('status', 'Role updated successfully. User role changed from ' . $oldRole . ' to ' . $newRole);
+        } catch (\Exception $e) {
+            Log::error('Error updating user role', [
+                'admin_id' => $adminUser->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withErrors(['error' => 'An error occurred while updating the role.']);
+        }
     }
 
     public function show(User $user): View
     {
+        $this->authorize('view', $user);
+
         return view('admin.users.show', [
             'user' => $user,
         ]);
@@ -115,16 +202,44 @@ class AdminUserController extends Controller
 
     public function destroy(User $user): RedirectResponse
     {
-        $user->delete();
+        $this->authorize('delete', $user);
 
-        return redirect()->route('admin.users.index')
-            ->with('status', 'user-deleted');
+        $adminUser = Auth::user();
+
+        try {
+            $userEmail = $user->email;
+            $userId = $user->id;
+
+            $user->delete();
+
+            // Log user deletion
+            $this->logAuditAction('user_deleted', null, [
+                'user_id' => $userId,
+                'email' => $userEmail,
+                'deleted_by_admin' => $adminUser->name,
+                'ip_address' => request()->ip(),
+            ]);
+
+            return redirect()->route('admin.users.index')
+                ->with('status', 'User deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error deleting user', [
+                'admin_id' => $adminUser->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withErrors(['error' => 'An error occurred while deleting the user.']);
+        }
     }
 
     public function pending(): View
     {
+        $this->authorize('viewAny', User::class);
+
         $users = User::where('is_approved', false)
-            ->where('has_requested_account', true) // Only show those who actively requested
+            ->where('has_requested_account', true)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -135,65 +250,169 @@ class AdminUserController extends Controller
 
     public function bulkAction(Request $request): RedirectResponse
     {
+        $this->authorize('bulkAction', User::class);
+
         $request->validate([
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
             'action' => 'required|in:approve,reject',
         ]);
 
+        $adminUser = Auth::user();
         $users = User::whereIn('id', $request->user_ids)->get();
 
-        if ($request->action === 'approve') {
-            foreach ($users as $user) {
-                $user->update(['is_approved' => true]);
-            }
-            $message = count($users).' users approved successfully.';
-        } elseif ($request->action === 'reject') {
-            foreach ($users as $user) {
-                $user->delete();
-            }
-            $message = count($users).' users rejected and removed.';
-        }
+        try {
+            if ($request->action === 'approve') {
+                foreach ($users as $user) {
+                    $user->update(['is_approved' => true]);
 
-        return redirect()->back()->with('status', $message);
+                    // Log approval action
+                    $this->logAuditAction('user_approved', $user, [
+                        'approved_by_admin' => $adminUser->name,
+                        'ip_address' => $request->ip(),
+                    ]);
+                }
+                $message = count($users) . ' users approved successfully.';
+            } elseif ($request->action === 'reject') {
+                foreach ($users as $user) {
+                    $userEmail = $user->email;
+                    $userId = $user->id;
+
+                    $user->delete();
+
+                    // Log rejection action
+                    $this->logAuditAction('user_rejected', null, [
+                        'user_id' => $userId,
+                        'email' => $userEmail,
+                        'rejected_by_admin' => $adminUser->name,
+                        'ip_address' => $request->ip(),
+                    ]);
+                }
+                $message = count($users) . ' users rejected and removed.';
+            }
+
+            return redirect()->back()->with('status', $message);
+        } catch (\Exception $e) {
+            Log::error('Error performing bulk action on users', [
+                'admin_id' => $adminUser->id,
+                'action' => $request->action,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withErrors(['error' => 'An error occurred while processing bulk actions.']);
+        }
     }
 
     public function approve(User $user): RedirectResponse
     {
-        $user->update(['is_approved' => true]);
+        $this->authorize('approve', $user);
 
-        return redirect()->back()->with('status', 'User approved successfully.');
+        $adminUser = Auth::user();
+
+        try {
+            $user->update(['is_approved' => true]);
+
+            // Log approval action
+            $this->logAuditAction('user_approved', $user, [
+                'approved_by_admin' => $adminUser->name,
+                'ip_address' => request()->ip(),
+            ]);
+
+            return redirect()->back()->with('status', 'User approved successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error approving user', [
+                'admin_id' => $adminUser->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withErrors(['error' => 'An error occurred while approving the user.']);
+        }
     }
 
     public function reject(User $user): RedirectResponse
     {
-        // Option 1: Delete the user
-        $user->delete();
+        $this->authorize('reject', $user);
 
-        // Option 2: Keep them but mark rejected (if you have a status column)
-        // For now, deletion seems appropriate for a rejection of a registration request.
+        $adminUser = Auth::user();
 
-        return redirect()->back()->with('status', 'User rejected and removed.');
+        try {
+            $userEmail = $user->email;
+            $userId = $user->id;
+
+            $user->delete();
+
+            // Log rejection action
+            $this->logAuditAction('user_rejected', null, [
+                'user_id' => $userId,
+                'email' => $userEmail,
+                'rejected_by_admin' => $adminUser->name,
+                'ip_address' => request()->ip(),
+            ]);
+
+            return redirect()->back()->with('status', 'User rejected and removed.');
+        } catch (\Exception $e) {
+            Log::error('Error rejecting user', [
+                'admin_id' => $adminUser->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withErrors(['error' => 'An error occurred while rejecting the user.']);
+        }
     }
 
     public function resetPassword(Request $request, User $user): RedirectResponse
     {
+        $this->authorize('resetPassword', $user);
+
         $request->validate([
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user->update([
-            'password' => Hash::make($request->password),
-            'encrypted_password' => Crypt::encryptString($request->password), // Store encrypted
-        ]);
+        $adminUser = Auth::user();
 
-        return redirect()->back()->with('status', 'Password reset successfully.');
+        try {
+            $user->update([
+                'password' => Hash::make($request->password),
+                'encrypted_password' => Crypt::encryptString($request->password),
+            ]);
+
+            // Log password reset action
+            $this->logAuditAction('user_password_reset', $user, [
+                'reset_by_admin' => $adminUser->name,
+                'ip_address' => $request->ip(),
+            ]);
+
+            return redirect()->back()->with('status', 'Password reset successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error resetting user password', [
+                'admin_id' => $adminUser->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withErrors(['error' => 'An error occurred while resetting the password.']);
+        }
     }
 
     // Export a CSV list of student login usernames (emails) and status
     public function exportStudents(Request $request): StreamedResponse
     {
+        $this->authorize('viewAny', User::class);
+
         $students = User::where('role', User::ROLE_STUDENT)->orderBy('name')->get();
+
+        // Log export action
+        $this->logAuditAction('student_list_exported', null, [
+            'exported_by_admin' => Auth::user()->name,
+            'student_count' => count($students),
+            'ip_address' => $request->ip(),
+        ]);
 
         $headers = [
             'Content-Type' => 'text/csv',
@@ -205,12 +424,44 @@ class AdminUserController extends Controller
             fputcsv($out, ['Name', 'Email (Username)', 'Status', 'Default Password Hint']);
             foreach ($students as $s) {
                 $status = $s->is_approved ? 'Active' : ($s->has_requested_account ? 'Pending' : 'Imported');
-                $hint = (! $s->has_requested_account && $s->role === User::ROLE_STUDENT)
-                    ? strtolower(last(explode(' ', $s->name))).'123'
+                $hint = (!$s->has_requested_account && $s->role === User::ROLE_STUDENT)
+                    ? strtolower(last(explode(' ', $s->name))) . '123'
                     : '';
                 fputcsv($out, [$s->name, $s->email, $status, $hint]);
             }
             fclose($out);
         }, 200, $headers);
     }
+
+    /**
+     * Log audit action for user management operations.
+     * CRITICAL: This provides detailed tracking of all admin actions on users.
+     *
+     * @param string $action The action being performed
+     * @param User|null $user The user being acted upon
+     * @param array $details Additional context details
+     */
+    private function logAuditAction(string $action, ?User $user, array $details = []): void
+    {
+        try {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'admin_' . $action,
+                'auditable_type' => User::class,
+                'auditable_id' => $user?->id,
+                'old_values' => null,
+                'new_values' => json_encode($details),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to log audit action', [
+                'action' => $action,
+                'user_id' => $user?->id,
+                'admin_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
 }
+

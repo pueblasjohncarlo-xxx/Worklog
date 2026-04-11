@@ -62,12 +62,9 @@
                         <p>To add multiple students at once, use the form above. Download the CSV template, fill in the student names, emails, and temporary passwords, then upload the file here. The system will automatically create accounts for all students in the list.</p>
                     </div>
                     <div>
-                        <h4 class="font-bold">2. Public Registration</h4>
-                        <p>Students can also register themselves by visiting the registration page. They should select "Student" as their role during sign-up. You can then manage their assignments from the Coordinator dashboard.</p>
+                        <h4 class="font-bold">2. Admin Management</h4>
+                        <p>The System Administrator has exclusive authority to create student accounts manually from the Admin panel. User registration is restricted to administrators only to ensure proper account management and security oversight.</p>
                     </div>
-                    <div>
-                        <h4 class="font-bold">3. Admin Management</h4>
-                        <p>The System Administrator also has the ability to create student accounts manually from the Admin panel if needed for troubleshooting or specific administrative tasks.</p>
                     </div>
                     <div class="p-4 bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-500 text-indigo-700 dark:text-indigo-300">
                         <p class="font-bold">Note:</p>

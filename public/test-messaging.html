@@ -1,0 +1,264 @@
+<!-- Diagnostic page to test the messaging system -->
+<!-- Save this file as public/test-messaging.html and visit http://127.0.0.1:8000/test-messaging.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messaging System Diagnostic</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #5b7cfa;
+            border-bottom: 2px solid #5b7cfa;
+            padding-bottom: 10px;
+        }
+        .section {
+            background: #16213e;
+            border: 1px solid #5b7cfa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-btn {
+            background: #5b7cfa;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: #7c90db;
+        }
+        .output {
+            background: #0f3460;
+            border: 1px solid #16213e;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            word-break: break-all;
+        }
+        .success {
+            color: #51cf66;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .warning {
+            color: #fcc419;
+        }
+        .info {
+            color: #74c0fc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #5b7cfa;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #5b7cfa;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Messaging System Diagnostic Tool</h1>
+        
+        <div class="section">
+            <h2>Tests</h2>
+            <button class="test-btn" onclick="testAPIEndpoint()">Test API Endpoint</button>
+            <button class="test-btn" onclick="testWithSearch()">Test API with Search</button>
+            <button class="test-btn" onclick="testModalRendering()">Test Modal Rendering</button>
+            <button class="test-btn" onclick="testAlpineData()">Test Alpine.js Data</button>
+            <button class="test-btn" onclick="clearOutput()">Clear Output</button>
+        </div>
+
+        <div class="section">
+            <h2>Output</h2>
+            <div id="output" class="output">Tests will appear here...</div>
+        </div>
+
+        <div class="section">
+            <h2>Browser Information</h2>
+            <table>
+                <tr>
+                    <td>User Agent</td>
+                    <td id="userAgent"></td>
+                </tr>
+                <tr>
+                    <td>Current URL</td>
+                    <td id="currentUrl"></td>
+                </tr>
+                <tr>
+                    <td>Page Title</td>
+                    <td id="pageTitle"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : 
+                            type === 'error' ? 'error' : 
+                            type === 'warning' ? 'warning' : 'info';
+            const line = `<div class="${className}">[${timestamp}] ${message}</div>`;
+            output.innerHTML += line;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            output.innerHTML = 'Output cleared. Run tests to see results...';
+        }
+
+        async function testAPIEndpoint() {
+            log('Testing API endpoint: /api/messages/available-users', 'info');
+            try {
+                const response = await fetch('/api/messages/available-users');
+                log(`Response Status: ${response.status}`, response.status === 200 ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    log(`HTTP Error: ${response.status} ${response.statusText}`, 'error');
+                    const text = await response.text();
+                    log(`Response: ${text.substring(0, 200)}`, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                log(`Response parsed successfully`, 'success');
+                log(`Success flag: ${data.success ? 'Yes' : 'No'}`, data.success ? 'success' : 'error');
+                log(`Total users returned: ${data.total}`, data.total > 0 ? 'success' : 'warning');
+                
+                if (data.users && data.users.length > 0) {
+                    log(`Sample users:`, 'info');
+                    data.users.slice(0, 3).forEach((user, index) => {
+                        log(`  ${index + 1}. ${user.name} (${user.email}) - ${user.role}`, 'success');
+                    });
+                } else {
+                    log(`No users in response!`, 'error');
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWithSearch() {
+            log('Testing API with search parameter: "sean"', 'info');
+            try {
+                const response = await fetch('/api/messages/available-users?search=sean');
+                log(`Response Status: ${response.status}`, response.status === 200 ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    log(`HTTP Error: ${response.status}`, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                log(`Total users matching "sean": ${data.total}`, 'success');
+                
+                if (data.users) {
+                    data.users.forEach((user, index) => {
+                        log(`  ${index + 1}. ${user.name} (${user.email})`, 'success');
+                    });
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testModalRendering() {
+            log('Checking if messaging page is loaded...', 'info');
+            
+            // Check if we're on messaging page
+            if (!window.location.pathname.includes('/messages')) {
+                log(`⚠ You are not on the messaging page! (${window.location.pathname})`, 'warning');
+                log(`Visit http://127.0.0.1:8000/messages in a new tab and test from there`, 'warning');
+                return;
+            }
+
+            log(`✓ On messaging page: ${window.location.pathname}`, 'success');
+            
+            // Check for modal element
+            const modal = document.querySelector('[x-show="showStartConversationModal"]');
+            if (!modal) {
+                log(`✗ Modal element not found!`, 'error');
+                log(`Make sure the messages/index.blade.php is loaded correctly`, 'error');
+                return;
+            }
+            log(`✓ Modal element exists`, 'success');
+
+            // Check for Alpine.js
+            if (typeof Alpine !== 'undefined') {
+                log(`✓ Alpine.js is loaded (version info not available)`, 'success');
+            } else {
+                log(`✗ Alpine.js is not loaded!`, 'error');
+            }
+
+            // Check for x-data attribute
+            const mainDiv = document.querySelector('[x-data]');
+            if (mainDiv) {
+                log(`✓ Alpine.js x-data found on main div`, 'success');
+            } else {
+                log(`✗ Alpine.js x-data not found!`, 'error');
+            }
+        }
+
+        function testAlpineData() {
+            log('Checking Alpine.js component state...', 'info');
+            
+            // This requires Alpine.js to be loaded on the current page
+            if (typeof Alpine === 'undefined') {
+                log(`✗ Alpine.js not loaded on this page`, 'error');
+                log(`Go to http://127.0.0.1:8000/messages in another tab to test`, 'warning');
+                return;
+            }
+
+            log(`✓ Alpine.js detected`, 'success');
+            
+            // Try to find the chatApp component
+            const elements = document.querySelectorAll('[x-data*="chatApp"]');
+            log(`Found ${elements.length} chatApp components`, elements.length > 0 ? 'success' : 'warning');
+            
+            if (elements.length > 0) {
+                elements.forEach((el, index) => {
+                    log(`Component ${index}: ${el.tagName}`, 'info');
+                });
+            }
+        }
+
+        // Initialize browser info
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('pageTitle').textContent = document.title;
+
+        // Initial message
+        log('Diagnostic tool ready. Click tests above to diagnose the messaging system.', 'success');
+    </script>
+</body>
+</html>

@@ -7,13 +7,21 @@
         <div class="lg:col-span-1 border-r border-indigo-500/20 flex flex-col bg-black/40 min-h-[400px] lg:min-h-auto">
             <!-- Header -->
             <div class="p-4 border-b border-indigo-500/20 bg-black/60 sticky top-0 z-10">
-                <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V5z"></path>
-                        <path d="M4 12a1 1 0 00-1 1v2a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 00-1-1H4z"></path>
-                    </svg>
-                    Messages
-                </h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V5z"></path>
+                            <path d="M4 12a1 1 0 00-1 1v2a1 1 0 001 1h3a1 1 0 001-1v-2a1 1 0 00-1-1H4z"></path>
+                        </svg>
+                        Messages
+                    </h2>
+                    <button @click="openStartConversation()" class="px-3 py-1 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span class="hidden sm:inline">New Chat</span>
+                    </button>
+                </div>
                 <div class="flex gap-2 mb-3">
                     <input x-model="searchQuery" @input="filterConversations()" 
                         type="text" placeholder="Search conversations..." 
@@ -186,6 +194,77 @@
             </template>
         </div>
     </div>
+
+    <!-- Start Conversation Modal -->
+    <div x-show="showStartConversationModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click="closeStartConversation()" x-transition>
+        <div @click.stop class="bg-gray-900 rounded-lg shadow-2xl w-full max-w-md mx-auto border border-indigo-500/30 max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-black/60 border-b border-indigo-500/20 p-4 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Start a Conversation</h3>
+                <button @click="closeStartConversation()" class="p-1 hover:bg-gray-800 rounded transition text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Search Box -->
+            <div class="p-4 border-b border-gray-800">
+                <input x-model="startConversationSearch" @input="filterAvailableUsers()" 
+                    type="text" placeholder="Search by name or email..." 
+                    class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition">
+            </div>
+
+            <!-- Users List -->
+            <div class="p-4 space-y-2">
+                <template x-if="filteredAvailableUsers.length === 0">
+                    <div class="text-center py-8">
+                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.657 0 3-1.343 3-3S13.657 2 12 2s-3 1.343-3 3 1.343 3 3 3zm0 2c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm7 12c0-2.567-3.447-4-7-4s-7 1.433-7 4v2h14v-2z"></path>
+                        </svg>
+                        <p class="text-gray-400 text-sm">No users found</p>
+                    </div>
+                </template>
+
+                <template x-for="user in filteredAvailableUsers" :key="user.id">
+                    <div class="w-full p-3 bg-gray-800/50 rounded-lg border border-gray-700 hover:border-indigo-500 transition flex items-center gap-3">
+                        
+                        <div class="flex items-center flex-1 min-w-0">
+                            <!-- Avatar -->
+                            <img :src="user.avatar" :alt="user.name" 
+                                class="w-10 h-10 rounded-full flex-shrink-0 object-cover border border-indigo-500/30">
+                            
+                            <!-- User Info -->
+                            <div class="flex-1 min-w-0 ml-3">
+                                <h4 class="font-semibold text-white truncate" x-text="user.name"></h4>
+                                <p class="text-xs text-gray-400 truncate" x-text="user.email"></p>
+                                <span class="text-xs text-indigo-400 capitalize" x-text="user.role"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2 flex-shrink-0">
+                            <!-- Chat Button -->
+                            <button @click="startConversationWithUser(user)"
+                                class="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition" title="Chat">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Gmail Button -->
+                            <a :href="`https://mail.google.com/mail/?view=cm&fs=1&to=${user.email}`" target="_blank" rel="noopener noreferrer"
+                                class="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition" title="Send Email">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -200,8 +279,21 @@ function chatApp() {
         messageInput: '',
         isLoading: false,
         pollInterval: null,
+        showStartConversationModal: false,
+        availableUsers: [],
+        filteredAvailableUsers: [],
+        startConversationSearch: '',
+        searchTimeout: null,
 
         init() {
+            console.log('=== CHATAPP INITIALIZED ===');
+            console.log('Component state:', {
+                conversations: this.conversations.length,
+                availableUsers: this.availableUsers.length,
+                filteredAvailableUsers: this.filteredAvailableUsers.length,
+                showStartConversationModal: this.showStartConversationModal,
+                activeConversation: this.activeConversation,
+            });
             this.loadConversations();
             // Poll for new messages every 2 seconds
             this.pollInterval = setInterval(() => {
@@ -210,6 +302,7 @@ function chatApp() {
                 }
                 this.loadConversations();
             }, 2000);
+            console.log('=== INITIALIZATION COMPLETE ===');
         },
 
         async loadConversations() {
@@ -351,6 +444,137 @@ function chatApp() {
                 setTimeout(() => {
                     container.scrollTop = container.scrollHeight;
                 }, 50);
+            }
+        },
+
+        async openStartConversation() {
+            console.log('=== OPENING START CONVERSATION MODAL ===');
+            this.showStartConversationModal = true;
+            this.startConversationSearch = '';
+            this.availableUsers = [];
+            this.filteredAvailableUsers = [];
+            console.log('Modal state:', {
+                showing: this.showStartConversationModal,
+                search: this.startConversationSearch,
+                users: this.availableUsers,
+                filtered: this.filteredAvailableUsers,
+            });
+            console.log('Calling loadAvailableUsers()...');
+            // Load users immediately when modal opens
+            await this.loadAvailableUsers();
+            console.log('=== MODAL OPEN COMPLETE ===');
+        },
+
+        closeStartConversation() {
+            this.showStartConversationModal = false;
+            this.startConversationSearch = '';
+            this.filteredAvailableUsers = [];
+        },
+
+        async loadAvailableUsers() {
+            try {
+                console.log('=== LOADING AVAILABLE USERS ===');
+                console.log('Search term:', this.startConversationSearch);
+                
+                // Build query string with search param if provided
+                const url = new URL('/api/messages/available-users', window.location.origin);
+                if (this.startConversationSearch && this.startConversationSearch.trim()) {
+                    url.searchParams.append('search', this.startConversationSearch.trim());
+                    console.log('Added search param to URL');
+                }
+                
+                console.log('Fetching from:', url.toString());
+                const response = await fetch(url.toString());
+                
+                console.log('Response received:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: {
+                        contentType: response.headers.get('content-type'),
+                    },
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                console.log('Response data:', data);
+                
+                if (data.success === false) {
+                    throw new Error(data.error || 'API returned success:false');
+                }
+                
+                if (!data.users) {
+                    throw new Error('No users field in response');
+                }
+
+                this.availableUsers = data.users || [];
+                this.filteredAvailableUsers = this.availableUsers;
+                
+                console.log('Data assigned:', {
+                    availableUsersCount: this.availableUsers.length,
+                    filteredAvailableUsersCount: this.filteredAvailableUsers.length,
+                });
+                
+                console.log(`✓ Successfully loaded ${this.availableUsers.length} users`);
+                console.log('=== LOADING COMPLETE ===');
+            } catch (error) {
+                console.error('✗ Error loading available users:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                });
+                this.availableUsers = [];
+                this.filteredAvailableUsers = [];
+            }
+        },
+
+        filterAvailableUsers() {
+            console.log('filterAvailableUsers called with search:', this.startConversationSearch);
+            // Debounce search to avoid excessive API calls
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                console.log('Search debounce complete, calling loadAvailableUsers()');
+                this.loadAvailableUsers();
+            }, 300); // Wait 300ms after user stops typing
+        },
+
+        async startConversationWithUser(user) {
+            try {
+                console.log('Starting conversation with user:', user);
+                
+                // Check if we already have a conversation with this user
+                const existingConversation = this.conversations.find(c => c.id === user.id);
+                
+                if (existingConversation) {
+                    console.log('Opening existing conversation');
+                    // Open existing conversation
+                    this.selectConversation(existingConversation);
+                } else {
+                    console.log('Creating new conversation');
+                    // Start new conversation by selecting the user
+                    this.activeConversation = {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        avatar: user.avatar,
+                        unread_count: 0,
+                        last_message: null,
+                        last_message_time: null
+                    };
+                    this.messageInput = '';
+                    this.messages = [];
+                    await this.loadMessages();
+                    this.scrollToBottom();
+                }
+                
+                this.closeStartConversation();
+            } catch (error) {
+                console.error('Error starting conversation:', error);
+                alert('Unable to start conversation. Please try again.');
             }
         },
 

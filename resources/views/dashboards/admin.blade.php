@@ -1,106 +1,203 @@
 <x-admin-layout>
     <x-slot name="header">
-        Admin dashboard
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-white">Admin Dashboard</h2>
+                <p class="text-gray-400 text-sm mt-1">System overview and management controls</p>
+            </div>
+            <div class="text-sm text-gray-400">
+                Last updated: {{ now()->format('M d, Y H:i') }}
+            </div>
+        </div>
     </x-slot>
 
     <div class="space-y-6">
-        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            <div class="bg-indigo-600/20 backdrop-blur-md border border-indigo-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(79,70,229,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-indigo-500/20 hover:bg-indigo-600/30 group">
-                <div class="p-4 text-gray-100">
-                    <div class="text-sm text-indigo-200 font-bold uppercase tracking-wider group-hover:text-indigo-100 transition-colors">
-                        Total users
+        <!-- ===== SUMMARY CARDS SECTION ===== -->
+        <div>
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Key Metrics</h3>
+            
+            <!-- Row 1: Core User Metrics -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                <!-- Total Users -->
+                <div class="group bg-gradient-to-br from-indigo-600/20 to-indigo-600/10 border border-indigo-500/30 rounded-lg p-4 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-indigo-200 font-semibold uppercase tracking-wider">Total Users</p>
+                            <p class="text-2xl font-black text-white mt-1">{{ $totalUsers }}</p>
+                            <p class="text-xs text-indigo-300 mt-1">{{ $totalApprovedUsers }} approved</p>
+                        </div>
+                        <svg class="h-8 w-8 text-indigo-400/40 group-hover:text-indigo-400/60 transition" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
                     </div>
-                    <div class="mt-1 text-2xl font-black text-white group-hover:text-indigo-50 transition-colors">
-                        {{ $totalUsers }}
+                </div>
+
+                <!-- Active Users -->
+                <div class="group bg-gradient-to-br from-green-600/20 to-green-600/10 border border-green-500/30 rounded-lg p-4 hover:border-green-500/50 transition-all hover:shadow-lg hover:shadow-green-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-green-200 font-semibold uppercase tracking-wider">Active Users</p>
+                            <p class="text-2xl font-black text-white mt-1">{{ $activeUsers }}</p>
+                            <p class="text-xs text-green-300 mt-1">Last 7 days</p>
+                        </div>
+                        <svg class="h-8 w-8 text-green-400/40 group-hover:text-green-400/60 transition" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Total Companies -->
+                <div class="group bg-gradient-to-br from-cyan-600/20 to-cyan-600/10 border border-cyan-500/30 rounded-lg p-4 hover:border-cyan-500/50 transition-all hover:shadow-lg hover:shadow-cyan-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-cyan-200 font-semibold uppercase tracking-wider">Companies</p>
+                            <p class="text-2xl font-black text-white mt-1">{{ $companies }}</p>
+                            <p class="text-xs text-cyan-300 mt-1">Partner organizations</p>
+                        </div>
+                        <svg class="h-8 w-8 text-cyan-400/40 group-hover:text-cyan-400/60 transition" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm4 8H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm10 12h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-8V3h8v2z" />
+                        </svg>
                     </div>
                 </div>
             </div>
-            <div class="bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(5,150,105,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-emerald-500/20 hover:bg-emerald-600/30 group">
-                <div class="p-4 text-gray-100">
-                    <div class="text-sm text-emerald-200 font-bold uppercase tracking-wider group-hover:text-emerald-100 transition-colors">
-                        Supervisors
-                    </div>
-                    <div class="mt-1 text-2xl font-black text-white group-hover:text-emerald-50 transition-colors">
-                        {{ $supervisors }}
-                    </div>
+
+            <!-- Row 2: Role Distribution -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <!-- Admins -->
+                <div class="group bg-gradient-to-br from-purple-600/20 to-purple-600/10 border border-purple-500/30 rounded-lg p-3 hover:border-purple-500/50 transition-all hover:shadow-lg hover:shadow-purple-500/20">
+                    <p class="text-xs text-purple-200 font-semibold uppercase tracking-wider">Admins</p>
+                    <p class="text-xl font-black text-white mt-1">{{ $admins }}</p>
+                </div>
+
+                <!-- Coordinators -->
+                <div class="group bg-gradient-to-br from-blue-600/20 to-blue-600/10 border border-blue-500/30 rounded-lg p-3 hover:border-blue-500/50 transition-all hover:shadow-lg hover:shadow-blue-500/20">
+                    <p class="text-xs text-blue-200 font-semibold uppercase tracking-wider">Coordinators</p>
+                    <p class="text-xl font-black text-white mt-1">{{ $coordinators }}</p>
+                </div>
+
+                <!-- Supervisors -->
+                <div class="group bg-gradient-to-br from-emerald-600/20 to-emerald-600/10 border border-emerald-500/30 rounded-lg p-3 hover:border-emerald-500/50 transition-all hover:shadow-lg hover:shadow-emerald-500/20">
+                    <p class="text-xs text-emerald-200 font-semibold uppercase tracking-wider">Supervisors</p>
+                    <p class="text-xl font-black text-white mt-1">{{ $supervisors }}</p>
+                </div>
+
+                <!-- OJT Advisers -->
+                <div class="group bg-gradient-to-br from-rose-600/20 to-rose-600/10 border border-rose-500/30 rounded-lg p-3 hover:border-rose-500/50 transition-all hover:shadow-lg hover:shadow-rose-500/20">
+                    <p class="text-xs text-rose-200 font-semibold uppercase tracking-wider">OJT Advisers</p>
+                    <p class="text-xl font-black text-white mt-1">{{ $advisers }}</p>
+                </div>
+
+                <!-- Students -->
+                <div class="group bg-gradient-to-br from-indigo-600/20 to-indigo-600/10 border border-indigo-500/30 rounded-lg p-3 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/20">
+                    <p class="text-xs text-indigo-200 font-semibold uppercase tracking-wider">Students</p>
+                    <p class="text-xl font-black text-white mt-1">{{ $students }}</p>
                 </div>
             </div>
-            <div class="bg-cyan-600/20 backdrop-blur-md border border-cyan-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(8,145,178,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-cyan-500/20 hover:bg-cyan-600/30 group">
-                <div class="p-4 text-gray-100">
-                    <div class="text-sm text-cyan-200 font-bold uppercase tracking-wider group-hover:text-cyan-100 transition-colors">
-                        Coordinators
+        </div>
+
+        <!-- ===== WORK LOG METRICS ===== -->
+        <div>
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Work Logs & Assignments</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <!-- Total Work Logs -->
+                <div class="group bg-gradient-to-br from-purple-600/20 to-purple-600/10 border border-purple-500/30 rounded-lg p-4 hover:border-purple-500/50 transition-all hover:shadow-lg hover:shadow-purple-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-purple-200 font-semibold uppercase tracking-wider">Total Work Logs</p>
+                            <p class="text-2xl font-black text-white mt-1">{{ $workLogs }}</p>
+                        </div>
+                        <svg class="h-8 w-8 text-purple-400/40 group-hover:text-purple-400/60 transition" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3h3v-3zm-3-2h3V6h-3v4zm3 5h3v-3h-3v3zm2-5h3V6h-3v4z" />
+                        </svg>
                     </div>
-                    <div class="mt-1 text-2xl font-black text-white group-hover:text-cyan-50 transition-colors">
-                        {{ $coordinators }}
+                </div>
+
+                <!-- Pending Reviews -->
+                <div class="group bg-gradient-to-br from-red-600/20 to-red-600/10 border border-red-500/30 rounded-lg p-4 hover:border-red-500/50 transition-all hover:shadow-lg hover:shadow-red-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-red-200 font-semibold uppercase tracking-wider">Pending Reviews</p>
+                            <p class="text-2xl font-black text-white mt-1">{{ $pendingReviews }}</p>
+                        </div>
+                        <svg class="h-8 w-8 text-red-400/40 group-hover:text-red-400/60 transition" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Approved Work Logs -->
+                <div class="group bg-gradient-to-br from-emerald-600/20 to-emerald-600/10 border border-emerald-500/30 rounded-lg p-4 hover:border-emerald-500/50 transition-all hover:shadow-lg hover:shadow-emerald-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-emerald-200 font-semibold uppercase tracking-wider">Approved</p>
+                            <p class="text-2xl font-black text-white mt-1">{{ $approvedWorkLogs }}</p>
+                        </div>
+                        <svg class="h-8 w-8 text-emerald-400/40 group-hover:text-emerald-400/60 transition" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Total Assignments -->
+                <div class="group bg-gradient-to-br from-amber-600/20 to-amber-600/10 border border-amber-500/30 rounded-lg p-4 hover:border-amber-500/50 transition-all hover:shadow-lg hover:shadow-amber-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-amber-200 font-semibold uppercase tracking-wider">Assignments</p>
+                            <p class="text-2xl font-black text-white mt-1">{{ $assignments }}</p>
+                        </div>
+                        <svg class="h-8 w-8 text-amber-400/40 group-hover:text-amber-400/60 transition" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-            <div class="bg-blue-600/20 backdrop-blur-md border border-blue-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(37,99,235,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-blue-500/20 hover:bg-blue-600/30 group">
-                <div class="p-4 text-gray-100">
-                    <div class="text-sm text-blue-200 font-bold uppercase tracking-wider group-hover:text-blue-100 transition-colors">
-                        OJT Students
-                    </div>
-                    <div class="mt-1 text-2xl font-black text-white group-hover:text-blue-50 transition-colors">
-                        {{ $students }}
-                    </div>
-                </div>
-            </div>
-            <div class="bg-purple-600/20 backdrop-blur-md border border-purple-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(147,51,234,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-purple-500/20 hover:bg-purple-600/30 group">
-                <div class="p-4 text-gray-100">
-                    <div class="text-sm text-purple-200 font-bold uppercase tracking-wider group-hover:text-purple-100 transition-colors">
-                        Work logs
-                    </div>
-                    <div class="mt-1 text-2xl font-black text-white group-hover:text-purple-50 transition-colors">
-                        {{ $workLogs }}
+        <!-- ===== ANNOUNCEMENTS & MISC ===== -->
+        <div>
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Content Management</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Total Announcements -->
+                <div class="group bg-gradient-to-br from-cyan-600/20 to-cyan-600/10 border border-cyan-500/30 rounded-lg p-4 hover:border-cyan-500/50 transition-all hover:shadow-lg hover:shadow-cyan-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-cyan-200 font-semibold uppercase tracking-wider">Announcements</p>
+                            <p class="text-2xl font-black text-white mt-1">{{ $announcements }}</p>
+                            <p class="text-xs text-cyan-300 mt-1">Posted to all users</p>
+                        </div>
+                        <svg class="h-8 w-8 text-cyan-400/40 group-hover:text-cyan-400/60 transition" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 13.5h8v-2H3v2zm0 4h8v-2H3v2zm0-8h8v-2H3v2zm15 0.5h2V9h3V7.5h-3v-3H16v3h-3V9h3v4.5z" />
+                        </svg>
                     </div>
                 </div>
-            </div>
-            <div class="bg-amber-600/20 backdrop-blur-md border border-amber-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(217,119,6,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-amber-500/20 hover:bg-amber-600/30 group">
-                <div class="p-4 text-gray-100">
-                    <div class="text-sm text-amber-200 font-bold uppercase tracking-wider group-hover:text-amber-100 transition-colors">
-                        Companies
-                    </div>
-                    <div class="mt-1 text-2xl font-black text-white group-hover:text-amber-50 transition-colors">
-                        {{ $companies }}
-                    </div>
-                </div>
-            </div>
-            <div class="bg-rose-600/20 backdrop-blur-md border border-rose-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(225,29,72,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-rose-500/20 hover:bg-rose-600/30 group">
-                <div class="p-4 text-gray-100">
-                    <div class="text-sm text-rose-200 font-bold uppercase tracking-wider group-hover:text-rose-100 transition-colors">
-                        Assignments
-                    </div>
-                    <div class="mt-1 text-2xl font-black text-white group-hover:text-rose-50 transition-colors">
-                        {{ $assignments }}
-                    </div>
-                </div>
-            </div>
-            <div class="bg-red-600/20 backdrop-blur-md border border-red-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(220,38,38,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-red-500/20 hover:bg-red-600/30 group">
-                <div class="p-4 text-gray-100">
-                    <div class="text-sm text-red-200 font-bold uppercase tracking-wider group-hover:text-red-100 transition-colors">
-                        Pending reviews
-                    </div>
-                    <div class="mt-1 text-2xl font-black text-white group-hover:text-red-50 transition-colors">
-                        {{ $pendingReviews }}
+
+                <!-- Audit Logs Count -->
+                <div class="group bg-gradient-to-br from-indigo-600/20 to-indigo-600/10 border border-indigo-500/30 rounded-lg p-4 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/20">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-indigo-200 font-semibold uppercase tracking-wider">Audit Logs</p>
+                            <p class="text-2xl font-black text-white mt-1">{{ $recentAuditLogs->count() }}+</p>
+                            <p class="text-xs text-indigo-300 mt-1">Recent activities logged</p>
+                        </div>
+                        <svg class="h-8 w-8 text-indigo-400/40 group-hover:text-indigo-400/60 transition" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-2.12-2.86-1.41 1.41L10.5 19l4.96-6.71z" />
+                        </svg>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Section -->
+        <!-- ===== CHARTS SECTION ===== -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- User Distribution Doughnut Chart -->
-            <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 shadow-xl">
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <svg class="h-5 w-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.001 0 0120.488 9z" />
+            <!-- User Role Distribution Chart -->
+            <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-xl p-6 shadow-xl">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg class="h-5 w-5 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                        <path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                     </svg>
-                    User Role Distribution
-                </h3>
+                    <h3 class="text-lg font-bold text-white">User Role Distribution</h3>
+                </div>
                 <div class="relative h-[300px]">
                     <canvas id="userDistributionChart" 
                         data-labels="{{ json_encode(array_keys($userDistribution)) }}"
@@ -109,214 +206,226 @@
                 </div>
             </div>
 
-            <!-- Registration Trends Line Chart -->
-            <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 shadow-xl">
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <svg class="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            <!-- User Approval Status Chart -->
+            <div class="bg-black/40 backdrop-blur-md border border-emerald-500/20 rounded-xl p-6 shadow-xl">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg class="h-5 w-5 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
                     </svg>
-                    New Account Trends
-                </h3>
+                    <h3 class="text-lg font-bold text-white">User Approval Status</h3>
+                </div>
                 <div class="relative h-[300px]">
+                    <canvas id="userApprovalChart" 
+                        data-labels="{{ json_encode(array_keys($userApprovalStatus)) }}"
+                        data-values="{{ json_encode(array_values($userApprovalStatus)) }}">
+                    </canvas>
+                </div>
+            </div>
+
+            <!-- Registration Trends Chart -->
+            <div class="bg-black/40 backdrop-blur-md border border-cyan-500/20 rounded-xl p-6 shadow-xl">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg class="h-5 w-5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3h3v-3zm-3-2h3V6h-3v4zm3 5h3v-3h-3v3z" />
+                    </svg>
+                    <h3 class="text-lg font-bold text-white">New Accounts Trend</h3>
+                </div>
+                <div class="relative h-[250px]">
                     <canvas id="registrationTrendsChart"
                         data-labels="{{ json_encode($registrationTrends->pluck('month')) }}"
                         data-values="{{ json_encode($registrationTrends->pluck('count')) }}">
                     </canvas>
                 </div>
             </div>
-        </div>
 
-        <div class="glass-panel overflow-hidden">
-            <div class="p-6 text-gray-100 space-y-3">
-                <h3 class="font-bold text-white">
-                    Management
-                </h3>
-                <div class="flex flex-wrap gap-3">
-                        <a
-                            href="{{ route('admin.users.index') }}"
-                            class="inline-flex items-center px-3 py-2 rounded-md bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-500 shadow-lg shadow-indigo-900/50 transition-all hover:scale-105"
-                        >
-                            Manage users
-                        </a>
-                        <a
-                            href="{{ route('admin.companies.index') }}"
-                            class="inline-flex items-center px-3 py-2 rounded-md bg-blue-600 text-white text-sm font-bold hover:bg-blue-500 shadow-lg shadow-blue-900/50 transition-all hover:scale-105"
-                        >
-                            Manage companies
-                        </a>
-                        <a
-                            href="{{ route('admin.users.index') }}#create-user"
-                        class="inline-flex items-center px-3 py-2 rounded-md bg-purple-600 text-white text-sm font-bold hover:bg-purple-500 shadow-lg shadow-purple-900/50 transition-all hover:scale-105"
-                    >
-                        Create user
-                    </a>
+            <!-- Work Log Trends Chart -->
+            <div class="bg-black/40 backdrop-blur-md border border-purple-500/20 rounded-xl p-6 shadow-xl">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg class="h-5 w-5 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 13.5h8v-2H3v2zm0 4h8v-2H3v2zm0-8h8v-2H3v2zm15 0.5h2V9h3V7.5h-3v-3H16v3h-3V9h3v4.5z" />
+                    </svg>
+                    <h3 class="text-lg font-bold text-white">Work Logs Submitted</h3>
+                </div>
+                <div class="relative h-[250px]">
+                    <canvas id="workLogTrendsChart"
+                        data-labels="{{ json_encode($workLogTrends->pluck('month')) }}"
+                        data-values="{{ json_encode($workLogTrends->pluck('count')) }}">
+                    </canvas>
                 </div>
             </div>
         </div>
 
-        <div class="glass-panel overflow-hidden">
-            <div class="p-6 text-gray-100 space-y-3">
-                <h3 class="font-bold text-white">
-                    Recent users
-                </h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-left text-sm">
-                        <thead>
-                            <tr class="border-b border-white/10">
-                                <th class="px-3 py-2 text-white font-semibold uppercase tracking-wider">Name</th>
-                                <th class="px-3 py-2 text-white font-semibold uppercase tracking-wider">Email</th>
-                                <th class="px-3 py-2 text-white font-semibold uppercase tracking-wider">Role</th>
-                                <th class="px-3 py-2 text-white font-semibold uppercase tracking-wider">Joined</th>
-                                <th class="px-3 py-2 text-white font-semibold uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($recentUsers as $u)
-                                <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                    <td class="px-3 py-2 whitespace-nowrap font-medium text-white">{{ $u->name }}</td>
-                                    <td class="px-3 py-2 whitespace-nowrap text-gray-100">{{ $u->email }}</td>
-                                    <td class="px-3 py-2 whitespace-nowrap">
-                                        <x-user-role-badge :role="$u->role" />
-                                    </td>
-                                    <td class="px-3 py-2 whitespace-nowrap text-gray-100">{{ $u->created_at->diffForHumans() }}</td>
-                                    <td class="px-3 py-2 whitespace-nowrap text-gray-100">
-                                        @if (!$u->is_approved)
-                                            <div class="flex gap-2">
-                                                <form action="{{ route('admin.users.approve', $u) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-600 hover:text-white transition-all duration-200">
-                                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                        Approve
-                                                    </button>
-                                                </form>
-                                                <form action="{{ route('admin.users.reject', $u) }}" method="POST" onsubmit="return confirm('Are you sure you want to reject this request? This will delete the account.');" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600/20 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-rose-600 hover:text-white transition-all duration-200">
-                                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                        Reject
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        @else
-                                            <form action="{{ route('admin.users.destroy', $u) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?');" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 text-gray-100 border border-white/10 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-600/20 hover:text-red-400 hover:border-red-500/30 transition-all duration-200">
-                                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                    Delete
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-3 py-4 text-sm text-gray-100 font-semibold">
-                                        No users yet.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // User Distribution Chart
-            const distCanvas = document.getElementById('userDistributionChart');
-            const userDistributionLabels = JSON.parse(distCanvas.dataset.labels);
-            const userDistributionData = JSON.parse(distCanvas.dataset.values);
-
-            const distCtx = distCanvas.getContext('2d');
-            new Chart(distCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: userDistributionLabels,
-                    datasets: [{
-                        data: userDistributionData,
-                        backgroundColor: [
-                            '#4f46e5', // indigo
-                            '#0891b2', // cyan
-                            '#059669', // emerald
-                            '#2563eb', // blue
-                            '#7c3aed', // purple
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 15
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#9ca3af',
-                                padding: 20,
-                                font: { size: 12, weight: 'bold' }
-                            }
-                        }
-                    },
-                    cutout: '70%'
-                }
-            });
-
-            // Registration Trends Chart
-            const trendCanvas = document.getElementById('registrationTrendsChart');
-            const registrationTrendsLabels = JSON.parse(trendCanvas.dataset.labels);
-            const registrationTrendsData = JSON.parse(trendCanvas.dataset.values);
-
-            const trendCtx = trendCanvas.getContext('2d');
-            const gradient = trendCtx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
-            gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
-
-            new Chart(trendCtx, {
-                type: 'line',
-                data: {
-                    labels: registrationTrendsLabels,
-                    datasets: [{
-                        label: 'New Users',
-                        data: registrationTrendsData,
-                        borderColor: '#10b981',
-                        backgroundColor: gradient,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#10b981',
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#9ca3af' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#9ca3af' }
+            const chartDefaults = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#9ca3af',
+                            padding: 15,
+                            font: { size: 12, weight: 'bold' }
                         }
                     }
                 }
-            });
+            };
+
+            // User Distribution Chart
+            const distCanvas = document.getElementById('userDistributionChart');
+            if (distCanvas && distCanvas.dataset.labels) {
+                const userDistributionLabels = JSON.parse(distCanvas.dataset.labels);
+                const userDistributionData = JSON.parse(distCanvas.dataset.values);
+                const distCtx = distCanvas.getContext('2d');
+                
+                new Chart(distCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: userDistributionLabels,
+                        datasets: [{
+                            data: userDistributionData,
+                            backgroundColor: [
+                                '#7c3aed', // purple
+                                '#0891b2', // cyan
+                                '#059669', // emerald
+                                '#2563eb', // blue
+                                '#f43f5e', // rose
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        ...chartDefaults,
+                        cutout: '70%'
+                    }
+                });
+            }
+
+            // User Approval Status Chart
+            const approvalCanvas = document.getElementById('userApprovalChart');
+            if (approvalCanvas && approvalCanvas.dataset.labels) {
+                const approvalLabels = JSON.parse(approvalCanvas.dataset.labels);
+                const approvalData = JSON.parse(approvalCanvas.dataset.values);
+                const approvalCtx = approvalCanvas.getContext('2d');
+                
+                new Chart(approvalCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: approvalLabels,
+                        datasets: [{
+                            data: approvalData,
+                            backgroundColor: [
+                                '#10b981', // emerald
+                                '#f59e0b', // amber
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 12
+                        }]
+                    },
+                    options: {
+                        ...chartDefaults
+                    }
+                });
+            }
+
+            // Registration Trends Chart
+            const trendCanvas = document.getElementById('registrationTrendsChart');
+            if (trendCanvas && trendCanvas.dataset.labels) {
+                const registrationTrendsLabels = JSON.parse(trendCanvas.dataset.labels);
+                const registrationTrendsData = JSON.parse(trendCanvas.dataset.values);
+                const trendCtx = trendCanvas.getContext('2d');
+                const gradient = trendCtx.createLinearGradient(0, 0, 0, 250);
+                gradient.addColorStop(0, 'rgba(6, 182, 212, 0.3)');
+                gradient.addColorStop(1, 'rgba(6, 182, 212, 0)');
+
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: registrationTrendsLabels,
+                        datasets: [{
+                            label: 'New Users',
+                            data: registrationTrendsData,
+                            borderColor: '#06b6d4',
+                            backgroundColor: gradient,
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#06b6d4',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        ...chartDefaults,
+                        plugins: {
+                            ...chartDefaults.plugins,
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#9ca3af' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Work Log Trends Chart
+            const workLogCanvas = document.getElementById('workLogTrendsChart');
+            if (workLogCanvas && workLogCanvas.dataset.labels) {
+                const workLogLabels = JSON.parse(workLogCanvas.dataset.labels);
+                const workLogData = JSON.parse(workLogCanvas.dataset.values);
+                const workLogCtx = workLogCanvas.getContext('2d');
+                const workLogGradient = workLogCtx.createLinearGradient(0, 0, 0, 250);
+                workLogGradient.addColorStop(0, 'rgba(168, 85, 247, 0.3)');
+                workLogGradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
+
+                new Chart(workLogCtx, {
+                    type: 'line',
+                    data: {
+                        labels: workLogLabels,
+                        datasets: [{
+                            label: 'Work Logs',
+                            data: workLogData,
+                            borderColor: '#a855f7',
+                            backgroundColor: workLogGradient,
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#a855f7',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        ...chartDefaults,
+                        plugins: {
+                            ...chartDefaults.plugins,
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#9ca3af' }
+                            }
+                        }
+                    }
+                });
+            }
         });
     </script>
 </x-admin-layout>

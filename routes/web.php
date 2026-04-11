@@ -86,6 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/api/messages/send', [MessageController::class, 'apiSend'])->name('api.messages.send');
     Route::post('/api/messages/{message}/read', [MessageController::class, 'apiMarkAsRead'])->name('api.messages.read');
     Route::get('/api/messages/unread-count', [MessageController::class, 'apiUnreadCount'])->name('api.messages.unread-count');
+    Route::get('/api/messages/available-users', [MessageController::class, 'apiAvailableUsers'])->name('api.messages.available-users');
 });
 
 use App\Http\Controllers\Student\StudentAnnouncementController;

@@ -236,17 +236,39 @@ class MessageController extends Controller
     private function getPotentialRecipients($user)
     {
         if ($user->role === User::ROLE_SUPERVISOR) {
-            $coordinators = User::where('role', User::ROLE_COORDINATOR)->get();
+            // Supervisors can message: coordinators + students assigned to them
+            $coordinators = User::where('role', User::ROLE_COORDINATOR)->orderBy('name')->get();
             $studentIds = Assignment::where('supervisor_id', $user->id)->pluck('student_id');
-            $students = User::whereIn('id', $studentIds)->get();
-            return $coordinators->merge($students)->sortBy('name');
+            $students = User::whereIn('id', $studentIds)->orderBy('name')->get();
+            return $coordinators->merge($students)->unique('id')->sortBy('name');
+            
         } elseif ($user->role === User::ROLE_COORDINATOR) {
-            return User::where('role', User::ROLE_SUPERVISOR)->orderBy('name')->get();
+            // Coordinators can message: supervisors + students (any user with student role)
+            $supervisors = User::where('role', User::ROLE_SUPERVISOR)->orderBy('name')->get();
+            $students = User::where('role', User::ROLE_STUDENT)->orderBy('name')->get();
+            return $supervisors->merge($students)->unique('id')->sortBy('name');
+                
         } elseif ($user->role === User::ROLE_STUDENT) {
+            // Students can message: their supervisors + coordinators
             $supervisorIds = Assignment::where('student_id', $user->id)->pluck('supervisor_id');
-            return User::whereIn('id', $supervisorIds)->orderBy('name')->get();
+            $supervisors = User::whereIn('id', $supervisorIds)->orderBy('name')->get();
+            
+            // Also get coordinators as a fallback
+            $coordinators = User::where('role', User::ROLE_COORDINATOR)->orderBy('name')->get();
+            
+            return $supervisors->merge($coordinators)->unique('id')->sortBy('name');
+            
+        } elseif ($user->role === User::ROLE_OJT_ADVISER) {
+            // OJT Advisers can message everyone except themselves
+            return User::where('id', '!=', $user->id)
+                ->orderBy('name')
+                ->get();
+                
         } else {
-            return User::where('id', '!=', $user->id)->orderBy('name')->get();
+            // Admin and others can message everyone
+            return User::where('id', '!=', $user->id)
+                ->orderBy('name')
+                ->get();
         }
     }
 
@@ -416,5 +438,67 @@ class MessageController extends Controller
             'success' => true,
             'unread_count' => $unreadCount,
         ]);
+    }
+
+    public function apiAvailableUsers(Request $request): JsonResponse
+    {
+        try {
+            $userId = Auth::id();
+            $search = $request->input('search', '');
+
+            // Debug logging
+            \Log::info('apiAvailableUsers called', [
+                'user_id' => $userId,
+                'search' => $search,
+            ]);
+
+            // Fetch all users except the currently logged-in user
+            $query = User::where('id', '!=', $userId)->orderBy('name');
+
+            // Apply search filter if provided
+            if (!empty($search)) {
+                $searchTerm = '%' . $search . '%';
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('name', 'LIKE', $searchTerm)
+                      ->orWhere('email', 'LIKE', $searchTerm);
+                });
+            }
+
+            $allUsers = $query->get();
+
+            \Log::info('apiAvailableUsers users found', [
+                'count' => $allUsers->count(),
+                'search' => $search,
+            ]);
+
+            // Format response
+            $users = $allUsers->map(function ($u) {
+                return [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'role' => $u->role,
+                    'avatar' => sprintf('https://ui-avatars.com/api/?name=%s&background=random', urlencode($u->name)),
+                ];
+            })->values();
+
+            return response()->json([
+                'success' => true,
+                'users' => $users,
+                'total' => $users->count(),
+            ]);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error in apiAvailableUsers', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'users' => [],
+                'error' => 'Unable to load users',
+            ], 500);
+        }
     }
 }

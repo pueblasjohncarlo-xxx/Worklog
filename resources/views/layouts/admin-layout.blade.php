@@ -83,15 +83,4 @@
             });
         </script>
     </body>
-                </header>
-
-                <!-- Page Content -->
-                <main class="p-6">
-                    {{ $slot }}
-                </main>
-            </div>
-        </div>
-        <x-loading-screen />
-        @stack('scripts')
-    </body>
 </html>

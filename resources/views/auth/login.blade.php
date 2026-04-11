@@ -80,10 +80,7 @@
 
             <div class="text-center mt-4">
                 <p class="text-sm text-gray-600">
-                    Don't have an account? 
-                    <a href="{{ route('register') }}" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
-                        Create account
-                    </a>
+                    {{-- Registration disabled: User creation restricted to admin panel only --}}
                 </p>
             </div>
         </form>
