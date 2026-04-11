@@ -386,6 +386,5 @@
                 <p class="text-gray-500 dark:text-gray-400">Select a date range and click "Generate Summary Report" to view data.</p>
             </div>
         @endif
-        @endif
     </div>
 </x-app-layout>
