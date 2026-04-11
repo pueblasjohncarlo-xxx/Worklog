@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\View\View; // Add this line
+use Illuminate\Support\Facades\Schema;
+use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
@@ -43,7 +44,8 @@ class RegisteredUserController extends Controller
             return back()->withErrors(['email' => 'This email is already registered.']);
         }
 
-        $user = User::create([
+        // Build user data with all required fields
+        $userData = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -51,10 +53,19 @@ class RegisteredUserController extends Controller
             'role' => $role,
             'section' => $request->section,
             'department' => $request->department,
-            'is_approved' => false,
-            'status' => 'pending',
             'has_requested_account' => true,
-        ]);
+        ];
+
+        // Safely add approval workflow fields only if columns exist in database
+        if (Schema::hasColumn('users', 'is_approved')) {
+            $userData['is_approved'] = false;
+        }
+
+        if (Schema::hasColumn('users', 'status')) {
+            $userData['status'] = 'pending';
+        }
+
+        $user = User::create($userData);
 
         return redirect()->route('login')->with('status', 'Your account has been created and is pending admin approval.');
     }

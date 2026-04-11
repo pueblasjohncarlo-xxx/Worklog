@@ -32,8 +32,8 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        // Check for approval status
-        if ($user->status === 'pending') {
+        // Check for approval status (if status column exists)
+        if (Schema::hasColumn('users', 'status') && isset($user->status) && $user->status === 'pending') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -43,8 +43,9 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
-        if ($user->status === 'rejected') {
-            $reason = $user->rejection_reason ? ": " . $user->rejection_reason : ".";
+        // Check for rejected status
+        if (Schema::hasColumn('users', 'status') && isset($user->status) && $user->status === 'rejected') {
+            $reason = isset($user->rejection_reason) && $user->rejection_reason ? ": " . $user->rejection_reason : ".";
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
