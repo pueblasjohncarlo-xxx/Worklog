@@ -30,9 +30,19 @@
 
         <a href="{{ route('supervisor.leaves.index') }}" 
            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('supervisor.leaves.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <div class="relative">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                @php
+                    $pendingLeavesCount = \App\Models\Leave::whereIn('assignment_id', \App\Models\Assignment::where('supervisor_id', Auth::id())->where('status', 'active')->pluck('id'))->whereIn('status', ['submitted', 'pending'])->count();
+                @endphp
+                @if($pendingLeavesCount > 0)
+                    <span class="absolute -top-2 -right-2 flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-[10px] font-bold text-white bg-orange-600 rounded-full border-2 border-black">
+                        {{ $pendingLeavesCount > 99 ? '99+' : $pendingLeavesCount }}
+                    </span>
+                @endif
+            </div>
             <span class="font-medium">Leave Requests</span>
         </a>
 

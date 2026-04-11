@@ -22,7 +22,7 @@
         @endif
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-            <h3 class="font-bold text-gray-900 dark:text-white">Leave Request Completion Checklist</h3>
+            <h3 class="font-bold text-gray-900 dark:text-gray-100">Leave Request Completion Checklist</h3>
             <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Requested feature list inserted and implemented below.</p>
             <ul class="mt-3 text-xs text-gray-700 dark:text-gray-300 list-disc pl-5 space-y-1">
                 <li>Fields included: leave type, start date, end date, number of days, reason/description, optional attachment.</li>
@@ -95,7 +95,7 @@
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-semibold mb-2 flex items-center gap-2">
+                                <label class="block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100 flex items-center gap-2">
                                     Leave Type
                                     <span class="text-red-500">*</span>
                                     <span class="group relative">
@@ -103,7 +103,7 @@
                                         <span class="invisible group-hover:visible absolute -top-8 left-0 bg-gray-900 dark:bg-gray-950 text-white text-xs rounded py-1 px-2 whitespace-nowrap z-10">Choose the type of leave</span>
                                     </span>
                                 </label>
-                                <select name="type" id="leave_type" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2" required onchange="updateLeaveTypeDescription(); checkLeaveBalance();">
+                                <select name="type" id="leave_type" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 p-2" required onchange="updateLeaveTypeDescription(); checkLeaveBalance();">
                                     <option value="">-- Select leave type --</option>
                                     <option value="Sick Leave" @selected(old('type') === 'Sick Leave')>Sick Leave</option>
                                     <option value="Annual" @selected(old('type') === 'Annual')>Annual Leave</option>
@@ -114,66 +114,66 @@
                                     <option value="Vacation" @selected(old('type') === 'Vacation')>Vacation</option>
                                     <option value="No Pay Leave" @selected(old('type') === 'No Pay Leave')>No Pay Leave</option>
                                 </select>
-                                <div id="type_help" class="text-xs text-gray-500 dark:text-gray-400 mt-1 block"></div>
+                                <div id="type_help" class="text-xs text-gray-600 dark:text-gray-300 mt-1 block"></div>
                                 <div id="approval_timeline" class="text-xs text-blue-600 dark:text-blue-300 mt-2 hidden">
                                     <strong>Estimated approval:</strong> <span id="timeline_text"></span>
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold mb-2">Date Filed</label>
-                                <input type="date" name="date_filed" value="{{ old('date_filed', now()->format('Y-m-d')) }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2">
+                                <label class="block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100">Date Filed</label>
+                                <input type="date" name="date_filed" value="{{ old('date_filed', now()->format('Y-m-d')) }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 p-2">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold mb-2 flex items-center gap-2">
+                                <label class="block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100 flex items-center gap-2">
                                     Start Date
                                     <span class="text-red-500">*</span>
                                 </label>
-                                <input type="date" name="start_date" id="start_date" value="{{ old('start_date') }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2" required onchange="calculateDays();">
+                                <input type="date" name="start_date" id="start_date" value="{{ old('start_date') }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 p-2" required onchange="calculateDays();">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold mb-2 flex items-center gap-2">
+                                <label class="block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100 flex items-center gap-2">
                                     End Date
                                     <span class="text-red-500">*</span>
                                 </label>
-                                <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2" required onchange="calculateDays();">
+                                <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 p-2" required onchange="calculateDays();">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold mb-2">Number of Days</label>
+                                <label class="block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100">Number of Days</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="number" id="number_of_days" name="number_of_days" readonly class="flex-1 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 bg-gray-100 dark:bg-gray-900 p-2">
+                                    <input type="number" id="number_of_days" name="number_of_days" readonly class="flex-1 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 bg-gray-100 dark:bg-gray-900 p-2">
                                     <span id="days_badge" class="px-3 py-2 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded text-sm font-semibold min-w-fit hidden">0 days</span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Calculated automatically from dates above</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Calculated automatically from dates above</p>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold mb-2">Attachment <span class="text-gray-500 text-xs">(Optional)</span></label>
-                                <input type="file" name="attachment" id="attachment" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded p-2" onchange="updateAttachmentInfo();">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Supported: PDF, JPG, PNG, DOC, DOCX (Max 5MB)</p>
+                                <label class="block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100">Attachment <span class="text-gray-600 dark:text-gray-300 text-xs">(Optional)</span></label>
+                                <input type="file" name="attachment" id="attachment" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="w-full text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 rounded p-2" onchange="updateAttachmentInfo();">
+                                <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Supported: PDF, JPG, PNG, DOC, DOCX (Max 5MB)</p>
                                 <div id="file_info" class="text-xs text-green-600 dark:text-green-400 mt-1 hidden"></div>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold mb-2">Reason / Description <span class="text-red-500">*</span></label>
-                            <textarea name="reason" id="reason" rows="4" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2" required placeholder="Please provide a detailed reason for your leave request..." onkeyup="updateCharCount();">{{ old('reason') }}</textarea>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <label class="block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100">Reason / Description <span class="text-red-500">*</span></label>
+                            <textarea name="reason" id="reason" rows="4" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 p-2" required placeholder="Please provide a detailed reason for your leave request..." onkeyup="updateCharCount();">{{ old('reason') }}</textarea>
+                            <div class="text-xs text-gray-600 dark:text-gray-300 mt-1">
                                 <span id="char_count">0</span>/2000 characters
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-semibold mb-2">Company</label>
-                                <input type="text" name="company_name" value="{{ old('company_name', $assignment?->company?->name) }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2" readonly>
+                                <label class="block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100">Company</label>
+                                <input type="text" name="company_name" value="{{ old('company_name', $assignment?->company?->name) }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 p-2" readonly>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold mb-2">Prepared By</label>
-                                <input type="text" name="prepared_by" value="{{ old('prepared_by', auth()->user()->name) }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 p-2" readonly>
+                                <label class="block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100">Prepared By</label>
+                                <input type="text" name="prepared_by" value="{{ old('prepared_by', auth()->user()->name) }}" class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 p-2" readonly>
                             </div>
                         </div>
 
@@ -198,7 +198,7 @@
 
             <div class="space-y-4">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-                    <h3 class="font-bold mb-3">Status Summary</h3>
+                    <h3 class="font-bold mb-3 text-gray-900 dark:text-gray-100">Status Summary</h3>
                     @php
                         $all = $leaves->total();
                         $draft = $leaves->getCollection()->where('status', 'draft')->count();
@@ -208,12 +208,12 @@
                         $rejected = $leaves->getCollection()->where('status', 'rejected')->count();
                     @endphp
                     <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div class="p-2 rounded bg-slate-100 dark:bg-slate-700">Total: <span class="font-bold">{{ $all }}</span></div>
-                        <div class="p-2 rounded bg-gray-100 dark:bg-gray-700">Draft: <span class="font-bold">{{ $draft }}</span></div>
-                        <div class="p-2 rounded bg-blue-100 text-blue-700">Submitted: <span class="font-bold">{{ $submitted }}</span></div>
-                        <div class="p-2 rounded bg-yellow-100 text-yellow-700">Pending: <span class="font-bold">{{ $pending }}</span></div>
-                        <div class="p-2 rounded bg-green-100 text-green-700">Approved: <span class="font-bold">{{ $approved }}</span></div>
-                        <div class="p-2 rounded bg-red-100 text-red-700">Rejected: <span class="font-bold">{{ $rejected }}</span></div>
+                        <div class="p-2 rounded bg-slate-100 dark:bg-slate-700 text-gray-900 dark:text-gray-100">Total: <span class="font-bold">{{ $all }}</span></div>
+                        <div class="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">Draft: <span class="font-bold">{{ $draft }}</span></div>
+                        <div class="p-2 rounded bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100">Submitted: <span class="font-bold">{{ $submitted }}</span></div>
+                        <div class="p-2 rounded bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100">Pending: <span class="font-bold">{{ $pending }}</span></div>
+                        <div class="p-2 rounded bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100">Approved: <span class="font-bold">{{ $approved }}</span></div>
+                        <div class="p-2 rounded bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100">Rejected: <span class="font-bold">{{ $rejected }}</span></div>
                     </div>
                 </div>
             </div>
@@ -221,17 +221,17 @@
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="font-bold">Leave Requests List</h3>
+                <h3 class="font-bold text-gray-900 dark:text-gray-100">Leave Requests List</h3>
                 <form method="GET" action="{{ route('student.leaves.index') }}" class="mt-3 grid grid-cols-1 md:grid-cols-5 gap-3">
-                    <input type="text" name="q" placeholder="Search reason/type" value="{{ request('q') }}" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
-                    <select name="status" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
+                    <input type="text" name="q" placeholder="Search reason/type" value="{{ request('q') }}" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-sm">
+                    <select name="status" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-sm">
                         <option value="">All Status</option>
                         @foreach (['draft','submitted','pending','approved','rejected','cancelled'] as $st)
                             <option value="{{ $st }}" @selected(request('status') === $st)>{{ ucfirst($st) }}</option>
                         @endforeach
                     </select>
-                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
-                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
+                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-sm">
+                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-sm">
                     <button type="submit" class="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold">Filter</button>
                 </form>
             </div>
@@ -240,13 +240,13 @@
                 <table class="min-w-full text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-900/40">
                         <tr>
-                            <th class="px-4 py-3 text-left">Leave Type</th>
-                            <th class="px-4 py-3 text-left">Dates</th>
-                            <th class="px-4 py-3 text-left">Days</th>
-                            <th class="px-4 py-3 text-left">Reason</th>
-                            <th class="px-4 py-3 text-left">Status</th>
-                            <th class="px-4 py-3 text-left">Submitted</th>
-                            <th class="px-4 py-3 text-left">Actions</th>
+                            <th class="px-4 py-3 text-left text-gray-900 dark:text-gray-100">Leave Type</th>
+                            <th class="px-4 py-3 text-left text-gray-900 dark:text-gray-100">Dates</th>
+                            <th class="px-4 py-3 text-left text-gray-900 dark:text-gray-100">Days</th>
+                            <th class="px-4 py-3 text-left text-gray-900 dark:text-gray-100">Reason</th>
+                            <th class="px-4 py-3 text-left text-gray-900 dark:text-gray-100">Status</th>
+                            <th class="px-4 py-3 text-left text-gray-900 dark:text-gray-100">Submitted</th>
+                            <th class="px-4 py-3 text-left text-gray-900 dark:text-gray-100">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

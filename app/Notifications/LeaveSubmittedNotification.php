@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\Leave;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class LeaveSubmittedNotification extends Notification
 {
@@ -16,7 +17,28 @@ class LeaveSubmittedNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $studentName = $this->leave->assignment?->student?->name ?? 'A student';
+        $leaveType = $this->leave->type ?? 'Leave';
+        
+        return (new MailMessage)
+            ->subject("New Leave Request from {$studentName}")
+            ->greeting("Hello {$notifiable->name},")
+            ->line("A new leave request has been submitted and is awaiting your review.")
+            ->line("**Student:** {$studentName}")
+            ->line("**Leave Type:** {$leaveType}")
+            ->line("**Dates:** {$this->leave->start_date?->format('M d, Y')} - {$this->leave->end_date?->format('M d, Y')}")
+            ->line("**Days:** {$this->leave->number_of_days}")
+            ->when($this->leave->reason, function ($mail) {
+                return $mail->line("**Reason:** {$this->leave->reason}");
+            })
+            ->action('Review Leave Request', route('supervisor.leaves.index'))
+            ->line('Please log in to your account to approve or reject the request.')
+            ->salutation('Best regards,\nWorkLog System');
     }
 
     public function toArray(object $notifiable): array
@@ -32,6 +54,7 @@ class LeaveSubmittedNotification extends Notification
             'student_name' => $this->leave->assignment?->student?->name,
             'leave_type' => $this->leave->type,
             'dates' => $this->leave->start_date?->format('M d, Y').' - '.$this->leave->end_date?->format('M d, Y'),
+            'days' => $this->leave->number_of_days,
             'url' => $url,
         ];
     }
