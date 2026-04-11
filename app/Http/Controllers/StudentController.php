@@ -15,29 +15,34 @@ use Illuminate\View\View;
 
 class StudentController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
     {
         $user = Auth::user();
+
+        // DEBUG: Log execution
+        \Log::info('========== STUDENT DASHBOARD CALLED ==========');
+        \Log::info('Route: student.dashboard | Controller: StudentController@index | User: ' . $user->id . ' (' . $user->name . ')');
 
         $assignment = Assignment::with(['company', 'supervisor'])
             ->where('student_id', $user->id)
             ->where('status', 'active')
             ->first();
 
+        // Get calendar current date from request or use today
+        $calendarCurrentDate = Carbon::now();
+        if (request()->has('attendance_month')) {
+            try {
+                $calendarCurrentDate = Carbon::createFromFormat('Y-m', request('attendance_month'))->startOfMonth();
+            } catch (\Exception $e) {
+                $calendarCurrentDate = Carbon::now();
+            }
+        }
+
         $workLogs = collect();
         $todayLog = null;
         $activeTasks = collect();
         $pastPendingLog = null;
-        $earlyClockOut = false;
-        $needsDailyReportReminder = false;
-        $attendanceCalendar = collect();
-
-        $attendanceMonth = $request->input('attendance_month', Carbon::now()->format('Y-m'));
-        if (!preg_match('/^\d{4}-\d{2}$/', $attendanceMonth)) {
-            $attendanceMonth = Carbon::now()->format('Y-m');
-        }
-
-        $calendarCurrentDate = Carbon::createFromFormat('Y-m', $attendanceMonth)->startOfMonth();
+        $monthlyTotalHours = 0;
 
         if ($assignment) {
             $workLogs = WorkLog::where('assignment_id', $assignment->id)
@@ -60,26 +65,7 @@ class StudentController extends Controller
                 ->orderBy('due_date')
                 ->get();
 
-            $earlyClockOut = false;
-            $needsDailyReportReminder = false;
-
-            if ($todayLog && $todayLog->time_in && ! $todayLog->time_out) {
-                $clockInTime = Carbon::parse($todayLog->time_in);
-                $elapsedHours = $clockInTime->diffInHours(now());
-                $earlyClockOut = $elapsedHours < 8;
-            }
-
-            // If today's attendance is approved and no daily accomplishment report exists, show reminder.
-            if ($todayLog && $todayLog->time_in && $todayLog->time_out && $todayLog->status === 'approved') {
-                $dailyReportExists = WorkLog::where('assignment_id', $assignment->id)
-                    ->where('type', 'daily')
-                    ->where('work_date', now()->toDateString())
-                    ->exists();
-
-                $needsDailyReportReminder = ! $dailyReportExists;
-            }
-
-            // Weekly Hours for Bar Chart (original, but replaced in UI by calendar)
+            // Weekly Hours for Bar Chart
             $fromDate = Carbon::now()->subDays(6)->toDateString();
             $logsForWeek = WorkLog::where('assignment_id', $assignment->id)
                 ->where('work_date', '>=', $fromDate)
@@ -98,56 +84,84 @@ class StudentController extends Controller
                 ];
             });
 
-            // Calendar for the selected month (attendance statuses)
-            $startOfMonth = $calendarCurrentDate->copy()->startOfMonth();
-            $endOfMonth = $calendarCurrentDate->copy()->endOfMonth();
-            $currentDay = $startOfMonth->copy()->startOfWeek(Carbon::SUNDAY);
-            $endDay = $endOfMonth->copy()->endOfWeek(Carbon::SATURDAY);
-
-            $monthWorkLogs = WorkLog::where('assignment_id', $assignment->id)
-                ->whereBetween('work_date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
-                ->get();
-
-            $monthlyTotalHours = $monthWorkLogs->sum('hours');
-            $monthlyApprovedHours = $monthWorkLogs->where('status', 'approved')->sum('hours');
-            $monthlyPendingHours = $monthWorkLogs->where('status', 'submitted')->sum('hours');
-            $monthlyRejectedHours = $monthWorkLogs->where('status', 'rejected')->sum('hours');
-            $monthlyRemainingHours = max(0, $assignment->required_hours - $monthlyApprovedHours);
-
-            $dayLogsKeyed = $monthWorkLogs->keyBy(fn ($log) => $log->work_date?->toDateString());
-            $attendanceCalendar = [];
-
-            while ($currentDay <= $endDay) {
-                $dayString = $currentDay->toDateString();
-                $dayLog = $dayLogsKeyed->get($dayString);
-
-                $attendanceCalendar[] = [
-                    'date' => $currentDay->copy(),
-                    'is_current_month' => $currentDay->month === $calendarCurrentDate->month,
-                    'status' => $dayLog ? $dayLog->status : null,
-                    'hours' => $dayLog ? $dayLog->hours : null,
-                    'time_in' => $dayLog ? $dayLog->time_in : null,
-                    'time_out' => $dayLog ? $dayLog->time_out : null,
-                ];
-
-                $currentDay->addDay();
-            }
-
-            $pendingHours = $workLogs->where('status', 'submitted')->sum('hours');
-            $rejectedHours = $workLogs->where('status', 'rejected')->sum('hours');
-
             // Completion Stats for Doughnut Chart
             $completedHours = $assignment->totalApprovedHours();
             $remainingHours = max(0, $assignment->required_hours - $completedHours);
             $completionStats = [
                 'Completed' => $completedHours,
-                'Pending' => $pendingHours,
-                'Rejected' => $rejectedHours,
                 'Remaining' => $remainingHours,
             ];
+
+            // Monthly Hours and Calendar for Calendar View
+            $monthStart = $calendarCurrentDate->copy()->startOfMonth();
+            $monthEnd = $calendarCurrentDate->copy()->endOfMonth();
+            $monthlyLogs = WorkLog::where('assignment_id', $assignment->id)
+                ->whereBetween('work_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->get();
+            
+            $monthlyTotalHours = $monthlyLogs->sum('hours');
+            $monthlyApprovedHours = $monthlyLogs->where('status', 'approved')->sum('hours');
+            $monthlyPendingHours = $monthlyLogs->whereIn('status', ['submitted', 'draft'])->sum('hours');
+            $monthlyRejectedHours = $monthlyLogs->where('status', 'rejected')->sum('hours');
+            $monthlyRemainingHours = max(0, $assignment->required_hours - $monthlyApprovedHours);
+
+            // Build Attendance Calendar for Month
+            $attendanceCalendar = [];
+            $firstDayOfMonth = $monthStart->copy();
+            $daysInMonth = $monthEnd->day;
+            $startingDayOfWeek = $firstDayOfMonth->dayOfWeek; // 0 = Sunday
+
+            // Add empty days from previous month
+            for ($i = 0; $i < $startingDayOfWeek; $i++) {
+                $prevDate = $firstDayOfMonth->copy()->subDays($startingDayOfWeek - $i);
+                $attendanceCalendar[] = [
+                    'date' => $prevDate,
+                    'is_current_month' => false,
+                    'status' => null,
+                    'time_in' => null,
+                    'time_out' => null,
+                    'hours' => null,
+                ];
+            }
+
+            // Add days of current month
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $currentDate = $monthStart->copy()->addDays($day - 1);
+                $log = $monthlyLogs->first(fn ($l) => $l->work_date->toDateString() === $currentDate->toDateString());
+
+                $attendanceCalendar[] = [
+                    'date' => $currentDate,
+                    'is_current_month' => true,
+                    'status' => $log?->status,
+                    'time_in' => $log?->time_in,
+                    'time_out' => $log?->time_out,
+                    'hours' => $log?->hours,
+                ];
+            }
+
+            // Add empty days from next month to fill the grid
+            $totalCells = count($attendanceCalendar);
+            $remainingCells = (ceil($totalCells / 7) * 7) - $totalCells;
+            for ($i = 1; $i <= $remainingCells; $i++) {
+                $nextDate = $monthEnd->copy()->addDays($i);
+                $attendanceCalendar[] = [
+                    'date' => $nextDate,
+                    'is_current_month' => false,
+                    'status' => null,
+                    'time_in' => null,
+                    'time_out' => null,
+                    'hours' => null,
+                ];
+            }
         } else {
             $weeklyHours = collect();
             $completionStats = ['Completed' => 0, 'Remaining' => 0];
+            $attendanceCalendar = [];
+            $monthlyTotalHours = 0;
+            $monthlyApprovedHours = 0;
+            $monthlyPendingHours = 0;
+            $monthlyRejectedHours = 0;
+            $monthlyRemainingHours = 0;
         }
 
         return view('dashboards.student', [
@@ -158,24 +172,18 @@ class StudentController extends Controller
             'pastPendingLog' => $pastPendingLog,
             'weeklyHours' => $weeklyHours,
             'completionStats' => $completionStats,
-            'attendanceCalendar' => $attendanceCalendar,
             'calendarCurrentDate' => $calendarCurrentDate,
-            'monthlyTotalHours' => $monthlyTotalHours ?? 0,
-            'monthlyApprovedHours' => $monthlyApprovedHours ?? 0,
-            'monthlyPendingHours' => $monthlyPendingHours ?? 0,
-            'monthlyRejectedHours' => $monthlyRejectedHours ?? 0,
-            'monthlyRemainingHours' => $monthlyRemainingHours ?? 0,
-            'earlyClockOut' => $earlyClockOut,
-            'needsDailyReportReminder' => $needsDailyReportReminder,
+            'monthlyTotalHours' => $monthlyTotalHours,
+            'monthlyApprovedHours' => $monthlyApprovedHours,
+            'monthlyPendingHours' => $monthlyPendingHours,
+            'monthlyRejectedHours' => $monthlyRejectedHours,
+            'monthlyRemainingHours' => $monthlyRemainingHours,
+            'attendanceCalendar' => $attendanceCalendar,
         ]);
     }
 
-    public function clockIn(Request $request): RedirectResponse
+    public function clockIn(): RedirectResponse
     {
-        $request->validate([
-            'time_in' => 'required|date_format:H:i',
-        ]);
-
         $user = Auth::user();
         $assignment = Assignment::where('student_id', $user->id)
             ->where('status', 'active')
@@ -209,12 +217,10 @@ class StudentController extends Controller
             return redirect()->back()->with('error', 'You have already clocked in today.');
         }
 
-        $timeIn = Carbon::parse($request->input('time_in'))->format('H:i:s');
-
         WorkLog::create([
             'assignment_id' => $assignment->id,
             'work_date' => now()->toDateString(),
-            'time_in' => $timeIn,
+            'time_in' => now()->toTimeString(),
             'status' => 'draft',
             'hours' => 0,
             'description' => 'Daily attendance log',
@@ -243,45 +249,14 @@ class StudentController extends Controller
             return redirect()->back()->with('error', 'No active session found to clock out.');
         }
 
-        $now = now();
-
-        // Parse time_in safely in case it is string or Carbon instance.
-        if ($log->time_in instanceof Carbon) {
-            $timeInString = $log->time_in->format('H:i:s');
-        } else {
-            $timeInString = Carbon::parse($log->time_in)->format('H:i:s');
-        }
-
-        $startTime = Carbon::parse($log->work_date->format('Y-m-d').' '.$timeInString);
-        $hoursElapsed = $startTime->diffInHours($now);
-
-        $earlyReason = $request->input('early_reason');
-
-        if ($hoursElapsed < 8 && ! $earlyReason) {
-            return redirect()->back()->with('error', 'You are clocking out early. Please provide an early departure reason first.');
-        }
-
-        $description = $log->description;
-        if ($earlyReason) {
-            $description .= "\n(Extra: Early clock-out reason: {$earlyReason})";
-        }
-
         $log->update([
-            'time_out' => $now->toTimeString(),
-            'hours' => $hoursElapsed,
+            'time_out' => now()->toTimeString(),
+            'hours' => now()->diffInHours($log->time_in), // Simple calculation
             'status' => 'submitted', // Auto-submit for approval
-            'description' => $description,
         ]);
 
         // Recalculate precise hours
-        $timeInValue = $log->time_in;
-        if ($timeInValue instanceof Carbon) {
-            $timeInString = $timeInValue->format('H:i:s');
-        } else {
-            $timeInString = Carbon::parse($timeInValue)->format('H:i:s');
-        }
-
-        $start = Carbon::parse($log->work_date->format('Y-m-d').' '.$timeInString);
+        $start = Carbon::parse($log->work_date->format('Y-m-d').' '.$log->time_in);
         $end = now();
         $hours = $start->diffInMinutes($end) / 60;
 
@@ -341,117 +316,5 @@ class StudentController extends Controller
         ]);
 
         return redirect()->back()->with('status', 'Manual clock-out submitted for approval.');
-    }
-
-    public function updateTaskStatus(Request $request, Task $task): RedirectResponse
-    {
-        $request->validate([
-            'status' => 'required|in:pending,in_progress,completed',
-        ]);
-
-        // Check if task belongs to the authenticated student
-        $user = Auth::user();
-        $assignment = Assignment::where('student_id', $user->id)
-            ->where('id', $task->assignment_id)
-            ->firstOrFail();
-
-        $task->update([
-            'status' => $request->status,
-        ]);
-
-        return redirect()->back()->with('status', 'Task status updated successfully.');
-    }
-
-    public function leavesIndex(): View
-    {
-        $assignment = Assignment::with(['company', 'supervisor', 'ojtAdviser'])
-            ->where('student_id', Auth::id())
-            ->where('status', 'active')
-            ->first();
-
-        $assignmentIds = Assignment::where('student_id', Auth::id())->pluck('id');
-
-        $leaves = Leave::with(['assignment.company', 'assignment.student'])
-            ->whereIn('assignment_id', $assignmentIds)
-            ->orderByDesc('created_at')
-            ->paginate(20);
-
-        return view('student.leaves.index', [
-            'assignment' => $assignment,
-            'leaves' => $leaves,
-        ]);
-    }
-
-    public function leavesStore(Request $request): RedirectResponse
-    {
-        $assignment = Assignment::where('student_id', Auth::id())
-            ->where('status', 'active')
-            ->first();
-
-        if (! $assignment) {
-            return redirect()->back()->withErrors([
-                'leave' => 'No active assignment found.',
-            ]);
-        }
-
-        $validated = $request->validate([
-            'type' => ['required', 'string', 'max:50'],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'reason' => ['nullable', 'string', 'max:2000'],
-            'student_name' => ['nullable', 'string', 'max:255'],
-            'course_major' => ['nullable', 'string', 'max:255'],
-            'year_section' => ['nullable', 'string', 'max:255'],
-            'cellphone_no' => ['nullable', 'string', 'max:255'],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'date_filed' => ['nullable', 'date'],
-            'job_designation' => ['nullable', 'string', 'max:255'],
-            'prepared_by' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $start = Carbon::parse($validated['start_date'])->startOfDay();
-        $end = Carbon::parse($validated['end_date'])->endOfDay();
-
-        $hasAttendance = WorkLog::where('assignment_id', $assignment->id)
-            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
-            ->whereNotNull('time_in')
-            ->exists();
-
-        if ($hasAttendance) {
-            return redirect()->back()
-                ->withErrors(['start_date' => 'Attendance exists within the selected dates.'])
-                ->withInput();
-        }
-
-        $leave = Leave::create([
-            'assignment_id' => $assignment->id,
-            'type' => $validated['type'],
-            'start_date' => $start->toDateString(),
-            'end_date' => $end->toDateString(),
-            'reason' => $validated['reason'] ?? null,
-            'status' => 'pending',
-            'student_name' => $validated['student_name'] ?? null,
-            'course_major' => $validated['course_major'] ?? null,
-            'year_section' => $validated['year_section'] ?? null,
-            'cellphone_no' => $validated['cellphone_no'] ?? null,
-            'company_name' => $validated['company_name'] ?? null,
-            'date_filed' => $validated['date_filed'] ?? now()->toDateString(),
-            'job_designation' => $validated['job_designation'] ?? null,
-            'prepared_by' => $validated['prepared_by'] ?? null,
-        ]);
-
-        // Save signature if provided (base64 PNG)
-        if ($request->filled('signature')) {
-            $dataUrl = $request->input('signature');
-            if (str_starts_with($dataUrl, 'data:image')) {
-                [$meta, $content] = explode(',', $dataUrl, 2);
-                $binary = base64_decode($content);
-                $path = 'signatures/leave_'.$leave->id.'.png';
-                Storage::disk('public')->put($path, $binary);
-                $leave->update(['signature_path' => $path]);
-            }
-        }
-
-        return redirect()->route('student.leaves.index')->with('status', 'Leave request submitted.');
     }
 }

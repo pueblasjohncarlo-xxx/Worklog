@@ -14,6 +14,12 @@
                     </div>
                 @endif
 
+                @if ($errors->any())
+                    <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
                 @if ($users->isEmpty())
                     <div class="text-center py-8 text-gray-500">
                         No pending approvals found.
@@ -21,6 +27,7 @@
                 @else
                     <form action="{{ route('admin.users.bulk-action') }}" method="POST" id="bulk-action-form">
                         @csrf
+                        <input type="hidden" name="action" id="bulk-action-input" value="">
                         <div class="flex justify-between items-center mb-4">
                             <div class="flex items-center gap-2">
                                 <input type="checkbox" id="select-all" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -33,7 +40,7 @@
                                     </svg>
                                     Approve Selected
                                 </button>
-                                <button type="submit" name="action" value="reject" class="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-rose-700 transition-all duration-200 shadow-md" onclick="return confirm('Are you sure you want to reject selected requests? This will delete their accounts.');">
+                                <button type="button" id="bulk-reject-btn" class="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-rose-700 transition-all duration-200 shadow-md">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -78,22 +85,22 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div class="flex justify-end gap-2">
-                                                    <a href="{{ route('admin.users.approve', $user) }}" 
-                                                       onclick="event.preventDefault(); document.getElementById('approve-form-{{ $user->id }}').submit();"
-                                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-emerald-700 transition-all duration-200 shadow-md">
+                                                    <button type="button"
+                                                       data-form-id="approve-form-{{ $user->id }}"
+                                                       class="js-user-approve inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-emerald-700 transition-all duration-200 shadow-md">
                                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                                         </svg>
                                                         Approve
-                                                    </a>
-                                                    <a href="{{ route('admin.users.reject', $user) }}" 
-                                                       onclick="event.preventDefault(); if(confirm('Are you sure?')) document.getElementById('reject-form-{{ $user->id }}').submit();"
-                                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-rose-700 transition-all duration-200 shadow-md">
+                                                    </button>
+                                                    <button type="button"
+                                                       data-form-id="reject-form-{{ $user->id }}"
+                                                       class="js-user-reject inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-rose-700 transition-all duration-200 shadow-md">
                                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
                                                         Reject
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -110,9 +117,68 @@
                     @endforeach
 
                     <script>
-                        document.getElementById('select-all').addEventListener('change', function() {
-                            const checkboxes = document.querySelectorAll('.user-checkbox');
-                            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const selectAll = document.getElementById('select-all');
+                            const bulkRejectBtn = document.getElementById('bulk-reject-btn');
+                            const bulkActionForm = document.getElementById('bulk-action-form');
+                            const bulkActionInput = document.getElementById('bulk-action-input');
+
+                            if (selectAll) {
+                                selectAll.addEventListener('change', function() {
+                                    const checkboxes = document.querySelectorAll('.user-checkbox');
+                                    checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+                                });
+                            }
+
+                            if (bulkRejectBtn && bulkActionForm && bulkActionInput) {
+                                bulkRejectBtn.addEventListener('click', function () {
+                                    const selected = document.querySelectorAll('.user-checkbox:checked');
+                                    if (selected.length === 0) {
+                                        alert('Please select at least one user to reject.');
+                                        return;
+                                    }
+
+                                    const confirmed = confirm('Are you sure you want to reject selected requests?');
+                                    if (!confirmed) {
+                                        return;
+                                    }
+
+                                    console.debug('[PendingApprovals] Bulk reject confirmed for users:', selected.length);
+                                    bulkActionInput.value = 'reject';
+                                    bulkActionForm.submit();
+                                });
+                            }
+
+                            document.querySelectorAll('.js-user-approve').forEach(function (button) {
+                                button.addEventListener('click', function () {
+                                    const form = document.getElementById(button.dataset.formId);
+                                    if (!form) {
+                                        console.error('[PendingApprovals] Approve form not found:', button.dataset.formId);
+                                        return;
+                                    }
+
+                                    console.debug('[PendingApprovals] Approve submit:', button.dataset.formId);
+                                    form.submit();
+                                });
+                            });
+
+                            document.querySelectorAll('.js-user-reject').forEach(function (button) {
+                                button.addEventListener('click', function () {
+                                    const form = document.getElementById(button.dataset.formId);
+                                    if (!form) {
+                                        console.error('[PendingApprovals] Reject form not found:', button.dataset.formId);
+                                        return;
+                                    }
+
+                                    const confirmed = confirm('Are you sure you want to reject this request?');
+                                    if (!confirmed) {
+                                        return;
+                                    }
+
+                                    console.debug('[PendingApprovals] Reject submit:', button.dataset.formId);
+                                    form.submit();
+                                });
+                            });
                         });
                     </script>
                 @endif

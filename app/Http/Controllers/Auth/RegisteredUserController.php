@@ -51,12 +51,11 @@ class RegisteredUserController extends Controller
             'role' => $role,
             'section' => $request->section,
             'department' => $request->department,
-            'is_approved' => true,
+            'is_approved' => false,
+            'status' => 'pending',
             'has_requested_account' => true,
         ]);
 
-        Auth::login($user);
-
-        return redirect()->route('dashboard');
+        return redirect()->route('login')->with('status', 'Your account has been created and is pending admin approval.');
     }
 }

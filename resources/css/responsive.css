@@ -8,7 +8,7 @@ body {
 /* ===== LAYOUT IMPROVEMENTS ===== */
 
 /* Ensure main content doesn't overflow behind sidebar */
-main {
+main:not(#admin-main-content) {
     min-height: 100vh;
     overflow-y: auto;
 }

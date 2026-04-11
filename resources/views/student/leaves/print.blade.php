@@ -260,152 +260,203 @@
         </div>
 
         <div class="header">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="header-logo" onerror="this.style.display='none'">
-            <div class="header-text">
-                <h1>Lapu-Lapu City College</h1>
-                <p>Don B. Benedicto Rd., Gun-ob, Lapu-Lapu City, 6015</p>
-                <p>School Code: 7174</p>
+            <div class="header-text" style="text-align: center; width: 100%;">
+                <h1 style="font-size: 14pt;">MINISTRY OF LABOUR AND SMALL ENTERPRISE DEVELOPMENT</h1>
+                <div class="report-title-main" style="font-size: 14pt;">ON-THE-JOB TRAINING PROGRAMME</div>
+                <p>Corner Chaguanas Main Road and Connector Road, Chaguanas</p>
+                <p>Tel: (868) 671-4447 / 671-7822 / 671-1764 / 671-3457</p>
+                <p>Website: <a href="http://molsed.gov.tt" style="color: black; text-decoration: underline;">molsed.gov.tt</a></p>
+                <hr style="border: 1px solid black; margin: 10px 0;">
+                <div class="report-title-sub" style="font-size: 14pt;">TRAINEE APPLICATION FOR LEAVE OF ABSENCE FORM</div>
             </div>
         </div>
 
-        <div class="report-title">
-            <div class="report-title-main">ON-THE-JOB TRAINING (OJT)</div>
-            <div class="report-title-sub">Leave Request Form</div>
-        </div>
-
-        <table class="info-table">
+        <table class="info-table" style="margin-top: 20px; font-size: 11pt; line-height: 1.8;">
             <tr>
-                <td style="width: 55%;">
-                    <span class="info-label">Student's Name:</span> <span class="info-value">{{ $leave->student_name ?? ($student->lastname . ', ' . $student->firstname . ' ' . $student->middlename) }}</span>
-                </td>
-                <td style="width: 45%;">
-                    <span class="info-label">Course & Major:</span> <span class="info-value">{{ $leave->course_major ?? (($student->section ?? 'N/A') . ' - ' . ($student->department ?? 'N/A')) }}</span>
+                <td style="width: 25%; font-weight: bold;">TO:</td>
+                <td style="width: 75%; border-bottom: 1px solid black; text-align: center;">
+                    {{ optional($assignment->supervisor)->name ?? '' }}
                 </td>
             </tr>
             <tr>
-                <td>
-                    <span class="info-label">Year & Section:</span> <span class="info-value">{{ $leave->year_section ?? ($student->section ?? 'N/A') }}</span>
-                </td>
-                <td>
-                    <span class="info-label">Cellphone No.:</span> <span class="info-value">{{ $leave->cellphone_no ?? (optional($student->studentProfile)->phone ?? 'N/A') }}</span>
+                <td></td>
+                <td style="text-align: center; font-size: 9pt;">Name of Supervisor/Head of Department</td>
+            </tr>
+            
+            <tr>
+                <td style="font-weight: bold;">NAME OF TRAINEE:</td>
+                <td style="border-bottom: 1px solid black;">
+                    {{ $leave->student_name ?? ($student->lastname . ', ' . $student->firstname . ' ' . $student->middlename) }}
                 </td>
             </tr>
+            
             <tr>
-                <td>
-                    <span class="info-label">Company's Name:</span> <span class="info-value">{{ $leave->company_name ?? optional($assignment->company)->name }}</span>
-                </td>
-                <td>
-                    <span class="info-label">Date Filed:</span> <span class="info-value">{{ ($leave->date_filed ?? now())->format('F d, Y') }}</span>
+                <td style="font-weight: bold;">TRAINING PROVIDER NAME:</td>
+                <td style="border-bottom: 1px solid black;">
+                    {{ $leave->company_name ?? optional($assignment->company)->name }}
                 </td>
             </tr>
+            
             <tr>
-                <td>
-                    <span class="info-label">Student OJT Job Designation:</span> <span class="info-value">{{ $leave->job_designation ?? (optional($student->studentProfile)->program ?? 'Intern') }}</span>
-                </td>
-                <td>
-                    <span class="info-label">Leave Type:</span> <span class="info-value">{{ $leave->type }}</span>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <span class="info-label">Inclusive Dates:</span> <span class="info-value">{{ $leave->start_date->format('M d, Y') }} - {{ $leave->end_date->format('M d, Y') }}</span>
-                </td>
-                <td>
-                    <span class="info-label">Status:</span> <span class="info-value">{{ $leave->status }}</span>
+                <td style="font-weight: bold;">TRAINING ADDRESS:</td>
+                <td style="border-bottom: 1px solid black;">
+                    {{ optional($assignment->company)->address ?? '' }}
                 </td>
             </tr>
         </table>
+        
+        <p style="font-size: 10pt; font-style: italic; margin-bottom: 5px;">Indicate the 'leave type' being applied for, from the list below:</p>
 
-        <table>
+        <table style="width: 100%; border: 1px solid black; text-align: center; border-collapse: collapse; margin-bottom: 20px;">
             <thead>
                 <tr>
-                    <th>Reason / Explanation</th>
+                    <th style="border: 1px solid black; width: 60%; background-color: transparent;">LEAVE TYPE</th>
+                    <th style="border: 1px solid black; width: 20%; background-color: transparent;">START DATE</th>
+                    <th style="border: 1px solid black; width: 20%; background-color: transparent;">END DATE</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td class="box">
-                        {{ $leave->reason }}
+                    <td style="border: 1px solid black; text-align: left; padding: 10px;">
+                        @if($leave->type == 'Sick Leave') <strong>✔</strong> @endif SICK <em>(Medical Certificate for &ge; 3 days)</em>
                     </td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Sick Leave') {{ optional($leave->start_date)->format('Y-m-d') }} @endif</td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Sick Leave') {{ optional($leave->end_date)->format('Y-m-d') }} @endif</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; text-align: left; padding: 10px; font-weight: bold;">
+                        @if($leave->type == 'Discretionary') ✔ @endif *DISCRETIONARY
+                    </td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Discretionary') {{ optional($leave->start_date)->format('Y-m-d') }} @endif</td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Discretionary') {{ optional($leave->end_date)->format('Y-m-d') }} @endif</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; text-align: left; padding: 10px; font-weight: bold;">
+                        @if($leave->type == 'Maternity') ✔ @endif MATERNITY <em style="font-weight: normal;">(Copy of NI12 form attached and duly completed by the Medical Practitioner and OJT Regional Officer)</em>
+                    </td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Maternity') {{ optional($leave->start_date)->format('Y-m-d') }} @endif</td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Maternity') {{ optional($leave->end_date)->format('Y-m-d') }} @endif</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; text-align: left; padding: 10px; font-weight: bold;">
+                        @if($leave->type == 'Exam') ✔ @endif EXAM <em style="font-weight: normal;">(documents attached-stamped and signed)</em>
+                    </td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Exam') {{ optional($leave->start_date)->format('Y-m-d') }} @endif</td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Exam') {{ optional($leave->end_date)->format('Y-m-d') }} @endif</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; text-align: left; padding: 10px; font-weight: bold;">
+                        @if($leave->type == 'Bereavement') ✔ @endif *BEREAVEMENT <em style="font-weight: normal;">(Copy of Death Certificate indicating relation)</em>
+                    </td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Bereavement') {{ optional($leave->start_date)->format('Y-m-d') }} @endif</td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'Bereavement') {{ optional($leave->end_date)->format('Y-m-d') }} @endif</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; text-align: left; padding: 10px; font-weight: bold;">
+                        @if($leave->type == 'No Pay Leave') ✔ @endif *NO PAY LEAVE
+                    </td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'No Pay Leave') {{ optional($leave->start_date)->format('Y-m-d') }} @endif</td>
+                    <td style="border: 1px solid black;">@if($leave->type == 'No Pay Leave') {{ optional($leave->end_date)->format('Y-m-d') }} @endif</td>
                 </tr>
             </tbody>
         </table>
 
-        <div class="signatures">
-            <table class="sig-table">
-                <tr>
-                    <td>
-                        <div class="sig-label-top">Prepared by:</div>
-                        <div class="sig-line-container">
-                            @if($leave->signature_path)
-                                <div style="height:62px; display:flex; align-items:flex-end; justify-content:center; margin-bottom:6px;">
-                                    <img src="{{ asset('storage/'.$leave->signature_path) }}" alt="Signature" style="max-width:260px; max-height:60px;">
-                                </div>
-                            @else
-                                <div style="height:62px;"></div>
-                            @endif
-                            <span class="sig-line">{{ $leave->prepared_by ?? ($student->lastname . ', ' . $student->firstname . ' ' . $student->middlename) }}</span>
-                            <span class="sig-label-bottom">OJTee's Signature over Printed Name</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="date-line-container">
-                            <span class="date-label">Date:</span>
-                            <div class="date-line"></div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="sig-label-top">Reviewed by:</div>
-                        <div class="sig-line-container">
-                            <span class="sig-line">{{ optional($assignment->supervisor)->name ?? '__________________________' }}</span>
-                            <span class="sig-label-bottom">Company Supervisor/Manager's Signature over Printed Name</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="date-line-container">
-                            <span class="date-label">Date:</span>
-                            <div class="date-line"></div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="sig-line-container" style="margin-top: 15px;">
-                            <span class="sig-line">{{ optional($assignment->ojtAdviser)->name ?? '__________________________' }}</span>
-                            <span class="sig-label-bottom">LLCC-CDT OJT Coordinator Signature over Printed Name</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="date-line-container">
-                            <span class="date-label">Date:</span>
-                            <div class="date-line"></div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="sig-label-top">Approved by:</div>
-                        <div class="sig-line-container">
-                            <span class="sig-line">DR. ROBERT B. PABILLARAN</span>
-                            <span class="sig-label-bottom">VP Academics/ Dean, CDT Signature over Printed Name</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="date-line-container">
-                            <span class="date-label">Date:</span>
-                            <div class="date-line"></div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
+        <div style="margin-bottom: 30px;">
+            <p style="font-weight: bold; margin-bottom: 5px;">* Reasons: <span style="font-weight: normal; text-decoration: underline;">{{ $leave->reason }}</span></p>
         </div>
 
-        <div class="footer">
-            Website: <a href="http://www.llcc.edu.ph">www.llcc.edu.ph</a> | Fb page: LLCC Public Information Office | Email: llccadmin@llcc.edu.ph
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px; text-align: center;">
+            <div style="width: 45%;">
+                @if($leave->signature_path)
+                    <div style="height:40px; display:flex; align-items:flex-end; justify-content:center; border-bottom: 1px solid black;">
+                        <img src="{{ asset('storage/'.$leave->signature_path) }}" alt="Signature" style="max-width:200px; max-height:40px;">
+                    </div>
+                @else
+                    <div style="border-bottom: 1px solid black; height: 40px;"></div>
+                @endif
+                <div style="font-size: 10pt; margin-top: 5px;">TRAINEE'S SIGNATURE</div>
+            </div>
+            <div style="width: 45%;">
+                <div style="border-bottom: 1px solid black; height: 40px; line-height: 50px;">{{ ($leave->date_filed ?? now())->format('Y-m-d') }}</div>
+                <div style="font-size: 10pt; margin-top: 5px;">DATE</div>
+            </div>
         </div>
-        <div class="bottom-bar"></div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+            <div style="width: 55%;">
+                <div style="margin-bottom: 20px;">
+                    <span style="font-weight: bold; margin-right: 10px;">Recommended</span> 
+                    <span style="display: inline-block; width: 20px; height: 15px; border: 1px solid black; margin-right: 20px; text-align: center;">
+                        @if($leave->status !== 'rejected') ✔ @endif
+                    </span>
+                    <span style="font-weight: bold; margin-right: 10px;">Not Recommended</span> 
+                    <span style="display: inline-block; width: 20px; height: 15px; border: 1px solid black; text-align: center;">
+                        @if($leave->status === 'rejected') ✔ @endif
+                    </span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; text-align: center; margin-top: 40px;">
+                    <div style="width: 30%;">
+                        <div style="border-bottom: 1px solid black; min-height: 20px;">{{ optional($assignment->supervisor)->name ?? '' }}</div>
+                        <div style="font-size: 9pt; font-weight: bold; margin-top: 5px;">SUPERVISOR'S NAME</div>
+                    </div>
+                    <div style="width: 30%;">
+                        <div style="border-bottom: 1px solid black; min-height: 20px;">{{ $leave->reviewed_at ? $leave->reviewed_at->format('Y-m-d') : '' }}</div>
+                        <div style="font-size: 9pt; font-weight: bold; margin-top: 5px;">DATE</div>
+                    </div>
+                    <div style="width: 30%;">
+                        <div style="border-bottom: 1px solid black; min-height: 20px;">Supervisor</div>
+                        <div style="font-size: 9pt; font-weight: bold; margin-top: 5px;">SUPERVISOR'S TITLE</div>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 40%; border: 1px solid #ccc; height: 80px; display: flex; align-items: center; justify-content: center; color: #ccc;">
+                Signature and Department / Company Stamp
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px;">
+            <div style="width: 50%;">
+                <div style="margin-bottom: 40px;">
+                    <span style="font-weight: bold; margin-right: 20px;">Approved</span> 
+                    <span style="display: inline-block; width: 20px; height: 15px; border: 1px solid black; margin-right: 30px; text-align: center;">
+                        @if($leave->status === 'approved') ✔ @endif
+                    </span>
+                    <span style="font-weight: bold; margin-right: 20px;">Not Approved</span> 
+                    <span style="display: inline-block; width: 20px; height: 15px; border: 1px solid black; text-align: center;">
+                        @if($leave->status === 'rejected') ✔ @endif
+                    </span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; text-align: center;">
+                    <div style="width: 45%;">
+                        <div style="border-bottom: 1px solid black; min-height: 20px;"></div>
+                        <div style="font-size: 9pt; font-weight: bold; margin-top: 5px;">PMO I</div>
+                    </div>
+                    <div style="width: 45%;">
+                        <div style="border-bottom: 1px solid black; min-height: 20px;"></div>
+                        <div style="font-size: 9pt; font-weight: bold; margin-top: 5px;">DATE</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="width: 45%; border: 1px solid black; padding: 10px; min-height: 80px;">
+                <span style="font-weight: bold;">Comments:</span><br>
+                {{ $leave->reviewer_remarks }}
+            </div>
+        </div>
+
+        <div style="font-size: 8pt; font-weight: bold; text-align: justify; margin-bottom: 20px;">
+            P.S. Leave taken without prior approval from the OJT and Provider may be treated as a breach of contract. All approved leave applications must be submitted with your monthly timesheets.
+        </div>
+
+        <div style="font-size: 7.5pt; text-align: center; border-top: 1px solid black; padding-top: 10px;">
+            <strong>OJT Head Office:</strong> Corner Chaguanas Main Road and Connector Road, Chaguanas Tel: 671-7108; <strong>Chaguanas Office:</strong> Corner John & Lange Streets Montrose, Chaguanas Tel: 665-6658<br>
+            <strong>Point Fortin Office:</strong> 69 Main Road, Point Fortin Tel: 648-5810; <strong>Port of Spain Office:</strong> Levels 5 & 6, Tower C, IWC, Wrightson Road, Port of Spain Tel: 625-8478<br>
+            <strong>San Fernando Office:</strong> 40-42 St James Street, San Fernando Tel: 652-1350, 652-3181<br>
+            <strong>Siparia Office:</strong> Siparia Administrative Complex, Corner Allis Street and SS Erin Road, Siparia Tel: 649-0982<br>
+            <strong>Tunapuna Office:</strong> Anva Plaza, 16-20 Eastern Main Road, Tunapuna Tel: 645-8261; <strong>Tobago Office:</strong> Lot #2 Glen Road, Scarborough Tobago Tel: 685-8187
+        </div>
     </div>
 
     <script>

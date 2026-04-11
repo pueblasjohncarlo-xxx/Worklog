@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="NYGHQ5Ef1xzMhUjAD4wrX93ornzt3lrBp2wUIevz">
+
+        <title>WorkLog</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500' fill='none'><path d='M150 150L200 350L250 250L300 350L350 150' stroke='%234F46E5' stroke-width='60' stroke-linecap='round' stroke-linejoin='round'/><path d='M350 150V350H450' stroke='%230D9488' stroke-width='60' stroke-linecap='round' stroke-linejoin='round'/><path d='M180 300L220 220L250 320L280 260L320 300' stroke='%23312E81' stroke-width='15' stroke-linecap='round' stroke-linejoin='round'/><path d='M320 120L360 160L440 80' stroke='%2384CC16' stroke-width='40' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+        <link rel="shortcut icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500' fill='none'><path d='M150 150L200 350L250 250L300 350L350 150' stroke='%234F46E5' stroke-width='60' stroke-linecap='round' stroke-linejoin='round'/><path d='M350 150V350H450' stroke='%230D9488' stroke-width='60' stroke-linecap='round' stroke-linejoin='round'/><path d='M180 300L220 220L250 320L280 260L320 300' stroke='%23312E81' stroke-width='15' stroke-linecap='round' stroke-linejoin='round'/><path d='M320 120L360 160L440 80' stroke='%2384CC16' stroke-width='40' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        <!-- Scripts -->
+                    <script src="https://cdn.tailwindcss.com"></script>
+            <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+                
+    </head>
+    <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-gray-100">
+        <div class="min-h-screen flex flex-col items-center justify-center px-4">
+            <div class="w-full max-w-md">
+                <div class="rounded-3xl bg-white border border-gray-100 shadow-2xl backdrop-blur-md px-8 py-10 space-y-8">
+        <div class="text-center space-y-2">
+            <div class="flex flex-col items-center gap-2 mx-auto">
+    <!-- SVG Icon -->
+    <svg class="h-24 w-auto drop-shadow-lg" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        
+        <linearGradient id="gradW" x1="120" y1="120" x2="320" y2="270" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#4F46E5"/>
+            <stop offset="100%" stop-color="#312E81"/>
+        </linearGradient>
+        
+        <linearGradient id="gradL" x1="320" y1="120" x2="420" y2="270" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#2DD4BF"/>
+            <stop offset="100%" stop-color="#0D9488"/>
+        </linearGradient>
+    </defs>
+
+    <!-- W Shape (Gradient Dark Purple) -->
+    <path d="M120 120 L170 270 L220 170 L270 270 L320 120" 
+          stroke="url(#gradW)" 
+          stroke-width="50" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    
+    <!-- L Shape (Gradient Teal) -->
+    <path d="M320 120 V270 H420" 
+          stroke="url(#gradL)" 
+          stroke-width="50" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+          
+    <!-- Pulse Line (White Outline for Cutout) -->
+    <path d="M220 220 L250 160 L280 220" 
+          stroke="white" 
+          stroke-width="25" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+          
+    <!-- Pulse Line (Purple) -->
+    <path d="M220 220 L250 160 L280 220" 
+          stroke="#312E81" 
+          stroke-width="15" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+
+    <!-- Green Checkmark -->
+    <path d="M280 220 L320 140 L360 100" 
+          stroke="#84CC16" 
+          stroke-width="30" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+</svg>
+    
+    <!-- Text -->
+    <div class="flex items-center text-4xl font-bold tracking-tight -mt-4">
+        <span class="text-[#312E81]">Work</span>
+        <span class="text-[#0D9488]">Log</span>
+    </div>
+</div>
+        </div>
+
+        
+        
+        <form method="POST" action="http://127.0.0.1:8000/login" class="space-y-5">
+            <input type="hidden" name="_token" value="NYGHQ5Ef1xzMhUjAD4wrX93ornzt3lrBp2wUIevz" autocomplete="off">
+            <div class="space-y-1">
+                <label for="email" class="block text-sm font-medium text-gray-700">
+                    Email
+                </label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value=""
+                    required
+                    autofocus
+                    autocomplete="username"
+                    class="mt-1 block w-full rounded-xl border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all px-3 py-2 text-base"
+                    placeholder="email@example.com"
+                >
+            </div>
+
+            <div class="space-y-1" x-data="{ show: false }">
+                <label for="password" class="block text-sm font-medium text-gray-700">
+                    Password
+                </label>
+                <div class="relative">
+                    <input
+                        id="password"
+                        name="password"
+                        :type="show ? 'text' : 'password'"
+                        required
+                        autocomplete="current-password"
+                        class="mt-1 block w-full rounded-xl border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all px-3 py-2 text-base pr-10"
+                        placeholder="••••••••"
+                    >
+                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none">
+                        <svg x-show="!show" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        <svg x-show="show" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.577-2.977M7.618 7.618A5.96 5.96 0 0112 6c4.478 0 8.268 2.943 9.542 7a10.05 10.05 0 01-1.577 2.977M8 11a4 4 0 014-4m4 4a4 4 0 01-4 4m0 0l-4 4m4-4l4 4" /></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input id="remember_me" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" name="remember">
+                    <label for="remember_me" class="ml-2 block text-sm font-medium text-gray-600">
+                        Remember me
+                    </label>
+                </div>
+
+                                    <a class="text-sm text-indigo-600 hover:text-indigo-800 font-semibold transition-colors" href="http://127.0.0.1:8000/forgot-password">
+                        Forgot password?
+                    </a>
+                            </div>
+
+            <div>
+                <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+                    Sign in
+                </button>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-sm text-gray-600">
+                    Don&#039;t have an account?
+                    <a href="http://127.0.0.1:8000/register" class="text-indigo-600 hover:text-indigo-800 font-bold transition-colors ml-1">
+                        Create Account
+                    </a>
+                </p>
+            </div>
+        </form>
+    </div>
+            </div>
+        </div>
+        <div id="global-loader" class="fixed inset-0 z-[100] bg-indigo-950/80 backdrop-blur-md flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+    <div class="relative flex items-center justify-center">
+        <!-- 3D Rotating Ring (Fluid Organic Shapes) -->
+        <svg class="animate-spin absolute h-64 w-64" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation-duration: 8s;">
+            <defs>
+                <!-- Fluid Gradients -->
+                <linearGradient id="gold-fluid" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stop-color="#FFD700" stop-opacity="0.9" />
+                    <stop offset="100%" stop-color="#FDB931" stop-opacity="0.4" />
+                </linearGradient>
+                <linearGradient id="black-fluid" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stop-color="#000000" stop-opacity="0.9" />
+                    <stop offset="100%" stop-color="#2d2d2d" stop-opacity="0.5" />
+                </linearGradient>
+                
+                <!-- Liquid Glow Filter -->
+                <filter id="liquid-glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur" />
+                    <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 15 -5" result="goo" />
+                    <feComposite in="SourceGraphic" in2="goo" operator="over" />
+                    <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="rgba(255, 215, 0, 0.3)" />
+                </filter>
+            </defs>
+            
+            <g transform="translate(100, 100)" filter="url(#liquid-glow)">
+                <!-- Ring of 12 Fluid Shapes (Teardrop/Citrus Segments) -->
+                <!-- Gold Shapes (Even positions) -->
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#gold-fluid)" transform="rotate(0)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#gold-fluid)" transform="rotate(60)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#gold-fluid)" transform="rotate(120)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#gold-fluid)" transform="rotate(180)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#gold-fluid)" transform="rotate(240)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#gold-fluid)" transform="rotate(300)" />
+
+                <!-- Black Shapes (Odd positions) -->
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#black-fluid)" stroke="url(#gold-fluid)" stroke-width="1" stroke-opacity="0.5" transform="rotate(30)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#black-fluid)" stroke="url(#gold-fluid)" stroke-width="1" stroke-opacity="0.5" transform="rotate(90)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#black-fluid)" stroke="url(#gold-fluid)" stroke-width="1" stroke-opacity="0.5" transform="rotate(150)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#black-fluid)" stroke="url(#gold-fluid)" stroke-width="1" stroke-opacity="0.5" transform="rotate(210)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#black-fluid)" stroke="url(#gold-fluid)" stroke-width="1" stroke-opacity="0.5" transform="rotate(270)" />
+                <path d="M0,-55 C9,-60 14,-80 0,-95 C-14,-80 -9,-60 0,-55" fill="url(#black-fluid)" stroke="url(#gold-fluid)" stroke-width="1" stroke-opacity="0.5" transform="rotate(330)" />
+            </g>
+        </svg>
+        
+        <!-- Stationary Logo in White Container with Glow -->
+        <div class="z-10 bg-white rounded-full p-8 shadow-[0_0_50px_rgba(255,255,255,0.8)] relative animate-pulse-slow">
+             <svg class="h-24 w-24 drop-shadow-md" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        
+        <linearGradient id="gradW" x1="120" y1="120" x2="320" y2="270" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#4F46E5"/>
+            <stop offset="100%" stop-color="#312E81"/>
+        </linearGradient>
+        
+        <linearGradient id="gradL" x1="320" y1="120" x2="420" y2="270" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#2DD4BF"/>
+            <stop offset="100%" stop-color="#0D9488"/>
+        </linearGradient>
+    </defs>
+
+    <!-- W Shape (Gradient Dark Purple) -->
+    <path d="M120 120 L170 270 L220 170 L270 270 L320 120" 
+          stroke="url(#gradW)" 
+          stroke-width="50" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    
+    <!-- L Shape (Gradient Teal) -->
+    <path d="M320 120 V270 H420" 
+          stroke="url(#gradL)" 
+          stroke-width="50" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+          
+    <!-- Pulse Line (White Outline for Cutout) -->
+    <path d="M220 220 L250 160 L280 220" 
+          stroke="white" 
+          stroke-width="25" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+          
+    <!-- Pulse Line (Purple) -->
+    <path d="M220 220 L250 160 L280 220" 
+          stroke="#312E81" 
+          stroke-width="15" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+
+    <!-- Green Checkmark -->
+    <path d="M280 220 L320 140 L360 100" 
+          stroke="#84CC16" 
+          stroke-width="30" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+</svg>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animate-pulse-slow {
+        animation: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 30px rgba(255,255,255,0.6); }
+        50% { box-shadow: 0 0 60px rgba(255,255,255,0.9); }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loader = document.getElementById('global-loader');
+        
+        // Function to show loader
+        window.showLoader = function() {
+            loader.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            loader.classList.add('opacity-100', 'pointer-events-auto');
+            
+            // Auto-hide after 2.5 seconds (2-3s range)
+            setTimeout(() => {
+                hideLoader();
+            }, 2500);
+        };
+
+        // Function to hide loader
+        window.hideLoader = function() {
+            loader.classList.remove('opacity-100', 'pointer-events-auto');
+            loader.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                loader.classList.add('hidden');
+            }, 500); // 500ms fade out transition
+        };
+
+        // Initial Load - Show loader immediately then hide
+        showLoader();
+
+        // Show loader on link clicks
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (link && link.href && !link.href.startsWith('#') && !link.target && link.href !== window.location.href) {
+                // Check if it's an internal link
+                if (link.hostname === window.location.hostname) {
+                    showLoader();
+                }
+            }
+        });
+
+        // Show loader on form submissions
+        document.addEventListener('submit', function(e) {
+            if (!e.target.hasAttribute('data-no-loader')) {
+                showLoader();
+            }
+        });
+
+        // Hide loader on back/forward cache restore (pageshow)
+        window.addEventListener('pageshow', function(event) {
+            hideLoader();
+        });
+    });
+</script>
+    </body>
+</html>

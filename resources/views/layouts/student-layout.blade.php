@@ -91,37 +91,7 @@
             });
         </script>
     </body>
-                            @include('layouts.partials.language-switcher-compact')
-                            <div class="hidden sm:flex flex-col items-end">
-                                <span class="text-[10px] text-indigo-300 uppercase font-black tracking-[0.2em]">Student</span>
-                                <span class="text-sm sm:text-base font-black text-white">{{ Auth::user()->name }}</span>
-                            </div>
-                            <div class="relative">
-                                @if (Auth::user()->profile_photo_path)
-                                    <img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-500 shadow-md">
-                                @else
-                                    <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm border-2 border-indigo-400 shadow-md">
-                                        {{ substr(Auth::user()->name, 0, 1) }}
-                                    </div>
-                                @endif
-                                <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-black"></div>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                <!-- Page Content -->
-                <main class="p-4 sm:p-6 flex-1">
-                    {{ $slot }}
-                </main>
-            </div>
-        </div>
-        <script>
-            // Handle sidebar toggle for mobile
-            const studentSidebar = document.querySelector('[x-data*="mobileOpen"]');
-            document.addEventListener('toggle-sidebar', () => {
-                if (studentSidebar && studentSidebar.__x) {
-                    studentSidebar.__x.unobservedData.mobileOpen = !studentSidebar.__x.unobservedData.mobileOpen;
+</html>
                 }
             });
         </script>

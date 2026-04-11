@@ -238,7 +238,7 @@ class AdminUserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::where('is_approved', false)
+        $users = User::where('status', 'pending')
             ->where('has_requested_account', true)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -252,6 +252,14 @@ class AdminUserController extends Controller
     {
         $this->authorize('bulkAction', User::class);
 
+        Log::info('Admin bulk user action requested', [
+            'admin_id' => Auth::id(),
+            'action' => $request->input('action'),
+            'user_ids' => $request->input('user_ids', []),
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+        ]);
+
         $request->validate([
             'user_ids' => 'required|array',
             'user_ids.*' => 'exists:users,id',
@@ -264,7 +272,12 @@ class AdminUserController extends Controller
         try {
             if ($request->action === 'approve') {
                 foreach ($users as $user) {
-                    $user->update(['is_approved' => true]);
+                    $user->update([
+                        'is_approved' => true,
+                        'status' => 'approved',
+                        'approved_at' => now(),
+                        'approved_by' => $adminUser->id,
+                    ]);
 
                     // Log approval action
                     $this->logAuditAction('user_approved', $user, [
@@ -274,22 +287,33 @@ class AdminUserController extends Controller
                 }
                 $message = count($users) . ' users approved successfully.';
             } elseif ($request->action === 'reject') {
-                foreach ($users as $user) {
-                    $userEmail = $user->email;
-                    $userId = $user->id;
+                Log::info('Processing bulk reject action', [
+                    'admin_id' => $adminUser->id,
+                    'count' => $users->count(),
+                ]);
 
-                    $user->delete();
+                foreach ($users as $user) {
+                    $user->update([
+                        'is_approved' => false,
+                        'status' => 'rejected',
+                        'has_requested_account' => false,
+                        'rejected_at' => now(),
+                    ]);
 
                     // Log rejection action
-                    $this->logAuditAction('user_rejected', null, [
-                        'user_id' => $userId,
-                        'email' => $userEmail,
+                    $this->logAuditAction('user_rejected', $user, [
                         'rejected_by_admin' => $adminUser->name,
                         'ip_address' => $request->ip(),
                     ]);
                 }
-                $message = count($users) . ' users rejected and removed.';
+                $message = count($users) . ' users rejected.';
             }
+
+            Log::info('Admin bulk user action completed', [
+                'admin_id' => $adminUser->id,
+                'action' => $request->action,
+                'processed_count' => $users->count(),
+            ]);
 
             return redirect()->back()->with('status', $message);
         } catch (\Exception $e) {
@@ -311,7 +335,12 @@ class AdminUserController extends Controller
         $adminUser = Auth::user();
 
         try {
-            $user->update(['is_approved' => true]);
+            $user->update([
+                'is_approved' => true,
+                'status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => $adminUser->id
+            ]);
 
             // Log approval action
             $this->logAuditAction('user_approved', $user, [
@@ -338,21 +367,35 @@ class AdminUserController extends Controller
 
         $adminUser = Auth::user();
 
-        try {
-            $userEmail = $user->email;
-            $userId = $user->id;
+        Log::info('Admin reject requested', [
+            'admin_id' => $adminUser->id,
+            'target_user_id' => $user->id,
+            'current_status' => $user->status,
+            'method' => request()->method(),
+            'url' => request()->fullUrl(),
+        ]);
 
-            $user->delete();
+        try {
+            $user->update([
+                'is_approved' => false,
+                'status' => 'rejected',
+                'has_requested_account' => false,
+                'rejected_at' => now(),
+            ]);
+
+            Log::info('Admin reject completed', [
+                'admin_id' => $adminUser->id,
+                'target_user_id' => $user->id,
+                'new_status' => $user->fresh()->status,
+            ]);
 
             // Log rejection action
-            $this->logAuditAction('user_rejected', null, [
-                'user_id' => $userId,
-                'email' => $userEmail,
+            $this->logAuditAction('user_rejected', $user, [
                 'rejected_by_admin' => $adminUser->name,
                 'ip_address' => request()->ip(),
             ]);
 
-            return redirect()->back()->with('status', 'User rejected and removed.');
+            return redirect()->back()->with('status', 'User rejected.');
         } catch (\Exception $e) {
             Log::error('Error rejecting user', [
                 'admin_id' => $adminUser->id,

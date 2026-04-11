@@ -32,7 +32,29 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        // Block only if the student explicitly requested an account and is not yet approved
+        // Check for approval status
+        if ($user->status === 'pending') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'Your account is pending admin approval.',
+            ]);
+        }
+
+        if ($user->status === 'rejected') {
+            $reason = $user->rejection_reason ? ": " . $user->rejection_reason : ".";
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'Your account has been rejected' . $reason,
+            ]);
+        }
+
+        // Legacy check for is_approved for students
         if ($user->role === 'student' && ! $user->is_approved && $user->has_requested_account) {
             Auth::guard('web')->logout();
             $request->session()->invalidate();

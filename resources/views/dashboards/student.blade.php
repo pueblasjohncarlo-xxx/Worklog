@@ -1,4 +1,5 @@
 <x-student-layout>
+    <!-- DEBUG: resources/views/dashboards/student.blade.php (StudentController@index) -->
     <x-slot name="header">
         Student Dashboard
     </x-slot>
@@ -67,33 +68,33 @@
                             elseif($day['status'] === 'draft') $statusClass = 'bg-yellow-500 text-gray-900';
                             if(!$day['is_current_month']) $statusClass = 'bg-gray-900 text-gray-500 opacity-40';
                         @endphp
-                        <div class="h-24 p-1 border border-gray-700 {{ $statusClass }}" title="Status: {{ ucfirst($day['status'] ?? 'N/A') }}\nIn: {{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}\nOut: {{ $day['time_out'] ? \Carbon\Carbon::parse($day['time_out'])->format('h:i A') : '-' }}\nHours: {{ $day['hours'] !== null ? number_format($day['hours'], 2).'h' : '-' }}">
+                        <div class="h-16 p-1 border border-gray-700 {{ $statusClass }}" title="Status: {{ ucfirst($day['status'] ?? 'N/A') }}\nIn: {{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}\nOut: {{ $day['time_out'] ? \Carbon\Carbon::parse($day['time_out'])->format('h:i A') : '-' }}\nHours: {{ $day['hours'] !== null ? number_format($day['hours'], 2).'h' : '-' }}">
                             <div class="text-xs font-black">{{ $day['date']->day }}</div>
                             @if($day['time_in'] || $day['time_out'])
-                                <div class="text-[9px] uppercase">{{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }} - {{ $day['time_out'] ? \Carbon\Carbon::parse($day['time_out'])->format('h:i A') : '-' }}</div>
+                                <div class="text-[8px] uppercase">{{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}</div>
                             @endif
                             @if($day['hours'] !== null)
-                                <div class="text-[10px] uppercase font-bold">{{ number_format($day['hours'], 2) }}h</div>
+                                <div class="text-[9px] uppercase font-bold">{{ number_format($day['hours'], 2) }}h</div>
                             @endif
                         </div>
                     @endforeach
                 </div>
-                <div class="mt-3 text-xs text-gray-400">
-                    <span class="inline-flex items-center mr-2"><span class="w-2 h-2 bg-emerald-500 rounded-full mr-1"></span>Approved</span>
-                    <span class="inline-flex items-center mr-2"><span class="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>Submitted</span>
-                    <span class="inline-flex items-center mr-2"><span class="w-2 h-2 bg-rose-500 rounded-full mr-1"></span>Rejected</span>
-                    <span class="inline-flex items-center mr-2"><span class="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span>Draft</span>
-                </div>
-                <div class="mt-2 text-xs text-gray-200">
-                    <div class="grid grid-cols-2 gap-2">
-                        <span class="inline-flex items-center gap-1"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span>Approved:
-                            {{ number_format($monthlyApprovedHours ?? 0, 2) }}h</span>
-                        <span class="inline-flex items-center gap-1"><span class="w-2 h-2 bg-blue-500 rounded-full"></span>Pending:
-                            {{ number_format($monthlyPendingHours ?? 0, 2) }}h</span>
-                        <span class="inline-flex items-center gap-1"><span class="w-2 h-2 bg-rose-500 rounded-full"></span>Rejected:
-                            {{ number_format($monthlyRejectedHours ?? 0, 2) }}h</span>
-                        <span class="inline-flex items-center gap-1"><span class="w-2 h-2 bg-slate-400 rounded-full"></span>Remaining:
-                            {{ number_format($monthlyRemainingHours ?? 0, 2) }}h</span>
+                <div class="mt-4 grid grid-cols-4 gap-3 text-xs">
+                    <div class="bg-emerald-500/20 p-2 rounded border border-emerald-500/30">
+                        <div class="text-emerald-300 font-bold">{{ number_format($monthlyApprovedHours ?? 0, 2) }}h</div>
+                        <div class="text-gray-400 text-[10px]">Approved</div>
+                    </div>
+                    <div class="bg-blue-500/20 p-2 rounded border border-blue-500/30">
+                        <div class="text-blue-300 font-bold">{{ number_format($monthlyPendingHours ?? 0, 2) }}h</div>
+                        <div class="text-gray-400 text-[10px]">Pending</div>
+                    </div>
+                    <div class="bg-rose-500/20 p-2 rounded border border-rose-500/30">
+                        <div class="text-rose-300 font-bold">{{ number_format($monthlyRejectedHours ?? 0, 2) }}h</div>
+                        <div class="text-gray-400 text-[10px]">Rejected</div>
+                    </div>
+                    <div class="bg-slate-500/20 p-2 rounded border border-slate-500/30">
+                        <div class="text-slate-300 font-bold">{{ number_format($monthlyRemainingHours ?? 0, 2) }}h</div>
+                        <div class="text-gray-400 text-[10px]">Remaining</div>
                     </div>
                 </div>
             </div>
@@ -149,14 +150,6 @@
                                             </button>
                                         </form>
                                     </div>
-                                </div>
-                            @endif
-
-                            @if(isset($needsDailyReportReminder) && $needsDailyReportReminder)
-                                <div class="w-full bg-blue-100 dark:bg-blue-900/30 border border-blue-400 text-blue-700 dark:text-blue-300 px-4 py-3 rounded-lg relative" role="alert">
-                                    <strong class="font-bold">Reminder:</strong>
-                                    <span class="block sm:inline">You have an approved attended session for today. Please submit your Daily Accomplishment Report.</span>
-                                    <a href="{{ route('student.worklogs.create', ['type' => 'daily', 'date' => now()->format('Y-m-d')]) }}" class="ml-4 inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded bg-blue-200 dark:bg-blue-700 text-blue-800 dark:text-blue-100 hover:bg-blue-300">Add Report</a>
                                 </div>
                             @endif
 
@@ -297,107 +290,6 @@
 
         <!-- Active Tasks Section (REMOVED - Now on dedicated page) -->
         {{-- <div class="glass-panel overflow-hidden" id="my-tasks"> ... </div> --}}
-
-        <!-- Hours Log Summary Section -->
-        <div class="glass-panel overflow-hidden" id="hours-log">
-            <div class="bg-indigo-900/50 px-6 py-3 flex justify-between items-center backdrop-blur-sm border-b border-indigo-500/30">
-                <h3 class="text-lg font-bold text-white drop-shadow-md">Hours Log Summary</h3>
-            </div>
-            <div class="p-6">
-                @if ($assignment)
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="p-6 bg-indigo-500/10 rounded-2xl border border-indigo-500/30 relative overflow-hidden group hover:bg-indigo-500/20 transition-colors">
-                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/20 rounded-full blur-2xl group-hover:bg-indigo-500/30 transition-colors"></div>
-                            <div class="flex justify-between items-center mb-1 relative z-10">
-                                <p class="text-indigo-300 font-bold text-sm uppercase tracking-wider">Total Hours Rendered</p>
-                                <span class="text-xs font-bold text-indigo-400 uppercase tracking-widest">Progress: {{ ($assignment->required_hours ?? 1600) > 0 ? round(($workLogs->where('status', 'approved')->sum('hours') / ($assignment->required_hours ?? 1600)) * 100) : 0 }}%</span>
-                            </div>
-                            <p class="text-4xl font-black text-white relative z-10 drop-shadow-lg">{{ number_format($workLogs->where('status', 'approved')->sum('hours'), 2) }} <span class="text-lg font-medium text-indigo-400">/ {{ $assignment->required_hours ?? 1600 }}</span></p>
-                        </div>
-                        <div class="p-6 bg-emerald-500/10 rounded-2xl border border-emerald-500/30 relative overflow-hidden group hover:bg-emerald-500/20 transition-colors">
-                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/30 transition-colors"></div>
-                            <p class="text-emerald-300 font-bold text-sm uppercase tracking-wider mb-1 relative z-10">Remaining Hours</p>
-                            <p class="text-4xl font-black text-white relative z-10 drop-shadow-lg">{{ number_format(max(0, ($assignment->required_hours ?? 1600) - $workLogs->where('status', 'approved')->sum('hours')), 2) }}</p>
-                        </div>
-                    </div>
-                @else
-                    <p class="text-gray-400 italic text-center">No assignment data available.</p>
-                @endif
-            </div>
-        </div>
-
-        <!-- Detailed Work Logs Section -->
-        <div class="glass-panel overflow-hidden" id="work-logs">
-            <div class="bg-indigo-600/80 px-6 py-3 flex justify-between items-center backdrop-blur-sm border-b border-indigo-500/30">
-                <h3 class="text-lg font-bold text-white drop-shadow-md">Your Daily Journal</h3>
-                <a href="{{ route('student.worklogs.create') }}" class="text-xs bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full font-bold transition-colors border border-white/20">
-                    + Manual Log
-                </a>
-            </div>
-            <div class="p-6">
-                @if ($assignment)
-                    @if ($workLogs->isEmpty())
-                        <p class="text-gray-500 italic">Walang nahanap nga work logs.</p>
-                    @else
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full text-left text-sm divide-y divide-white/10">
-                                <thead>
-                                    <tr>
-                                        <th class="px-4 py-3 font-bold text-gray-400 uppercase tracking-wider">Date</th>
-                                        <th class="px-4 py-3 font-bold text-gray-400 uppercase tracking-wider">Hours</th>
-                                        <th class="px-4 py-3 font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                                        <th class="px-4 py-3 font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-white/5">
-                                    @foreach ($workLogs as $log)
-                                        <tr class="hover:bg-white/5 transition-colors">
-                                            <td class="px-4 py-4 font-medium text-white">
-                                                {{ $log->work_date->format('M d, Y') }}
-                                            </td>
-                                            <td class="px-4 py-4 font-mono text-gray-300">
-                                                {{ number_format($log->hours, 2) }} hrs
-                                            </td>
-                                            <td class="px-4 py-4">
-                                                <span class="px-2 py-1 rounded-full text-xs font-bold
-                                                    {{ $log->status === 'approved' ? 'bg-green-500/20 text-green-300 border border-green-500/30' : '' }}
-                                                    {{ $log->status === 'rejected' ? 'bg-red-500/20 text-red-300 border border-red-500/30' : '' }}
-                                                    {{ $log->status === 'submitted' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : '' }}
-                                                    {{ $log->status === 'draft' ? 'bg-white/10 text-gray-300 border border-white/20' : '' }}
-                                                ">
-                                                    {{ ucfirst($log->status) }}
-                                                </span>
-                                            </td>
-                                            <td class="px-4 py-4 text-right space-x-2">
-                                                <a href="{{ route('student.worklogs.edit', $log) }}" class="text-indigo-400 hover:text-indigo-300 font-bold">Edit</a>
-                                                @if ($log->status === 'draft')
-                                                    <form method="POST" action="{{ route('student.worklogs.submit', $log) }}" class="inline-flex items-center gap-1 submit-worklog-form">
-                                                        @csrf
-                                                        <button type="button" class="text-emerald-400 hover:text-emerald-300 font-bold"
-                                                                data-action="{{ route('student.worklogs.submit', $log) }}"
-                                                                data-preview="{{ route('student.worklogs.print', $log) }}"
-                                                                onclick="openSubmitConfirmFromButton(this)">
-                                                            Submit
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
-                @else
-                    <div class="text-center py-12">
-                        <svg class="h-16 w-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <p class="text-gray-400 font-medium">Wait for the coordinator to assign you to a company and supervisor.</p>
-                    </div>
-                @endif
-            </div>
-        </div>
     </div>
 
     <div id="submitConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4">

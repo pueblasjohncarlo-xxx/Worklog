@@ -24,16 +24,30 @@
         
         <!-- Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <style>
+            body.admin-shell {
+                min-height: auto !important;
+            }
+
+            body.admin-shell #admin-main-content {
+                min-height: 0 !important;
+                margin-top: 0 !important;
+                padding-top: 0.75rem !important;
+                overflow: visible !important;
+                align-self: flex-start !important;
+            }
+        </style>
     </head>
-    <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed shimmer-bg">
-        <div x-data="{ sidebarOpen: false }" class="min-h-screen flex flex-col md:flex-row">
+    <body class="admin-shell font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 h-auto bg-fixed shimmer-bg overflow-x-hidden">
+        <div x-data="{ sidebarOpen: false }" class="flex flex-row items-start">
             <!-- Sidebar -->
             @include('layouts.admin-sidebar')
 
             <!-- Main Content -->
-            <div class="flex-1 w-full md:ml-0 min-h-screen flex flex-col">
+            <div class="flex-1 flex flex-col items-start justify-start md:pl-64">
                 <!-- Top Header -->
-                <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg sticky top-0 z-30 w-full">
+                <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg sticky top-0 z-30 w-full flex-shrink-0">
                     <div class="w-full px-3 sm:px-4 lg:px-6 py-3 sm:py-4 flex justify-between items-center gap-2 sm:gap-4">
                         <!-- Mobile Menu Button -->
                         <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-gray-400 hover:text-white p-1.5 sm:p-2 rounded-lg hover:bg-gray-900 flex-shrink-0">
@@ -42,9 +56,15 @@
                             </svg>
                         </button>
                         
-                        <h2 class="font-semibold text-lg sm:text-xl text-white leading-tight drop-shadow-md truncate">
-                            {{ $header ?? 'Admin Dashboard' }}
-                        </h2>
+                        @if (isset($header))
+                            <div class="flex-1 min-w-0">
+                                {{ $header }}
+                            </div>
+                        @else
+                            <h2 class="font-semibold text-lg sm:text-xl text-white leading-tight drop-shadow-md truncate">
+                                Admin Dashboard
+                            </h2>
+                        @endif
                         
                         <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                             <x-notification-bell />
@@ -68,7 +88,7 @@
                 </header>
 
                 <!-- Page Content -->
-                <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto">
+                <main id="admin-main-content" class="w-full self-start min-h-0 p-3 sm:p-4 lg:p-6 overflow-visible">
                     <div class="max-w-7xl mx-auto w-full">
                         {{ $slot }}
                     </div>
@@ -76,6 +96,31 @@
             </div>
         </div>
         <script>
+            // Always open admin pages at the top; prevents retained scroll position.
+            const resetAdminScrollPosition = () => {
+                if ('scrollRestoration' in history) {
+                    history.scrollRestoration = 'manual';
+                }
+
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+
+                const main = document.getElementById('admin-main-content');
+                if (main) {
+                    main.scrollTop = 0;
+                }
+            };
+
+            window.addEventListener('pageshow', resetAdminScrollPosition);
+            document.addEventListener('DOMContentLoaded', resetAdminScrollPosition);
+            window.addEventListener('load', resetAdminScrollPosition);
+
+            // Run one more pass after first paint to beat browser restore timing.
+            requestAnimationFrame(() => {
+                resetAdminScrollPosition();
+            });
+
             // Handle sidebar toggle for mobile
             document.addEventListener('alpine:init', () => {
                 // Wait for Alpine to initialize
@@ -104,11 +149,6 @@
                         clearInterval(observeToggle);
                     }
                 }, 100);
-            });
-        </script>
-    </body>
-                    adminSidebar.__x.unobservedData.mobileOpen = !adminSidebar.__x.unobservedData.mobileOpen;
-                }
             });
         </script>
     </body>

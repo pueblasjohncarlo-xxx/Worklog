@@ -17,6 +17,10 @@ class TaskController extends Controller
         $user = Auth::user();
         $sortOrder = $request->query('sort', 'desc');
 
+        // DEBUG: Log execution
+        \Log::info('========== STUDENT TASKS CALLED ==========');
+        \Log::info('Route: student.tasks.index | Controller: Student\TaskController@index | User: ' . $user->id . ' (' . $user->name . ')');
+
         // Get student's assignment with relationships eager loaded
         $assignment = Assignment::with(['student', 'supervisor', 'company'])
             ->where('student_id', $user->id)
@@ -102,6 +106,21 @@ class TaskController extends Controller
         ]);
 
         return redirect()->back()->with('status', 'Task unsubmitted successfully.');
+    }
+
+    public function updateStatus(Request $request, Task $task): RedirectResponse
+    {
+        $this->authorizeTask($task);
+
+        $request->validate([
+            'status' => 'required|in:pending,in_progress,completed',
+        ]);
+
+        $task->update([
+            'status' => $request->status,
+        ]);
+
+        return redirect()->back()->with('status', 'Task status updated successfully.');
     }
 
     private function authorizeTask(Task $task): void

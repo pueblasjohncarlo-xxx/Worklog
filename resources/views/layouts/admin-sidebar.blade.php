@@ -1,5 +1,7 @@
-<div x-data="{ mobileOpen: false }" @window:resize="mobileOpen = window.innerWidth < 768 ? false : mobileOpen" class="fixed top-0 left-0 h-screen w-64 bg-black text-gray-100 flex flex-col z-40 shadow-xl overflow-y-auto glow-border-right hidden md:flex transition-transform duration-300"
-    :class="{'-translate-x-full': !mobileOpen && window.innerWidth < 768}">
+<div x-data="{ mobileOpen: false }" 
+    @window:resize="mobileOpen = window.innerWidth < 768 ? false : mobileOpen" 
+    class="fixed top-0 left-0 h-screen w-64 bg-black text-gray-100 flex flex-col z-40 shadow-xl overflow-y-auto glow-border-right transition-all duration-300"
+    :class="{'-translate-x-full md:translate-x-0': !mobileOpen && window.innerWidth < 768, 'translate-x-0': mobileOpen || window.innerWidth >= 768}">
     <!-- Header/Logo -->
     <div class="p-4 sm:p-6 flex items-center justify-between border-b border-indigo-500/30 bg-black/20 flex-shrink-0">
         <x-wl-sidebar-logo />
@@ -46,7 +48,7 @@
             </div>
             @php 
                 $pendingCount = \App\Models\User::where('role', 'student')
-                    ->where('is_approved', false)
+                    ->where('status', 'pending')
                     ->where('has_requested_account', true)
                     ->count(); 
             @endphp
@@ -63,6 +65,16 @@
             </svg>
             <span class="font-medium hidden sm:inline">Company Management</span>
             <span class="font-medium sm:hidden text-xs">Companies</span>
+        </a>
+
+        <!-- Leave Requests -->
+        <a href="{{ route('admin.leaves.index') }}"
+           class="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base {{ request()->routeIs('admin.leaves.*') ? 'bg-indigo-900 text-white' : 'hover:bg-gray-900 text-gray-300' }}">
+            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span class="font-medium hidden sm:inline">Leave Requests</span>
+            <span class="font-medium sm:hidden text-xs">Leaves</span>
         </a>
 
         <!-- Messages -->

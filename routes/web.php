@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminCompanyController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminLeaveController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Coordinator\AnnouncementController;
 use App\Http\Controllers\Coordinator\CoordinatorEvaluationController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\JournalController;
 use App\Http\Controllers\Student\TaskController as StudentTaskController;
+use App\Http\Controllers\Student\LeaveController as StudentLeaveController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\Supervisor\SupervisorReportController;
 use App\Http\Controllers\Supervisor\SupervisorTaskController;
@@ -118,7 +120,7 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
         return redirect()->route('student.reports.index');
     });
     Route::get('/student/tasks', [StudentTaskController::class, 'index'])->name('student.tasks.index');
-    Route::patch('/student/tasks/{task}/status', [StudentController::class, 'updateTaskStatus'])->name('student.tasks.update-status');
+    Route::patch('/student/tasks/{task}/status', [StudentTaskController::class, 'updateStatus'])->name('student.tasks.update-status');
     Route::post('/student/tasks/{task}/submit', [StudentTaskController::class, 'submit'])->name('student.tasks.submit');
     Route::post('/student/tasks/{task}/unsubmit', [StudentTaskController::class, 'unsubmit'])->name('student.tasks.unsubmit');
     Route::get('/student/journal', [JournalController::class, 'index'])->name('student.journal.index');
@@ -127,8 +129,12 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
     Route::post('/student/worklogs/{workLog}/submit', [WorkLogController::class, 'submit'])->name('student.worklogs.submit');
     Route::patch('/student/worklogs/{workLog}/manual-clock-out', [StudentController::class, 'manualClockOut'])->name('student.worklogs.manual-clock-out');
 
-    Route::get('/student/leaves', [StudentController::class, 'leavesIndex'])->name('student.leaves.index');
-    Route::post('/student/leaves', [StudentController::class, 'leavesStore'])->name('student.leaves.store');
+    Route::get('/student/leaves', [StudentLeaveController::class, 'index'])->name('student.leaves.index');
+    Route::post('/student/leaves', [StudentLeaveController::class, 'store'])->name('student.leaves.store');
+    Route::get('/student/leaves/{leave}/edit', [StudentLeaveController::class, 'edit'])->name('student.leaves.edit');
+    Route::put('/student/leaves/{leave}', [StudentLeaveController::class, 'update'])->name('student.leaves.update');
+    Route::delete('/student/leaves/{leave}', [StudentLeaveController::class, 'destroy'])->name('student.leaves.destroy');
+    Route::post('/student/leaves/{leave}/cancel', [StudentLeaveController::class, 'cancel'])->name('student.leaves.cancel');
     Route::get('/student/leaves/{leave}/print', [LeaveController::class, 'print'])->name('student.leaves.print');
 
     // Student Announcements
@@ -263,6 +269,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/admin/companies', [AdminCompanyController::class, 'index'])->name('admin.companies.index');
     Route::post('/admin/companies', [AdminCompanyController::class, 'store'])->name('admin.companies.store');
     Route::delete('/admin/companies/{company}', [AdminCompanyController::class, 'destroy'])->name('admin.companies.destroy');
+
+    // Leave Management
+    Route::get('/admin/leaves', [AdminLeaveController::class, 'index'])->name('admin.leaves.index');
+    Route::post('/admin/leaves/{leave}/approve', [AdminLeaveController::class, 'approve'])->name('admin.leaves.approve');
+    Route::post('/admin/leaves/{leave}/reject', [AdminLeaveController::class, 'reject'])->name('admin.leaves.reject');
 
     // Export student login list (name, email, status, default password hint)
     Route::get('/admin/users/export/students', [AdminUserController::class, 'exportStudents'])->name('admin.users.export.students');
