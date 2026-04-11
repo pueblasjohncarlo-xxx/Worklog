@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Coordinator;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Student;
 use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,8 +18,8 @@ class DashboardController extends Controller
         $coordinator = Auth::user();
 
         // Get statistics
-        $totalStudents = Student::count();
-        $activeOJTs = Student::where('status', 'active')->count();
+        $totalStudents = User::where('role', User::ROLE_STUDENT)->count();
+        $activeOJTs = User::where('role', User::ROLE_STUDENT)->where('status', 'active')->count();
         $totalCompanies = Company::count();
         
         // Get pending reviews count
