@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+﻿<x-student-layout>
     <x-slot name="header">
         @if(request('view') === 'reports')
             Reports & Performance
@@ -251,4 +251,4 @@
             @endif
         @endif
     </div>
-</x-app-layout>
+</x-student-layout>

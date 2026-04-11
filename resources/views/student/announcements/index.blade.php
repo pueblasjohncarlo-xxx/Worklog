@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-student-layout>
     <x-slot name="header">
         Announcements & Updates
     </x-slot>
@@ -80,4 +80,4 @@
         </div>
         @endif
     </div>
-</x-app-layout>
+</x-student-layout>

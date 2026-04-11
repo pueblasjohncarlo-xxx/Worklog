@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-student-layout>
     <x-slot name="header">
         <h2 class="text-white">Leave Request</h2>
     </x-slot>
@@ -279,5 +279,5 @@
             }
         });
     </script>
-</x-app-layout>
+</x-student-layout>
 

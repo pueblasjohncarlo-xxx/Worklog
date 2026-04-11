@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-student-layout>
     <x-slot name="header">
         <h2 class="text-white">Edit Leave Request</h2>
     </x-slot>
@@ -55,4 +55,4 @@
             </form>
         </div>
     </div>
-</x-app-layout>
+</x-student-layout>
