@@ -78,7 +78,6 @@
                 </button>
             </div>
 
-            @if (Route::has('register'))
             <div class="text-center mt-4">
                 <p class="text-sm text-gray-600">
                     {{ __("Don't have an account?") }}
@@ -87,7 +86,6 @@
                     </a>
                 </p>
             </div>
-            @endif
         </form>
     </div>
 </x-guest-layout>

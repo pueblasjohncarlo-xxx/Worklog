@@ -45,14 +45,17 @@ class CoordinatorEvaluationController extends Controller
         foreach ($supervisors as $supervisor) {
             $companies = $supervisor->supervisorAssignments->pluck('company')->unique('id');
             if ($companies->isEmpty()) {
-                $groupedSupervisors['No Company'][] = $supervisor;
+                if (!$groupedSupervisors->has('No Company')) {
+                    $groupedSupervisors->put('No Company', collect());
+                }
+                $groupedSupervisors->get('No Company')->push($supervisor);
             } else {
                 foreach ($companies as $company) {
                     $groupName = $company ? $company->name : 'No Company';
-                    if (! isset($groupedSupervisors[$groupName])) {
-                        $groupedSupervisors[$groupName] = collect();
+                    if (!$groupedSupervisors->has($groupName)) {
+                        $groupedSupervisors->put($groupName, collect());
                     }
-                    $groupedSupervisors[$groupName]->push($supervisor);
+                    $groupedSupervisors->get($groupName)->push($supervisor);
                 }
             }
         }
