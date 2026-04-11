@@ -26,28 +26,71 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed shimmer-bg">
-        <div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
+        <div x-data="{ sidebarOpen: false }" class="min-h-screen flex flex-col md:flex-row">
             <!-- Sidebar -->
             @include('layouts.student-sidebar')
 
             <!-- Main Content -->
-            <div class="flex-1 ml-0 md:ml-64 min-h-screen flex flex-col">
+            <div class="flex-1 w-full md:ml-0 min-h-screen flex flex-col">
                 <!-- Top Header -->
-                <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg sticky top-0 z-30">
-                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center gap-4">
+                <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg sticky top-0 z-30 w-full">
+                    <div class="w-full px-3 sm:px-4 lg:px-6 py-3 sm:py-4 flex justify-between items-center gap-2 sm:gap-4">
                         <!-- Mobile Menu Button -->
-                        <button @click="$dispatch('toggle-sidebar')" class="md:hidden text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-900 flex-shrink-0">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-gray-400 hover:text-white p-1.5 sm:p-2 rounded-lg hover:bg-gray-900 flex-shrink-0">
+                            <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
                         
-                        <h2 class="font-black text-xl sm:text-2xl text-white leading-tight drop-shadow-md tracking-tight flex-1 sm:flex-none">
+                        <h2 class="font-black text-lg sm:text-xl text-white leading-tight drop-shadow-md tracking-tight flex-1 truncate">
                             {{ $header ?? 'Student Dashboard' }}
                         </h2>
                         
-                        <div class="flex items-center gap-2 sm:gap-4">
+                        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                             <x-notification-bell />
+                            @include('layouts.partials.language-switcher-compact')
+                            <div class="hidden sm:flex flex-col items-end">
+                                <span class="text-xs text-indigo-300 uppercase font-bold tracking-wider">Student</span>
+                                <span class="text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
+                            </div>
+                            <div class="relative flex-shrink-0">
+                                @if (Auth::user()->profile_photo_path)
+                                    <img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" class="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover border-2 border-indigo-500 shadow-md">
+                                @else
+                                    <div class="h-8 sm:h-10 w-8 sm:w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs sm:text-sm border-2 border-indigo-400 shadow-md">
+                                        {{ substr(Auth::user()->name, 0, 1) }}
+                                    </div>
+                                @endif
+                                <div class="absolute bottom-0 right-0 h-2 sm:h-3 w-2 sm:w-3 rounded-full bg-green-500 border-2 border-black"></div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Page Content -->
+                <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto">
+                    <div class="max-w-7xl mx-auto w-full">
+                        {{ $slot }}
+                    </div>
+                </main>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const observeToggle = setInterval(() => {
+                    const mainDiv = document.querySelector('[x-data*="sidebarOpen"]');
+                    const sidebar = document.querySelector('[x-data*="mobileOpen"]');
+                    
+                    if (mainDiv && sidebar && mainDiv.__x && sidebar.__x) {
+                        if (mainDiv.__x.unobservedData.sidebarOpen !== sidebar.__x.unobservedData.mobileOpen) {
+                            sidebar.__x.unobservedData.mobileOpen = mainDiv.__x.unobservedData.sidebarOpen;
+                        }
+                        clearInterval(observeToggle);
+                    }
+                }, 100);
+            });
+        </script>
+    </body>
                             @include('layouts.partials.language-switcher-compact')
                             <div class="hidden sm:flex flex-col items-end">
                                 <span class="text-[10px] text-indigo-300 uppercase font-black tracking-[0.2em]">Student</span>

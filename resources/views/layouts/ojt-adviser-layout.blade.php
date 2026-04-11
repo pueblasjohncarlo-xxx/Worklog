@@ -31,33 +31,33 @@
             @include('layouts.ojt-adviser-sidebar')
 
             <!-- Main Content -->
-            <div class="flex-1 ml-0 md:ml-64 min-h-screen">
+            <div class="flex-1 w-full md:ml-0 min-h-screen flex flex-col">
                 <!-- Top Header -->
-                <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg sticky top-0 z-30">
-                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg sticky top-0 z-30 w-full">
+                    <div class="w-full px-3 sm:px-4 lg:px-6 py-3 sm:py-4 flex justify-between items-center gap-2 sm:gap-4">
                         <!-- Mobile Menu Button -->
-                        <button @click="$dispatch('toggle-sidebar')" class="md:hidden text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-900">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-gray-400 hover:text-white p-1.5 sm:p-2 rounded-lg hover:bg-gray-900 flex-shrink-0">
+                            <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
                         
-                        <h2 class="font-semibold text-xl text-white leading-tight drop-shadow-md">
+                        <h2 class="font-semibold text-lg sm:text-xl text-white leading-tight drop-shadow-md truncate">
                             {{ $header ?? 'OJT Adviser Dashboard' }}
                         </h2>
                         
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                             <x-notification-bell />
                             @include('layouts.partials.language-switcher-compact')
                             <div class="hidden sm:flex flex-col items-end">
                                 <span class="text-xs text-indigo-300 uppercase font-bold tracking-wider">OJT Adviser</span>
                                 <span class="text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
                             </div>
-                            <div class="relative">
+                            <div class="relative flex-shrink-0">
                                 @if (Auth::user()->profile_photo_path)
-                                    <img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-500 shadow-md">
+                                    <img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" class="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover border-2 border-indigo-500 shadow-md">
                                 @else
-                                    <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center border-2 border-indigo-400 shadow-md">
+                                    <div class="h-8 sm:h-10 w-8 sm:w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs sm:text-sm border-2 border-indigo-400 shadow-md">
                                         <span class="text-white font-bold">{{ substr(Auth::user()->name, 0, 1) }}</span>
                                     </div>
                                 @endif
@@ -81,14 +81,5 @@
                 }
             });
         </script>
-    </body>
-                </header>
-
-                <!-- Page Content -->
-                <main class="p-6">
-                    {{ $slot }}
-                </main>
-            </div>
-        </div>
     </body>
 </html>

@@ -1,76 +1,116 @@
 <x-ojt-adviser-layout>
     <x-slot name="header">
-        OJT Adviser Dashboard
+        <h1 class="text-3xl font-bold text-white">OJT Adviser Dashboard</h1>
     </x-slot>
 
     <div class="space-y-6">
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Total Students -->
-            <div class="bg-indigo-900/40 border border-indigo-500/30 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-indigo-300 text-sm font-bold uppercase tracking-wider">Assigned OJT Students</p>
-                        <h3 class="text-4xl font-black text-white mt-1">{{ $totalStudents }}</h3>
+        <!-- ===== ENHANCED SUMMARY CARDS ===== -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Assigned OJT Students -->
+            <div class="bg-gradient-to-br from-indigo-600/20 to-indigo-600/10 border border-indigo-500/30 rounded-xl p-5 shadow-lg hover:border-indigo-400/50 transition-all">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-xs text-indigo-300 font-semibold uppercase tracking-widest">Assigned Students</p>
+                        <h3 class="text-3xl font-black text-white mt-2">{{ $totalStudents }}</h3>
+                        <p class="text-xs text-indigo-400 mt-1">Total under supervision</p>
                     </div>
-                    <div class="p-3 bg-indigo-500/20 rounded-xl">
-                        <svg class="h-8 w-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-2.5 bg-indigo-500/30 rounded-lg">
+                        <svg class="h-6 w-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-indigo-500/20">
+                    <div class="text-xs text-indigo-300">
+                        <span class="inline-block bg-indigo-500/20 px-2 py-1 rounded">{{ $completedHoursCount }} completed</span>
                     </div>
                 </div>
             </div>
 
             <!-- Incomplete Logs -->
-            <div class="bg-red-900/40 border border-red-500/30 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-red-300 text-sm font-bold uppercase tracking-wider">Incomplete Logs</p>
-                        <h3 class="text-4xl font-black text-white mt-1">{{ $incompleteLogsCount }}</h3>
+            <div class="bg-gradient-to-br from-red-600/20 to-red-600/10 border border-red-500/30 rounded-xl p-5 shadow-lg hover:border-red-400/50 transition-all">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-xs text-red-300 font-semibold uppercase tracking-widest">Incomplete Logs</p>
+                        <h3 class="text-3xl font-black text-white mt-2">{{ $incompleteLogsCount }}</h3>
+                        <p class="text-xs text-red-400 mt-1">Awaiting completion</p>
                     </div>
-                    <div class="p-3 bg-red-500/20 rounded-xl">
-                        <svg class="h-8 w-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-2.5 bg-red-500/30 rounded-lg">
+                        <svg class="h-6 w-6 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
+                <div class="mt-3 pt-3 border-t border-red-500/20">
+                    <div class="text-xs text-red-300">
+                        <span class="font-semibold">{{ round(($incompleteLogsCount/$totalStudents)*100, 0) }}%</span> of students
+                    </div>
+                </div>
             </div>
 
-            <!-- Completed Hours -->
-            <div class="bg-emerald-900/40 border border-emerald-500/30 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-emerald-300 text-sm font-bold uppercase tracking-wider">Completed OJT</p>
-                        <h3 class="text-4xl font-black text-white mt-1">{{ $completedHoursCount }}</h3>
+            <!-- Completed OJT -->
+            <div class="bg-gradient-to-br from-emerald-600/20 to-emerald-600/10 border border-emerald-500/30 rounded-xl p-5 shadow-lg hover:border-emerald-400/50 transition-all">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-xs text-emerald-300 font-semibold uppercase tracking-widest">Completed OJT</p>
+                        <h3 class="text-3xl font-black text-white mt-2">{{ $completedHoursCount }}</h3>
+                        <p class="text-xs text-emerald-400 mt-1">400+ hours completed</p>
                     </div>
-                    <div class="p-3 bg-emerald-500/20 rounded-xl">
-                        <svg class="h-8 w-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-2.5 bg-emerald-500/30 rounded-lg">
+                        <svg class="h-6 w-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-emerald-500/20">
+                    <div class="text-xs text-emerald-300">
+                        <span class="font-semibold">{{ round(($completedHoursCount/$totalStudents)*100, 0) }}%</span> completion rate
                     </div>
                 </div>
             </div>
 
             <!-- Evaluation Progress -->
-            <div class="bg-amber-900/40 border border-amber-500/30 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-amber-300 text-sm font-bold uppercase tracking-wider">Evaluation Progress</p>
-                        <h3 class="text-4xl font-black text-white mt-1">{{ $evaluationProgress }}%</h3>
+            <div class="bg-gradient-to-br from-amber-600/20 to-amber-600/10 border border-amber-500/30 rounded-xl p-5 shadow-lg hover:border-amber-400/50 transition-all">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-xs text-amber-300 font-semibold uppercase tracking-widest">Evaluations</p>
+                        <h3 class="text-3xl font-black text-white mt-2">{{ $evaluationProgress }}%</h3>
+                        <p class="text-xs text-amber-400 mt-1">Students evaluated</p>
                     </div>
-                    <div class="p-3 bg-amber-500/20 rounded-xl">
-                        <svg class="h-8 w-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-2.5 bg-amber-500/30 rounded-lg">
+                        <svg class="h-6 w-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-amber-500/20">
+                    <div class="w-full bg-amber-900/30 rounded-full h-1.5">
+                        <div class="bg-amber-500 h-1.5 rounded-full" style="width: {{ $evaluationProgress }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Evaluations (New) -->
+            <div class="bg-gradient-to-br from-orange-600/20 to-orange-600/10 border border-orange-500/30 rounded-xl p-5 shadow-lg hover:border-orange-400/50 transition-all">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-xs text-orange-300 font-semibold uppercase tracking-widest">Pending Reviews</p>
+                        <h3 class="text-3xl font-black text-white mt-2">{{ $pendingEvaluationsCount }}</h3>
+                        <p class="text-xs text-orange-400 mt-1">Need evaluation</p>
+                    </div>
+                    <div class="p-2.5 bg-orange-500/30 rounded-lg">
+                        <svg class="h-6 w-6 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6m1 3h2m-2 0a3 3 0 10-6 0 3 3 0 006 0z" />
                         </svg>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Section -->
+        <!-- ===== CHARTS SECTION ===== -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Progress Overview Bar Chart -->
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl backdrop-blur-md">
+            <!-- Student Completion Chart -->
+            <div class="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur-sm">
                 <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                     <svg class="h-5 w-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -85,12 +125,11 @@
                 </div>
             </div>
 
-            <!-- Evaluation Radar Chart -->
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl backdrop-blur-md">
+            <!-- Performance Metrics Radar -->
+            <div class="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur-sm">
                 <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                     <svg class="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.001 0 0120.488 9z" />
                     </svg>
                     Average Performance Metrics
                 </h3>
@@ -103,128 +142,288 @@
             </div>
         </div>
 
-        <!-- Student List -->
-        <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-xl backdrop-blur-md">
+        <!-- ===== CRITICAL SECTIONS ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Students Needing Attention -->
+            <div class="bg-white/5 border border-red-500/30 rounded-xl p-6 shadow-lg backdrop-blur-sm">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 5v1m8.5-15a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Students Needing Attention
+                </h3>
+                <div class="space-y-3">
+                    @forelse($studentsNeedingAttention as $assignment)
+                        <div class="p-3 bg-red-900/20 border border-red-500/30 rounded-lg hover:bg-red-900/30 transition">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-white truncate">{{ $assignment->student->name }}</p>
+                                    <p class="text-xs text-gray-400 truncate">{{ $assignment->company->name }}</p>
+                                </div>
+                                <a href="#" class="ml-2 px-2 py-1 bg-red-600/50 hover:bg-red-600 text-white text-xs rounded transition">
+                                    Review
+                                </a>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-6 text-center text-gray-400">
+                            <p class="text-sm">✓ All students on track</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Pending Evaluations List -->
+            <div class="bg-white/5 border border-amber-500/30 rounded-xl p-6 shadow-lg backdrop-blur-sm">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <svg class="h-5 w-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Due for Evaluation
+                </h3>
+                <div class="space-y-3">
+                    @forelse($pendingEvaluations as $assignment)
+                        <div class="p-3 bg-amber-900/20 border border-amber-500/30 rounded-lg hover:bg-amber-900/30 transition">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-white truncate">{{ $assignment->student->name }}</p>
+                                    <p class="text-xs text-gray-400 truncate">{{ $assignment->company->name }}</p>
+                                </div>
+                                <a href="#" class="ml-2 px-2 py-1 bg-amber-600/50 hover:bg-amber-600 text-white text-xs rounded transition">
+                                    Evaluate
+                                </a>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-6 text-center text-gray-400">
+                            <p class="text-sm">✓ All evaluations current</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ENHANCED STUDENT TABLE ===== -->
+        <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
             <div class="p-6 border-b border-white/10 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white">Assigned OJT Student Overview</h3>
-                <a href="{{ route('ojt_adviser.students') }}" class="text-indigo-400 hover:text-indigo-300 text-sm font-bold uppercase tracking-wider transition-colors">View All OJT Students</a>
+                <h3 class="text-lg font-bold text-white">Assigned OJT Students Overview</h3>
+                <a href="{{ route('ojt_adviser.students') }}" class="text-indigo-400 hover:text-indigo-300 text-sm font-bold uppercase tracking-wider transition">View All</a>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-black/30">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-black/30 border-b border-white/10">
                         <tr>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Student</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Company</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Supervisor</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Hours</th>
+                            <th class="px-6 py-3 text-xs font-bold text-gray-300 uppercase">Student</th>
+                            <th class="px-6 py-3 text-xs font-bold text-gray-300 uppercase">Company</th>
+                            <th class="px-6 py-3 text-xs font-bold text-gray-300 uppercase">Progress</th>
+                            <th class="px-6 py-3 text-xs font-bold text-gray-300 uppercase text-right">Hours</th>
+                            <th class="px-6 py-3 text-xs font-bold text-gray-300 uppercase">Status</th>
+                            <th class="px-6 py-3 text-xs font-bold text-gray-300 uppercase text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
-                        @foreach($assignments->take(5) as $assignment)
-                            <tr class="hover:bg-white/5 transition-colors">
+                        @forelse($assignments->take(8) as $assignment)
+                            <tr class="hover:bg-white/5 transition">
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 font-bold text-xs">
                                             {{ substr($assignment->student->name, 0, 1) }}
                                         </div>
-                                        <span class="text-sm font-semibold text-gray-200">{{ $assignment->student->name }}</span>
+                                        <span class="font-semibold text-gray-100">{{ $assignment->student->name }}</span>
                                     </div>
                                 </td>
+                                <td class="px-6 py-4 text-gray-300">{{ $assignment->company->name }}</td>
                                 <td class="px-6 py-4">
-                                    <span class="text-sm text-gray-400">{{ $assignment->company->name }}</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                            <div class="h-full bg-indigo-500 rounded-full" style="width: {{ $assignment->progressPercentage() }}%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-gray-300 w-8">{{ $assignment->progressPercentage() }}%</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right text-gray-300 font-mono">
+                                    {{ $assignment->totalApprovedHours() }}/{{ $assignment->required_hours }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-sm text-gray-400">{{ $assignment->supervisor->name ?? 'N/A' }}</span>
+                                    @if($assignment->progressPercentage() >= 100)
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                                            Completed
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                            Active
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <span class="text-sm font-mono text-indigo-400">{{ $assignment->totalApprovedHours() }} / {{ $assignment->required_hours }}</span>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="#" class="p-1 hover:bg-white/10 rounded transition" title="View Profile">
+                                            <svg class="h-4 w-4 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                        <a href="#" class="p-1 hover:bg-white/10 rounded transition" title="Evaluate">
+                                            <svg class="h-4 w-4 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </a>
+                                        <a href="#" class="p-1 hover:bg-white/10 rounded transition" title="View Logs">
+                                            <svg class="h-4 w-4 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-400">
+                                    No assigned students. Check back later.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- ===== RECENT ACTIVITIES ===== -->
+        @if($recentActivities->count() > 0)
+        <div class="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur-sm">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <svg class="h-5 w-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Recent Work Activities
+            </h3>
+            <div class="space-y-3">
+                @foreach($recentActivities->take(5) as $activity)
+                    <div class="p-3 bg-cyan-900/10 border border-cyan-500/20 rounded-lg">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-white">{{ $activity->assignment->student->name }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $activity->work_date->format('M d, Y') }} · {{ $activity->hours }} hours</p>
+                            </div>
+                            <span class="text-xs text-cyan-300 font-semibold">{{ $activity->work_date->diffForHumans() }}</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Student Progress Bar Chart
             const progressCanvas = document.getElementById('studentProgressChart');
-            const progressLabels = JSON.parse(progressCanvas.dataset.labels);
-            const progressData = JSON.parse(progressCanvas.dataset.values);
+            if (progressCanvas && progressCanvas.dataset.labels) {
+                const progressLabels = JSON.parse(progressCanvas.dataset.labels);
+                const progressData = JSON.parse(progressCanvas.dataset.values);
 
-            const progressCtx = progressCanvas.getContext('2d');
-            new Chart(progressCtx, {
-                type: 'bar',
-                data: {
-                    labels: progressLabels,
-                    datasets: [{
-                        label: 'Completion %',
-                        data: progressData,
-                        backgroundColor: '#6366f1',
-                        borderRadius: 8,
-                        barThickness: 15,
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
+                const progressCtx = progressCanvas.getContext('2d');
+                new Chart(progressCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: progressLabels,
+                        datasets: [{
+                            label: 'Completion %',
+                            data: progressData,
+                            backgroundColor: '#6366f1',
+                            borderRadius: 6,
+                            barThickness: 12,
+                        }]
                     },
-                    scales: {
-                        x: {
-                            max: 100,
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#9ca3af' }
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.x + '% Complete';
+                                    }
+                                }
+                            }
                         },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: '#9ca3af' }
+                        scales: {
+                            x: {
+                                max: 100,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: '#9ca3af', font: { size: 11 } }
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
 
             // Evaluation Radar Chart
             const radarCanvas = document.getElementById('evaluationRadarChart');
-            const evaluationLabels = JSON.parse(radarCanvas.dataset.labels);
-            const evaluationData = JSON.parse(radarCanvas.dataset.values);
+            if (radarCanvas && radarCanvas.dataset.labels) {
+                const evaluationLabels = JSON.parse(radarCanvas.dataset.labels);
+                const evaluationData = JSON.parse(radarCanvas.dataset.values);
 
-            const radarCtx = radarCanvas.getContext('2d');
-            new Chart(radarCtx, {
-                type: 'radar',
-                data: {
-                    labels: evaluationLabels,
-                    datasets: [{
-                        label: 'Average Score',
-                        data: evaluationData,
-                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                        borderColor: '#10b981',
-                        pointBackgroundColor: '#10b981',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            min: 0,
-                            max: 5,
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-                            pointLabels: { color: '#9ca3af', font: { size: 12 } },
-                            ticks: { display: false }
-                        }
+                const radarCtx = radarCanvas.getContext('2d');
+                new Chart(radarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: evaluationLabels,
+                        datasets: [{
+                            label: 'Average Score (0-5)',
+                            data: evaluationData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                            borderColor: '#10b981',
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#10b981',
+                            pointHoverBackgroundColor: '#059669',
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            borderWidth: 2,
+                            fill: true,
+                        }]
                     },
-                    plugins: {
-                        legend: { display: false }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                min: 0,
+                                max: 5,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                                pointLabels: { 
+                                    color: '#9ca3af',
+                                    font: { size: 11, weight: 'bold' }
+                                },
+                                ticks: {
+                                    color: '#6b7280',
+                                    font: { size: 10 }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#9ca3af', font: { size: 11 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.r.toFixed(1) + ' / 5.0';
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
-            });
+                });
+            }
         });
     </script>
 </x-ojt-adviser-layout>
