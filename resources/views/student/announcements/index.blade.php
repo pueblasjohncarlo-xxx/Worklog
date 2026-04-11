@@ -74,8 +74,10 @@
                 @endforelse
             </ul>
         </div>
+        @if($announcements && $announcements->count() > 0)
         <div class="mt-4">
             {{ $announcements->links() }}
         </div>
+        @endif
     </div>
 </x-app-layout>

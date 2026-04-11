@@ -91,9 +91,9 @@
         <main class="py-12 px-6">
             <div class="max-w-7xl mx-auto">
                 @if(!$assignment)
-                    <div class="bg-white rounded shadow p-12 text-center">
-                        <h3 class="text-2xl font-bold mb-2">No Active Assignment</h3>
-                        <p class="text-gray-600">Contact your coordinator</p>
+                    <div class="bg-white dark:bg-gray-800 rounded shadow p-12 text-center">
+                        <h3 class="text-2xl font-bold mb-2 text-gray-800 dark:text-white">No Active Assignment</h3>
+                        <p class="text-gray-600 dark:text-gray-400">Contact your coordinator to get started</p>
                     </div>
                 @else
                     <div class="mb-8 grid grid-cols-4 gap-6">

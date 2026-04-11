@@ -180,7 +180,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($leaves as $leave)
+                        @forelse ($leaves ?? [] as $leave)
                             <tr class="border-t border-gray-200 dark:border-gray-700">
                                 <td class="px-4 py-3 font-semibold">{{ $leave->type }}</td>
                                 <td class="px-4 py-3">
