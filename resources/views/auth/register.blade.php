@@ -15,7 +15,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register') }}" class="space-y-5" x-data="{ role: '{{ old('role', 'student') }}' }">
+        <form method="POST" action="{{ url('/register') }}" class="space-y-5" x-data="{ role: '{{ old('role', 'student') }}' }">
             @csrf
 
             <div class="space-y-1">
