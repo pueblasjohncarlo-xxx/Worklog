@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -75,6 +76,17 @@ class LeaveController extends Controller
         if (! $assignment) {
             return redirect()->back()->withErrors([
                 'leave' => 'No active assignment found.',
+            ]);
+        }
+
+        // Check if required leave columns exist (for production migration safety)
+        if (!Schema::hasColumn('leaves', 'number_of_days')) {
+            Log::error('Required leave database columns missing', [
+                'student_id' => Auth::id(),
+                'missing_column' => 'number_of_days',
+            ]);
+            return redirect()->back()->withErrors([
+                'leave' => 'System is currently being updated. Please try again in a few moments.',
             ]);
         }
 
@@ -229,6 +241,17 @@ class LeaveController extends Controller
             return back()->withErrors(['leave' => 'Only draft or rejected leaves can be updated.']);
         }
 
+        // Check if required leave columns exist (for production migration safety)
+        if (!Schema::hasColumn('leaves', 'number_of_days')) {
+            Log::error('Required leave database columns missing', [
+                'student_id' => Auth::id(),
+                'missing_column' => 'number_of_days',
+            ]);
+            return back()->withErrors([
+                'leave' => 'System is currently being updated. Please try again in a few moments.',
+            ]);
+        }
+
         $action = $request->input('action', 'submit');
         $isDraft = $action === 'draft';
         Log::info('Student leave update requested', [
@@ -347,39 +370,78 @@ class LeaveController extends Controller
 
     /**
      * Calculate and return leave balance information for the assignment
+     * Safe version that handles missing columns gracefully for production
      */
     public function getLeaveBalance(Assignment $assignment): array
     {
-        $totalApproved = Leave::where('assignment_id', $assignment->id)
-            ->where('status', Leave::STATUS_APPROVED)
-            ->sum('number_of_days') ?? 0;
+        try {
+            // Check if number_of_days column exists before querying
+            if (!Schema::hasColumn('leaves', 'number_of_days')) {
+                Log::warning('number_of_days column missing from leaves table', [
+                    'method' => 'getLeaveBalance',
+                    'assignment_id' => $assignment->id,
+                ]);
+                // Return safe defaults if column doesn't exist yet
+                return $this->getDefaultLeaveBalance($assignment);
+            }
 
-        $totalPending = Leave::where('assignment_id', $assignment->id)
-            ->where('status', Leave::STATUS_PENDING)
-            ->sum('number_of_days') ?? 0;
+            $totalApproved = Leave::where('assignment_id', $assignment->id)
+                ->where('status', Leave::STATUS_APPROVED)
+                ->sum('number_of_days') ?? 0;
 
-        $annualLimit = $assignment->annual_leave_limit ?? 15;
-        $sickLeaveLimit = $assignment->sick_leave_limit ?? 10;
+            $totalPending = Leave::where('assignment_id', $assignment->id)
+                ->where('status', Leave::STATUS_PENDING)
+                ->sum('number_of_days') ?? 0;
 
-        $approvedAnnual = Leave::where('assignment_id', $assignment->id)
-            ->where('status', Leave::STATUS_APPROVED)
-            ->where('type', 'Annual')
-            ->sum('number_of_days') ?? 0;
+            $annualLimit = $assignment->annual_leave_limit ?? 15;
+            $sickLeaveLimit = $assignment->sick_leave_limit ?? 10;
 
-        $approvedSick = Leave::where('assignment_id', $assignment->id)
-            ->where('status', Leave::STATUS_APPROVED)
-            ->where('type', 'Sick Leave')
-            ->sum('number_of_days') ?? 0;
+            $approvedAnnual = Leave::where('assignment_id', $assignment->id)
+                ->where('status', Leave::STATUS_APPROVED)
+                ->where('type', 'Annual')
+                ->sum('number_of_days') ?? 0;
 
+            $approvedSick = Leave::where('assignment_id', $assignment->id)
+                ->where('status', Leave::STATUS_APPROVED)
+                ->where('type', 'Sick Leave')
+                ->sum('number_of_days') ?? 0;
+
+            return [
+                'total_approved' => $totalApproved,
+                'total_pending' => $totalPending,
+                'annual_limit' => $annualLimit,
+                'annual_used' => $approvedAnnual,
+                'annual_remaining' => max(0, $annualLimit - $approvedAnnual),
+                'sick_limit' => $sickLeaveLimit,
+                'sick_used' => $approvedSick,
+                'sick_remaining' => max(0, $sickLeaveLimit - $approvedSick),
+                'can_submit' => true,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error calculating leave balance', [
+                'error' => $e->getMessage(),
+                'assignment_id' => $assignment->id,
+            ]);
+            // Return safe defaults on any error
+            return $this->getDefaultLeaveBalance($assignment);
+        }
+    }
+
+    /**
+     * Return default leave balance if column doesn't exist yet
+     * Used as fallback during production migration
+     */
+    private function getDefaultLeaveBalance(Assignment $assignment): array
+    {
         return [
-            'total_approved' => $totalApproved,
-            'total_pending' => $totalPending,
-            'annual_limit' => $annualLimit,
-            'annual_used' => $approvedAnnual,
-            'annual_remaining' => max(0, $annualLimit - $approvedAnnual),
-            'sick_limit' => $sickLeaveLimit,
-            'sick_used' => $approvedSick,
-            'sick_remaining' => max(0, $sickLeaveLimit - $approvedSick),
+            'total_approved' => 0,
+            'total_pending' => 0,
+            'annual_limit' => $assignment->annual_leave_limit ?? 15,
+            'annual_used' => 0,
+            'annual_remaining' => $assignment->annual_leave_limit ?? 15,
+            'sick_limit' => $assignment->sick_leave_limit ?? 10,
+            'sick_used' => 0,
+            'sick_remaining' => $assignment->sick_leave_limit ?? 10,
             'can_submit' => true,
         ];
     }

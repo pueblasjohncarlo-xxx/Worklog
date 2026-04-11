@@ -8,6 +8,7 @@ use App\Http\Controllers\Coordinator\AnnouncementController;
 use App\Http\Controllers\Coordinator\CoordinatorEvaluationController;
 use App\Http\Controllers\Coordinator\CoordinatorSupervisorController;
 use App\Http\Controllers\Coordinator\StudentImportController;
+use App\Http\Controllers\Coordinator\DashboardController;
 use App\Http\Controllers\CoordinatorController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\MessageController;
@@ -191,7 +192,7 @@ Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'role:coordinator'])->group(function () {
-    Route::get('/coordinator/dashboard', [CoordinatorController::class, 'index'])->name('coordinator.dashboard');
+    Route::get('/coordinator/dashboard', [DashboardController::class, 'index'])->name('coordinator.dashboard');
     Route::get('/coordinator/student-overview', [CoordinatorController::class, 'studentOverview'])->name('coordinator.student-overview');
     Route::get('/coordinator/supervisor-overview', [CoordinatorController::class, 'supervisorOverview'])->name('coordinator.supervisor-overview');
     Route::get('/coordinator/adviser-overview', [CoordinatorController::class, 'adviserOverview'])->name('coordinator.adviser-overview');
