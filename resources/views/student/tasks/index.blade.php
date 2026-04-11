@@ -7,30 +7,30 @@
         $allTasks = collect($sem1_tasks ?? [])->merge($sem2_tasks ?? []);
     @endphp
 
-    <div class="px-4 md:px-6 lg:px-8 py-4">
-        <div class="max-w-7xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-5">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div class="px-3 md:px-6 lg:px-8 py-3 sm:py-4">
+        <div class="max-w-7xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-3 sm:p-4 md:p-5">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
                 <div>
-                    <h3 class="text-base md:text-lg font-bold text-gray-900 dark:text-white">Task Workflow</h3>
+                    <h3 class="text-sm sm:text-base md:text-lg font-bold text-gray-900 dark:text-white">Task Workflow</h3>
                     <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300 mt-1">Review each task, complete required outputs, then open the task details page to submit progress on time.</p>
-                    <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                        <span class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold">1. Review Instructions</span>
-                        <span class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold">2. Complete Deliverable</span>
-                        <span class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold">3. Update Status</span>
+                    <div class="mt-2 flex flex-wrap gap-1 sm:gap-2 text-xs">
+                        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-[11px] sm:text-xs">1. Review</span>
+                        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-[11px] sm:text-xs">2. Complete</span>
+                        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-[11px] sm:text-xs">3. Update</span>
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-2 md:gap-3 w-full lg:w-auto">
-                    <div class="rounded-md bg-indigo-50 dark:bg-indigo-900/30 px-3 py-2 text-center min-w-[90px]">
-                        <p class="text-[10px] uppercase font-bold text-indigo-700 dark:text-indigo-300">Total</p>
-                        <p class="text-lg font-extrabold text-indigo-600 dark:text-indigo-300">{{ $allTasks->count() }}</p>
+                <div class="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 w-full lg:w-auto">
+                    <div class="rounded-md bg-indigo-50 dark:bg-indigo-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px]">
+                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-indigo-700 dark:text-indigo-300">Total</p>
+                        <p class="text-base sm:text-lg font-extrabold text-indigo-600 dark:text-indigo-300">{{ $allTasks->count() }}</p>
                     </div>
-                    <div class="rounded-md bg-green-50 dark:bg-green-900/30 px-3 py-2 text-center min-w-[90px]">
-                        <p class="text-[10px] uppercase font-bold text-green-700 dark:text-green-300">Done</p>
-                        <p class="text-lg font-extrabold text-green-600 dark:text-green-300">{{ $allTasks->where('status', 'approved')->count() }}</p>
+                    <div class="rounded-md bg-green-50 dark:bg-green-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px]">
+                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-green-700 dark:text-green-300">Done</p>
+                        <p class="text-base sm:text-lg font-extrabold text-green-600 dark:text-green-300">{{ $allTasks->where('status', 'approved')->count() }}</p>
                     </div>
-                    <div class="rounded-md bg-yellow-50 dark:bg-yellow-900/30 px-3 py-2 text-center min-w-[90px]">
-                        <p class="text-[10px] uppercase font-bold text-yellow-700 dark:text-yellow-300">Pending</p>
-                        <p class="text-lg font-extrabold text-yellow-600 dark:text-yellow-300">{{ $allTasks->where('status', 'pending')->count() }}</p>
+                    <div class="rounded-md bg-yellow-50 dark:bg-yellow-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px]">
+                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-yellow-700 dark:text-yellow-300">Pending</p>
+                        <p class="text-base sm:text-lg font-extrabold text-yellow-600 dark:text-yellow-300">{{ $allTasks->where('status', 'pending')->count() }}</p>
                     </div>
                 </div>
             </div>

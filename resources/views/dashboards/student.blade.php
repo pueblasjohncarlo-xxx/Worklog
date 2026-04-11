@@ -51,11 +51,12 @@
                         <a href="{{ request()->fullUrlWithQuery(['attendance_month' => $calendarCurrentDate->copy()->addMonth()->format('Y-m')]) }}" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded">&rarr;</a>
                     </div>
                 </div>
-                <div class="flex justify-between items-center text-sm font-bold text-gray-300 mb-3">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs sm:text-sm font-bold text-gray-300 mb-3 gap-2">
                     <span>{{ $calendarCurrentDate->format('F Y') }}</span>
-                    <span>Total this month: {{ number_format($monthlyTotalHours ?? 0, 2) }}h</span>
+                    <span class="text-right sm:text-left">Total this month: {{ number_format($monthlyTotalHours ?? 0, 2) }}h</span>
                 </div>
-                <div class="grid grid-cols-7 gap-px bg-gray-900 rounded-lg text-xs text-center">
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                    <div class="grid grid-cols-7 gap-px bg-gray-900 rounded-lg text-xs sm:text-sm text-center min-w-[320px]">
                     @foreach(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $d)
                         <div class="py-1 bg-gray-900 text-white">{{ $d }}</div>
                     @endforeach
@@ -68,33 +69,34 @@
                             elseif($day['status'] === 'draft') $statusClass = 'bg-yellow-500 text-gray-900';
                             if(!$day['is_current_month']) $statusClass = 'bg-gray-900 text-gray-500 opacity-40';
                         @endphp
-                        <div class="h-16 p-1 border border-gray-700 {{ $statusClass }}" title="Status: {{ ucfirst($day['status'] ?? 'N/A') }}\nIn: {{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}\nOut: {{ $day['time_out'] ? \Carbon\Carbon::parse($day['time_out'])->format('h:i A') : '-' }}\nHours: {{ $day['hours'] !== null ? number_format($day['hours'], 2).'h' : '-' }}">
-                            <div class="text-xs font-black">{{ $day['date']->day }}</div>
+                        <div class="h-12 sm:h-16 p-1 border border-gray-700 {{ $statusClass }}" title="Status: {{ ucfirst($day['status'] ?? 'N/A') }}\nIn: {{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}\nOut: {{ $day['time_out'] ? \Carbon\Carbon::parse($day['time_out'])->format('h:i A') : '-' }}\nHours: {{ $day['hours'] !== null ? number_format($day['hours'], 2).'h' : '-' }}">
+                            <div class="text-xs sm:text-sm font-black">{{ $day['date']->day }}</div>
                             @if($day['time_in'] || $day['time_out'])
-                                <div class="text-[8px] uppercase">{{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}</div>
+                                <div class="text-[7px] sm:text-[8px] uppercase">{{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}</div>
                             @endif
                             @if($day['hours'] !== null)
-                                <div class="text-[9px] uppercase font-bold">{{ number_format($day['hours'], 2) }}h</div>
+                                <div class="text-[7px] sm:text-[9px] uppercase font-bold">{{ number_format($day['hours'], 2) }}h</div>
                             @endif
                         </div>
                     @endforeach
+                    </div>
                 </div>
-                <div class="mt-4 grid grid-cols-4 gap-3 text-xs">
-                    <div class="bg-emerald-500/20 p-2 rounded border border-emerald-500/30">
-                        <div class="text-emerald-300 font-bold">{{ number_format($monthlyApprovedHours ?? 0, 2) }}h</div>
-                        <div class="text-gray-400 text-[10px]">Approved</div>
+                <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
+                    <div class="bg-emerald-500/20 p-2 sm:p-3 rounded border border-emerald-500/30">
+                        <div class="text-emerald-300 font-bold text-sm sm:text-base">{{ number_format($monthlyApprovedHours ?? 0, 2) }}h</div>
+                        <div class="text-gray-400 text-[10px] sm:text-xs">Approved</div>
                     </div>
-                    <div class="bg-blue-500/20 p-2 rounded border border-blue-500/30">
-                        <div class="text-blue-300 font-bold">{{ number_format($monthlyPendingHours ?? 0, 2) }}h</div>
-                        <div class="text-gray-400 text-[10px]">Pending</div>
+                    <div class="bg-blue-500/20 p-2 sm:p-3 rounded border border-blue-500/30">
+                        <div class="text-blue-300 font-bold text-sm sm:text-base">{{ number_format($monthlyPendingHours ?? 0, 2) }}h</div>
+                        <div class="text-gray-400 text-[10px] sm:text-xs">Pending</div>
                     </div>
-                    <div class="bg-rose-500/20 p-2 rounded border border-rose-500/30">
-                        <div class="text-rose-300 font-bold">{{ number_format($monthlyRejectedHours ?? 0, 2) }}h</div>
-                        <div class="text-gray-400 text-[10px]">Rejected</div>
+                    <div class="bg-rose-500/20 p-2 sm:p-3 rounded border border-rose-500/30">
+                        <div class="text-rose-300 font-bold text-sm sm:text-base">{{ number_format($monthlyRejectedHours ?? 0, 2) }}h</div>
+                        <div class="text-gray-400 text-[10px] sm:text-xs">Rejected</div>
                     </div>
-                    <div class="bg-slate-500/20 p-2 rounded border border-slate-500/30">
-                        <div class="text-slate-300 font-bold">{{ number_format($monthlyRemainingHours ?? 0, 2) }}h</div>
-                        <div class="text-gray-400 text-[10px]">Remaining</div>
+                    <div class="bg-slate-500/20 p-2 sm:p-3 rounded border border-slate-500/30">
+                        <div class="text-slate-300 font-bold text-sm sm:text-base">{{ number_format($monthlyRemainingHours ?? 0, 2) }}h</div>
+                        <div class="text-gray-400 text-[10px] sm:text-xs">Remaining</div>
                     </div>
                 </div>
             </div>

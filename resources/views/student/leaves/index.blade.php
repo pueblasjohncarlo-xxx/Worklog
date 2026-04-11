@@ -21,29 +21,6 @@
             </div>
         @endif
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-            <h3 class="font-bold text-gray-900 dark:text-gray-100">Leave Request Completion Checklist</h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Requested feature list inserted and implemented below.</p>
-            <ul class="mt-3 text-xs text-gray-700 dark:text-gray-300 list-disc pl-5 space-y-1">
-                <li>Fields included: leave type, start date, end date, number of days, reason/description, optional attachment.</li>
-                <li>Validation enforced for required fields before submission.</li>
-                <li>Confirmation dialog added before final submission.</li>
-                <li>Save as draft supported before final submission.</li>
-                <li>Status workflow implemented: draft, submitted, pending, approved, rejected.</li>
-                <li>Status updates after every action.</li>
-                <li>List includes leave type, dates, short reason, status, and submitted date.</li>
-                <li>Full details view available via View action.</li>
-                <li>Student actions enabled: edit (draft/rejected), delete (draft), cancel (submitted/pending).</li>
-                <li>Requests sent to assigned supervisor and admins for review notifications.</li>
-                <li>Supervisor/Admin approve and reject actions with remarks.</li>
-                <li>Approve/Reject flows trigger backend updates reliably.</li>
-                <li>Filtering/search by status, date range, and keyword.</li>
-                <li>Color-coded statuses and success/error feedback messages.</li>
-                <li>Rules enforced: no open clock-out conflicts, no overlapping leave dates, leave-day limit.</li>
-                <li>Debug logging added for event/backend flow tracing.</li>
-            </ul>
-        </div>
-
         <!-- Enhanced Leave Balance Section -->
         @if($assignment && !empty($leaveBalance))
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
