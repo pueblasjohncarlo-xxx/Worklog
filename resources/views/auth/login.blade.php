@@ -79,14 +79,12 @@
             </div>
 
             <div class="text-center mt-4">
-                @if (Route::has('register'))
-                    <p class="text-sm text-gray-600">
-                        {{ __("Don't have an account?") }}
-                        <a href="{{ route('register') }}" class="text-indigo-600 hover:text-indigo-800 font-bold transition-colors ml-1">
-                            {{ __('Create Account') }}
-                        </a>
-                    </p>
-                @endif
+                <p class="text-sm text-gray-600">
+                    {{ __("Don't have an account?") }}
+                    <a href="{{ route('register') }}" class="text-indigo-600 hover:text-indigo-800 font-bold transition-colors ml-1">
+                        {{ __('Create Account') }}
+                    </a>
+                </p>
             </div>
         </form>
     </div>
