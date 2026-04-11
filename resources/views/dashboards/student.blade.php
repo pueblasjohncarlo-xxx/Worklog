@@ -437,6 +437,21 @@
                     }
                 });
             }
+
+            // Handle row-link clicks for recent logs
+            const rowLinks = document.querySelectorAll('.row-link');
+            rowLinks.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    // Prevent navigation if clicking on a button or link inside the row
+                    if (e.target.closest('button, a, [onclick]')) {
+                        return;
+                    }
+                    const href = this.getAttribute('data-href');
+                    if (href) {
+                        window.location.href = href;
+                    }
+                });
+            });
         });
     </script>
 </x-student-layout>

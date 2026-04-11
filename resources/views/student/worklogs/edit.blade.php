@@ -215,7 +215,7 @@
                     </div>
 
                     <!-- Form Actions -->
-                    <div class="flex items-center justify-between pt-6 border-t border-gray-50 dark:border-gray-700">
+                    <div class="flex items-center justify-between gap-4 pt-6 border-t border-gray-50 dark:border-gray-700">
                         <a
                             href="{{ route('student.dashboard') }}"
                             class="flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 uppercase tracking-widest transition-colors"
@@ -225,12 +225,21 @@
                             </svg>
                             Cancel Changes
                         </a>
-                        <button
-                            type="submit"
-                            class="inline-flex items-center px-10 py-4 rounded-2xl bg-indigo-600 text-sm font-black uppercase tracking-widest text-white hover:bg-indigo-700 shadow-xl shadow-indigo-200 dark:shadow-none transition-all hover:-translate-y-0.5"
-                        >
-                            Save Changes
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button
+                                type="submit"
+                                class="inline-flex items-center px-10 py-4 rounded-2xl bg-indigo-600 text-sm font-black uppercase tracking-widest text-white hover:bg-indigo-700 shadow-xl shadow-indigo-200 dark:shadow-none transition-all hover:-translate-y-0.5"
+                            >
+                                Save Changes
+                            </button>
+                            <button
+                                type="button"
+                                onclick="submitWorkLog()"
+                                class="inline-flex items-center px-10 py-4 rounded-2xl bg-emerald-600 text-sm font-black uppercase tracking-widest text-white hover:bg-emerald-700 shadow-xl shadow-emerald-200 dark:shadow-none transition-all hover:-translate-y-0.5"
+                            >
+                                Save & Submit
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -271,6 +280,69 @@
             
             // Initial calculation if values exist
             calculateHours();
+
+            // Submit worklog function
+            window.submitWorkLog = function() {
+                const form = document.querySelector('form');
+                if (form) {
+                    // Create a submit button to trigger form submission
+                    const submitBtn = document.createElement('button');
+                    submitBtn.type = 'submit';
+                    submitBtn.style.display = 'none';
+                    
+                    // Add data attribute to indicate this is a submit action
+                    submitBtn.setAttribute('data-action', 'submit-worklog');
+                    
+                    form.appendChild(submitBtn);
+                    
+                    // Create form data from current form
+                    const formData = new FormData(form);
+                    
+                    // Submit the form first (for saving changes)
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // After save succeeds, submit the worklog
+                            const submitUrl = '{{ route("student.worklogs.submit", $workLog->id) }}';
+                            return fetch(submitUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify({})
+                            });
+                        } else {
+                            throw new Error('Failed to save changes');
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Show success message
+                            alert('Worklog saved and submitted successfully!');
+                            // Redirect to dashboard
+                            window.location.href = '{{ route("student.dashboard") }}';
+                        } else {
+                            throw new Error('Failed to submit worklog');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred: ' + error.message);
+                    })
+                    .finally(() => {
+                        // Clean up
+                        submitBtn.remove();
+                    });
+                }
+            };
         });
     </script>
 </x-student-layout>
