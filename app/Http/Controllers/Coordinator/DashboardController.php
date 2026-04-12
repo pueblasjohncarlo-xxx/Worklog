@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Coordinator;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Company;
+use App\Models\Assignment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -19,12 +20,14 @@ class DashboardController extends Controller
 
         // Get statistics
         $totalStudents = User::where('role', User::ROLE_STUDENT)->count();
-        $activeOJTs = User::where('role', User::ROLE_STUDENT)->where('status', 'active')->count();
+        // Count students with active assignments (OJT in progress)
+        $activeOJTs = Assignment::where('status', 'active')
+            ->distinct()
+            ->count('student_id');
         $totalCompanies = Company::count();
         
-        // Get pending reviews count
-        $pendingReviews = DB::table('evaluations')
-            ->where('status', 'pending')
+        // Get performance evaluations count (pending/submitted ones)
+        $pendingReviews = DB::table('performance_evaluations')
             ->count();
 
         // Get recent activities (simulate from logs or events)
