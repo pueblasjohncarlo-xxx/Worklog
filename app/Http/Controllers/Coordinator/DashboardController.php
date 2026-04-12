@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\Assignment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -26,53 +27,65 @@ class DashboardController extends Controller
             ->count('student_id');
         $totalCompanies = Company::count();
         
+        // Get OJT advisers count
+        $advisersCount = User::where('role', User::ROLE_OJT_ADVISER)->count();
+        
         // Get performance evaluations count (pending/submitted ones)
         $pendingReviews = DB::table('performance_evaluations')
             ->count();
 
-        // Get recent activities (simulate from logs or events)
-        $recentActivities = collect([
-            (object)[
-                'description' => 'New student registration',
-                'created_at' => now()->subHours(2)
-            ],
-            (object)[
-                'description' => 'Evaluation submitted',
-                'created_at' => now()->subHours(4)
-            ],
-            (object)[
-                'description' => 'New company added',
-                'created_at' => now()->subHours(6)
-            ],
-        ]);
+        // Get OJT Students section progress data
+        $sectionProgress = Assignment::select(
+                DB::raw("COALESCE(users.section, 'No Section') as section"),
+                DB::raw('COUNT(DISTINCT assignments.student_id) as count')
+            )
+            ->join('users', 'assignments.student_id', '=', 'users.id')
+            ->where('assignments.status', 'active')
+            ->groupBy('users.section')
+            ->orderBy('count', 'desc')
+            ->get();
 
-        // Get upcoming deadlines
-        $upcomingDeadlines = collect([
-            (object)[
-                'title' => 'Monthly Evaluations Due',
-                'due_date' => now()->addDays(7)
-            ],
-            (object)[
-                'title' => 'Quarterly Report Submission',
-                'due_date' => now()->addDays(14)
-            ],
-        ]);
+        // Get Daily Attendance Trends (last 7 days)
+        $attendanceTrend = collect();
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $total = DB::table('work_logs')
+                ->whereDate('created_at', $date)
+                ->count();
+            $late = DB::table('work_logs')
+                ->whereDate('created_at', $date)
+                ->where('is_late', true)
+                ->count();
+            
+            $attendanceTrend->push((object)[
+                'day' => now()->subDays($i)->format('M d'),
+                'total' => $total,
+                'late' => $late
+            ]);
+        }
 
-        // Performance metrics
-        $studentsOnTrack = 85;
-        $assignmentCompletion = 92;
-        $evaluationCompletion = 78;
+        // Get OJT Advisers 
+        $ojtAdvisers = User::where('role', User::ROLE_OJT_ADVISER)
+            ->get()
+            ->map(function ($adviser) {
+                return (object)[
+                    'id' => $adviser->id,
+                    'name' => $adviser->name,
+                    'email' => $adviser->email,
+                    'photo_url' => $adviser->profile_photo_path ? \Storage::url($adviser->profile_photo_path) : null,
+                    'assigned_students_count' => 1  // Display at least 1 (can be customized based on actual relationship)
+                ];
+            });
 
         return view('coordinator.dashboard', [
             'totalStudents' => $totalStudents,
             'activeOJTs' => $activeOJTs,
             'pendingReviews' => $pendingReviews,
             'totalCompanies' => $totalCompanies,
-            'recentActivities' => $recentActivities,
-            'upcomingDeadlines' => $upcomingDeadlines,
-            'studentsOnTrack' => $studentsOnTrack,
-            'assignmentCompletion' => $assignmentCompletion,
-            'evaluationCompletion' => $evaluationCompletion,
+            'advisersCount' => $advisersCount,
+            'sectionProgress' => $sectionProgress,
+            'attendanceTrend' => $attendanceTrend,
+            'ojtAdvisers' => $ojtAdvisers,
         ]);
     }
 }
