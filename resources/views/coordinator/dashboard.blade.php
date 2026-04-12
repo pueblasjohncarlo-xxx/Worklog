@@ -114,112 +114,129 @@
         </div>
     </div>
 
-    @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // OJT Students Bar Chart
+            // OJT Students Bar Chart - with defensive logic
             const studentCtx = document.getElementById('studentChart');
             if (studentCtx) {
-                const studentLabels = JSON.parse(studentCtx.getAttribute('data-labels') || '[]');
-                const studentValues = JSON.parse(studentCtx.getAttribute('data-values') || '[]');
-                
-                new Chart(studentCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: studentLabels.length > 0 ? studentLabels : ['No Data'],
-                        datasets: [{
-                            label: 'Students',
-                            data: studentValues.length > 0 ? studentValues : [0],
-                            backgroundColor: 'rgba(99, 102, 241, 0.8)',
-                            borderColor: 'rgba(99, 102, 241, 1)',
-                            borderWidth: 2,
-                            borderRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        indexAxis: 'y',
-                        plugins: {
-                            legend: { display: false }
+                try {
+                    const studentLabels = JSON.parse(studentCtx.getAttribute('data-labels') || '[]');
+                    const studentValues = JSON.parse(studentCtx.getAttribute('data-values') || '[]');
+                    
+                    // Ensure we have data, otherwise use placeholder
+                    const hasData = studentLabels && studentLabels.length > 0 && studentValues && studentValues.length > 0;
+                    
+                    new Chart(studentCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: hasData ? studentLabels : ['No Data Available'],
+                            datasets: [{
+                                label: 'Students',
+                                data: hasData ? studentValues : [0],
+                                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                                borderColor: 'rgba(99, 102, 241, 1)',
+                                borderWidth: 2,
+                                borderRadius: 6
+                            }]
                         },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                                ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'y',
+                            plugins: {
+                                legend: { display: false }
                             },
-                            y: {
-                                grid: { display: false },
-                                ticks: { color: 'rgba(255, 255, 255, 0.8)' }
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                    ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+                                },
+                                y: {
+                                    grid: { display: false },
+                                    ticks: { color: 'rgba(255, 255, 255, 0.8)' }
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                } catch (error) {
+                    console.error('Failed to render student chart:', error);
+                    studentCtx.style.display = 'none';
+                }
             }
 
-            // Daily Attendance Trends Line Chart
+            // Daily Attendance Trends Line Chart - with defensive logic
             const attendanceCtx = document.getElementById('attendanceChart');
             if (attendanceCtx) {
-                const attendanceLabels = JSON.parse(attendanceCtx.getAttribute('data-labels') || '[]');
-                const totalData = JSON.parse(attendanceCtx.getAttribute('data-total') || '[]');
-                const lateData = JSON.parse(attendanceCtx.getAttribute('data-late') || '[]');
-                
-                new Chart(attendanceCtx, {
-                    type: 'line',
-                    data: {
-                        labels: attendanceLabels.length > 0 ? attendanceLabels : ['No Data'],
-                        datasets: [
-                            {
-                                label: 'Total Clock-ins',
-                                data: totalData.length > 0 ? totalData : [0],
-                                borderColor: '#10b981',
-                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                borderWidth: 2,
-                                fill: true,
-                                tension: 0.4,
-                                pointBackgroundColor: '#10b981',
-                                pointBorderColor: '#ffffff',
-                                pointBorderWidth: 2,
-                                pointRadius: 4
-                            },
-                            {
-                                label: 'Late',
-                                data: lateData.length > 0 ? lateData : [0],
-                                borderColor: '#ef4444',
-                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                borderWidth: 2,
-                                fill: true,
-                                tension: 0.4,
-                                pointBackgroundColor: '#ef4444',
-                                pointBorderColor: '#ffffff',
-                                pointBorderWidth: 2,
-                                pointRadius: 4
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: { color: 'rgba(255, 255, 255, 0.8)' }
-                            }
+                try {
+                    const attendanceLabels = JSON.parse(attendanceCtx.getAttribute('data-labels') || '[]');
+                    const totalData = JSON.parse(attendanceCtx.getAttribute('data-total') || '[]');
+                    const lateData = JSON.parse(attendanceCtx.getAttribute('data-late') || '[]');
+                    
+                    // Ensure we have valid data arrays
+                    const hasLabels = attendanceLabels && attendanceLabels.length > 0;
+                    const hasTotal = totalData && totalData.length > 0;
+                    const hasLate = lateData && lateData.length > 0;
+                    
+                    new Chart(attendanceCtx, {
+                        type: 'line',
+                        data: {
+                            labels: hasLabels ? attendanceLabels : ['No Data'],
+                            datasets: [
+                                {
+                                    label: 'Total Clock-ins',
+                                    data: hasTotal ? totalData : [0],
+                                    borderColor: '#10b981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true,
+                                    tension: 0.4,
+                                    pointBackgroundColor: '#10b981',
+                                    pointBorderColor: '#ffffff',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 4
+                                },
+                                {
+                                    label: 'Incomplete',
+                                    data: hasLate ? lateData : [0],
+                                    borderColor: '#ef4444',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true,
+                                    tension: 0.4,
+                                    pointBackgroundColor: '#ef4444',
+                                    pointBorderColor: '#ffffff',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 4
+                                }
+                            ]
                         },
-                        scales: {
-                            x: {
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                                ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    labels: { color: 'rgba(255, 255, 255, 0.8)' }
+                                }
                             },
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                                ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+                            scales: {
+                                x: {
+                                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                    ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                    ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                } catch (error) {
+                    console.error('Failed to render attendance chart:', error);
+                    attendanceCtx.style.display = 'none';
+                }
             }
         });
     </script>
