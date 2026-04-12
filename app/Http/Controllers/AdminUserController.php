@@ -325,7 +325,7 @@ class AdminUserController extends Controller
                 'processed_count' => $users->count(),
             ]);
 
-            return redirect()->back()->with('status', $message);
+            return redirect()->route('admin.users.pending')->with('status', $message);
         } catch (\Exception $e) {
             Log::error('Error performing bulk action on users', [
                 'admin_id' => $adminUser->id,
@@ -333,7 +333,7 @@ class AdminUserController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return redirect()->back()
+            return redirect()->route('admin.users.pending')
                 ->withErrors(['error' => 'An error occurred while processing bulk actions.']);
         }
     }
@@ -358,7 +358,7 @@ class AdminUserController extends Controller
                 'ip_address' => request()->ip(),
             ]);
 
-            return redirect()->back()->with('status', 'User approved successfully.');
+            return redirect()->route('admin.users.pending')->with('status', 'User approved successfully.');
         } catch (\Exception $e) {
             Log::error('Error approving user', [
                 'admin_id' => $adminUser->id,
@@ -366,7 +366,7 @@ class AdminUserController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return redirect()->back()
+            return redirect()->route('admin.users.pending')
                 ->withErrors(['error' => 'An error occurred while approving the user.']);
         }
     }
@@ -405,7 +405,7 @@ class AdminUserController extends Controller
                 'ip_address' => request()->ip(),
             ]);
 
-            return redirect()->back()->with('status', 'User rejected.');
+            return redirect()->route('admin.users.pending')->with('status', 'User rejected.');
         } catch (\Exception $e) {
             Log::error('Error rejecting user', [
                 'admin_id' => $adminUser->id,
@@ -413,7 +413,7 @@ class AdminUserController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return redirect()->back()
+            return redirect()->route('admin.users.pending')
                 ->withErrors(['error' => 'An error occurred while rejecting the user.']);
         }
     }

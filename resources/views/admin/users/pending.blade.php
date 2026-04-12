@@ -34,7 +34,7 @@
                                 <label for="select-all" class="text-sm text-gray-600 dark:text-gray-400">Select All</label>
                             </div>
                             <div class="flex gap-2">
-                                <button type="submit" name="action" value="approve" class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-emerald-700 transition-all duration-200 shadow-md">
+                                <button type="button" id="bulk-approve-btn" class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-emerald-700 transition-all duration-200 shadow-md">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                     </svg>
@@ -119,6 +119,7 @@
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             const selectAll = document.getElementById('select-all');
+                            const bulkApproveBtn = document.getElementById('bulk-approve-btn');
                             const bulkRejectBtn = document.getElementById('bulk-reject-btn');
                             const bulkActionForm = document.getElementById('bulk-action-form');
                             const bulkActionInput = document.getElementById('bulk-action-input');
@@ -130,6 +131,25 @@
                                 });
                             }
 
+                            if (bulkApproveBtn && bulkActionForm && bulkActionInput) {
+                                bulkApproveBtn.addEventListener('click', function () {
+                                    const selected = document.querySelectorAll('.user-checkbox:checked');
+                                    if (selected.length === 0) {
+                                        alert('Please select at least one user to approve.');
+                                        return;
+                                    }
+
+                                    const confirmed = confirm('Are you sure you want to approve ' + selected.length + ' selected request(s)?');
+                                    if (!confirmed) {
+                                        return;
+                                    }
+
+                                    console.debug('[PendingApprovals] Bulk approve confirmed for users:', selected.length);
+                                    bulkActionInput.value = 'approve';
+                                    bulkActionForm.submit();
+                                });
+                            }
+
                             if (bulkRejectBtn && bulkActionForm && bulkActionInput) {
                                 bulkRejectBtn.addEventListener('click', function () {
                                     const selected = document.querySelectorAll('.user-checkbox:checked');
@@ -138,7 +158,7 @@
                                         return;
                                     }
 
-                                    const confirmed = confirm('Are you sure you want to reject selected requests?');
+                                    const confirmed = confirm('Are you sure you want to reject ' + selected.length + ' selected request(s)?');
                                     if (!confirmed) {
                                         return;
                                     }

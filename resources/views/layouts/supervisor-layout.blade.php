@@ -31,7 +31,7 @@
             @include('layouts.supervisor-sidebar')
 
             <!-- Main Content -->
-            <div class="flex-1 w-full md:ml-0 min-h-screen flex flex-col">
+            <div class="flex-1 w-full md:ml-64 min-h-screen flex flex-col">
                 <!-- Top Header -->
                 <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg sticky top-0 z-30 w-full">
                     <div class="w-full px-3 sm:px-4 lg:px-6 py-3 sm:py-4 flex justify-between items-center gap-2 sm:gap-4">
