@@ -136,16 +136,16 @@
                         <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
                     </div>
                     <div class="px-6 py-4 space-y-3">
-                        <a href="{{ route('coordinator.students.index') }}" class="block px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded text-blue-700 font-medium transition">
+                        <a href="{{ route('coordinator.student-overview') }}" class="block px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded text-blue-700 font-medium transition">
                             Manage Students
                         </a>
                         <a href="{{ route('coordinator.companies.index') }}" class="block px-4 py-2 bg-green-50 hover:bg-green-100 rounded text-green-700 font-medium transition">
                             Manage Companies
                         </a>
-                        <a href="{{ route('coordinator.supervisors.index') }}" class="block px-4 py-2 bg-purple-50 hover:bg-purple-100 rounded text-purple-700 font-medium transition">
+                        <a href="{{ route('coordinator.supervisor-overview') }}" class="block px-4 py-2 bg-purple-50 hover:bg-purple-100 rounded text-purple-700 font-medium transition">
                             Manage Supervisors
                         </a>
-                        <a href="{{ route('coordinator.assignments.index') }}" class="block px-4 py-2 bg-yellow-50 hover:bg-yellow-100 rounded text-yellow-700 font-medium transition">
+                        <a href="{{ route('coordinator.deployment.index') }}" class="block px-4 py-2 bg-yellow-50 hover:bg-yellow-100 rounded text-yellow-700 font-medium transition">
                             View Assignments
                         </a>
                     </div>
