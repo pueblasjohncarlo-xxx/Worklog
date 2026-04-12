@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Reject Endpoint</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+        .error { background-color: #fee; color: #c00; }
+        .success { background-color: #efe; color: #0c0; }
+    </style>
+</head>
+<body>
+    <h1>Test Reject Endpoint</h1>
+    
+    <form id="testForm">
+        <label for="userId">User ID:</label>
+        <input type="number" id="userId" value="20" style="width: 100px;">
+        <button type="button" onclick="testReject()">Test Reject</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        async function testReject() {
+            const userId = document.getElementById('userId').value;
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                // First, get CSRF token
+                const pageRes = await fetch('/admin/users/pending');
+                const pageHtml = await pageRes.text();
+                const csrfMatch = pageHtml.match(/<meta name="csrf-token" content="([^"]+)/);
+                
+                if (!csrfMatch) {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = '<p>❌ Could not find CSRF token</p>';
+                    return;
+                }
+                
+                const csrfToken = csrfMatch[1];
+                
+                // Now test the reject endpoint
+                const response = await fetch(`/admin/users/${userId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: '_token=' + encodeURIComponent(csrfToken),
+                    redirect: 'manual'
+                });
+                
+                resultDiv.className = response.ok ? 'result success' : 'result error';
+                resultDiv.innerHTML = `
+                    <h3>${response.ok ? '✓ Success' : '❌ Failed'}</h3>
+                    <p><strong>Status Code:</strong> ${response.status}</p>
+                    <p><strong>Status Text:</strong> ${response.statusText}</p>
+                    ${response.status === 302 ? '<p>Redirect to pending approvals</p>' : ''}
+                `;
+            } catch (e) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<p>❌ Error: ${e.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
