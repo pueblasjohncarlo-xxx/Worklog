@@ -257,7 +257,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/admin/users/pending', [AdminUserController::class, 'pending'])->name('admin.users.pending');
     Route::post('/admin/users/bulk-action', [AdminUserController::class, 'bulkAction'])->name('admin.users.bulk-action');
     Route::post('/admin/users/{user}/approve', [AdminUserController::class, 'approve'])->name('admin.users.approve');
-    Route::delete('/admin/users/{user}/reject', [AdminUserController::class, 'reject'])->name('admin.users.reject');
+    Route::post('/admin/users/{user}/reject', [AdminUserController::class, 'reject'])->name('admin.users.reject');
 
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
     Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');

@@ -113,7 +113,7 @@
                     <!-- Hidden individual forms to keep existing route compatibility -->
                     @foreach ($users as $user)
                         <form id="approve-form-{{ $user->id }}" action="{{ route('admin.users.approve', $user) }}" method="POST" style="display: none;">@csrf</form>
-                        <form id="reject-form-{{ $user->id }}" action="{{ route('admin.users.reject', $user) }}" method="POST" style="display: none;">@csrf @method('DELETE')</form>
+                        <form id="reject-form-{{ $user->id }}" action="{{ route('admin.users.reject', $user) }}" method="POST" style="display: none;">@csrf</form>
                     @endforeach
 
                     <script>
