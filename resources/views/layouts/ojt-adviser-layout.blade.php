@@ -25,10 +25,12 @@
         <!-- Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
-    <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed">
-        <div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
+    <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed overflow-x-hidden">
+        <div x-data="{ sidebarOpen: false }" class="min-h-screen flex flex-col md:flex-row">
             <!-- Sidebar -->
             @include('layouts.ojt-adviser-sidebar')
+
+            <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false" class="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"></div>
 
             <!-- Main Content -->
             <div class="flex-1 w-full md:ml-64 min-h-screen flex flex-col">
@@ -67,19 +69,12 @@
                 </header>
 
                 <!-- Page Content -->
-                <main class="p-4 sm:p-6">
-                    {{ $slot }}
+                <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden">
+                    <div class="max-w-7xl mx-auto w-full">
+                        {{ $slot }}
+                    </div>
                 </main>
             </div>
         </div>
-        <script>
-            // Handle sidebar toggle for mobile
-            const adviserSidebar = document.querySelector('[x-data*="mobileOpen"]');
-            document.addEventListener('toggle-sidebar', () => {
-                if (adviserSidebar && adviserSidebar.__x) {
-                    adviserSidebar.__x.unobservedData.mobileOpen = !adviserSidebar.__x.unobservedData.mobileOpen;
-                }
-            });
-        </script>
     </body>
 </html>

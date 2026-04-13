@@ -1,8 +1,8 @@
-<div x-data="{ mobileOpen: false }" x-show="mobileOpen || window.innerWidth >= 768" @window:resize="mobileOpen = window.innerWidth >= 768" class="fixed top-0 left-0 h-full w-64 bg-black text-gray-100 flex flex-col z-20 shadow-xl overflow-y-auto glow-border-right hidden md:flex">
+<div x-cloak class="app-sidebar fixed inset-y-0 left-0 h-full w-64 bg-black text-gray-100 flex flex-col z-40 shadow-xl overflow-y-auto glow-border-right transform transition-transform duration-300 md:translate-x-0" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
     <!-- Header/Logo -->
     <div class="p-6 flex items-center justify-between border-b border-indigo-500/30 bg-black/20">
         <x-wl-sidebar-logo />
-        <button @click="mobileOpen = false" class="md:hidden text-gray-400 hover:text-white">
+        <button @click="sidebarOpen = false" class="md:hidden text-gray-400 hover:text-white">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -10,7 +10,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 mt-6 px-4 space-y-1">
+    <nav class="flex-1 mt-6 px-4 space-y-1" @click="if (window.innerWidth < 768) sidebarOpen = false">
         <!-- Dashboard -->
         <a href="{{ route('student.dashboard') }}" 
            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.dashboard') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">

@@ -25,10 +25,12 @@
         <!-- Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
-    <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed shimmer-bg">
+    <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed shimmer-bg overflow-x-hidden">
         <div x-data="{ sidebarOpen: false }" class="min-h-screen flex flex-col md:flex-row">
             <!-- Sidebar -->
             @include('layouts.supervisor-sidebar')
+
+            <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false" class="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"></div>
 
             <!-- Main Content -->
             <div class="flex-1 w-full md:ml-64 min-h-screen flex flex-col">
@@ -68,27 +70,12 @@
                 </header>
 
                 <!-- Page Content -->
-                <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto">
+                <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden">
                     <div class="max-w-7xl mx-auto w-full">
                         {{ $slot }}
                     </div>
                 </main>
             </div>
         </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const observeToggle = setInterval(() => {
-                    const mainDiv = document.querySelector('[x-data*="sidebarOpen"]');
-                    const sidebar = document.querySelector('[x-data*="mobileOpen"]');
-                    
-                    if (mainDiv && sidebar && mainDiv.__x && sidebar.__x) {
-                        if (mainDiv.__x.unobservedData.sidebarOpen !== sidebar.__x.unobservedData.mobileOpen) {
-                            sidebar.__x.unobservedData.mobileOpen = mainDiv.__x.unobservedData.sidebarOpen;
-                        }
-                        clearInterval(observeToggle);
-                    }
-                }, 100);
-            });
-        </script>
     </body>
 </html>

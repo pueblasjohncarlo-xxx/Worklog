@@ -14,8 +14,8 @@
                         <!-- Search Bar -->
                         <form method="GET" action="{{ route('coordinator.student-overview') }}" class="flex items-center gap-2">
                             <div class="relative">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search students..." 
-                                       class="text-sm rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-8 w-64"
+                                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search students..." 
+                                        class="text-sm rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-8 w-full sm:w-64"
                                        oninput="this.form.submit()">
                                 <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
                                     <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@
                                         </div>
 
                                         <!-- Content -->
-                                        <div class="bg-white dark:bg-gray-800 max-h-[70vh] overflow-y-auto">
+                                        <div class="bg-white dark:bg-gray-800 max-h-[70vh] overflow-y-auto overflow-x-auto">
                                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                                 <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900/90 backdrop-blur-sm shadow-sm">
                                                     <tr>

@@ -1,287 +1,99 @@
-/* ===== RESPONSIVE CSS UTILITIES ===== */
+/* ===== SHARED RESPONSIVE UTILITIES ===== */
 
-/* Fix body overflow on mobile */
+html,
 body {
+    max-width: 100%;
     overflow-x: hidden;
 }
 
-/* ===== LAYOUT IMPROVEMENTS ===== */
-
-/* Ensure main content doesn't overflow behind sidebar */
-main:not(#admin-main-content) {
-    min-height: 100vh;
-    overflow-y: auto;
+main {
+    max-width: 100%;
 }
 
-/* Better sidebar mobile behavior */
-@media (max-width: 767px) {
-    body main {
-        padding: 0.75rem;
-    }
+/* Media should never overflow their containers */
+img,
+video,
+canvas,
+svg,
+iframe {
+    max-width: 100%;
+    height: auto;
 }
 
-/* ===== TABLE RESPONSIVENESS ===== */
-
-/* Make all tables responsive */
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-/* Prevent overflow on small screens */
-div[class*="overflow-x-auto"],
-.overflow-x-auto {
-    -webkit-overflow-scrolling: touch;
+/* Keep table behavior predictable and scrollable on small screens */
+.table-responsive,
+.overflow-x-auto,
+div[class*="overflow-x-"] {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Better table cell padding on mobile */
+.table-responsive table,
+.overflow-x-auto table,
+div[class*="overflow-x-"] table {
+    min-width: 640px;
+}
+
+/* Improve tap targets for touch devices */
+@media (pointer: coarse) {
+    button,
+    [type="button"],
+    [type="submit"],
+    [type="reset"],
+    a,
+    input,
+    select,
+    textarea {
+        min-height: 44px;
+    }
+}
+
+/* Mobile spacing and readable typography */
 @media (max-width: 640px) {
-    table td,
-    table th {
-        padding: 0.5rem !important;
-        font-size: 0.875rem;
-    }
-}
-
-/* ===== BUTTON IMPROVEMENTS FOR TOUCH ===== */
-
-/* Increase button touch targets on mobile */
-@media (max-width: 640px) {
-    button, a.button, [type="submit"], [type="button"], [type="reset"] {
-        min-height: 2.75rem;
-        min-width: 2.75rem;
-        padding: 0.625rem 1rem;
+    .mobile-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
     }
 
-    button svg, a.button svg {
-        min-height: 1.25rem;
-        min-width: 1.25rem;
+    header h2 {
+        font-size: 1rem;
     }
-}
 
-/* ===== HEADER RESPONSIVENESS ===== */
-
-/* Fix header text truncation */
-header h2 {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex: 1;
-}
-
-/* Better header padding */
-@media (max-width: 640px) {
-    header {
-        padding: 0.75rem 0!important;
+    .text-3xl {
+        font-size: 1.5rem;
+        line-height: 2rem;
     }
-    
-    header > div {
+
+    .text-2xl {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+    }
+
+    .text-xl {
+        font-size: 1.125rem;
+        line-height: 1.5rem;
+    }
+
+    .p-6 {
+        padding: 1rem;
+    }
+
+    .gap-6 {
         gap: 1rem;
     }
 }
 
-/* ===== FORM IMPROVEMENTS ===== */
-
-/* Make all inputs and selects full-width on mobile */
-@media (max-width: 640px) {
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    input[type="date"],
-    input[type="time"],
-    input[type="search"],
-    select,
-    textarea {
-        width: 100%;
-        min-height: 2.5rem;
-        padding: 0.625rem;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 0.25rem;
-        font-size: 0.875rem;
-    }
-
-    .form-group {
-        margin-bottom: 1rem;
-    }
-}
-
-/* ===== CARD IMPROVEMENTS ===== */
-
-/* Better card spacing on mobile */
-@media (max-width: 640px) {
-    .card, [class*="bg-"][class*="rounded-lg"],  [class*="bg-"][class*="rounded-xl"] {
-        padding: 0.75rem;
-    }
-}
-
-/* ===== AVATAR SIZING ===== */
-
-/* Make avatars touch-friendly */
-@media (max-width: 640px) {
-    img[class*="rounded-full"],
-    [class*="rounded-full"] > * {
-        min-height: 2rem;
-        min-width: 2rem;
-    }
-}
-
-/* ===== MESSAGING SYSTEM ===== */
-
-/* Fix messaging layout on mobile */
-@media (max-width: 768px) {
-    .message-container {
-        height: calc(100vh - 200px);
-        overflow-y: auto;
-    }
-
-    .message-input {
-        position: sticky;
-        bottom: 0;
-        width: 100%;
-    }
-
-    .chat-sidebar {
-        display: none;
-    }
-
-    .chat-sidebar.active {
-        display: block;
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        width: 100%;
-        z-index: 40;
-        background: black;
-    }
-}
-
-/* ===== MODAL IMPROVEMENTS ===== */
-
-/* Make modals responsive */
-@media (max-width: 640px) {
-    .modal,
-    [class*="dialog"],
-    [role="dialog"] {
-        width: calc(100vw - 1rem);
-        max-height: calc(100vh - 2rem);
-        margin: auto;
-        border-radius: 0.5rem;
-    }
-}
-
-/* ===== SIDEBAR MOBILE OVERLAY ===== */
-
-/* Mobile sidebar overlay */
+/* Sidebar helpers */
 @media (max-width: 767px) {
-    .sidebar-overlay {
-        position: fixed;
-        inset: 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 30;
-    }
-
-    .sidebar-overlay.hidden {
-        display: none;
+    .app-sidebar {
+        width: 16rem;
+        max-width: calc(100vw - 2.5rem);
     }
 }
 
-/* ===== GRID IMPROVEMENTS ===== */
-
-/* Prevent grid overflow on mobile */
-@media (max-width: 640px) {
-    [class*="grid-cols-"] {
-        grid-auto-columns: minmax(0, 1fr);
+@media print {
+    .no-print {
+        display: none !important;
     }
-
-    .gap-4,
-    .gap-6 {
-        gap: 0.75rem;
-    }
-}
-
-/* ===== FLEX IMPROVEMENTS ===== */
-
-/* Better flex wrapping on mobile */
-@media (max-width: 640px) {
-    [class*="flex"] {
-        flex-wrap: wrap;
-    }
-
-    [class*="flex-justif"] {
-        flex-direction: column;
-    }
-}
-
-/* ===== SPACING CLEANUP ===== */
-
-/* Remove excessive spacing on mobile */
-@media (max-width: 640px) {
-    .space-y-6 {
-        --tw-space-y-reverse: 0;
-        margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
-        margin-bottom: calc(1rem * var(--tw-space-y-reverse));
-    }
-
-    .px-8,
-    .px-12 {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-
-    .py-8,
-    .py-12 {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-    }
-}
-
-/* ===== SCROLLING PERFORMANCE ===== */
-
-/* Better scrolling on mobile */
-.overflow-y-auto,
-[class*="overflow-y-auto"] {
-    -webkit-overflow-scrolling: touch;
-}
-
-/* ===== VISIBILITY FIX ===== */
-
-/* Ensure nothing gets permanently hidden on mobile */
-@media (max-width: 767px) {
-    .hidden {
-        display: none;
-    }
-
-    .block {
-        display: block;
-    }
-
-    .flex {
-        display: flex;
-    }
-}
-
-/* ===== Z-INDEX MANAGEMENT ===== */
-
-/* Proper z-index stacking for overlays and modals */
-.sidebar-overlay {
-    z-index: 30;
-}
-
-.sidebar {
-    z-index: 40;
-}
-
-.modal,
-[role="dialog"] {
-    z-index: 50;
-}
-
-header {
-    z-index: 20;
 }

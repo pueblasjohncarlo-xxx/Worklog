@@ -64,13 +64,13 @@
                                                 </button>
                                             </form>
 
-                                            <form method="POST" action="{{ route('coordinator.registrations.reject', $user) }}" class="flex gap-2">
+                                            <form method="POST" action="{{ route('coordinator.registrations.reject', $user) }}" class="flex flex-col sm:flex-row gap-2 w-full">
                                                 @csrf
                                                 <input
                                                     type="text"
                                                     name="reason"
                                                     placeholder="Optional rejection reason"
-                                                    class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-xs"
+                                                    class="w-full sm:w-56 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-xs"
                                                 >
                                                 <button type="submit" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold">
                                                     Reject
