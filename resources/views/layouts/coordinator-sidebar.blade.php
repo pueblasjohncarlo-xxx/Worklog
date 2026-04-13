@@ -51,6 +51,32 @@
             <span class="font-medium">OJT Advisory</span>
         </a>
 
+        <!-- Registration Approvals -->
+        <a href="{{ route('coordinator.registrations.pending') }}"
+           class="flex items-center justify-between px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('coordinator.registrations.*') ? 'bg-indigo-900 text-white' : 'hover:bg-gray-900 text-gray-300' }}">
+            <div class="flex items-center gap-3">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-medium">Registration Approvals</span>
+            </div>
+            @php
+                $pendingQuery = \App\Models\User::whereIn('role', [\App\Models\User::ROLE_STUDENT, \App\Models\User::ROLE_SUPERVISOR, \App\Models\User::ROLE_OJT_ADVISER])
+                    ->where('has_requested_account', true);
+
+                if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'status')) {
+                    $pendingQuery->where('status', 'pending');
+                } else {
+                    $pendingQuery->where('is_approved', false);
+                }
+
+                $pendingRegistrations = $pendingQuery->count();
+            @endphp
+            @if($pendingRegistrations > 0)
+                <span class="bg-orange-600 text-white text-xs px-2 py-0.5 rounded-full">{{ $pendingRegistrations }}</span>
+            @endif
+        </a>
+
         <!-- Supervisor Overview -->
         <a href="{{ route('coordinator.supervisor-overview') }}" 
            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('coordinator.supervisor-overview') ? 'bg-indigo-900 text-white' : 'hover:bg-gray-900 text-gray-300' }}">

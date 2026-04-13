@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -31,7 +30,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['nullable', 'string', 'in:student,supervisor,coordinator,ojt_adviser'],
+            'role' => ['nullable', 'string', 'in:student,supervisor,ojt_adviser'],
             'section' => ['nullable', 'string', 'max:100'],
             'department' => ['nullable', 'string', 'max:255'],
         ]);
@@ -56,19 +55,29 @@ class RegisteredUserController extends Controller
             'has_requested_account' => true,
         ];
 
-        // Registration no longer requires admin approval. Keep checks for schema compatibility.
+        // Publicly registered accounts require coordinator approval.
         if (Schema::hasColumn('users', 'is_approved')) {
-            $userData['is_approved'] = true;
+            $userData['is_approved'] = false;
         }
 
         if (Schema::hasColumn('users', 'status')) {
-            $userData['status'] = 'approved';
+            $userData['status'] = 'pending';
+        }
+
+        if (Schema::hasColumn('users', 'approved_at')) {
+            $userData['approved_at'] = null;
+        }
+
+        if (Schema::hasColumn('users', 'rejected_at')) {
+            $userData['rejected_at'] = null;
+        }
+
+        if (Schema::hasColumn('users', 'rejection_reason')) {
+            $userData['rejection_reason'] = null;
         }
 
         $user = User::create($userData);
 
-        Auth::login($user);
-
-        return redirect()->route('dashboard')->with('status', 'Your account has been created successfully.');
+        return redirect()->route('login')->with('status', 'Your account has been created and is pending coordinator approval.');
     }
 }

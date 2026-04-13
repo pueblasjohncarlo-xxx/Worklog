@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -1063,6 +1064,108 @@ class CoordinatorController extends Controller
 
         return redirect()->route('coordinator.settings.hours')
             ->with('status', "Updated required hours for {$updated} assignment(s).");
+    }
+
+    public function registrationApprovals(Request $request): View
+    {
+        $allowedRoles = [User::ROLE_STUDENT, User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER];
+
+        $query = User::query()
+            ->whereIn('role', $allowedRoles)
+            ->where('has_requested_account', true)
+            ->orderByDesc('created_at');
+
+        if (Schema::hasColumn('users', 'status')) {
+            $query->where('status', 'pending');
+        } elseif (Schema::hasColumn('users', 'is_approved')) {
+            $query->where('is_approved', false);
+        }
+
+        if ($request->filled('q')) {
+            $term = trim((string) $request->string('q'));
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', '%'.$term.'%')
+                    ->orWhere('email', 'like', '%'.$term.'%')
+                    ->orWhere('role', 'like', '%'.$term.'%');
+            });
+        }
+
+        $users = $query->paginate(20)->withQueryString();
+
+        return view('coordinator.registrations.pending', [
+            'users' => $users,
+        ]);
+    }
+
+    public function approveRegistration(User $user): RedirectResponse
+    {
+        if (!in_array((string) $user->role, [User::ROLE_STUDENT, User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER], true)) {
+            return redirect()->route('coordinator.registrations.pending')
+                ->withErrors(['error' => 'This account role is not eligible for coordinator approval.']);
+        }
+
+        $updates = [];
+        if (Schema::hasColumn('users', 'is_approved')) {
+            $updates['is_approved'] = true;
+        }
+        if (Schema::hasColumn('users', 'status')) {
+            $updates['status'] = 'approved';
+        }
+        if (Schema::hasColumn('users', 'approved_at')) {
+            $updates['approved_at'] = now();
+        }
+        if (Schema::hasColumn('users', 'approved_by')) {
+            $updates['approved_by'] = auth()->id();
+        }
+        if (Schema::hasColumn('users', 'rejected_at')) {
+            $updates['rejected_at'] = null;
+        }
+        if (Schema::hasColumn('users', 'rejection_reason')) {
+            $updates['rejection_reason'] = null;
+        }
+
+        if (!empty($updates)) {
+            $user->update($updates);
+        }
+
+        return redirect()->route('coordinator.registrations.pending')
+            ->with('status', 'Account approved successfully.');
+    }
+
+    public function rejectRegistration(Request $request, User $user): RedirectResponse
+    {
+        if (!in_array((string) $user->role, [User::ROLE_STUDENT, User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER], true)) {
+            return redirect()->route('coordinator.registrations.pending')
+                ->withErrors(['error' => 'This account role is not eligible for coordinator review.']);
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $updates = [];
+        if (Schema::hasColumn('users', 'is_approved')) {
+            $updates['is_approved'] = false;
+        }
+        if (Schema::hasColumn('users', 'status')) {
+            $updates['status'] = 'rejected';
+        }
+        if (Schema::hasColumn('users', 'rejected_at')) {
+            $updates['rejected_at'] = now();
+        }
+        if (Schema::hasColumn('users', 'rejection_reason')) {
+            $updates['rejection_reason'] = $validated['reason'] ?? null;
+        }
+        if (Schema::hasColumn('users', 'approved_at')) {
+            $updates['approved_at'] = null;
+        }
+
+        if (!empty($updates)) {
+            $user->update($updates);
+        }
+
+        return redirect()->route('coordinator.registrations.pending')
+            ->with('status', 'Account request rejected.');
     }
 
 

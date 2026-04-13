@@ -51,9 +51,6 @@
                     <option value="supervisor">
                         Supervisor
                     </option>
-                    <option value="coordinator">
-                        Coordinator
-                    </option>
                     <option value="ojt_adviser">
                         OJT Adviser
                     </option>

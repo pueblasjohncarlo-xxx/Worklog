@@ -21,11 +21,12 @@ class StoreSupervisorWithCompanyRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            // Supervisor rules
+            // Account rules
+            'role' => ['required', 'in:supervisor,ojt_adviser'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['required', 'string', 'max:50'],
-            'position_title' => ['required', 'string', 'max:255'],
+            'position_title' => ['nullable', 'string', 'max:255'],
             'department' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
 
@@ -33,8 +34,12 @@ class StoreSupervisorWithCompanyRequest extends FormRequest
             'create_company' => ['boolean'],
         ];
 
+        if ($this->input('role') === User::ROLE_SUPERVISOR) {
+            $rules['position_title'] = ['required', 'string', 'max:255'];
+        }
+
         // Conditional company rules
-        if ($this->boolean('create_company')) {
+        if ($this->input('role') === User::ROLE_SUPERVISOR && $this->boolean('create_company')) {
             $rules = array_merge($rules, [
                 'company_name' => ['required', 'string', 'max:255', 'unique:companies,name'],
                 'company_industry' => ['required', 'string', 'max:255'],

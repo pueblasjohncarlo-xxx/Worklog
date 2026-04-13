@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-                'email' => 'Your account is pending admin approval.',
+                'email' => 'Your account is pending coordinator approval.',
             ]);
         }
 
@@ -62,7 +62,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-                'email' => 'Your account is pending approval by the administrator.',
+                'email' => 'Your account is pending coordinator approval.',
             ]);
         }
 

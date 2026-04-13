@@ -195,6 +195,9 @@ Route::middleware(['auth', 'verified', 'role:coordinator'])->group(function () {
     Route::get('/coordinator/student-overview', [CoordinatorController::class, 'studentOverview'])->name('coordinator.student-overview');
     Route::get('/coordinator/supervisor-overview', [CoordinatorController::class, 'supervisorOverview'])->name('coordinator.supervisor-overview');
     Route::get('/coordinator/adviser-overview', [CoordinatorController::class, 'adviserOverview'])->name('coordinator.adviser-overview');
+    Route::get('/coordinator/registrations/pending', [CoordinatorController::class, 'registrationApprovals'])->name('coordinator.registrations.pending');
+    Route::post('/coordinator/registrations/{user}/approve', [CoordinatorController::class, 'approveRegistration'])->name('coordinator.registrations.approve');
+    Route::post('/coordinator/registrations/{user}/reject', [CoordinatorController::class, 'rejectRegistration'])->name('coordinator.registrations.reject');
 
     // Announcements (Replaces Assign Task)
     Route::get('/coordinator/announcements', [AnnouncementController::class, 'index'])->name('coordinator.announcements.index');

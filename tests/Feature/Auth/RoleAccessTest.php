@@ -47,11 +47,29 @@ class RoleAccessTest extends TestCase
             'password_confirmation' => 'password123',
         ]);
 
-        $response->assertRedirect('/dashboard');
+        $response->assertRedirect('/login');
 
         $this->assertDatabaseHas('users', [
             'email' => 'student@example.com',
             'role' => User::ROLE_STUDENT,
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_public_registration_cannot_use_coordinator_role(): void
+    {
+        $response = $this->post('/register', [
+            'name' => 'Invalid Coordinator',
+            'email' => 'coord@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'role' => User::ROLE_COORDINATOR,
+        ]);
+
+        $response->assertSessionHasErrors(['role']);
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'coord@example.com',
         ]);
     }
 }

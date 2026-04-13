@@ -1,9 +1,9 @@
 <x-coordinator-layout>
     <x-slot name="header">
-        {{ __('Add New Supervisor') }}
+        {{ __('Create Personnel Account') }}
     </x-slot>
 
-    <div class="py-12" x-data="{ createCompany: {{ old('create_company') ? 'true' : 'false' }} }">
+    <div class="py-12" x-data="{ createCompany: {{ old('create_company') ? 'true' : 'false' }}, role: '{{ old('role', 'supervisor') }}' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
             @if ($errors->has('error'))
@@ -19,14 +19,23 @@
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <header class="mb-6">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                            {{ __('Supervisor Information') }}
+                            {{ __('Account Information') }}
                         </h3>
                         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {{ __('Enter the personal and professional details of the new supervisor.') }}
+                            {{ __('Enter the details for the new Supervisor or OJT Adviser account.') }}
                         </p>
                     </header>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <x-input-label for="role" :value="__('Account Role')" />
+                            <select id="role" name="role" x-model="role" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" required>
+                                <option value="supervisor" @selected(old('role', 'supervisor') === 'supervisor')>Supervisor</option>
+                                <option value="ojt_adviser" @selected(old('role') === 'ojt_adviser')>OJT Adviser</option>
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('role')" />
+                        </div>
+
                         <div>
                             <x-input-label for="name" :value="__('Full Name')" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required />
@@ -53,7 +62,7 @@
 
                         <div>
                             <x-input-label for="position_title" :value="__('Position/Role')" />
-                            <x-text-input id="position_title" name="position_title" type="text" class="mt-1 block w-full" :value="old('position_title')" required />
+                            <x-text-input id="position_title" name="position_title" type="text" class="mt-1 block w-full" :value="old('position_title')" x-bind:required="role === 'supervisor'" />
                             <x-input-error class="mt-2" :messages="$errors->get('position_title')" />
                         </div>
 
@@ -71,7 +80,7 @@
                 </div>
 
                 <!-- Company Association Toggle -->
-                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg" x-show="role === 'supervisor'" x-transition>
                     <div class="flex items-center gap-3">
                         <input type="hidden" name="create_company" value="0">
                         <input 
@@ -88,7 +97,7 @@
                 </div>
 
                 <!-- Company Information (Conditional) -->
-                <div x-show="createCompany" x-transition class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div x-show="role === 'supervisor' && createCompany" x-transition class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <header class="mb-6">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                             {{ __('Company Information') }}
@@ -164,7 +173,7 @@
                 <div class="flex items-center justify-end gap-4">
                     <a href="{{ route('coordinator.dashboard') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Cancel</a>
                     <x-primary-button>
-                        {{ __('Create Supervisor') }}
+                        {{ __('Create Account') }}
                     </x-primary-button>
                 </div>
             </form>
