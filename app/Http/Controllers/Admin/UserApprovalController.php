@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class UserApprovalController extends Controller
 {
@@ -26,8 +29,11 @@ class UserApprovalController extends Controller
         $user->update([
             'status' => 'approved',
             'is_approved' => true,
+            'has_requested_account' => true,
             'approved_at' => now(),
             'approved_by' => Auth::id(),
+            'rejected_at' => null,
+            'rejection_reason' => null,
         ]);
 
         return redirect()->back()->with('success', "Account for {$user->name} has been approved.");
@@ -45,9 +51,18 @@ class UserApprovalController extends Controller
         $user->update([
             'status' => 'rejected',
             'is_approved' => false,
+            'has_requested_account' => false,
             'rejected_at' => now(),
             'rejection_reason' => $request->reason,
         ]);
+
+        if (Schema::hasTable('sessions') && Schema::hasColumn('sessions', 'user_id')) {
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+        }
+
+        $user->forceFill([
+            'remember_token' => Str::random(60),
+        ])->save();
 
         return redirect()->back()->with('success', "Account for {$user->name} has been rejected.");
     }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,9 +30,9 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $user = $request->user();
+        $accessState = $this->resolveAccessState($user);
 
-        // Check for approval status (if status column exists)
-        if (Schema::hasColumn('users', 'status') && isset($user->status) && $user->status === 'pending') {
+        if ($accessState === 'pending') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -43,26 +42,13 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
-        // Check for rejected status
-        if (Schema::hasColumn('users', 'status') && isset($user->status) && $user->status === 'rejected') {
-            $reason = isset($user->rejection_reason) && $user->rejection_reason ? ": " . $user->rejection_reason : ".";
+        if ($accessState === 'rejected') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-                'email' => 'Your account has been rejected' . $reason,
-            ]);
-        }
-
-        // Legacy check for is_approved for students
-        if ($user->role === 'student' && ! $user->is_approved && $user->has_requested_account) {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return back()->withErrors([
-                'email' => 'Your account is pending coordinator approval.',
+                'email' => 'Your account has been rejected. Please contact the coordinator.',
             ]);
         }
 
@@ -76,6 +62,39 @@ class AuthenticatedSessionController extends Controller
         }
 
         return redirect()->intended(route('dashboard', absolute: false));
+    }
+
+    private function resolveAccessState(object $user): string
+    {
+        if (Schema::hasColumn('users', 'status')) {
+            $status = strtolower(trim((string) ($user->status ?? '')));
+
+            if ($status !== '') {
+                if (in_array($status, ['approved', 'active'], true)) {
+                    return 'approved';
+                }
+
+                if ($status === 'rejected') {
+                    return 'rejected';
+                }
+
+                return 'pending';
+            }
+        }
+
+        if (Schema::hasColumn('users', 'rejected_at') && !empty($user->rejected_at)) {
+            return 'rejected';
+        }
+
+        if (Schema::hasColumn('users', 'rejection_reason') && !empty($user->rejection_reason)) {
+            return 'rejected';
+        }
+
+        if (Schema::hasColumn('users', 'is_approved') && (bool) $user->is_approved === true) {
+            return 'approved';
+        }
+
+        return 'pending';
     }
 
     /**

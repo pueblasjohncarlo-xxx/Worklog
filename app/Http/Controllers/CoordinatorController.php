@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CoordinatorController extends Controller
@@ -1167,8 +1168,23 @@ class CoordinatorController extends Controller
             $user->update($updates);
         }
 
+        $this->invalidateUserSessions($user);
+
         return redirect()->route('coordinator.registrations.pending')
             ->with('status', 'Account request rejected.');
+    }
+
+    private function invalidateUserSessions(User $user): void
+    {
+        if (Schema::hasTable('sessions') && Schema::hasColumn('sessions', 'user_id')) {
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+        }
+
+        if (Schema::hasColumn('users', 'remember_token')) {
+            $user->forceFill([
+                'remember_token' => Str::random(60),
+            ])->save();
+        }
     }
 
 

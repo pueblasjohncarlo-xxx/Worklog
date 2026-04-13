@@ -17,6 +17,9 @@ class RoleAccessTest extends TestCase
             'email' => 'student@example.test',
             'password' => bcrypt('password'),
             'role' => User::ROLE_STUDENT,
+            'status' => 'approved',
+            'is_approved' => true,
+            'has_requested_account' => true,
         ]);
 
         $response = $this->actingAs($student)->get('/admin/dashboard');
@@ -31,6 +34,9 @@ class RoleAccessTest extends TestCase
             'email' => 'admin@example.test',
             'password' => bcrypt('password'),
             'role' => User::ROLE_ADMIN,
+            'status' => 'approved',
+            'is_approved' => true,
+            'has_requested_account' => true,
         ]);
 
         $response = $this->actingAs($admin)->get('/admin/dashboard');
