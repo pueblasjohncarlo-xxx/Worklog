@@ -1159,6 +1159,9 @@ class CoordinatorController extends Controller
         if (Schema::hasColumn('users', 'approved_at')) {
             $updates['approved_at'] = null;
         }
+        if (Schema::hasColumn('users', 'has_requested_account')) {
+            $updates['has_requested_account'] = false;
+        }
 
         if (!empty($updates)) {
             $user->update($updates);
