@@ -1,12 +1,12 @@
 <x-coordinator-layout>
     <x-slot name="header">
-        Daily Journals
+        Journals
     </x-slot>
 
     <div class="space-y-6">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 dark:text-gray-100">
-                <h3 class="text-lg font-semibold mb-6">Centralized Work Log Monitoring</h3>
+                <h3 class="text-lg font-semibold mb-6">Centralized Journal Monitoring</h3>
 
                 @forelse($groupedJournals as $section => $students)
                     <div x-data="{ openSection: true }" class="mb-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
