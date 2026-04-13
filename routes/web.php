@@ -1,8 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminCompanyController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AdminLeaveController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Coordinator\AnnouncementController;
 use App\Http\Controllers\Coordinator\CoordinatorEvaluationController;
@@ -49,6 +47,7 @@ Route::get('/dashboard', function () {
         User::ROLE_SUPERVISOR => redirect()->route('supervisor.dashboard'),
         User::ROLE_COORDINATOR => redirect()->route('coordinator.dashboard'),
         User::ROLE_ADMIN => redirect()->route('admin.dashboard'),
+        User::ROLE_STAFF => redirect()->route('admin.dashboard'),
         User::ROLE_OJT_ADVISER => redirect()->route('ojt_adviser.dashboard'),
         default => redirect()->route('login'),
     };
@@ -246,38 +245,60 @@ Route::middleware(['auth', 'verified', 'role:ojt_adviser'])->group(function () {
     Route::get('/ojt-adviser/accomplishment-reports', [OjtAdviserController::class, 'accomplishmentReports'])->name('ojt_adviser.accomplishment-reports');
     Route::get('/ojt-adviser/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('ojt_adviser.worklogs.print');
     Route::get('/ojt-adviser/leaves/{leave}/print', [LeaveController::class, 'print'])->name('ojt_adviser.leaves.print');
+    Route::get('/ojt-adviser/leaves', [OjtAdviserController::class, 'leavesIndex'])->name('ojt_adviser.leaves.index');
+    Route::post('/ojt-adviser/leaves/{leave}/approve', [OjtAdviserController::class, 'approveLeave'])->name('ojt_adviser.leaves.approve');
+    Route::post('/ojt-adviser/leaves/{leave}/reject', [OjtAdviserController::class, 'rejectLeave'])->name('ojt_adviser.leaves.reject');
     Route::get('/ojt-adviser/evaluations', [OjtAdviserController::class, 'evaluations'])->name('ojt_adviser.evaluations');
     Route::get('/ojt-adviser/reports', [OjtAdviserController::class, 'reports'])->name('ojt_adviser.reports');
 });
 
-Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin,staff'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
-    // User Approval (Must be before user resource routes to avoid wildcard conflict)
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::get('/admin/users/{user}', [AdminUserController::class, 'show'])->name('admin.users.show');
+
+    // Safe compatibility routes: features moved out of Admin module.
     Route::get('/admin/users/pending', [AdminUserController::class, 'pending'])->name('admin.users.pending');
     Route::post('/admin/users/bulk-action', [AdminUserController::class, 'bulkAction'])->name('admin.users.bulk-action');
     Route::post('/admin/users/{user}/approve', [AdminUserController::class, 'approve'])->name('admin.users.approve');
     Route::post('/admin/users/{user}/reject', [AdminUserController::class, 'reject'])->name('admin.users.reject');
 
-    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
-    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
-    Route::post('/admin/users/{user}/role', [AdminUserController::class, 'updateRole'])->name('admin.users.update-role');
-    Route::get('/admin/users/{user}', [AdminUserController::class, 'show'])->name('admin.users.show');
-    Route::post('/admin/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('admin.users.reset-password');
-    Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+    Route::get('/admin/companies', function () {
+        return redirect()->route('admin.dashboard')
+            ->with('status', 'Company management is available under the Coordinator module.');
+    })->name('admin.companies.index');
+    Route::post('/admin/companies', function () {
+        return redirect()->route('admin.dashboard')
+            ->with('status', 'Company creation moved to Coordinator.');
+    })->name('admin.companies.store');
+    Route::delete('/admin/companies/{company}', function () {
+        return redirect()->route('admin.dashboard')
+            ->with('status', 'Company deletion moved to Coordinator.');
+    })->name('admin.companies.destroy');
 
-    // Company Management
-    Route::get('/admin/companies', [AdminCompanyController::class, 'index'])->name('admin.companies.index');
-    Route::post('/admin/companies', [AdminCompanyController::class, 'store'])->name('admin.companies.store');
-    Route::delete('/admin/companies/{company}', [AdminCompanyController::class, 'destroy'])->name('admin.companies.destroy');
-
-    // Leave Management
-    Route::get('/admin/leaves', [AdminLeaveController::class, 'index'])->name('admin.leaves.index');
-    Route::post('/admin/leaves/{leave}/approve', [AdminLeaveController::class, 'approve'])->name('admin.leaves.approve');
-    Route::post('/admin/leaves/{leave}/reject', [AdminLeaveController::class, 'reject'])->name('admin.leaves.reject');
+    Route::get('/admin/leaves', function () {
+        return redirect()->route('admin.dashboard')
+            ->with('status', 'Leave request review is handled by Supervisors and OJT Advisers.');
+    })->name('admin.leaves.index');
+    Route::post('/admin/leaves/{leave}/approve', function () {
+        return redirect()->route('admin.dashboard')
+            ->with('status', 'Admin leave approval is disabled.');
+    })->name('admin.leaves.approve');
+    Route::post('/admin/leaves/{leave}/reject', function () {
+        return redirect()->route('admin.dashboard')
+            ->with('status', 'Admin leave rejection is disabled.');
+    })->name('admin.leaves.reject');
 
     // Export student login list (name, email, status, default password hint)
     Route::get('/admin/users/export/students', [AdminUserController::class, 'exportStudents'])->name('admin.users.export.students');
+});
+
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
+    Route::post('/admin/users/{user}/role', [AdminUserController::class, 'updateRole'])->name('admin.users.update-role');
+    Route::post('/admin/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('admin.users.reset-password');
+    Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
 });
 
 require __DIR__.'/auth.php';

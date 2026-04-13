@@ -16,6 +16,8 @@ class User extends Authenticatable
 
     public const ROLE_ADMIN = 'admin';
 
+    public const ROLE_STAFF = 'staff';
+
     public const ROLE_COORDINATOR = 'coordinator';
 
     public const ROLE_SUPERVISOR = 'supervisor';

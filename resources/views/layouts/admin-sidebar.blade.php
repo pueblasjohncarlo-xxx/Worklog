@@ -36,56 +36,9 @@
             </div>
         </a>
 
-        <!-- Pending Approvals -->
-        <a href="{{ route('admin.users.pending') }}" 
-           class="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base {{ request()->routeIs('admin.users.pending') ? 'bg-indigo-900 text-white' : 'hover:bg-gray-900 text-gray-300' }}">
-            <div class="flex items-center gap-3 min-w-0">
-                <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="font-medium hidden sm:inline">Pending Approvals</span>
-                <span class="font-medium sm:hidden text-xs">Pending</span>
-            </div>
-            @php 
-                use Illuminate\Support\Facades\Schema;
-                // Safely handle status column if it exists in production
-                if (Schema::hasColumn('users', 'status')) {
-                    $pendingCount = \App\Models\User::where('role', 'student')
-                        ->where('status', 'pending')
-                        ->where('has_requested_account', true)
-                        ->count();
-                } else {
-                    // Fallback: use is_approved if status doesn't exist
-                    $pendingCount = \App\Models\User::where('role', 'student')
-                        ->where('is_approved', false)
-                        ->where('has_requested_account', true)
-                        ->count();
-                }
-            @endphp
-            @if($pendingCount > 0)
-                <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex-shrink-0">{{ $pendingCount }}</span>
-            @endif
-        </a>
-
-        <!-- Company Management -->
-        <a href="{{ route('admin.companies.index') }}" 
-           class="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base {{ request()->routeIs('admin.companies.index') ? 'bg-indigo-900 text-white' : 'hover:bg-gray-900 text-gray-300' }}">
-            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            <span class="font-medium hidden sm:inline">Company Management</span>
-            <span class="font-medium sm:hidden text-xs">Companies</span>
-        </a>
-
-        <!-- Leave Requests -->
-        <a href="{{ route('admin.leaves.index') }}"
-           class="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base {{ request()->routeIs('admin.leaves.*') ? 'bg-indigo-900 text-white' : 'hover:bg-gray-900 text-gray-300' }}">
-            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span class="font-medium hidden sm:inline">Leave Requests</span>
-            <span class="font-medium sm:hidden text-xs">Leaves</span>
-        </a>
+        @if(auth()->user()->role === \App\Models\User::ROLE_ADMIN)
+            <!-- Pending approvals, company, and leave processing are intentionally hidden from Admin navigation. -->
+        @endif
 
         <!-- Messages -->
         <a href="{{ route('messages.index') }}" 

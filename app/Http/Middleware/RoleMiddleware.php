@@ -26,7 +26,14 @@ class RoleMiddleware
             return $next($request);
         }
 
-        if (! in_array($user->role, $roles, true)) {
+        $allowedRoles = collect($roles)
+            ->flatMap(fn (string $role) => preg_split('/[|,]/', $role))
+            ->filter()
+            ->map(fn (string $role) => trim($role))
+            ->values()
+            ->all();
+
+        if (! in_array($user->role, $allowedRoles, true)) {
             abort(403);
         }
 

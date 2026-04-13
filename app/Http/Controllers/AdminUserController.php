@@ -26,8 +26,9 @@ class AdminUserController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            // Verify user is authenticated and has admin role
-            if (!Auth::check() || Auth::user()->role !== User::ROLE_ADMIN) {
+            // Verify user is authenticated and has admin/staff role
+            $allowedRoles = [User::ROLE_ADMIN, User::ROLE_STAFF];
+            if (!Auth::check() || !in_array((string) Auth::user()->role, $allowedRoles, true)) {
                 Log::warning('Unauthorized access attempt to admin user management', [
                     'user_id' => Auth::id(),
                     'ip' => $request->ip(),
@@ -52,6 +53,7 @@ class AdminUserController extends Controller
 
         // Group other roles
         $admins = $users->where('role', 'admin');
+        $staff = $users->where('role', 'staff');
         $coordinators = $users->where('role', 'coordinator');
         $supervisors = $users->where('role', 'supervisor');
         $ojtAdvisers = $users->where('role', 'ojt_adviser');
@@ -59,6 +61,7 @@ class AdminUserController extends Controller
         return view('admin.users.index', [
             'studentsBySection' => $students,
             'admins' => $admins,
+            'staff' => $staff,
             'coordinators' => $coordinators,
             'supervisors' => $supervisors,
             'ojtAdvisers' => $ojtAdvisers,
@@ -237,185 +240,26 @@ class AdminUserController extends Controller
 
     public function pending(): View
     {
-        $this->authorize('viewAny', User::class);
-
-        // Safely handle status column if it exists in production
-        if (Schema::hasColumn('users', 'status')) {
-            $users = User::where('status', 'pending')
-                ->where('has_requested_account', true)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        } else {
-            // Fallback: use is_approved if status doesn't exist
-            $users = User::where('is_approved', false)
-                ->where('has_requested_account', true)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
-
-        return view('admin.users.pending', [
-            'users' => $users,
-        ]);
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Pending approvals are disabled. Accounts are handled through direct user management.');
     }
 
     public function bulkAction(Request $request): RedirectResponse
     {
-        $this->authorize('bulkAction', User::class);
-
-        Log::info('Admin bulk user action requested', [
-            'admin_id' => Auth::id(),
-            'action' => $request->input('action'),
-            'user_ids' => $request->input('user_ids', []),
-            'method' => $request->method(),
-            'url' => $request->fullUrl(),
-        ]);
-
-        $request->validate([
-            'user_ids' => 'required|array',
-            'user_ids.*' => 'exists:users,id',
-            'action' => 'required|in:approve,reject',
-        ]);
-
-        $adminUser = Auth::user();
-        $users = User::whereIn('id', $request->user_ids)->get();
-
-        try {
-            if ($request->action === 'approve') {
-                foreach ($users as $user) {
-                    $user->update([
-                        'is_approved' => true,
-                        'status' => 'approved',
-                        'approved_at' => now(),
-                        'approved_by' => $adminUser->id,
-                    ]);
-
-                    // Log approval action
-                    $this->logAuditAction('user_approved', $user, [
-                        'approved_by_admin' => $adminUser->name,
-                        'ip_address' => $request->ip(),
-                    ]);
-                }
-                $message = count($users) . ' users approved successfully.';
-            } elseif ($request->action === 'reject') {
-                Log::info('Processing bulk reject action', [
-                    'admin_id' => $adminUser->id,
-                    'count' => $users->count(),
-                ]);
-
-                foreach ($users as $user) {
-                    $user->update([
-                        'is_approved' => false,
-                        'status' => 'rejected',
-                        'has_requested_account' => false,
-                        'rejected_at' => now(),
-                    ]);
-
-                    // Log rejection action
-                    $this->logAuditAction('user_rejected', $user, [
-                        'rejected_by_admin' => $adminUser->name,
-                        'ip_address' => $request->ip(),
-                    ]);
-                }
-                $message = count($users) . ' users rejected.';
-            }
-
-            Log::info('Admin bulk user action completed', [
-                'admin_id' => $adminUser->id,
-                'action' => $request->action,
-                'processed_count' => $users->count(),
-            ]);
-
-            return redirect()->route('admin.users.pending')->with('status', $message);
-        } catch (\Exception $e) {
-            Log::error('Error performing bulk action on users', [
-                'admin_id' => $adminUser->id,
-                'action' => $request->action,
-                'error' => $e->getMessage(),
-            ]);
-
-            return redirect()->route('admin.users.pending')
-                ->withErrors(['error' => 'An error occurred while processing bulk actions.']);
-        }
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Pending approval bulk actions are disabled.');
     }
 
     public function approve(User $user): RedirectResponse
     {
-        $this->authorize('approve', $user);
-
-        $adminUser = Auth::user();
-
-        try {
-            $user->update([
-                'is_approved' => true,
-                'status' => 'approved',
-                'approved_at' => now(),
-                'approved_by' => $adminUser->id
-            ]);
-
-            // Log approval action
-            $this->logAuditAction('user_approved', $user, [
-                'approved_by_admin' => $adminUser->name,
-                'ip_address' => request()->ip(),
-            ]);
-
-            return redirect()->route('admin.users.pending')->with('status', 'User approved successfully.');
-        } catch (\Exception $e) {
-            Log::error('Error approving user', [
-                'admin_id' => $adminUser->id,
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return redirect()->route('admin.users.pending')
-                ->withErrors(['error' => 'An error occurred while approving the user.']);
-        }
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Manual approval is disabled.');
     }
 
     public function reject(User $user): RedirectResponse
     {
-        $this->authorize('reject', $user);
-
-        $adminUser = Auth::user();
-
-        Log::info('Admin reject requested', [
-            'admin_id' => $adminUser->id,
-            'target_user_id' => $user->id,
-            'current_status' => $user->status,
-            'method' => request()->method(),
-            'url' => request()->fullUrl(),
-        ]);
-
-        try {
-            $user->update([
-                'is_approved' => false,
-                'status' => 'rejected',
-                'has_requested_account' => false,
-                'rejected_at' => now(),
-            ]);
-
-            Log::info('Admin reject completed', [
-                'admin_id' => $adminUser->id,
-                'target_user_id' => $user->id,
-                'new_status' => $user->fresh()->status,
-            ]);
-
-            // Log rejection action
-            $this->logAuditAction('user_rejected', $user, [
-                'rejected_by_admin' => $adminUser->name,
-                'ip_address' => request()->ip(),
-            ]);
-
-            return redirect()->route('admin.users.pending')->with('status', 'User rejected.');
-        } catch (\Exception $e) {
-            Log::error('Error rejecting user', [
-                'admin_id' => $adminUser->id,
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return redirect()->route('admin.users.pending')
-                ->withErrors(['error' => 'An error occurred while rejecting the user.']);
-        }
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Manual approval rejection is disabled.');
     }
 
     public function resetPassword(Request $request, User $user): RedirectResponse

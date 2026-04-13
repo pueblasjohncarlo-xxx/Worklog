@@ -56,17 +56,19 @@ class RegisteredUserController extends Controller
             'has_requested_account' => true,
         ];
 
-        // Safely add approval workflow fields only if columns exist in database
+        // Registration no longer requires admin approval. Keep checks for schema compatibility.
         if (Schema::hasColumn('users', 'is_approved')) {
-            $userData['is_approved'] = false;
+            $userData['is_approved'] = true;
         }
 
         if (Schema::hasColumn('users', 'status')) {
-            $userData['status'] = 'pending';
+            $userData['status'] = 'approved';
         }
 
         $user = User::create($userData);
 
-        return redirect()->route('login')->with('status', 'Your account has been created and is pending admin approval.');
+        Auth::login($user);
+
+        return redirect()->route('dashboard')->with('status', 'Your account has been created successfully.');
     }
 }

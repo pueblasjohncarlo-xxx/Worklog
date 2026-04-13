@@ -51,6 +51,7 @@
                             required
                         >
                             <option value="admin">Admin</option>
+                            <option value="staff">Staff</option>
                             <option value="coordinator">Coordinator</option>
                             <option value="supervisor">Supervisor</option>
                             <option value="ojt_adviser">OJT Adviser</option>
@@ -106,6 +107,26 @@
                 </button>
                 <div x-show="open" class="overflow-x-auto">
                     <x-user-table :users="$admins" />
+                </div>
+            </div>
+
+            <!-- Staff -->
+            <div x-data="{ open: true }" class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
+                <button @click="open = !open" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2 py-1 rounded text-xs font-bold bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900 dark:text-fuchsia-300 uppercase">
+                            Staff
+                        </span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $staff->count() }} Users
+                        </span>
+                    </div>
+                    <svg class="h-5 w-5 text-gray-400 transform transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div x-show="open" class="overflow-x-auto">
+                    <x-user-table :users="$staff" />
                 </div>
             </div>
 

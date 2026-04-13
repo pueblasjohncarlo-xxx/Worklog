@@ -23,8 +23,10 @@
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                         {{ match($user->role) {
                             'admin' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+                            'staff' => 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-200',
                             'coordinator' => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
                             'supervisor' => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+                            'ojt_adviser' => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
                             'student' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
                             default => 'bg-gray-100 text-gray-800'
                         } }}">
@@ -62,8 +64,10 @@
                             @csrf
                             <select name="role" onchange="this.form.submit()" class="rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 text-xs py-1 pl-2 pr-6 focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="admin" @selected($user->role === 'admin')>Admin</option>
+                                <option value="staff" @selected($user->role === 'staff')>Staff</option>
                                 <option value="coordinator" @selected($user->role === 'coordinator')>Coordinator</option>
                                 <option value="supervisor" @selected($user->role === 'supervisor')>Supervisor</option>
+                                <option value="ojt_adviser" @selected($user->role === 'ojt_adviser')>OJT Adviser</option>
                                 <option value="student" @selected($user->role === 'student')>Student</option>
                             </select>
                         </form>

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\AuditLog;
-use App\Models\Company;
 use App\Models\User;
 use App\Models\WorkLog;
 use Carbon\Carbon;
@@ -24,13 +23,10 @@ class AdminController extends Controller
         $supervisors = User::where('role', User::ROLE_SUPERVISOR)->count();
         $students = User::where('role', User::ROLE_STUDENT)->count();
         $advisers = User::where('role', User::ROLE_OJT_ADVISER)->count();
+        $staff = User::where('role', User::ROLE_STAFF)->count();
         $activeUsers = User::where('last_login_at', '>=', Carbon::now()->subDays(7))->count();
-        $pendingApprovals = User::where('is_approved', false)
-            ->where('has_requested_account', true)
-            ->count();
 
-        // ===== Company & Assignment Metrics =====
-        $companies = Company::count();
+        // ===== Assignment Metrics =====
         $assignments = Assignment::count();
 
         // ===== Work Log & Review Metrics =====
@@ -50,16 +46,11 @@ class AdminController extends Controller
         // ===== User Role Distribution for Chart =====
         $userDistribution = [
             'Admins' => $admins,
+            'Staff' => $staff,
             'Coordinators' => $coordinators,
             'Supervisors' => $supervisors,
             'Students' => $students,
             'OJT Advisers' => $advisers,
-        ];
-
-        // ===== User Status Breakdown =====
-        $userApprovalStatus = [
-            'Approved' => $totalApprovedUsers,
-            'Pending' => $pendingApprovals,
         ];
 
         // ===== Registration Trends (Last 6 Months) =====
@@ -113,11 +104,10 @@ class AdminController extends Controller
             'supervisors' => $supervisors,
             'students' => $students,
             'advisers' => $advisers,
+            'staff' => $staff,
             'activeUsers' => $activeUsers,
-            'pendingApprovals' => $pendingApprovals,
 
             // Other Metrics
-            'companies' => $companies,
             'assignments' => $assignments,
             'workLogs' => $workLogs,
             'pendingReviews' => $pendingReviews,
@@ -129,7 +119,6 @@ class AdminController extends Controller
 
             // Chart Data
             'userDistribution' => $userDistribution,
-            'userApprovalStatus' => $userApprovalStatus,
             'registrationTrends' => $registrationTrends,
             'workLogTrends' => $workLogTrends,
         ]);

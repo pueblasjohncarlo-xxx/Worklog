@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assignment;
+use App\Models\Leave;
 use App\Models\PerformanceEvaluation;
 use App\Models\User;
 use App\Models\WorkLog;
+use App\Notifications\LeaveStatusUpdatedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class OjtAdviserController extends Controller
@@ -211,5 +214,116 @@ class OjtAdviserController extends Controller
             ->get();
 
         return view('ojt_adviser.reports.index', compact('assignments'));
+    }
+
+    public function leavesIndex(Request $request): View
+    {
+        $assignments = Assignment::where('ojt_adviser_id', Auth::id())
+            ->where('status', 'active')
+            ->pluck('id');
+
+        Leave::whereIn('assignment_id', $assignments)
+            ->where('status', Leave::STATUS_SUBMITTED)
+            ->update(['status' => Leave::STATUS_PENDING]);
+
+        $query = Leave::with(['assignment.student', 'assignment.company', 'reviewer'])
+            ->whereIn('assignment_id', $assignments)
+            ->orderByDesc('created_at');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status')->toString());
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('start_date', '>=', $request->date('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('end_date', '<=', $request->date('date_to'));
+        }
+
+        if ($request->filled('q')) {
+            $search = trim((string) $request->string('q'));
+            $query->where(function ($q) use ($search) {
+                $q->where('type', 'like', '%'.$search.'%')
+                    ->orWhere('reason', 'like', '%'.$search.'%')
+                    ->orWhere('student_name', 'like', '%'.$search.'%');
+            });
+        }
+
+        $leaves = $query->paginate(30)->withQueryString();
+
+        return view('ojt_adviser.leaves.index', compact('leaves'));
+    }
+
+    public function approveLeave(Request $request, Leave $leave)
+    {
+        $this->authorizeAdviser($leave);
+
+        $validated = $request->validate([
+            'reviewer_remarks' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        if (! in_array($leave->status, [Leave::STATUS_SUBMITTED, Leave::STATUS_PENDING], true)) {
+            return back()->withErrors(['leave' => 'Only submitted/pending leave requests can be approved.']);
+        }
+
+        $leave->update([
+            'status' => Leave::STATUS_APPROVED,
+            'reviewer_remarks' => $validated['reviewer_remarks'] ?? null,
+            'reviewer_id' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        if ($leave->assignment?->student) {
+            $leave->assignment->student->notify(new LeaveStatusUpdatedNotification($leave->fresh()));
+        }
+
+        Log::info('OJT adviser approved leave', [
+            'leave_id' => $leave->id,
+            'ojt_adviser_id' => Auth::id(),
+            'status' => $leave->status,
+        ]);
+
+        return redirect()->back()->with('status', 'Leave request approved.');
+    }
+
+    public function rejectLeave(Request $request, Leave $leave)
+    {
+        $this->authorizeAdviser($leave);
+
+        $validated = $request->validate([
+            'reviewer_remarks' => ['required', 'string', 'max:1000'],
+        ]);
+
+        if (! in_array($leave->status, [Leave::STATUS_SUBMITTED, Leave::STATUS_PENDING], true)) {
+            return back()->withErrors(['leave' => 'Only submitted/pending leave requests can be rejected.']);
+        }
+
+        $leave->update([
+            'status' => Leave::STATUS_REJECTED,
+            'reviewer_remarks' => $validated['reviewer_remarks'],
+            'reviewer_id' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        if ($leave->assignment?->student) {
+            $leave->assignment->student->notify(new LeaveStatusUpdatedNotification($leave->fresh()));
+        }
+
+        Log::info('OJT adviser rejected leave', [
+            'leave_id' => $leave->id,
+            'ojt_adviser_id' => Auth::id(),
+            'status' => $leave->status,
+        ]);
+
+        return redirect()->back()->with('status', 'Leave request rejected.');
+    }
+
+    private function authorizeAdviser(Leave $model): void
+    {
+        if ($model->assignment->ojt_adviser_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
     }
 }

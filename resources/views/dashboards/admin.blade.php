@@ -40,18 +40,6 @@
                     </div>
                 </div>
 
-                <!-- Companies -->
-                <div class="group bg-gradient-to-br from-cyan-600/20 to-cyan-600/10 border border-cyan-500/30 rounded-lg p-3 hover:border-cyan-500/50 transition-all">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-[10px] text-cyan-200 font-bold uppercase tracking-wider">Companies</p>
-                            <p class="text-xl font-black text-white mt-0.5">{{ $companies }}</p>
-                            <p class="text-[10px] text-cyan-300">Partners</p>
-                        </div>
-                        <svg class="h-6 w-6 text-cyan-400/40" fill="currentColor" viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm4 8H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm10 12h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-8V3h8v2z" /></svg>
-                    </div>
-                </div>
-
                 <!-- Pending -->
                 <div class="group bg-gradient-to-br from-red-600/20 to-red-600/10 border border-red-500/30 rounded-lg p-3 hover:border-red-500/50 transition-all">
                     <div class="flex items-center justify-between">
@@ -80,6 +68,10 @@
                     <p class="text-sm font-black text-white leading-none mt-1">{{ $students }}</p>
                 </div>
                 <div class="bg-black/20 border border-white/5 rounded p-1.5 text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase italic">Staff</p>
+                    <p class="text-sm font-black text-white leading-none mt-1">{{ $staff }}</p>
+                </div>
+                <div class="bg-black/20 border border-white/5 rounded p-1.5 text-center">
                     <p class="text-[9px] text-red-500 font-bold uppercase italic">Audit</p>
                     <p class="text-sm font-black text-white leading-none mt-1">{{ $recentAuditLogs->count() }}</p>
                 </div>
@@ -87,7 +79,7 @@
         </div>
 
         <!-- ===== ROW 2: MAIN VISUALS (UPPER HALF) ===== -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Role Distribution -->
             <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-lg p-3 shadow-lg">
                 <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-2">Role Mix</h3>
@@ -95,16 +87,6 @@
                     <canvas id="userDistributionChart" 
                         data-labels="{{ json_encode(array_keys($userDistribution)) }}"
                         data-values="{{ json_encode(array_values($userDistribution)) }}"></canvas>
-                </div>
-            </div>
-
-            <!-- Approval Status -->
-            <div class="bg-black/40 backdrop-blur-md border border-emerald-500/20 rounded-lg p-3 shadow-lg">
-                <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-2">Approval Status</h3>
-                <div class="relative h-[160px]">
-                    <canvas id="userApprovalChart" 
-                        data-labels="{{ json_encode(array_keys($userApprovalStatus)) }}"
-                        data-values="{{ json_encode(array_values($userApprovalStatus)) }}"></canvas>
                 </div>
             </div>
 
@@ -173,33 +155,6 @@
                     options: {
                         ...chartDefaults,
                         cutout: '70%'
-                    }
-                });
-            }
-
-            // User Approval Status Chart
-            const approvalCanvas = document.getElementById('userApprovalChart');
-            if (approvalCanvas && approvalCanvas.dataset.labels) {
-                const approvalLabels = JSON.parse(approvalCanvas.dataset.labels);
-                const approvalData = JSON.parse(approvalCanvas.dataset.values);
-                const approvalCtx = approvalCanvas.getContext('2d');
-                
-                new Chart(approvalCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: approvalLabels,
-                        datasets: [{
-                            data: approvalData,
-                            backgroundColor: [
-                                '#10b981', // emerald
-                                '#f59e0b', // amber
-                            ],
-                            borderWidth: 0,
-                            hoverOffset: 12
-                        }]
-                    },
-                    options: {
-                        ...chartDefaults
                     }
                 });
             }
