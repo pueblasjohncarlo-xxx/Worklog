@@ -51,6 +51,8 @@ class RoleAccessTest extends TestCase
             'email' => 'student@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'section' => 'BSIT-4A',
+            'department' => 'Computer Technology',
         ]);
 
         $response->assertRedirect('/login');
@@ -58,7 +60,28 @@ class RoleAccessTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'student@example.com',
             'role' => User::ROLE_STUDENT,
+            'section' => 'BSIT-4A',
+            'department' => 'Computer Technology',
             'status' => 'pending',
+        ]);
+    }
+
+    public function test_registration_rejects_invalid_student_section_or_major(): void
+    {
+        $response = $this->post('/register', [
+            'name' => 'Invalid Student',
+            'email' => 'invalid.student@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'role' => User::ROLE_STUDENT,
+            'section' => 'BSIT-5X',
+            'department' => 'Random Major',
+        ]);
+
+        $response->assertSessionHasErrors(['section', 'department']);
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'invalid.student@example.com',
         ]);
     }
 

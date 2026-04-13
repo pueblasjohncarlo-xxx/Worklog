@@ -27,7 +27,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-sm text-gray-400">{{ $assignment->student->studentProfile->department ?? 'N/A' }}</span>
+                                    <span class="text-sm text-gray-400">{{ $assignment->student->studentProfile->department ?? $assignment->student->department ?? 'N/A' }}</span>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="text-sm text-gray-400">{{ $assignment->company->name }}</span>

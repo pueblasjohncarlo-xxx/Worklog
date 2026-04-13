@@ -9,10 +9,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
+    private const STUDENT_SECTIONS = [
+        'BSIT-4A',
+        'BSIT-4B',
+        'BSIT-4C',
+        'BSIT-4D',
+        'BSIT-4AE',
+    ];
+
+    private const STUDENT_MAJORS = [
+        'Computer Technology',
+        'Electronics Technology',
+    ];
+
     /**
      * Display the registration view.
      */
@@ -26,13 +40,17 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $request->merge([
+            'role' => $request->input('role', User::ROLE_STUDENT),
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['nullable', 'string', 'in:student,supervisor,ojt_adviser'],
-            'section' => ['nullable', 'string', 'max:100'],
-            'department' => ['nullable', 'string', 'max:255'],
+            'role' => ['required', 'string', Rule::in([User::ROLE_STUDENT, User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER])],
+            'section' => ['required_if:role,'.User::ROLE_STUDENT, 'nullable', 'string', Rule::in(self::STUDENT_SECTIONS)],
+            'department' => ['required_if:role,'.User::ROLE_STUDENT, 'nullable', 'string', Rule::in(self::STUDENT_MAJORS)],
         ]);
 
         $role = $validated['role'] ?? User::ROLE_STUDENT;
@@ -50,8 +68,8 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'encrypted_password' => Crypt::encryptString($request->password),
             'role' => $role,
-            'section' => $request->section,
-            'department' => $request->department,
+            'section' => $role === User::ROLE_STUDENT ? ($validated['section'] ?? null) : null,
+            'department' => $role === User::ROLE_STUDENT ? ($validated['department'] ?? null) : null,
             'has_requested_account' => true,
         ];
 

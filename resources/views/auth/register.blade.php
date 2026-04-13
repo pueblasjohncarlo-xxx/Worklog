@@ -63,29 +63,37 @@
                     <label for="section" class="block text-sm font-medium text-purple-100">
                         Course/Section
                     </label>
-                    <input
+                    <select
                         id="section"
                         name="section"
-                        type="text"
-                        value="{{ old('section') }}"
                         :required="role === 'student'"
                         class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
-                        placeholder="e.g. BSIT-4A"
                     >
+                        <option value="" class="text-gray-400">Select Course/Section</option>
+                        @foreach (['BSIT-4A', 'BSIT-4B', 'BSIT-4C', 'BSIT-4D', 'BSIT-4AE'] as $sectionOption)
+                            <option value="{{ $sectionOption }}" @selected(old('section') === $sectionOption)>
+                                {{ $sectionOption }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="space-y-1">
                     <label for="department" class="block text-sm font-medium text-purple-100">
                         Major
                     </label>
-                    <input
+                    <select
                         id="department"
                         name="department"
-                        type="text"
-                        value="{{ old('department') }}"
                         :required="role === 'student'"
                         class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
-                        placeholder="e.g. Computer Tech"
                     >
+                        <option value="" class="text-gray-400">Select Major</option>
+                        @foreach (['Computer Technology', 'Electronics Technology'] as $majorOption)
+                            <option value="{{ $majorOption }}" @selected(old('department') === $majorOption)>
+                                {{ $majorOption }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
