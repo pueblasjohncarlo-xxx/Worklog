@@ -37,9 +37,11 @@ class CoordinatorController extends Controller
             ->where('status', 'active')
             ->get()
             ->map(function ($assignment) {
+                $student = $assignment->student;
+
                 return [
-                    'student_name' => $assignment->student->name,
-                    'student_section' => $assignment->student->section ?? 'No Section',
+                    'student_name' => $student->name,
+                    'student_section' => $student->normalizedStudentSection() ?? User::STUDENT_SECTION_BSIT_4A,
                     'industry_name' => $assignment->company->industry ?: $assignment->company->name,
                     'supervisor_name' => optional($assignment->supervisor)->name,
                     'progress' => $assignment->progressPercentage(),
@@ -152,7 +154,7 @@ class CoordinatorController extends Controller
         $sectionProgress = Assignment::with('student')
             ->where('status', 'active')
             ->get()
-            ->groupBy(fn ($a) => $a->student->section ?? 'No Section')
+            ->groupBy(fn ($a) => $a->student->normalizedStudentSection() ?? User::STUDENT_SECTION_BSIT_4A)
             ->map(function ($assignments, $section) {
                 return [
                     'section' => $section,
@@ -230,13 +232,15 @@ class CoordinatorController extends Controller
             ->values();
 
         $departmentSectionOptions = [
-            'Computer Technology' => ['4A', '4B', '4C', '4D'],
-            'Electronics Technology' => ['4AE'],
-        ];
-
-        $departmentKeywords = [
-            'Computer Technology' => ['computer', 'comptech'],
-            'Electronics Technology' => ['electronics', 'electronic'],
+            User::STUDENT_MAJOR_COMPUTER_TECHNOLOGY => [
+                User::STUDENT_SECTION_BSIT_4A,
+                User::STUDENT_SECTION_BSIT_4B,
+                User::STUDENT_SECTION_BSIT_4C,
+                User::STUDENT_SECTION_BSIT_4D,
+            ],
+            User::STUDENT_MAJOR_ELECTRONICS_TECHNOLOGY => [
+                User::STUDENT_SECTION_BSIT_4AE,
+            ],
         ];
 
         // Get students with active assignments first, then include all students for display
@@ -245,52 +249,14 @@ class CoordinatorController extends Controller
             ->orderBy('name')
             ->get();
 
-        $normalizeSection = function (?string $section) {
-            $value = strtoupper(trim((string) $section));
-            if ($value === '') {
-                return null;
-            }
-
-            $compact = str_replace([' ', '_'], '', $value);
-            $compact = str_replace(['—', '–'], '-', $compact);
-
-            if (preg_match('/\b(4A[E]?|4B|4C|4D)\b/', $compact, $m)) {
-                return $m[1];
-            }
-
-            if (preg_match('/(4A[E]?|4B|4C|4D)$/', $compact, $m)) {
-                return $m[1];
-            }
-
-            $parts = explode('-', $compact);
-            $tail = end($parts) ?: null;
-            if ($tail && preg_match('/^(4A[E]?|4B|4C|4D)$/', $tail)) {
-                return $tail;
-            }
-
-            return null;
-        };
-
-        $departmentsData = collect($departmentSectionOptions)->map(function (array $sectionOptions, string $department) use ($studentsForDepartments, $normalizeSection, $departmentKeywords, $activeStudentIds) {
-            $students = $studentsForDepartments->filter(function (User $u) use ($department, $departmentKeywords) {
-                $dept = (string) ($u->department ?? '');
-                if ($dept === '') {
-                    return false;
-                }
-
-                $keywords = $departmentKeywords[$department] ?? [$department];
-                foreach ($keywords as $keyword) {
-                    if (stripos($dept, $keyword) !== false) {
-                        return true;
-                    }
-                }
-
-                return false;
+        $departmentsData = collect($departmentSectionOptions)->map(function (array $sectionOptions, string $department) use ($studentsForDepartments, $activeStudentIds) {
+            $students = $studentsForDepartments->filter(function (User $u) use ($department) {
+                return $u->normalizedStudentDepartment() === $department;
             });
 
-            $studentsBySection = collect($sectionOptions)->mapWithKeys(function (string $section) use ($students, $normalizeSection, $activeStudentIds) {
-                $filtered = $students->filter(function (User $u) use ($normalizeSection, $section) {
-                    return $normalizeSection($u->section) === $section;
+            $studentsBySection = collect($sectionOptions)->mapWithKeys(function (string $section) use ($students, $activeStudentIds) {
+                $filtered = $students->filter(function (User $u) use ($section) {
+                    return $u->normalizedStudentSection() === $section;
                 });
 
                 return [
@@ -502,6 +468,8 @@ class CoordinatorController extends Controller
         $query = User::where('role', User::ROLE_STUDENT)
             ->with(['studentAssignments.company', 'studentAssignments.supervisor']);
 
+        $query = $this->applyApprovedStudentScope($query);
+
         // Search by Name or Email
         if ($request->has('search') && $request->search) {
             $searchTerm = $request->search;
@@ -545,13 +513,19 @@ class CoordinatorController extends Controller
         // Get all students matching filters
         $students = $query->get();
 
-        // Group by Section/Department if no specific filters that break grouping are applied
-        // For the overview, we want to see students grouped by Section (e.g. BSIT-4A)
-        $groupedStudents = $students->groupBy(function ($item, $key) {
-            $section = $item->section ?? 'No Section';
-            $department = $item->department ? "({$item->department})" : '';
+        $students = $students->map(function (User $student) {
+            $student->section = $student->normalizedStudentSection();
+            $student->department = $student->normalizedStudentDepartment();
 
-            return trim("$section $department");
+            return $student;
+        });
+
+        // Group students using normalized section-major labels only.
+        $groupedStudents = $students->groupBy(function (User $student) {
+            $section = $student->section ?? User::STUDENT_SECTION_BSIT_4A;
+            $department = $student->department ?? User::STUDENT_MAJOR_COMPUTER_TECHNOLOGY;
+
+            return sprintf('%s (%s)', $section, $department);
         })->sortKeys();
 
         return view('coordinator.student-overview', compact('groupedStudents', 'companies'));
@@ -687,7 +661,7 @@ class CoordinatorController extends Controller
                     'email' => $student?->email,
                     'program' => $student->studentProfile?->program ?? 'N/A',
                     'year_level' => $student->studentProfile?->year_level ?? 'N/A',
-                    'section' => $student?->section ?? 'No Section',
+                    'section' => $student?->normalizedStudentSection() ?? User::STUDENT_SECTION_BSIT_4A,
                     'company' => $assignment->company?->name,
                     'company_id' => $assignment->company?->id,
                     'supervisor' => $assignment->supervisor?->name,
@@ -749,7 +723,7 @@ class CoordinatorController extends Controller
         // Group by Student Section and Name
         $groupedJournals = $journals->groupBy(function ($log) {
             $student = $log->assignment->student;
-            $section = $student->section ?? 'No Section';
+            $section = $student?->normalizedStudentSection() ?? User::STUDENT_SECTION_BSIT_4A;
 
             return $section;
         })->sortKeys()->map(function ($logs) {
@@ -772,14 +746,14 @@ class CoordinatorController extends Controller
         // Group by Section/Department like student overview
         $groupedReports = $workLogs->groupBy(function ($log) {
             $student = $log->assignment?->student;
-            if (!$student) {
-                return 'No Section';
+            if (! $student) {
+                return sprintf('%s (%s)', User::STUDENT_SECTION_BSIT_4A, User::STUDENT_MAJOR_COMPUTER_TECHNOLOGY);
             }
-            
-            $section = $student->section ?? 'No Section';
-            $department = $student->department ? "({$student->department})" : '';
 
-            return trim("$section $department");
+            $section = $student->normalizedStudentSection() ?? User::STUDENT_SECTION_BSIT_4A;
+            $department = $student->normalizedStudentDepartment() ?? User::STUDENT_MAJOR_COMPUTER_TECHNOLOGY;
+
+            return sprintf('%s (%s)', $section, $department);
         })->sortKeys();
 
         return view('coordinator.accomplishment-reports.index', compact('groupedReports', 'workLogs'));
@@ -896,11 +870,22 @@ class CoordinatorController extends Controller
 
         // Get students and group by section for Select2
         $students = User::where('role', User::ROLE_STUDENT)
+            ->when(Schema::hasColumn('users', 'status'), function ($q) {
+                $q->where(function ($s) {
+                    $s->whereIn('status', ['approved', 'active'])
+                        ->orWhereNull('status');
+                });
+            })
+            ->when(Schema::hasColumn('users', 'is_approved'), function ($q) {
+                $q->where('is_approved', true);
+            })
             ->orderBy('section')
             ->orderBy('lastname')
             ->get()
             ->groupBy(function ($student) {
-                return $student->section ? "Section: {$student->section}" : 'No Section';
+                $normalizedSection = $student->normalizedStudentSection() ?? User::STUDENT_SECTION_BSIT_4A;
+
+                return "Section: {$normalizedSection}";
             });
 
         $supervisors = User::where('role', User::ROLE_SUPERVISOR)->orderBy('name')->get();
@@ -1172,6 +1157,29 @@ class CoordinatorController extends Controller
 
         return redirect()->route('coordinator.registrations.pending')
             ->with('status', 'Account request rejected.');
+    }
+
+    private function applyApprovedStudentScope($query)
+    {
+        if (Schema::hasColumn('users', 'status')) {
+            $query->where(function ($q) {
+                $q->whereIn('status', ['approved', 'active']);
+
+                if (Schema::hasColumn('users', 'is_approved')) {
+                    $q->orWhere(function ($fallback) {
+                        $fallback->whereNull('status')->where('is_approved', true);
+                    });
+                }
+            });
+        } elseif (Schema::hasColumn('users', 'is_approved')) {
+            $query->where('is_approved', true);
+        }
+
+        if (Schema::hasColumn('users', 'status')) {
+            $query->where('status', '!=', 'rejected');
+        }
+
+        return $query;
     }
 
     private function invalidateUserSessions(User $user): void

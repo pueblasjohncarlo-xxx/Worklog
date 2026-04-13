@@ -325,7 +325,7 @@
                                                                             <div class="text-xs text-gray-500">{{ $assignment->student->email }}</div>
                                                                         </div>
                                                                     </div>
-                                                                    <span class="text-xs text-gray-400">{{ $assignment->student->section ?? 'No Section' }}</span>
+                                                                    <span class="text-xs text-gray-400">{{ $assignment->student->normalizedStudentSection() ?? \App\Models\User::STUDENT_SECTION_BSIT_4A }}</span>
                                                                 </div>
                                                             @empty
                                                                 <p class="text-sm text-gray-500 text-center py-4">No active students assigned.</p>

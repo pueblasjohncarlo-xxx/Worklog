@@ -1,4 +1,8 @@
 <x-guest-layout>
+    @php
+        $studentSectionOptions = \App\Models\User::STUDENT_SECTIONS;
+        $studentMajorOptions = \App\Models\User::STUDENT_MAJORS;
+    @endphp
     <div class="rounded-3xl bg-purple-900/60 border border-purple-500/30 shadow-2xl backdrop-blur-md px-8 py-10 space-y-8">
         <div class="text-center space-y-2">
             <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 shadow-lg">
@@ -70,7 +74,7 @@
                         class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
                     >
                         <option value="" class="text-gray-400">Select Course/Section</option>
-                        @foreach (['BSIT-4A', 'BSIT-4B', 'BSIT-4C', 'BSIT-4D', 'BSIT-4AE'] as $sectionOption)
+                        @foreach ($studentSectionOptions as $sectionOption)
                             <option value="{{ $sectionOption }}" @selected(old('section') === $sectionOption)>
                                 {{ $sectionOption }}
                             </option>
@@ -88,7 +92,7 @@
                         class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
                     >
                         <option value="" class="text-gray-400">Select Major</option>
-                        @foreach (['Computer Technology', 'Electronics Technology'] as $majorOption)
+                        @foreach ($studentMajorOptions as $majorOption)
                             <option value="{{ $majorOption }}" @selected(old('department') === $majorOption)>
                                 {{ $majorOption }}
                             </option>

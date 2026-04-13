@@ -14,19 +14,6 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    private const STUDENT_SECTIONS = [
-        'BSIT-4A',
-        'BSIT-4B',
-        'BSIT-4C',
-        'BSIT-4D',
-        'BSIT-4AE',
-    ];
-
-    private const STUDENT_MAJORS = [
-        'Computer Technology',
-        'Electronics Technology',
-    ];
-
     /**
      * Display the registration view.
      */
@@ -49,11 +36,17 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'string', Rule::in([User::ROLE_STUDENT, User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER])],
-            'section' => ['required_if:role,'.User::ROLE_STUDENT, 'nullable', 'string', Rule::in(self::STUDENT_SECTIONS)],
-            'department' => ['required_if:role,'.User::ROLE_STUDENT, 'nullable', 'string', Rule::in(self::STUDENT_MAJORS)],
+            'section' => ['required_if:role,'.User::ROLE_STUDENT, 'nullable', 'string', Rule::in(User::STUDENT_SECTIONS)],
+            'department' => ['required_if:role,'.User::ROLE_STUDENT, 'nullable', 'string', Rule::in(User::STUDENT_MAJORS)],
         ]);
 
         $role = $validated['role'] ?? User::ROLE_STUDENT;
+        $normalizedDepartment = $role === User::ROLE_STUDENT
+            ? User::normalizeStudentDepartment($validated['department'] ?? null)
+            : null;
+        $normalizedSection = $role === User::ROLE_STUDENT
+            ? User::normalizeStudentSection($validated['section'] ?? null, $normalizedDepartment)
+            : null;
         $email = $request->email;
         $existingUser = User::where('email', $email)->first();
 
@@ -68,8 +61,8 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'encrypted_password' => Crypt::encryptString($request->password),
             'role' => $role,
-            'section' => $role === User::ROLE_STUDENT ? ($validated['section'] ?? null) : null,
-            'department' => $role === User::ROLE_STUDENT ? ($validated['department'] ?? null) : null,
+            'section' => $normalizedSection,
+            'department' => $normalizedDepartment,
             'has_requested_account' => true,
         ];
 

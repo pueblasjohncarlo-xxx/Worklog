@@ -78,25 +78,39 @@ class DashboardController extends Controller
         try {
             // Get OJT Students section progress data
             $sectionProgress = Assignment::select(
-                    DB::raw("COALESCE(users.section, 'No Section') as section"),
+                    DB::raw('users.section as section'),
                     DB::raw('COUNT(DISTINCT assignments.student_id) as count')
                 )
                 ->join('users', 'assignments.student_id', '=', 'users.id')
                 ->where('assignments.status', 'active')
                 ->groupBy('users.section')
                 ->orderBy('count', 'desc')
-                ->get();
+                ->get()
+                ->map(function ($row) {
+                    return [
+                        'section' => User::normalizeStudentSection($row->section) ?? User::STUDENT_SECTION_BSIT_4A,
+                        'count' => (int) $row->count,
+                    ];
+                })
+                ->groupBy('section')
+                ->map(function ($rows, $section) {
+                    return (object) [
+                        'section' => $section,
+                        'count' => $rows->sum('count'),
+                    ];
+                })
+                ->values();
             
             // If no results, provide empty safe state
             if ($sectionProgress->isEmpty()) {
                 $sectionProgress = collect([
-                    (object)['section' => 'No Section', 'count' => 0]
+                    (object)['section' => User::STUDENT_SECTION_BSIT_4A, 'count' => 0]
                 ]);
             }
         } catch (\Exception $e) {
             \Log::error('Dashboard: Failed to get section progress', ['error' => $e->getMessage()]);
             $sectionProgress = collect([
-                (object)['section' => 'No Section', 'count' => 0]
+                (object)['section' => User::STUDENT_SECTION_BSIT_4A, 'count' => 0]
             ]);
         }
 

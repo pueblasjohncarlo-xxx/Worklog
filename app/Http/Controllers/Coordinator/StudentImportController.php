@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class StudentImportController extends Controller
@@ -157,6 +158,18 @@ class StudentImportController extends Controller
                 'department' => $indices['department'] !== false ? trim($row[$indices['department']]) : '',
             ];
 
+            $studentData['department'] = User::normalizeStudentDepartment($studentData['department']);
+            $studentData['section'] = User::normalizeStudentSection($studentData['section'], $studentData['department']);
+
+            if ($studentData['department'] === null) {
+                $studentData['department'] = User::inferStudentDepartmentFromSection($studentData['section']);
+            }
+
+            if ($studentData['section'] === null) {
+                $studentData['section'] = User::normalizeStudentSection(null, $studentData['department'])
+                    ?? User::STUDENT_SECTION_BSIT_4A;
+            }
+
             // Normalize Gender
             $rawGender = strtolower($studentData['gender']);
             if ($rawGender === 'male' || $rawGender === 'm' || $rawGender === 'boy') {
@@ -174,17 +187,17 @@ class StudentImportController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255|unique:users,email',
                 'password' => 'required|string|min:8|max:255',
-                'section' => 'nullable|string|max:255',
-                'department' => 'nullable|string|max:255',
+                'section' => ['nullable', 'string', Rule::in(User::STUDENT_SECTIONS)],
+                'department' => ['nullable', 'string', Rule::in(User::STUDENT_MAJORS)],
             ] : [
                 'lastname' => 'required|string|max:255',
                 'firstname' => 'required|string|max:255',
                 'middlename' => 'nullable|string|max:255',
                 'age' => 'nullable|integer|min:16',
                 'gender' => 'nullable|string|in:Male,Female,Other',
-                'section' => 'nullable|string|max:255',
+                'section' => ['nullable', 'string', Rule::in(User::STUDENT_SECTIONS)],
                 'email' => 'required|email|max:255|unique:users,email',
-                'department' => 'nullable|string|max:255',
+                'department' => ['nullable', 'string', Rule::in(User::STUDENT_MAJORS)],
             ]);
 
             if ($validator->fails()) {
@@ -211,6 +224,7 @@ class StudentImportController extends Controller
                 'section' => $studentData['section'],
                 'department' => $studentData['department'],
                 'is_approved' => true, // Imported students are automatically approved
+                'status' => 'approved',
                 'has_requested_account' => true,
             ]);
 
