@@ -36,6 +36,16 @@
             </div>
         </a>
 
+        <!-- Invitation Links -->
+        <a href="{{ route('invitations.index') }}"
+           class="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base {{ request()->routeIs('invitations.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+            <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m5 7H6a2 2 0 01-2-2V7a2 2 0 012-2h2l2-2h4l2 2h2a2 2 0 012 2v12a2 2 0 01-2 2z" />
+            </svg>
+            <span class="font-medium hidden sm:inline">Invitation Links</span>
+            <span class="font-medium sm:hidden text-xs">Invites</span>
+        </a>
+
         @if(auth()->user()->role === \App\Models\User::ROLE_ADMIN)
             <!-- Pending approvals, company, and leave processing are intentionally hidden from Admin navigation. -->
         @endif

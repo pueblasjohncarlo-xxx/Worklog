@@ -9,6 +9,7 @@ use App\Http\Controllers\Coordinator\StudentImportController;
 use App\Http\Controllers\Coordinator\DashboardController;
 use App\Http\Controllers\CoordinatorController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -117,6 +118,12 @@ Route::post('/locale', function (Request $request) {
 
     return back();
 })->name('locale.set');
+
+Route::middleware(['auth', 'verified', 'role:coordinator,admin'])->group(function () {
+    Route::get('/invitations', [InvitationController::class, 'index'])->name('invitations.index');
+    Route::post('/invitations', [InvitationController::class, 'store'])->name('invitations.store');
+    Route::post('/invitations/{invitation}/revoke', [InvitationController::class, 'revoke'])->name('invitations.revoke');
+});
 
 Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
     Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');

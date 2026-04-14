@@ -3,6 +3,10 @@
         $studentSectionOptions = \App\Models\User::STUDENT_SECTIONS;
         $studentMajorOptions = \App\Models\User::STUDENT_MAJORS;
         $companyOptions = $companies ?? collect();
+        $invitationData = $invitation ?? null;
+        $invitedRole = $invitationData?->role;
+        $invitedEmail = $invitationData?->email;
+        $invitedCompanyId = $invitationData?->company_id;
     @endphp
     <div class="rounded-3xl bg-purple-900/60 border border-purple-500/30 shadow-2xl backdrop-blur-md px-8 py-10 space-y-8">
         <div class="text-center space-y-2">
@@ -20,8 +24,25 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register') }}" class="space-y-5" x-data="{ role: '{{ old('role', 'student') }}' }">
+        @if (!empty($inviteError))
+            <div class="mb-4 rounded-xl border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-100">
+                {{ $inviteError }}
+            </div>
+        @endif
+
+        @if ($invitationData)
+            <div class="mb-4 rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-3 text-sm text-emerald-100">
+                You are registering through an invitation for <span class="font-semibold">{{ ucfirst(str_replace('_', ' ', $invitedRole)) }}</span>
+                using <span class="font-semibold">{{ $invitedEmail }}</span>.
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('register') }}" class="space-y-5" x-data="{ role: '{{ old('role', $invitedRole ?? 'student') }}' }">
             @csrf
+
+            @if ($invitationData && !empty($inviteToken))
+                <input type="hidden" name="invite_token" value="{{ $inviteToken }}">
+            @endif
 
             <div class="space-y-1">
                 <label for="name" class="block text-sm font-medium text-purple-100">
@@ -48,6 +69,7 @@
                     id="role"
                     name="role"
                     x-model="role"
+                    @disabled($invitationData)
                     class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
                 >
                     <option value="student">
@@ -60,6 +82,9 @@
                         OJT Adviser
                     </option>
                 </select>
+                @if ($invitationData)
+                    <input type="hidden" name="role" value="{{ $invitedRole }}">
+                @endif
             </div>
 
             <!-- Student Specific Fields -->
@@ -111,15 +136,19 @@
                     id="company_id"
                     name="company_id"
                     :required="role === 'supervisor'"
+                    @disabled($invitationData && $invitedRole === \App\Models\User::ROLE_SUPERVISOR && !empty($invitedCompanyId))
                     class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
                 >
                     <option value="">Select company</option>
                     @foreach ($companyOptions as $companyOption)
-                        <option value="{{ $companyOption->id }}" @selected((string) old('company_id') === (string) $companyOption->id)>
+                        <option value="{{ $companyOption->id }}" @selected((string) old('company_id', $invitedCompanyId) === (string) $companyOption->id)>
                             {{ $companyOption->name }}
                         </option>
                     @endforeach
                 </select>
+                @if ($invitationData && $invitedRole === \App\Models\User::ROLE_SUPERVISOR && !empty($invitedCompanyId))
+                    <input type="hidden" name="company_id" value="{{ $invitedCompanyId }}">
+                @endif
                 @if ($companyOptions->isEmpty())
                     <p class="text-xs text-amber-300">
                         No companies are available right now. Please contact the coordinator to create your supervisor account.
@@ -135,8 +164,9 @@
                     id="email"
                     name="email"
                     type="email"
-                    value="{{ old('email') }}"
+                    value="{{ old('email', $invitedEmail) }}"
                     required
+                    @readonly($invitationData)
                     autocomplete="username"
                     class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
                     placeholder="email@example.com"
