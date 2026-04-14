@@ -25,7 +25,13 @@
             ->values();
     @endphp
 
-    <div class="space-y-6" x-data="phAddress()">
+    <div class="space-y-6" x-data='phAddress(@json([
+        "country" => old("country", ""),
+        "city" => old("city", ""),
+        "state" => old("state", ""),
+        "postal_code" => old("postal_code", ""),
+        "address" => old("address", ""),
+    ]))'>
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
                 <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Companies</p>
@@ -121,6 +127,10 @@
 
                     <details class="rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-5" @if(old('country') || old('address') || old('city') || old('state') || old('postal_code')) open @endif>
                         <summary class="cursor-pointer text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Address Details (Optional)</summary>
+                        <input type="hidden" name="address" :value="formatAddressForSubmit()">
+                        <input type="hidden" name="city" :value="city">
+                        <input type="hidden" name="state" :value="isPhilippines ? province : stateText">
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div class="space-y-1 relative">
                                 <label for="country" class="block text-sm font-medium">Country</label>
@@ -136,8 +146,8 @@
                             </div>
 
                             <div class="space-y-1 relative">
-                                <label for="address" class="block text-sm font-medium">Street Address</label>
-                                <input id="address" name="address" type="text" x-model="address" @input="searchAddress()" @focus="searchAddress()" @click.away="showAddressList = false" autocomplete="off" placeholder="Start typing address..." class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label for="street_address" class="block text-sm font-medium">Street Address</label>
+                                <input id="street_address" type="text" x-model="streetAddress" @input="searchAddress()" @focus="searchAddress()" @click.away="showAddressList = false" autocomplete="off" placeholder="Start typing address..." class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <div x-show="showAddressList && filteredAddresses.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
                                     <template x-for="a in filteredAddresses" :key="a.display_name">
                                         <div @click="selectAddress(a)" class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm border-b border-gray-100 dark:border-gray-600 last:border-0">
@@ -149,10 +159,42 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div x-show="isPhilippines" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div>
+                                <label for="province_create" class="block text-sm font-medium">Province</label>
+                                <select id="province_create" x-model="province" @change="onCreateProvinceChange()" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Select province</option>
+                                    <template x-for="prov in provinces" :key="prov.code">
+                                        <option :value="prov.name" x-text="prov.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="city_create_ph" class="block text-sm font-medium">City / Municipality</label>
+                                <select id="city_create_ph" x-model="city" @change="onCreateCityChange()" :disabled="!province" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Select city/municipality</option>
+                                    <template x-for="cityOption in createCityOptions" :key="cityOption.code">
+                                        <option :value="cityOption.name" x-text="cityOption.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="barangay_create" class="block text-sm font-medium">Barangay</label>
+                                <select id="barangay_create" x-model="barangay" :disabled="!city" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Select barangay</option>
+                                    <template x-for="barangayOption in createBarangayOptions" :key="barangayOption">
+                                        <option :value="barangayOption" x-text="barangayOption"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div x-show="!isPhilippines" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div class="space-y-1 relative">
-                                <label for="city" class="block text-sm font-medium">City</label>
-                                <input id="city" name="city" type="text" x-model="city" @input="searchCity()" @focus="searchCity()" @click.away="showCityList = false" autocomplete="off" placeholder="Type city..." :disabled="!country" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label for="city_create_manual" class="block text-sm font-medium">City</label>
+                                <input id="city_create_manual" type="text" x-model="city" @input="searchCity()" @focus="searchCity()" @click.away="showCityList = false" autocomplete="off" placeholder="Type city..." :disabled="!country" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <div x-show="showCityList && filteredCities.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
                                     <template x-for="c in filteredCities" :key="c.name">
                                         <div @click="selectCity(c)" class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm" x-text="c.name"></div>
@@ -160,16 +202,13 @@
                                 </div>
                             </div>
 
-                            <div class="space-y-1 relative">
-                                <label for="state" class="block text-sm font-medium" x-text="stateLabel">State / Province</label>
-                                <input id="state" name="state" type="text" x-model="barangay" @input="searchBarangay()" @focus="searchBarangay()" @click.away="showBarangayList = false" autocomplete="off" :placeholder="'Type ' + stateLabel.toLowerCase() + '...'" :disabled="!city && isPhilippines" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <div x-show="showBarangayList && filteredBarangays.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                    <template x-for="b in filteredBarangays" :key="b">
-                                        <div @click="selectBarangay(b)" class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm" x-text="b"></div>
-                                    </template>
-                                </div>
+                            <div>
+                                <label for="state_create_manual" class="block text-sm font-medium">State / Province</label>
+                                <input id="state_create_manual" type="text" x-model="stateText" autocomplete="off" placeholder="Type state/province..." class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
+                        </div>
 
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                             <div>
                                 <label for="postal_code" class="block text-sm font-medium">Postal Code</label>
                                 <input id="postal_code" name="postal_code" type="text" x-model="postalCode" maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -269,6 +308,17 @@
                                         class="company-row hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                                         data-company-id="{{ $company->id }}"
                                         data-name="{{ strtolower($company->name) }}"
+                                        data-company-name="{{ e($company->name) }}"
+                                        data-company-industry="{{ e((string) $company->industry) }}"
+                                        data-company-country="{{ e((string) $company->country) }}"
+                                        data-company-state="{{ e((string) $company->state) }}"
+                                        data-company-city="{{ e((string) $company->city) }}"
+                                        data-company-address="{{ e((string) $company->address) }}"
+                                        data-company-postal="{{ e((string) $company->postal_code) }}"
+                                        data-company-contact-person="{{ e((string) $company->contact_person) }}"
+                                        data-company-contact-email="{{ e((string) $company->contact_email) }}"
+                                        data-company-contact-phone="{{ e((string) $company->contact_phone) }}"
+                                        data-update-url="{{ route('coordinator.companies.update', $company) }}"
                                         data-industry="{{ strtolower((string) $company->industry) }}"
                                         data-students="{{ $studentCount }}"
                                         data-search="{{ $searchBlob }}"
@@ -346,7 +396,7 @@
                                             <div class="flex items-center gap-2">
                                                 <button type="button" class="px-2 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors" onclick="toggleCompanyDetails({{ $company->id }})">View</button>
 
-                                                <button type="button" x-show="!editing" @click="editing = true" class="px-2 py-1 text-xs font-semibold rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors">Edit</button>
+                                                <button type="button" class="px-2 py-1 text-xs font-semibold rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors" onclick="openCompanyEditModal({{ $company->id }})">Edit</button>
                                                 <button type="button" x-show="editing" @click="$el.closest('tr').querySelector('form[id^=\'company-update-\']').submit()" class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700 hover:bg-green-200 transition-colors">Save</button>
                                                 <button type="button" x-show="editing" @click="editing = false" class="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Cancel</button>
 
@@ -389,23 +439,141 @@
                 @endif
             </div>
         </div>
+
+        <div id="companyEditModal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-gray-900/60" onclick="closeCompanyEditModal()"></div>
+            <div class="relative mx-auto mt-6 w-[95%] max-w-5xl rounded-xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[92vh] overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 z-10">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Company</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Update missing fields and keep company records complete and deployment-ready.</p>
+                    </div>
+                    <button type="button" onclick="closeCompanyEditModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Close</button>
+                </div>
+
+                <form id="companyEditForm" method="POST" class="p-6 space-y-5">
+                    @csrf
+                    @method('PATCH')
+
+                    <div id="companyEditMissing" class="hidden rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20 p-3 text-sm text-amber-800 dark:text-amber-300"></div>
+
+                    <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Basic Company Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label for="edit_name" class="block text-sm font-medium">Company Name <span class="text-red-500">*</span></label>
+                                <input id="edit_name" name="name" type="text" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label for="edit_industry" class="block text-sm font-medium">Industry</label>
+                                <input id="edit_industry" name="industry" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Location Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label for="edit_country" class="block text-sm font-medium">Country</label>
+                                <input id="edit_country" name="country" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" oninput="handleEditCountryInput()">
+                            </div>
+                            <div>
+                                <label for="edit_street" class="block text-sm font-medium">Street Address</label>
+                                <input id="edit_street" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Building / street / block">
+                            </div>
+                        </div>
+
+                        <div id="editPHLocationWrap" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 hidden">
+                            <div>
+                                <label for="edit_province" class="block text-sm font-medium">Province</label>
+                                <select id="edit_province" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="handleEditProvinceChange()">
+                                    <option value="">Select province</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="edit_city_ph" class="block text-sm font-medium">City / Municipality</label>
+                                <select id="edit_city_ph" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="handleEditCityChange()">
+                                    <option value="">Select city/municipality</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="edit_barangay" class="block text-sm font-medium">Barangay</label>
+                                <select id="edit_barangay" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Select barangay</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="editNonPHLocationWrap" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label for="edit_city_manual" class="block text-sm font-medium">City</label>
+                                <input id="edit_city_manual" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label for="edit_state_manual" class="block text-sm font-medium">State / Province</label>
+                                <input id="edit_state_manual" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="edit_postal_code" class="block text-sm font-medium">Postal Code</label>
+                            <input id="edit_postal_code" name="postal_code" type="text" maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Contact Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div>
+                                <label for="edit_contact_person" class="block text-sm font-medium">Contact Person</label>
+                                <input id="edit_contact_person" name="contact_person" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label for="edit_contact_email" class="block text-sm font-medium">Contact Email</label>
+                                <input id="edit_contact_email" name="contact_email" type="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label for="edit_contact_phone" class="block text-sm font-medium">Contact Phone</label>
+                                <input id="edit_contact_phone" name="contact_phone" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="e.g. +63 912 345 6789">
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="edit_hidden_city" name="city">
+                    <input type="hidden" id="edit_hidden_state" name="state">
+                    <input type="hidden" id="edit_hidden_address" name="address">
+
+                    <div class="flex items-center justify-end gap-2">
+                        <button type="button" onclick="closeCompanyEditModal()" class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 text-sm">Cancel</button>
+                        <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700">Save Company Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     <script>
-        function phAddress() {
+        function phAddress(initial = {}) {
             return {
-                country: '',
-                city: '',
-                barangay: '',
-                postalCode: '',
+            country: initial.country || '',
+            city: initial.city || '',
+            barangay: '',
+            province: initial.state || '',
+            stateText: initial.state || '',
+            postalCode: initial.postal_code || '',
                 
-                address: '',
+            streetAddress: '',
                 phoneNumber: '',
                 dialCode: '',
                 
                 // Data Sources
                 allCountries: [],
+            provinces: [],
+            phCities: [],
                 cities: [], // Will hold both cities and municipalities
                 barangays: [],
+            createCityOptions: [],
+            createBarangayOptions: [],
                 
                 // Filtered Lists
                 filteredCountries: [],
@@ -431,7 +599,44 @@
                     return this.isPhilippines ? 'Barangay' : 'State / Province';
                 },
 
+                formatAddressForSubmit() {
+                    if (this.isPhilippines) {
+                        const street = (this.streetAddress || '').trim();
+                        const brgy = (this.barangay || '').trim();
+                        if (brgy && street) {
+                            return `Brgy: ${brgy} | ${street}`;
+                        }
+                        if (brgy) {
+                            return `Brgy: ${brgy}`;
+                        }
+                        return street;
+                    }
+
+                    return (this.streetAddress || '').trim();
+                },
+
+                parseAddressFromStored(rawAddress) {
+                    const raw = (rawAddress || '').trim();
+                    if (!raw) {
+                        return { street: '', barangay: '' };
+                    }
+
+                    const match = raw.match(/^Brgy:\s*(.*?)\s*\|\s*(.*)$/i);
+                    if (match) {
+                        return {
+                            barangay: (match[1] || '').trim(),
+                            street: (match[2] || '').trim(),
+                        };
+                    }
+
+                    return { street: raw, barangay: '' };
+                },
+
                 async init() {
+                    const parsedAddress = this.parseAddressFromStored(initial.address || '');
+                    this.streetAddress = parsedAddress.street;
+                    this.barangay = parsedAddress.barangay;
+
                     // Load Countries
                     try {
                         const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,idd');
@@ -447,6 +652,113 @@
 
                     // Load PH Zip Codes (same as before)
                     this.loadZipCodes();
+
+                    if (this.isPhilippines) {
+                        await this.loadPHGeography();
+                    }
+                },
+
+                async loadPHGeography() {
+                    try {
+                        const [provincesRes, citiesRes, munisRes] = await Promise.all([
+                            fetch('https://psgc.gitlab.io/api/provinces.json'),
+                            fetch('https://psgc.gitlab.io/api/cities.json'),
+                            fetch('https://psgc.gitlab.io/api/municipalities.json'),
+                        ]);
+
+                        const provincesRaw = await provincesRes.json();
+                        const citiesRaw = await citiesRes.json();
+                        const municipalitiesRaw = await munisRes.json();
+
+                        const normalizeName = (name, isCity) => {
+                            let n = name || '';
+                            n = n.replace(/\s*\(.*?\)\s*/g, '');
+                            n = n.replace(/^City of\s+/i, '');
+                            n = n.replace(/^Municipality of\s+/i, '');
+                            if (isCity && !/\bCity\b$/i.test(n)) {
+                                n += ' City';
+                            }
+                            return n;
+                        };
+
+                        this.provinces = provincesRaw
+                            .map((province) => ({ code: province.code, name: province.name }))
+                            .sort((a, b) => a.name.localeCompare(b.name));
+
+                        const normalizedCities = citiesRaw.map((city) => ({
+                            code: city.code,
+                            provinceCode: city.provinceCode,
+                            name: normalizeName(city.name, true),
+                            type: 'city',
+                        }));
+
+                        const normalizedMunicipalities = municipalitiesRaw.map((municipality) => ({
+                            code: municipality.code,
+                            provinceCode: municipality.provinceCode,
+                            name: normalizeName(municipality.name, false),
+                            type: 'municipality',
+                        }));
+
+                        this.phCities = [...normalizedCities, ...normalizedMunicipalities].sort((a, b) => a.name.localeCompare(b.name));
+
+                        if (this.province) {
+                            this.onCreateProvinceChange();
+                        }
+                        if (this.city) {
+                            await this.onCreateCityChange();
+                        }
+                    } catch (error) {
+                        console.error('Failed to load Philippines geography data:', error);
+                    }
+                },
+
+                onCreateProvinceChange() {
+                    const selectedProvince = this.provinces.find((province) => province.name === this.province);
+                    const provinceCode = selectedProvince ? selectedProvince.code : null;
+                    this.createCityOptions = provinceCode
+                        ? this.phCities.filter((city) => city.provinceCode === provinceCode)
+                        : [];
+
+                    if (!this.createCityOptions.some((city) => city.name === this.city)) {
+                        this.city = '';
+                        this.barangay = '';
+                        this.createBarangayOptions = [];
+                    }
+                },
+
+                async onCreateCityChange() {
+                    const selectedCity = this.createCityOptions.find((city) => city.name === this.city);
+
+                    if (!selectedCity) {
+                        this.createBarangayOptions = [];
+                        this.barangay = '';
+                        return;
+                    }
+
+                    if (this.zipCodes[selectedCity.name]) {
+                        this.postalCode = this.zipCodes[selectedCity.name];
+                    } else {
+                        const cleanName = selectedCity.name.replace(' City', '').replace('Municipality of ', '');
+                        this.postalCode = this.zipCodes[cleanName] || this.postalCode;
+                    }
+
+                    try {
+                        const endpoint = selectedCity.type === 'city'
+                            ? `https://psgc.gitlab.io/api/cities/${selectedCity.code}/barangays.json`
+                            : `https://psgc.gitlab.io/api/municipalities/${selectedCity.code}/barangays.json`;
+                        const response = await fetch(endpoint);
+                        const data = await response.json();
+                        this.createBarangayOptions = data
+                            .map((barangay) => barangay.name)
+                            .sort((a, b) => a.localeCompare(b));
+
+                        if (!this.createBarangayOptions.includes(this.barangay)) {
+                            this.barangay = '';
+                        }
+                    } catch (error) {
+                        console.error('Failed to load barangays for create form:', error);
+                        this.createBarangayOptions = [];
+                    }
                 },
 
                 async loadZipCodes() {
@@ -496,13 +808,17 @@
                     // Reset Dependent Fields
                     this.city = '';
                     this.barangay = '';
+                    this.province = '';
+                    this.stateText = '';
                     this.postalCode = '';
                     this.cities = [];
                     this.filteredCities = [];
                     this.barangays = [];
+                    this.createCityOptions = [];
+                    this.createBarangayOptions = [];
                     
                     if (this.isPhilippines) {
-                        this.loadPHCities();
+                        this.loadPHGeography();
                     } else {
                         // Load Global Cities for Selected Country
                         this.loadGlobalCities(countryData.name);
@@ -663,14 +979,14 @@
 
                 // --- Street Address Logic (Nominatim) ---
                 async searchAddress() {
-                    if (this.address.length < 3) {
+                    if ((this.streetAddress || '').length < 3) {
                         this.filteredAddresses = [];
                         this.showAddressList = false;
                         return;
                     }
 
                     // Build query context
-                    let query = this.address;
+                    let query = this.streetAddress;
                     let context = '';
                     if (this.city) context += ', ' + this.city;
                     if (this.country) context += ', ' + this.country;
@@ -694,7 +1010,7 @@
 
                 selectAddress(addressData) {
                     // When selecting an address, we can optionally auto-fill other fields if they are empty
-                    this.address = addressData.name;
+                    this.streetAddress = addressData.name;
                     
                     // Optional: Smart fill if City/Country/Postcode are missing
                     const addr = addressData.full_data.address;
@@ -805,6 +1121,303 @@
             });
 
             applyCompanyDirectoryFilters();
+
+            const editForm = document.getElementById('companyEditForm');
+            if (editForm) {
+                editForm.addEventListener('submit', prepareEditFormPayload);
+            }
         });
+
+        const companyEditState = {
+            cacheLoaded: false,
+            provinces: [],
+            cities: [],
+            selectedCityOptions: [],
+            preloaded: {
+                state: '',
+                city: '',
+                barangay: '',
+            },
+        };
+
+        function parseStoredAddress(rawAddress) {
+            const raw = String(rawAddress || '').trim();
+            const match = raw.match(/^Brgy:\s*(.*?)\s*\|\s*(.*)$/i);
+            if (match) {
+                return {
+                    barangay: (match[1] || '').trim(),
+                    street: (match[2] || '').trim(),
+                };
+            }
+
+            return {
+                barangay: '',
+                street: raw,
+            };
+        }
+
+        function formatAddressForStorage(street, barangay) {
+            const cleanStreet = String(street || '').trim();
+            const cleanBarangay = String(barangay || '').trim();
+            if (cleanBarangay && cleanStreet) {
+                return `Brgy: ${cleanBarangay} | ${cleanStreet}`;
+            }
+            if (cleanBarangay) {
+                return `Brgy: ${cleanBarangay}`;
+            }
+            return cleanStreet;
+        }
+
+        async function ensurePHGeoCache() {
+            if (companyEditState.cacheLoaded) {
+                return;
+            }
+
+            const [provincesRes, citiesRes, munisRes] = await Promise.all([
+                fetch('https://psgc.gitlab.io/api/provinces.json'),
+                fetch('https://psgc.gitlab.io/api/cities.json'),
+                fetch('https://psgc.gitlab.io/api/municipalities.json'),
+            ]);
+
+            const provincesRaw = await provincesRes.json();
+            const citiesRaw = await citiesRes.json();
+            const municipalitiesRaw = await munisRes.json();
+
+            const normalizeName = (name, isCity) => {
+                let n = name || '';
+                n = n.replace(/\s*\(.*?\)\s*/g, '');
+                n = n.replace(/^City of\s+/i, '');
+                n = n.replace(/^Municipality of\s+/i, '');
+                if (isCity && !/\bCity\b$/i.test(n)) {
+                    n += ' City';
+                }
+                return n;
+            };
+
+            companyEditState.provinces = provincesRaw
+                .map((province) => ({ code: province.code, name: province.name }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const normalizedCities = citiesRaw.map((city) => ({
+                code: city.code,
+                provinceCode: city.provinceCode,
+                name: normalizeName(city.name, true),
+                type: 'city',
+            }));
+
+            const normalizedMunicipalities = municipalitiesRaw.map((municipality) => ({
+                code: municipality.code,
+                provinceCode: municipality.provinceCode,
+                name: normalizeName(municipality.name, false),
+                type: 'municipality',
+            }));
+
+            companyEditState.cities = [...normalizedCities, ...normalizedMunicipalities].sort((a, b) => a.name.localeCompare(b.name));
+            companyEditState.cacheLoaded = true;
+        }
+
+        function closeCompanyEditModal() {
+            const modal = document.getElementById('companyEditModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function openCompanyEditModal(companyId) {
+            const row = document.querySelector(`tr.company-row[data-company-id="${companyId}"]`);
+            if (!row) {
+                return;
+            }
+
+            const form = document.getElementById('companyEditForm');
+            const modal = document.getElementById('companyEditModal');
+            if (!form || !modal) {
+                return;
+            }
+
+            const parsedAddress = parseStoredAddress(row.dataset.companyAddress || '');
+
+            form.setAttribute('action', row.dataset.updateUrl || '');
+            document.getElementById('edit_name').value = row.dataset.companyName || '';
+            document.getElementById('edit_industry').value = row.dataset.companyIndustry || '';
+            document.getElementById('edit_country').value = row.dataset.companyCountry || '';
+            document.getElementById('edit_postal_code').value = row.dataset.companyPostal || '';
+            document.getElementById('edit_contact_person').value = row.dataset.companyContactPerson || '';
+            document.getElementById('edit_contact_email').value = row.dataset.companyContactEmail || '';
+            document.getElementById('edit_contact_phone').value = row.dataset.companyContactPhone || '';
+            document.getElementById('edit_street').value = parsedAddress.street || '';
+            document.getElementById('edit_city_manual').value = row.dataset.companyCity || '';
+            document.getElementById('edit_state_manual').value = row.dataset.companyState || '';
+
+            companyEditState.preloaded.state = row.dataset.companyState || '';
+            companyEditState.preloaded.city = row.dataset.companyCity || '';
+            companyEditState.preloaded.barangay = parsedAddress.barangay || '';
+
+            showEditMissingFields(row);
+            handleEditCountryInput(true);
+
+            modal.classList.remove('hidden');
+        }
+
+        function showEditMissingFields(row) {
+            const missing = [];
+            if (!row.dataset.companyContactPerson) missing.push('Contact person');
+            if (!row.dataset.companyContactEmail) missing.push('Contact email');
+            if (!row.dataset.companyContactPhone) missing.push('Contact phone');
+            if (!row.dataset.companyAddress) missing.push('Street/barangay');
+            if (!row.dataset.companyCity) missing.push('City');
+            if (!row.dataset.companyState) missing.push('State/Province');
+            if (!row.dataset.companyCountry) missing.push('Country');
+
+            const panel = document.getElementById('companyEditMissing');
+            if (!panel) {
+                return;
+            }
+
+            if (missing.length === 0) {
+                panel.classList.add('hidden');
+                panel.textContent = '';
+                return;
+            }
+
+            panel.classList.remove('hidden');
+            panel.textContent = `Incomplete profile fields: ${missing.join(', ')}.`;
+        }
+
+        async function handleEditCountryInput(isPreload = false) {
+            const country = (document.getElementById('edit_country')?.value || '').trim().toLowerCase();
+            const isPhilippines = country === 'philippines';
+            const phWrap = document.getElementById('editPHLocationWrap');
+            const nonPHWrap = document.getElementById('editNonPHLocationWrap');
+
+            if (!phWrap || !nonPHWrap) {
+                return;
+            }
+
+            phWrap.classList.toggle('hidden', !isPhilippines);
+            nonPHWrap.classList.toggle('hidden', isPhilippines);
+
+            if (!isPhilippines) {
+                return;
+            }
+
+            await ensurePHGeoCache();
+
+            const provinceSelect = document.getElementById('edit_province');
+            if (!provinceSelect) {
+                return;
+            }
+
+            provinceSelect.innerHTML = '<option value="">Select province</option>';
+            companyEditState.provinces.forEach((province) => {
+                const option = document.createElement('option');
+                option.value = province.code;
+                option.textContent = province.name;
+                provinceSelect.appendChild(option);
+            });
+
+            if (isPreload && companyEditState.preloaded.state) {
+                const matchedProvince = companyEditState.provinces.find((province) => province.name.toLowerCase() === companyEditState.preloaded.state.toLowerCase());
+                if (matchedProvince) {
+                    provinceSelect.value = matchedProvince.code;
+                }
+            }
+
+            await handleEditProvinceChange(isPreload);
+        }
+
+        async function handleEditProvinceChange(isPreload = false) {
+            const provinceCode = document.getElementById('edit_province')?.value || '';
+            const citySelect = document.getElementById('edit_city_ph');
+            if (!citySelect) {
+                return;
+            }
+
+            companyEditState.selectedCityOptions = provinceCode
+                ? companyEditState.cities.filter((city) => city.provinceCode === provinceCode)
+                : [];
+
+            citySelect.innerHTML = '<option value="">Select city/municipality</option>';
+            companyEditState.selectedCityOptions.forEach((city) => {
+                const option = document.createElement('option');
+                option.value = city.code;
+                option.textContent = city.name;
+                citySelect.appendChild(option);
+            });
+
+            if (isPreload && companyEditState.preloaded.city) {
+                const matchedCity = companyEditState.selectedCityOptions.find((city) => city.name.toLowerCase() === companyEditState.preloaded.city.toLowerCase());
+                if (matchedCity) {
+                    citySelect.value = matchedCity.code;
+                }
+            }
+
+            await handleEditCityChange(isPreload);
+        }
+
+        async function handleEditCityChange(isPreload = false) {
+            const cityCode = document.getElementById('edit_city_ph')?.value || '';
+            const barangaySelect = document.getElementById('edit_barangay');
+            if (!barangaySelect) {
+                return;
+            }
+
+            barangaySelect.innerHTML = '<option value="">Select barangay</option>';
+
+            const selectedCity = companyEditState.selectedCityOptions.find((city) => city.code === cityCode);
+            if (!selectedCity) {
+                return;
+            }
+
+            try {
+                const endpoint = selectedCity.type === 'city'
+                    ? `https://psgc.gitlab.io/api/cities/${selectedCity.code}/barangays.json`
+                    : `https://psgc.gitlab.io/api/municipalities/${selectedCity.code}/barangays.json`;
+
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                const barangays = data.map((barangay) => barangay.name).sort((a, b) => a.localeCompare(b));
+
+                barangays.forEach((barangay) => {
+                    const option = document.createElement('option');
+                    option.value = barangay;
+                    option.textContent = barangay;
+                    barangaySelect.appendChild(option);
+                });
+
+                if (isPreload && companyEditState.preloaded.barangay) {
+                    const matched = barangays.find((barangay) => barangay.toLowerCase() === companyEditState.preloaded.barangay.toLowerCase());
+                    if (matched) {
+                        barangaySelect.value = matched;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load barangays for edit form:', error);
+            }
+        }
+
+        function prepareEditFormPayload() {
+            const isPhilippines = (document.getElementById('edit_country')?.value || '').trim().toLowerCase() === 'philippines';
+            const street = document.getElementById('edit_street')?.value || '';
+
+            if (isPhilippines) {
+                const provinceCode = document.getElementById('edit_province')?.value || '';
+                const cityCode = document.getElementById('edit_city_ph')?.value || '';
+                const barangay = document.getElementById('edit_barangay')?.value || '';
+
+                const provinceName = companyEditState.provinces.find((province) => province.code === provinceCode)?.name || '';
+                const cityName = companyEditState.selectedCityOptions.find((city) => city.code === cityCode)?.name || '';
+
+                document.getElementById('edit_hidden_state').value = provinceName;
+                document.getElementById('edit_hidden_city').value = cityName;
+                document.getElementById('edit_hidden_address').value = formatAddressForStorage(street, barangay);
+            } else {
+                const manualState = document.getElementById('edit_state_manual')?.value || '';
+                const manualCity = document.getElementById('edit_city_manual')?.value || '';
+                document.getElementById('edit_hidden_state').value = manualState;
+                document.getElementById('edit_hidden_city').value = manualCity;
+                document.getElementById('edit_hidden_address').value = String(street || '').trim();
+            }
+        }
     </script>
 </x-coordinator-layout>
