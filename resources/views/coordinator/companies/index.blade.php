@@ -3,20 +3,65 @@
         Company Directory
     </x-slot>
 
+    @php
+        $totalCompanies = $companies->count();
+        $companiesWithStudents = $companies->filter(fn ($company) => $company->assignments->where('status', 'active')->count() > 0)->count();
+        $incompleteCompanies = $companies->filter(function ($company) {
+            return blank($company->contact_person)
+                || blank($company->contact_email)
+                || blank($company->contact_phone)
+                || blank($company->address)
+                || blank($company->city)
+                || blank($company->country);
+        })->count();
+        $activeCompanies = $companiesWithStudents;
+        $industryOptions = $companies
+            ->pluck('industry')
+            ->filter()
+            ->map(fn ($industry) => trim((string) $industry))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+    @endphp
+
     <div class="space-y-6" x-data="phAddress()">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900 dark:text-gray-100 space-y-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Register New Partner Company</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Companies</p>
+                <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $totalCompanies }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Active Partners</p>
+                <p class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">{{ $activeCompanies }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">With Assigned Students</p>
+                <p class="mt-2 text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ $companiesWithStudents }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Incomplete Profiles</p>
+                <p class="mt-2 text-3xl font-bold text-amber-600 dark:text-amber-400">{{ $incompleteCompanies }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="p-6 lg:p-8 text-gray-900 dark:text-gray-100 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-lg font-semibold">Register New Partner Company</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Create complete, searchable company records for supervisor assignment and deployment automation.</p>
+                    </div>
                 </div>
+
                 @if ($errors->any())
-                    <div class="text-sm text-red-600 dark:text-red-400">
+                    <div class="rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-300">
                         {{ $errors->first() }}
                     </div>
                 @endif
 
                 @if (session('status'))
-                    <div class="text-sm text-green-600 dark:text-green-400">
+                    <div class="rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20 p-3 text-sm text-green-700 dark:text-green-300">
                         @if (session('status') === 'company-created')
                             Company added successfully.
                         @elseif (session('status') === 'company-updated')
@@ -29,263 +74,206 @@
                     </div>
                 @endif
 
-                <form
-                    method="POST"
-                    action="{{ route('coordinator.companies.store') }}"
-                    class="space-y-4"
-                >
+                <form method="POST" action="{{ route('coordinator.companies.store') }}" class="space-y-6">
                     @csrf
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label for="name" class="block text-sm font-medium">
-                                Name
-                            </label>
-                            <input
-                                id="name"
-                                name="name"
-                                type="text"
-                                value="{{ old('name') }}"
-                                required
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
-                        </div>
-
-                        <div class="space-y-1">
-                            <label for="industry" class="block text-sm font-medium">
-                                Industry
-                            </label>
-                            <input
-                                id="industry"
-                                name="industry"
-                                type="text"
-                                value="{{ old('industry') }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="space-y-1 relative">
-                            <label for="country" class="block text-sm font-medium">
-                                Country
-                            </label>
-                            <input
-                                id="country"
-                                name="country"
-                                type="text"
-                                x-model="country"
-                                @input="searchCountry()"
-                                @focus="searchCountry()"
-                                @click.away="showCountryList = false"
-                                autocomplete="off"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Type country..."
-                            >
-                            <!-- Country Dropdown -->
-                            <div x-show="showCountryList && filteredCountries.length > 0" class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                <template x-for="c in filteredCountries" :key="c.name">
-                                    <div 
-                                        @click="selectCountry(c)"
-                                        class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm flex items-center gap-3"
-                                    >
-                                        <img :src="c.flag" alt="" class="w-6 h-4 object-cover rounded-sm border border-gray-200">
-                                        <span x-text="c.name"></span>
-                                    </div>
-                                </template>
+                    <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-5">
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Company Basics</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label for="name" class="block text-sm font-medium">Company Name <span class="text-red-500">*</span></label>
+                                <input id="name" name="name" type="text" value="{{ old('name') }}" required maxlength="255" minlength="2" placeholder="e.g. Timex Technologies" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
-                        </div>
-
-                        <div class="space-y-1 relative">
-                            <label for="address" class="block text-sm font-medium">
-                                Street Address
-                            </label>
-                            <input
-                                id="address"
-                                name="address"
-                                type="text"
-                                x-model="address"
-                                @input="searchAddress()"
-                                @focus="searchAddress()"
-                                @click.away="showAddressList = false"
-                                autocomplete="off"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Start typing address..."
-                            >
-                            <!-- Address Dropdown -->
-                            <div x-show="showAddressList && filteredAddresses.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                <template x-for="a in filteredAddresses" :key="a.display_name">
-                                    <div 
-                                        @click="selectAddress(a)"
-                                        class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm border-b border-gray-100 dark:border-gray-600 last:border-0"
-                                    >
-                                        <div class="font-medium text-gray-800 dark:text-gray-200" x-text="a.name"></div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400" x-text="a.display_name"></div>
-                                    </div>
-                                </template>
+                            <div>
+                                <label for="industry" class="block text-sm font-medium">Industry</label>
+                                <input id="industry" name="industry" type="text" value="{{ old('industry') }}" maxlength="255" list="industry-options" placeholder="e.g. Information Technology" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <datalist id="industry-options">
+                                    @foreach($industryOptions as $industryOption)
+                                        <option value="{{ $industryOption }}"></option>
+                                    @endforeach
+                                </datalist>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div class="space-y-1 relative">
-                            <label for="city" class="block text-sm font-medium">
-                                City
-                            </label>
-                            <input
-                                id="city"
-                                name="city"
-                                type="text"
-                                x-model="city"
-                                @input="searchCity()"
-                                @focus="searchCity()"
-                                @click.away="showCityList = false"
-                                autocomplete="off"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Type city..."
-                                :disabled="!country"
-                            >
-                            <!-- City Dropdown -->
-                            <div x-show="showCityList && filteredCities.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                <template x-for="c in filteredCities" :key="c.name">
-                                    <div 
-                                        @click="selectCity(c)"
-                                        class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm"
-                                        x-text="c.name"
-                                    ></div>
-                                </template>
+                    <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-5">
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Contact Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label for="contact_person" class="block text-sm font-medium">Contact Person</label>
+                                <input id="contact_person" name="contact_person" type="text" value="{{ old('contact_person') }}" maxlength="255" placeholder="Full name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label for="contact_email" class="block text-sm font-medium">Contact Email</label>
+                                <input id="contact_email" name="contact_email" type="email" value="{{ old('contact_email') }}" maxlength="255" placeholder="name@company.com" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
-
-                        <div class="space-y-1 relative">
-                            <label for="state" class="block text-sm font-medium" x-text="stateLabel">
-                                State/Barangay
-                            </label>
-                            <input
-                                id="state"
-                                name="state"
-                                type="text"
-                                x-model="barangay"
-                                @input="searchBarangay()"
-                                @focus="searchBarangay()"
-                                @click.away="showBarangayList = false"
-                                autocomplete="off"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                :placeholder="'Type ' + stateLabel.toLowerCase() + '...'"
-                                :disabled="!city && isPhilippines"
-                            >
-                             <!-- Barangay Dropdown (Only for PH) -->
-                             <div x-show="showBarangayList && filteredBarangays.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                <template x-for="b in filteredBarangays" :key="b">
-                                    <div 
-                                        @click="selectBarangay(b)"
-                                        class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm"
-                                        x-text="b"
-                                    ></div>
-                                </template>
+                        <div class="mt-4">
+                            <label for="contact_phone" class="block text-sm font-medium">Contact Phone</label>
+                            <div class="relative rounded-md shadow-sm mt-1">
+                                <div class="absolute inset-y-0 left-0 flex items-center">
+                                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 sm:text-sm h-full" x-text="dialCode || '+--'"></span>
+                                </div>
+                                <input id="contact_phone" name="contact_phone" type="text" x-model="phoneNumber" maxlength="50" pattern="[0-9\s\-\+\(\)]{7,50}" placeholder="912 345 6789" class="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-16">
                             </div>
-                        </div>
-
-                        <div class="space-y-1">
-                            <label for="postal_code" class="block text-sm font-medium">
-                                Postal code
-                            </label>
-                            <input
-                                id="postal_code"
-                                name="postal_code"
-                                type="text"
-                                x-model="postalCode"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label for="contact_person" class="block text-sm font-medium">
-                                Contact person
-                            </label>
-                            <input
-                                id="contact_person"
-                                name="contact_person"
-                                type="text"
-                                value="{{ old('contact_person') }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
-                        </div>
-                        <div class="space-y-1">
-                            <label for="contact_email" class="block text-sm font-medium">
-                                Contact email
-                            </label>
-                            <input
-                                id="contact_email"
-                                name="contact_email"
-                                type="email"
-                                value="{{ old('contact_email') }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="space-y-1">
-                        <label for="contact_phone" class="block text-sm font-medium">
-                            Contact phone
-                        </label>
-                        <div class="relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 flex items-center">
-                                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 sm:text-sm h-full" x-text="dialCode || '+--'">
-                                </span>
+                    <details class="rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-5" @if(old('country') || old('address') || old('city') || old('state') || old('postal_code')) open @endif>
+                        <summary class="cursor-pointer text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Address Details (Optional)</summary>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div class="space-y-1 relative">
+                                <label for="country" class="block text-sm font-medium">Country</label>
+                                <input id="country" name="country" type="text" x-model="country" @input="searchCountry()" @focus="searchCountry()" @click.away="showCountryList = false" autocomplete="off" placeholder="Type country..." class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <div x-show="showCountryList && filteredCountries.length > 0" class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    <template x-for="c in filteredCountries" :key="c.name">
+                                        <div @click="selectCountry(c)" class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm flex items-center gap-3">
+                                            <img :src="c.flag" alt="" class="w-6 h-4 object-cover rounded-sm border border-gray-200">
+                                            <span x-text="c.name"></span>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
-                            <input
-                                id="contact_phone"
-                                name="contact_phone"
-                                type="text"
-                                x-model="phoneNumber"
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-16"
-                                placeholder="912 345 6789"
-                            >
-                            <!-- Hidden input to submit full phone number including code -->
-                            <input type="hidden" name="contact_phone_full" :value="(dialCode ? dialCode + ' ' : '') + phoneNumber">
-                        </div>
-                    </div>
 
-                    <div class="flex items-center justify-end">
-                        <button
-                            type="submit"
-                            class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-xs font-semibold uppercase tracking-wide text-white hover:bg-indigo-700"
-                        >
-                            Add company
-                        </button>
+                            <div class="space-y-1 relative">
+                                <label for="address" class="block text-sm font-medium">Street Address</label>
+                                <input id="address" name="address" type="text" x-model="address" @input="searchAddress()" @focus="searchAddress()" @click.away="showAddressList = false" autocomplete="off" placeholder="Start typing address..." class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <div x-show="showAddressList && filteredAddresses.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    <template x-for="a in filteredAddresses" :key="a.display_name">
+                                        <div @click="selectAddress(a)" class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm border-b border-gray-100 dark:border-gray-600 last:border-0">
+                                            <div class="font-medium text-gray-800 dark:text-gray-200" x-text="a.name"></div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400" x-text="a.display_name"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div class="space-y-1 relative">
+                                <label for="city" class="block text-sm font-medium">City</label>
+                                <input id="city" name="city" type="text" x-model="city" @input="searchCity()" @focus="searchCity()" @click.away="showCityList = false" autocomplete="off" placeholder="Type city..." :disabled="!country" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <div x-show="showCityList && filteredCities.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    <template x-for="c in filteredCities" :key="c.name">
+                                        <div @click="selectCity(c)" class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm" x-text="c.name"></div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1 relative">
+                                <label for="state" class="block text-sm font-medium" x-text="stateLabel">State / Province</label>
+                                <input id="state" name="state" type="text" x-model="barangay" @input="searchBarangay()" @focus="searchBarangay()" @click.away="showBarangayList = false" autocomplete="off" :placeholder="'Type ' + stateLabel.toLowerCase() + '...'" :disabled="!city && isPhilippines" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <div x-show="showBarangayList && filteredBarangays.length > 0" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    <template x-for="b in filteredBarangays" :key="b">
+                                        <div @click="selectBarangay(b)" class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm" x-text="b"></div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="postal_code" class="block text-sm font-medium">Postal Code</label>
+                                <input id="postal_code" name="postal_code" type="text" x-model="postalCode" maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                    </details>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-xs font-semibold uppercase tracking-wide text-white hover:bg-indigo-700">Add Company</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900 dark:text-gray-100">
-                <h3 class="font-semibold mb-3 text-lg">
-                    Partner Company Directory
-                </h3>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="p-6 lg:p-8 text-gray-900 dark:text-gray-100 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h3 class="font-semibold text-lg">Partner Company Directory</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400"><span id="visibleCompaniesCount">0</span> companies shown</p>
+                </div>
+
                 @if ($companies->isEmpty())
-                    <p class="text-sm text-gray-500 italic">
-                        Walang nahanap na companies.
-                    </p>
+                    <div class="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">No companies yet. Add your first partner company using the form above.</p>
+                    </div>
                 @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                        <input id="companySearch" type="text" placeholder="Search company, location, contact..." class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <select id="industryFilter" class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">All Industries</option>
+                            @foreach($industryOptions as $industryOption)
+                                <option value="{{ strtolower($industryOption) }}">{{ $industryOption }}</option>
+                            @endforeach
+                        </select>
+                        <select id="studentsFilter" class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="all">All Student Loads</option>
+                            <option value="with">With Assigned Students</option>
+                            <option value="none">No Assigned Students</option>
+                        </select>
+                        <select id="sortBy" class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="name_asc">Sort: Name (A-Z)</option>
+                            <option value="name_desc">Sort: Name (Z-A)</option>
+                            <option value="students_desc">Sort: Most Students</option>
+                            <option value="students_asc">Sort: Least Students</option>
+                        </select>
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-left text-sm divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Company Name</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Industry</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Students</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Students</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                            <tbody id="companiesTableBody" class="divide-y divide-gray-100 dark:divide-gray-800">
                                 @foreach ($companies as $company)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" x-data="{ showStudents: false, editing: false }">
+                                    @php
+                                        $activeStudents = $company->assignments->where('status', 'active');
+                                        $studentCount = $activeStudents->count();
+                                        $hasIncompleteProfile = blank($company->contact_person)
+                                            || blank($company->contact_email)
+                                            || blank($company->contact_phone)
+                                            || blank($company->address)
+                                            || blank($company->city)
+                                            || blank($company->country);
+
+                                        $assignedSupervisors = $company->supervisorProfiles
+                                            ->pluck('user.name')
+                                            ->filter()
+                                            ->unique()
+                                            ->values();
+
+                                        $assignedAdvisers = $company->assignments
+                                            ->pluck('ojtAdviser.name')
+                                            ->filter()
+                                            ->unique()
+                                            ->values();
+
+                                        $searchBlob = strtolower(implode(' ', [
+                                            $company->name,
+                                            $company->industry,
+                                            $company->city,
+                                            $company->state,
+                                            $company->country,
+                                            $company->contact_person,
+                                            $company->contact_email,
+                                        ]));
+                                    @endphp
+
+                                    <tr
+                                        class="company-row hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                        data-company-id="{{ $company->id }}"
+                                        data-name="{{ strtolower($company->name) }}"
+                                        data-industry="{{ strtolower((string) $company->industry) }}"
+                                        data-students="{{ $studentCount }}"
+                                        data-search="{{ $searchBlob }}"
+                                        x-data="{ editing: false }"
+                                    >
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             <template x-if="!editing">
                                                 <div class="font-medium text-gray-900 dark:text-gray-100">{{ $company->name }}</div>
@@ -294,17 +282,37 @@
                                                 <input form="company-update-{{ $company->id }}" type="text" name="name" value="{{ $company->name }}" required class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm">
                                             </template>
                                         </td>
+
                                         <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
                                             <template x-if="!editing">
-                                                <span>{{ $company->industry ?? '-' }}</span>
+                                                <span>{{ $company->industry ?: 'Unspecified' }}</span>
                                             </template>
                                             <template x-if="editing">
                                                 <input form="company-update-{{ $company->id }}" type="text" name="industry" value="{{ $company->industry }}" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm">
                                             </template>
                                         </td>
+
+                                        <td class="px-4 py-4 whitespace-nowrap">
+                                            <div class="flex flex-wrap gap-2">
+                                                @if($studentCount > 0)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">Active Partner</span>
+                                                @else
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300">No Deployment</span>
+                                                @endif
+
+                                                @if($hasIncompleteProfile)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Incomplete Profile</span>
+                                                @endif
+                                            </div>
+                                        </td>
+
+                                        <td class="px-4 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">{{ $studentCount }} students</span>
+                                        </td>
+
                                         <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
                                             <template x-if="!editing">
-                                                <span>{{ $company->city ?? '-' }}, {{ $company->country ?? '-' }}</span>
+                                                <span>{{ $company->city ?: '-' }}, {{ $company->country ?: '-' }}</span>
                                             </template>
                                             <template x-if="editing">
                                                 <div class="grid grid-cols-2 gap-2">
@@ -313,66 +321,12 @@
                                                 </div>
                                             </template>
                                         </td>
-                                        <td class="px-4 py-4 whitespace-nowrap">
-                                            @php
-                                                // Handle potential null relationship gracefully
-                                                $activeStudents = $company->assignments ? $company->assignments->where('status', 'active') : collect();
-                                                $studentCount = $activeStudents->count();
-                                            @endphp
-                                            <button @click="showStudents = true" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors cursor-pointer">
-                                                {{ $studentCount }} Students
-                                            </button>
 
-                                            <!-- Students Modal -->
-                                            <div x-show="showStudents" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                                                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                                                    <div class="fixed inset-0 bg-gray-900/75 transition-opacity backdrop-blur-sm" @click="showStudents = false" aria-hidden="true" x-transition.opacity></div>
-
-                                                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                                                    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700" x-transition>
-                                                        <div class="bg-gray-50 dark:bg-gray-900/80 px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                                                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                                                                Students Assigned to {{ $company->name }}
-                                                            </h3>
-                                                            <button @click="showStudents = false" class="text-gray-400 hover:text-gray-500">
-                                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                            </button>
-                                                        </div>
-                                                        
-                                                        <div class="px-4 py-4 max-h-[60vh] overflow-y-auto">
-                                                            @forelse($activeStudents as $assignment)
-                                                                <div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
-                                                                    <div class="flex items-center gap-3">
-                                                                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
-                                                                            {{ substr($assignment->student->name, 0, 1) }}
-                                                                        </div>
-                                                                        <div>
-                                                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $assignment->student->name }}</div>
-                                                                            <div class="text-xs text-gray-500">{{ $assignment->student->email }}</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <span class="text-xs text-gray-400">{{ $assignment->student->normalizedStudentSection() ?? \App\Models\User::STUDENT_SECTION_BSIT_4A }}</span>
-                                                                </div>
-                                                            @empty
-                                                                <p class="text-sm text-gray-500 text-center py-4">No active students assigned.</p>
-                                                            @endforelse
-                                                        </div>
-                                                        
-                                                        <div class="bg-gray-50 dark:bg-gray-900/80 px-4 py-3 flex justify-end">
-                                                            <button type="button" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700" @click="showStudents = false">
-                                                                Close
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
                                         <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
                                             <template x-if="!editing">
                                                 <div>
-                                                    <div class="text-xs">{{ $company->contact_person ?? '-' }}</div>
-                                                    <div class="text-[10px] text-gray-400">{{ $company->contact_email ?? '' }}</div>
+                                                    <div class="text-xs">{{ $company->contact_person ?: '-' }}</div>
+                                                    <div class="text-[10px] text-gray-400">{{ $company->contact_email ?: 'No email' }}</div>
                                                 </div>
                                             </template>
                                             <template x-if="editing">
@@ -382,6 +336,7 @@
                                                 </div>
                                             </template>
                                         </td>
+
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             <form id="company-update-{{ $company->id }}" method="POST" action="{{ route('coordinator.companies.update', $company) }}" class="hidden">
                                                 @csrf
@@ -389,23 +344,41 @@
                                             </form>
 
                                             <div class="flex items-center gap-2">
-                                                <button type="button" x-show="!editing" @click="editing = true" class="px-2 py-1 text-xs font-semibold rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors">
-                                                    Edit
-                                                </button>
-                                                <button type="button" x-show="editing" @click="$el.closest('tr').querySelector('form[id^=\'company-update-\']').submit()" class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700 hover:bg-green-200 transition-colors">
-                                                    Save
-                                                </button>
-                                                <button type="button" x-show="editing" @click="editing = false" class="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
-                                                    Cancel
-                                                </button>
+                                                <button type="button" class="px-2 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors" onclick="toggleCompanyDetails({{ $company->id }})">View</button>
 
-                                                <form method="POST" action="{{ route('coordinator.companies.destroy', $company) }}" onsubmit="return confirm('Delete this company? This is blocked if linked to supervisors or active deployments.');" class="inline">
+                                                <button type="button" x-show="!editing" @click="editing = true" class="px-2 py-1 text-xs font-semibold rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors">Edit</button>
+                                                <button type="button" x-show="editing" @click="$el.closest('tr').querySelector('form[id^=\'company-update-\']').submit()" class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700 hover:bg-green-200 transition-colors">Save</button>
+                                                <button type="button" x-show="editing" @click="editing = false" class="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Cancel</button>
+
+                                                <form method="POST" action="{{ route('coordinator.companies.destroy', $company) }}" onsubmit="return confirm('Delete this company? This is blocked if linked to deployments or supervisors.');" class="inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
-                                                        Delete
-                                                    </button>
+                                                    <button type="submit" class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors">Delete</button>
                                                 </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr id="company-details-{{ $company->id }}" class="company-details hidden bg-gray-50/70 dark:bg-gray-900/20" data-parent="{{ $company->id }}">
+                                        <td colspan="7" class="px-4 py-4">
+                                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm">
+                                                <div>
+                                                    <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Full Location</p>
+                                                    <p class="mt-1 text-gray-700 dark:text-gray-200">{{ $company->address ?: 'No address recorded' }}</p>
+                                                    <p class="text-gray-500 dark:text-gray-400">{{ $company->city ?: '-' }}, {{ $company->state ?: '-' }}, {{ $company->postal_code ?: '-' }}, {{ $company->country ?: '-' }}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Contact Details</p>
+                                                    <p class="mt-1 text-gray-700 dark:text-gray-200">Person: {{ $company->contact_person ?: 'Not set' }}</p>
+                                                    <p class="text-gray-500 dark:text-gray-400">Email: {{ $company->contact_email ?: 'Not set' }}</p>
+                                                    <p class="text-gray-500 dark:text-gray-400">Phone: {{ $company->contact_phone ?: 'Not set' }}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Assignments</p>
+                                                    <p class="mt-1 text-gray-700 dark:text-gray-200">Supervisors: {{ $assignedSupervisors->isNotEmpty() ? $assignedSupervisors->implode(', ') : 'None' }}</p>
+                                                    <p class="text-gray-500 dark:text-gray-400">Advisers: {{ $assignedAdvisers->isNotEmpty() ? $assignedAdvisers->implode(', ') : 'None' }}</p>
+                                                    <p class="text-gray-500 dark:text-gray-400">Students: {{ $activeStudents->pluck('student.name')->filter()->unique()->values()->implode(', ') ?: 'None' }}</p>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -736,5 +709,102 @@
                 }
             }
         }
+
+        function toggleCompanyDetails(companyId) {
+            const detailsRow = document.getElementById(`company-details-${companyId}`);
+            if (!detailsRow) {
+                return;
+            }
+
+            detailsRow.classList.toggle('hidden');
+        }
+
+        function applyCompanyDirectoryFilters() {
+            const tbody = document.getElementById('companiesTableBody');
+            if (!tbody) {
+                return;
+            }
+
+            const search = (document.getElementById('companySearch')?.value || '').toLowerCase().trim();
+            const industry = (document.getElementById('industryFilter')?.value || '').toLowerCase();
+            const studentsFilter = document.getElementById('studentsFilter')?.value || 'all';
+            const sortBy = document.getElementById('sortBy')?.value || 'name_asc';
+
+            const rows = Array.from(tbody.querySelectorAll('tr.company-row'));
+            const rowPairs = rows.map((row) => {
+                const companyId = row.dataset.companyId;
+                const details = document.getElementById(`company-details-${companyId}`);
+                return { row, details };
+            });
+
+            rowPairs.sort((a, b) => {
+                const aName = a.row.dataset.name || '';
+                const bName = b.row.dataset.name || '';
+                const aStudents = Number(a.row.dataset.students || 0);
+                const bStudents = Number(b.row.dataset.students || 0);
+
+                if (sortBy === 'name_desc') {
+                    return bName.localeCompare(aName);
+                }
+                if (sortBy === 'students_desc') {
+                    return bStudents - aStudents;
+                }
+                if (sortBy === 'students_asc') {
+                    return aStudents - bStudents;
+                }
+                return aName.localeCompare(bName);
+            });
+
+            rowPairs.forEach(({ row, details }) => {
+                tbody.appendChild(row);
+                if (details) {
+                    tbody.appendChild(details);
+                }
+            });
+
+            let visibleCount = 0;
+
+            rowPairs.forEach(({ row, details }) => {
+                const rowSearch = row.dataset.search || '';
+                const rowIndustry = row.dataset.industry || '';
+                const rowStudents = Number(row.dataset.students || 0);
+
+                const matchesSearch = search === '' || rowSearch.includes(search);
+                const matchesIndustry = industry === '' || rowIndustry === industry;
+                const matchesStudents = studentsFilter === 'all'
+                    || (studentsFilter === 'with' && rowStudents > 0)
+                    || (studentsFilter === 'none' && rowStudents === 0);
+
+                const show = matchesSearch && matchesIndustry && matchesStudents;
+                row.style.display = show ? '' : 'none';
+
+                if (!show && details) {
+                    details.style.display = 'none';
+                    details.classList.add('hidden');
+                }
+
+                if (show) {
+                    visibleCount += 1;
+                }
+            });
+
+            const visibleCountElement = document.getElementById('visibleCompaniesCount');
+            if (visibleCountElement) {
+                visibleCountElement.textContent = String(visibleCount);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const controls = ['companySearch', 'industryFilter', 'studentsFilter', 'sortBy'];
+            controls.forEach((id) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', applyCompanyDirectoryFilters);
+                    element.addEventListener('change', applyCompanyDirectoryFilters);
+                }
+            });
+
+            applyCompanyDirectoryFilters();
+        });
     </script>
 </x-coordinator-layout>

@@ -844,7 +844,12 @@ class CoordinatorController extends Controller
 
     public function companiesIndex(): View
     {
-        $companies = Company::with(['assignments.student'])
+        $companies = Company::with([
+            'assignments.student',
+            'assignments.supervisor',
+            'assignments.ojtAdviser',
+            'supervisorProfiles.user',
+        ])
             ->orderBy('name')
             ->get();
 
