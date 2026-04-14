@@ -1,0 +1,9 @@
+ssh -p 65002 u174002700@145.79.25.197
+password: Worklog123!
+cd domains/worklog.bond/public_html
+git pull origin main
+php artisan cache:clear
+php artisan view:clear
+php artisan config:clear
+# SQL ERROR IN LIVE SERVE
+php artisan migrate

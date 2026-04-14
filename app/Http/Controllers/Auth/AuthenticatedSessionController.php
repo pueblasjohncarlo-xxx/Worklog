@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -66,6 +67,22 @@ class AuthenticatedSessionController extends Controller
 
     private function resolveAccessState(object $user): string
     {
+        // Internal roles are managed by trusted admins/coordinators and should not
+        // be blocked by student-style pending approval checks.
+        if (property_exists($user, 'role') && in_array((string) $user->role, [
+            User::ROLE_COORDINATOR,
+            User::ROLE_ADMIN,
+            User::ROLE_STAFF,
+        ], true)) {
+            return 'approved';
+        }
+
+        // Legacy accounts that never requested public self-registration should
+        // remain able to sign in even if approval columns are empty.
+        if (Schema::hasColumn('users', 'has_requested_account') && (bool) ($user->has_requested_account ?? false) === false) {
+            return 'approved';
+        }
+
         if (Schema::hasColumn('users', 'status')) {
             $status = strtolower(trim((string) ($user->status ?? '')));
 
