@@ -53,6 +53,28 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        // Keep internal roles sign-in ready even when legacy live data marks them as pending.
+        $normalizedRole = strtolower(trim((string) ($user->role ?? '')));
+        if (in_array($normalizedRole, [User::ROLE_COORDINATOR, User::ROLE_ADMIN, User::ROLE_STAFF], true)) {
+            $updates = [];
+
+            if (Schema::hasColumn('users', 'status') && strtolower(trim((string) ($user->status ?? ''))) !== 'approved') {
+                $updates['status'] = 'approved';
+            }
+
+            if (Schema::hasColumn('users', 'is_approved') && (bool) ($user->is_approved ?? false) !== true) {
+                $updates['is_approved'] = true;
+            }
+
+            if (Schema::hasColumn('users', 'approved_at') && empty($user->approved_at)) {
+                $updates['approved_at'] = now();
+            }
+
+            if ($updates !== []) {
+                $user->forceFill($updates)->save();
+            }
+        }
+
         $request->session()->regenerate();
 
         // Update last login time when the column exists.
