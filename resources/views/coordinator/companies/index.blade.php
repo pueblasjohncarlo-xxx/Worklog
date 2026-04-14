@@ -23,15 +23,17 @@
             ->unique()
             ->sort()
             ->values();
+
+        $companyFormInitial = [
+            'country' => old('country', ''),
+            'city' => old('city', ''),
+            'state' => old('state', ''),
+            'postal_code' => old('postal_code', ''),
+            'address' => old('address', ''),
+        ];
     @endphp
 
-    <div class="space-y-6" x-data='phAddress(@json([
-        "country" => old("country", ""),
-        "city" => old("city", ""),
-        "state" => old("state", ""),
-        "postal_code" => old("postal_code", ""),
-        "address" => old("address", ""),
-    ]))'>
+    <div class="space-y-6" x-data='phAddress(@json($companyFormInitial))'>
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
                 <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Companies</p>
