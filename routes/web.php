@@ -119,6 +119,9 @@ Route::post('/locale', function (Request $request) {
     return back();
 })->name('locale.set');
 
+Route::get('/invitations/accept/{token}', [InvitationController::class, 'accept'])
+    ->name('invitations.accept');
+
 Route::middleware(['auth', 'verified', 'role:coordinator,admin'])->group(function () {
     Route::get('/invitations', [InvitationController::class, 'index'])->name('invitations.index');
     Route::post('/invitations', [InvitationController::class, 'store'])->name('invitations.store');

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\RegistrationInvitationLinkNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -83,7 +84,7 @@ class InvitationController extends Controller
             ],
         ]);
 
-        $registerUrl = route('register', ['invite' => $token]);
+        $registerUrl = route('invitations.accept', ['token' => $token]);
 
         $warning = null;
         try {
@@ -100,9 +101,35 @@ class InvitationController extends Controller
             $warning = 'Invitation created, but the email could not be sent. Share the link manually.';
         }
 
-        return back()->with('status', 'Invitation created and sent successfully.')
+        return back()->with('status', 'Invitation created. Email dispatch completed for '.$invitation->email.'.')
             ->with('invite_link', $registerUrl)
             ->with('warning', $warning);
+    }
+
+    public function accept(Request $request, string $token): RedirectResponse
+    {
+        $invitation = RegistrationInvitation::query()
+            ->where('token_hash', hash('sha256', trim($token)))
+            ->whereNull('accepted_at')
+            ->whereNull('revoked_at')
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (! $invitation) {
+            return redirect()->route('register')->withErrors([
+                'email' => 'This invitation link is invalid, expired, or already used.',
+            ]);
+        }
+
+        // If inviter is currently logged in and clicks the link for testing,
+        // move to guest context so registration can continue immediately.
+        if (Auth::check()) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        return redirect()->route('register', ['invite' => $token]);
     }
 
     public function revoke(Request $request, RegistrationInvitation $invitation): RedirectResponse
