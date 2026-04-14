@@ -85,7 +85,7 @@
                             @if($day['can_write'])
                                 <a href="{{ route('student.worklogs.create', ['type' => 'daily', 'date' => $day['date']->toDateString()]) }}"
                                    class="absolute inset-0 z-10"
-                                   aria-label="Write daily journal for {{ $day['date']->format('M d, Y') }}">
+                                              aria-label="Write journal for {{ $day['date']->format('M d, Y') }}">
                                 </a>
                             @endif
                             <div class="flex justify-between items-start mb-2">

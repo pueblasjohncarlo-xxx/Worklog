@@ -316,6 +316,24 @@
                             </div>
                         </div>
 
+                        <div class="mb-4">
+                            <label for="adviser-student-search" class="sr-only">Search students</label>
+                            <div class="relative">
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <svg class="h-4 w-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    id="adviser-student-search"
+                                    type="text"
+                                    x-model="adviserSearchTerm"
+                                    placeholder="Search by name, section, company, or status..."
+                                    class="w-full rounded-lg border border-white/20 bg-white/10 text-white placeholder-slate-300 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                >
+                            </div>
+                        </div>
+
                         <div class="overflow-x-auto border border-white/10 rounded-lg">
                             <table class="min-w-full text-sm">
                                 <thead class="bg-white/10 text-left">
@@ -329,12 +347,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template x-if="selectedAdviser.students.length === 0">
+                                    <template x-if="getFilteredAdviserStudents().length === 0">
                                         <tr>
-                                            <td colspan="6" class="px-4 py-6 text-center text-slate-300">No assigned students found for this adviser.</td>
+                                            <td colspan="6" class="px-4 py-6 text-center text-slate-300">No students found.</td>
                                         </tr>
                                     </template>
-                                    <template x-for="student in selectedAdviser.students" :key="student.assignment_id">
+                                    <template x-for="student in getFilteredAdviserStudents()" :key="student.assignment_id">
                                         <tr class="border-t border-white/10">
                                             <td class="px-4 py-3" x-text="student.name"></td>
                                             <td class="px-4 py-3" x-text="student.section"></td>
@@ -375,6 +393,7 @@
                 adviserData: [],
                 selectedSection: null,
                 selectedAdviser: null,
+                adviserSearchTerm: '',
                 init(payload) {
                     this.sectionData = Array.isArray(payload.sectionReportOverview) ? payload.sectionReportOverview : [];
                     this.adviserData = Array.isArray(payload.adviserData) ? payload.adviserData : [];
@@ -386,10 +405,36 @@
                     this.selectedSection = null;
                 },
                 openAdviser(adviserId) {
+                    this.adviserSearchTerm = '';
                     this.selectedAdviser = this.adviserData.find(item => Number(item.id) === Number(adviserId)) || null;
                 },
                 closeAdviser() {
+                    this.adviserSearchTerm = '';
                     this.selectedAdviser = null;
+                },
+                getFilteredAdviserStudents() {
+                    if (!this.selectedAdviser || !Array.isArray(this.selectedAdviser.students)) {
+                        return [];
+                    }
+
+                    const term = (this.adviserSearchTerm || '').trim().toLowerCase();
+                    if (!term) {
+                        return this.selectedAdviser.students;
+                    }
+
+                    return this.selectedAdviser.students.filter((student) => {
+                        const haystack = [
+                            student.name,
+                            student.section,
+                            student.company,
+                            student.status,
+                        ]
+                            .filter(Boolean)
+                            .join(' ')
+                            .toLowerCase();
+
+                        return haystack.includes(term);
+                    });
                 }
             };
         }

@@ -8,6 +8,18 @@
     @endphp
 
     <div class="px-3 md:px-6 lg:px-8 py-3 sm:py-4">
+        @if (session('error'))
+            <div class="max-w-7xl mx-auto mb-3 rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if (session('status'))
+            <div class="max-w-7xl mx-auto mb-3 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                {{ session('status') }}
+            </div>
+        @endif
+
         <div class="max-w-7xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-3 sm:p-4 md:p-5">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
                 <div>
@@ -68,7 +80,7 @@
                                     <h4 class="font-bold text-sm mb-1">{{ Str::limit($task['title'], 35) }}</h4>
                                     <p class="text-xs text-gray-600 mb-2">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
                                     <span class="text-xs inline-block bg-indigo-100 px-2 py-1 rounded mb-2">{{ ucfirst($task['status'] ?? 'pending') }}</span>
-                                    <a href="/student/tasks/{{ $task['id'] }}" class="block px-3 py-2 bg-indigo-600 text-white text-xs text-center rounded font-semibold mt-2">View</a>
+                                    <a href="{{ route('student.tasks.show', $task['id']) }}" class="block px-3 py-2 bg-indigo-600 text-white text-xs text-center rounded font-semibold mt-2">View</a>
                                 </div>
                             @endforeach
                             @foreach($sem2_tasks as $task)
@@ -76,7 +88,7 @@
                                     <h4 class="font-bold text-sm mb-1">{{ Str::limit($task['title'], 35) }}</h4>
                                     <p class="text-xs text-gray-600 mb-2">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
                                     <span class="text-xs inline-block bg-indigo-100 px-2 py-1 rounded mb-2">{{ ucfirst($task['status'] ?? 'pending') }}</span>
-                                    <a href="/student/tasks/{{ $task['id'] }}" class="block px-3 py-2 bg-indigo-600 text-white text-xs text-center rounded font-semibold mt-2">View</a>
+                                    <a href="{{ route('student.tasks.show', $task['id']) }}" class="block px-3 py-2 bg-indigo-600 text-white text-xs text-center rounded font-semibold mt-2">View</a>
                                 </div>
                             @endforeach
                         </div>
@@ -140,7 +152,7 @@
                                     @if(isset($task['due_date']))
                                         <p class="text-xs text-gray-500 mb-4">Due: {{ \Carbon\Carbon::parse($task['due_date'])->format('M d, Y') }}</p>
                                     @endif
-                                    <a href="/student/tasks/{{ $task['id'] }}" class="block w-full px-4 py-2 bg-indigo-600 text-white text-center font-semibold rounded">View Details</a>
+                                    <a href="{{ route('student.tasks.show', $task['id']) }}" class="block w-full px-4 py-2 bg-indigo-600 text-white text-center font-semibold rounded">View Details</a>
                                 </div>
                             @endforeach
                         </div>
@@ -157,7 +169,7 @@
                                     @if(isset($task['due_date']))
                                         <p class="text-xs text-gray-500 mb-4">Due: {{ \Carbon\Carbon::parse($task['due_date'])->format('M d, Y') }}</p>
                                     @endif
-                                    <a href="/student/tasks/{{ $task['id'] }}" class="block w-full px-4 py-2 bg-indigo-600 text-white text-center font-semibold rounded">View Details</a>
+                                    <a href="{{ route('student.tasks.show', $task['id']) }}" class="block w-full px-4 py-2 bg-indigo-600 text-white text-center font-semibold rounded">View Details</a>
                                 </div>
                             @endforeach
                         </div>

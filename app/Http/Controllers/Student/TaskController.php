@@ -60,6 +60,41 @@ class TaskController extends Controller
         ]);
     }
 
+    public function show(int $taskId): View|RedirectResponse
+    {
+        $user = Auth::user();
+
+        $assignment = Assignment::with(['supervisor', 'company'])
+            ->where('student_id', $user->id)
+            ->first();
+
+        if (! $assignment) {
+            return redirect()
+                ->route('student.tasks.index')
+                ->with('error', 'No active assignment found for your account.');
+        }
+
+        $task = Task::with(['assignment.supervisor', 'assignment.company'])
+            ->where('id', $taskId)
+            ->where('assignment_id', $assignment->id)
+            ->first();
+
+        if (! $task) {
+            return redirect()
+                ->route('student.tasks.index')
+                ->with('error', 'Task not found or not assigned to your account.');
+        }
+
+        if (empty($task->semester)) {
+            $task->semester = '1st';
+        }
+
+        return view('student.tasks.show', [
+            'task' => $task,
+            'assignment' => $assignment,
+        ]);
+    }
+
     public function submit(Request $request, Task $task): RedirectResponse
     {
         $this->authorizeTask($task);

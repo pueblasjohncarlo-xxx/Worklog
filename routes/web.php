@@ -127,6 +127,7 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
         return redirect()->route('student.reports.index');
     });
     Route::get('/student/tasks', [StudentTaskController::class, 'index'])->name('student.tasks.index');
+    Route::get('/student/tasks/{taskId}', [StudentTaskController::class, 'show'])->whereNumber('taskId')->name('student.tasks.show');
     Route::patch('/student/tasks/{task}/status', [StudentTaskController::class, 'updateStatus'])->name('student.tasks.update-status');
     Route::post('/student/tasks/{task}/submit', [StudentTaskController::class, 'submit'])->name('student.tasks.submit');
     Route::post('/student/tasks/{task}/unsubmit', [StudentTaskController::class, 'unsubmit'])->name('student.tasks.unsubmit');
