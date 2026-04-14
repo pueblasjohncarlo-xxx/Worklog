@@ -19,7 +19,7 @@
                     </div>
                 @endif
 
-                <div class="mb-2" x-data="{ role: 'student' }">
+                <div class="mb-2" x-data="{ role: '{{ old('role', 'student') }}' }">
                     <h3 id="create-user" class="font-semibold mb-3 text-lg">Create New User</h3>
                     <form method="POST" action="{{ route('admin.users.store') }}" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
                         @csrf
@@ -57,6 +57,21 @@
                             <option value="ojt_adviser">OJT Adviser</option>
                             <option value="student" selected>OJT Student</option>
                         </select>
+
+                        <template x-if="role === 'supervisor'">
+                            <select
+                                name="company_id"
+                                class="rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
+                                required
+                            >
+                                <option value="">Select company for supervisor</option>
+                                @forelse($companies as $company)
+                                    <option value="{{ $company->id }}" @selected((string) old('company_id') === (string) $company->id)>{{ $company->name }}</option>
+                                @empty
+                                    <option value="" disabled>No companies available</option>
+                                @endforelse
+                            </select>
+                        </template>
 
                         <template x-if="role === 'ojt_adviser'">
                             <input

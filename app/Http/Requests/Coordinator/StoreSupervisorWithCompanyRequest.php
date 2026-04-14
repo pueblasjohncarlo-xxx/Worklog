@@ -32,10 +32,15 @@ class StoreSupervisorWithCompanyRequest extends FormRequest
 
             // Company toggle
             'create_company' => ['boolean'],
+            'company_id' => ['nullable', 'integer', 'exists:companies,id'],
         ];
 
         if ($this->input('role') === User::ROLE_SUPERVISOR) {
             $rules['position_title'] = ['required', 'string', 'max:255'];
+
+            if (! $this->boolean('create_company')) {
+                $rules['company_id'] = ['required', 'integer', 'exists:companies,id'];
+            }
         }
 
         // Conditional company rules
@@ -55,5 +60,13 @@ class StoreSupervisorWithCompanyRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    public function messages(): array
+    {
+        return [
+            'company_id.required' => 'Please select a company for the supervisor.',
+            'company_id.exists' => 'The selected company is invalid.',
+        ];
     }
 }

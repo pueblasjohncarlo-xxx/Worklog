@@ -96,6 +96,39 @@
                     </div>
                 </div>
 
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg" x-show="role === 'supervisor' && !createCompany" x-transition>
+                    <header class="mb-4">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                            {{ __('Assign Existing Company') }}
+                        </h3>
+                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                            {{ __('Select the company this supervisor belongs to.') }}
+                        </p>
+                    </header>
+
+                    <div>
+                        <x-input-label for="company_id" :value="__('Company')" />
+                        <select
+                            id="company_id"
+                            name="company_id"
+                            x-bind:required="role === 'supervisor' && !createCompany"
+                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                        >
+                            <option value="">Select company</option>
+                            @foreach($companies as $company)
+                                <option value="{{ $company->id }}" @selected(old('company_id') == $company->id)>{{ $company->name }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('company_id')" />
+
+                        @if($companies->isEmpty())
+                            <p class="mt-2 text-sm text-amber-600 dark:text-amber-400">
+                                {{ __('No company records found. Enable "create company" to continue creating a supervisor.') }}
+                            </p>
+                        @endif
+                    </div>
+                </div>
+
                 <!-- Company Information (Conditional) -->
                 <div x-show="role === 'supervisor' && createCompany" x-transition class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <header class="mb-6">

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Admin\CreateUserRequest;
 use App\Http\Requests\Admin\UpdateUserRoleRequest;
 use App\Models\AuditLog;
+use App\Models\Company;
+use App\Models\SupervisorProfile;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +47,7 @@ class AdminUserController extends Controller
         $this->authorize('viewAny', User::class);
 
         $users = User::orderBy('name')->get();
+        $companies = Company::orderBy('name')->get();
 
         // Group students by section (or 'No Section' if null)
         $students = $users->where('role', 'student')->groupBy(function ($user) {
@@ -66,6 +69,7 @@ class AdminUserController extends Controller
             'supervisors' => $supervisors,
             'ojtAdvisers' => $ojtAdvisers,
             'allUsers' => $users,
+            'companies' => $companies,
         ]);
     }
 
@@ -105,6 +109,17 @@ class AdminUserController extends Controller
                     );
                 }
 
+                if ($data['role'] === User::ROLE_SUPERVISOR) {
+                    SupervisorProfile::updateOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'company_id' => (int) $data['company_id'],
+                            'department' => $data['department'] ?? null,
+                            'phone' => $data['phone'] ?? null,
+                        ]
+                    );
+                }
+
                 // Log user update action
                 $this->logAuditAction('user_updated', $user, [
                     'old_role' => $oldRole,
@@ -132,6 +147,15 @@ class AdminUserController extends Controller
                         'department' => $data['department'] ?? null,
                         'phone' => $data['phone'] ?? null,
                         'address' => $data['address'] ?? null,
+                    ]);
+                }
+
+                if ($data['role'] === User::ROLE_SUPERVISOR) {
+                    SupervisorProfile::create([
+                        'user_id' => $newUser->id,
+                        'company_id' => (int) $data['company_id'],
+                        'department' => $data['department'] ?? null,
+                        'phone' => $data['phone'] ?? null,
                     ]);
                 }
 

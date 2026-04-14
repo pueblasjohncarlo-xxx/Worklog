@@ -23,7 +23,9 @@ class CoordinatorSupervisorController extends Controller
      */
     public function create(): View
     {
-        return view('coordinator.supervisors.create');
+        return view('coordinator.supervisors.create', [
+            'companies' => Company::orderBy('name')->get(),
+        ]);
     }
 
     /**
@@ -68,9 +70,13 @@ class CoordinatorSupervisorController extends Controller
 
             $user = User::create($userData);
 
-            $companyId = null;
+            $companyId = $role === User::ROLE_SUPERVISOR && $request->filled('company_id')
+                ? (int) $request->input('company_id')
+                : null;
 
             // 2. Optional Company Creation
+            $createdNewCompany = false;
+
             if ($role === User::ROLE_SUPERVISOR && $request->boolean('create_company')) {
                 $company = Company::create([
                     'name' => $request->company_name,
@@ -85,6 +91,7 @@ class CoordinatorSupervisorController extends Controller
                     'contact_phone' => $request->company_contact_phone,
                 ]);
                 $companyId = $company->id;
+                $createdNewCompany = true;
             }
 
             // 3. Create role profile
@@ -117,7 +124,7 @@ class CoordinatorSupervisorController extends Controller
             }
 
             return redirect()->route('coordinator.dashboard')
-                ->with('status', ucfirst(str_replace('_', ' ', $role)).' account created successfully'.($companyId ? ' and linked to the new company.' : '.').($warning ?? ''));
+                ->with('status', ucfirst(str_replace('_', ' ', $role)).' account created successfully'.($companyId ? ($createdNewCompany ? ' and linked to the new company.' : ' and linked to the selected company.') : '.').($warning ?? ''));
 
         } catch (\Exception $e) {
             DB::rollBack();
