@@ -24,13 +24,7 @@
                                 <button type="button" onclick="document.getElementById('receiver_id').value = '{{ $recipient->id }}'; document.getElementById('receiver_id').dispatchEvent(new Event('change')); document.getElementById('body').focus(); return false;"
                                     class="w-full text-left p-3 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors group">
                                     <div class="flex items-center gap-3">
-                                        @if ($recipient->profile_photo_path)
-                                            <img src="{{ Storage::url($recipient->profile_photo_path) }}" alt="{{ $recipient->name }}" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-500/50">
-                                        @else
-                                            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-500 dark:to-purple-600 flex items-center justify-center text-white text-sm font-bold border-2 border-indigo-200 dark:border-indigo-500/50">
-                                                {{ substr($recipient->name, 0, 1) }}
-                                            </div>
-                                        @endif
+                                        <img src="{{ $recipient->profile_photo_url }}" data-avatar-user-id="{{ $recipient->id }}" alt="{{ $recipient->name }}" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-500/50">
                                         <div class="min-w-0 flex-1">
                                             <p class="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
                                                 {{ $recipient->name }}

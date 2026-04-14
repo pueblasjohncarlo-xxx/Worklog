@@ -94,7 +94,7 @@
                         <div class="flex items-center gap-4">
                             <div class="h-14 w-14 rounded-full overflow-hidden border-4 border-white bg-gray-900/10 flex items-center justify-center flex-shrink-0">
                                 <template x-if="selectedAdviser().photo_url">
-                                    <img :src="selectedAdviser().photo_url" alt="" class="h-full w-full object-cover">
+                                    <img :src="selectedAdviser().photo_url" :data-avatar-user-id="selectedAdviser().id" alt="" class="h-full w-full object-cover">
                                 </template>
                                 <template x-if="!selectedAdviser().photo_url">
                                     <div class="text-white font-bold text-lg" x-text="selectedAdviser().name.charAt(0).toUpperCase()"></div>

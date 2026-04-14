@@ -42,6 +42,7 @@
                 @yield('content')
             </main>
         </div>
+        @include('layouts.partials.avatar-sync')
         @stack('scripts')
     </body>
 </html>

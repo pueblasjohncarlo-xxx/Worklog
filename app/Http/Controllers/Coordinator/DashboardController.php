@@ -10,7 +10,6 @@ use App\Models\WorkLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 
@@ -275,7 +274,7 @@ class DashboardController extends Controller
                         'id' => $adviser->id,
                         'name' => $adviser->name ?? 'Unknown',
                         'email' => $adviser->email ?? 'N/A',
-                        'photo_url' => $adviser->profile_photo_path ? Storage::url($adviser->profile_photo_path) : null,
+                        'photo_url' => $adviser->profile_photo_path ? $adviser->profile_photo_url : null,
                         'assigned_students_count' => $students->count(),
                         'on_track_count' => $students->where('status', 'On Track')->count(),
                         'attention_count' => $students->where('status', 'Needs Attention')->count(),

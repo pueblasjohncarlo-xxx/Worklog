@@ -5,7 +5,7 @@
 
     <div class="space-y-6">
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="bg-indigo-600/20 backdrop-blur-md border border-indigo-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(79,70,229,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-indigo-500/20 hover:bg-indigo-600/30 group">
+            <a href="{{ route('coordinator.student-overview') }}" class="block bg-indigo-600/20 backdrop-blur-md border border-indigo-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(79,70,229,0.1)] overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 hover:shadow-indigo-500/20 hover:bg-indigo-600/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 group">
                 <div class="p-4 text-gray-100">
                     <div class="text-sm text-indigo-200 font-bold uppercase tracking-wider group-hover:text-indigo-100 transition-colors">
                         OJT Students
@@ -14,8 +14,8 @@
                         {{ $totalStudents }}
                     </div>
                 </div>
-            </div>
-            <div class="bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(5,150,105,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-emerald-500/20 hover:bg-emerald-600/30 group">
+            </a>
+            <a href="{{ route('coordinator.adviser-overview') }}" class="block bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(5,150,105,0.1)] overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 hover:shadow-emerald-500/20 hover:bg-emerald-600/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 group">
                 <div class="p-4 text-gray-100">
                     <div class="text-sm text-emerald-200 font-bold uppercase tracking-wider group-hover:text-emerald-100 transition-colors">
                         OJT Advisory
@@ -24,8 +24,8 @@
                         {{ $advisersCount }}
                     </div>
                 </div>
-            </div>
-            <div class="bg-amber-600/20 backdrop-blur-md border border-amber-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(217,119,6,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-amber-500/20 hover:bg-amber-600/30 group">
+            </a>
+            <a href="{{ route('coordinator.companies.index') }}" class="block bg-amber-600/20 backdrop-blur-md border border-amber-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(217,119,6,0.1)] overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 hover:shadow-amber-500/20 hover:bg-amber-600/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 group">
                 <div class="p-4 text-gray-100">
                     <div class="text-sm text-amber-200 font-bold uppercase tracking-wider group-hover:text-amber-100 transition-colors">
                         Industry
@@ -34,8 +34,8 @@
                         {{ $companiesCount }}
                     </div>
                 </div>
-            </div>
-            <div class="bg-rose-600/20 backdrop-blur-md border border-rose-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(225,29,72,0.1)] overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-rose-500/20 hover:bg-rose-600/30 group">
+            </a>
+            <a href="{{ route('coordinator.deployment.index') }}" class="block bg-rose-600/20 backdrop-blur-md border border-rose-500/30 rounded-xl shadow-[0_8px_32px_0_rgba(225,29,72,0.1)] overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300 hover:shadow-rose-500/20 hover:bg-rose-600/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 group">
                 <div class="p-4 text-gray-100">
                     <div class="text-sm text-rose-200 font-bold uppercase tracking-wider group-hover:text-rose-100 transition-colors">
                         Status
@@ -44,7 +44,7 @@
                         {{ $activeAssignmentsCount }}
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <!-- Charts Section -->
@@ -111,7 +111,7 @@
                                 <div class="flex items-center gap-4">
                                     <div class="h-14 w-14 rounded-full overflow-hidden border border-white/10 bg-black/20 flex items-center justify-center shrink-0">
                                         <template x-if="adviser.photo_url">
-                                            <img :src="adviser.photo_url" alt="" class="h-full w-full object-cover">
+                                            <img :src="adviser.photo_url" :data-avatar-user-id="adviser.id" alt="" class="h-full w-full object-cover">
                                         </template>
                                         <template x-if="!adviser.photo_url">
                                             <div class="text-white font-black text-xl" x-text="adviser.name.charAt(0).toUpperCase()"></div>

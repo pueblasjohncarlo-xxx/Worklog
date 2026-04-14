@@ -5,11 +5,36 @@
         </div>
     </x-slot>
 
+    @php
+        $supervisorsForJs = $supervisors->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'name' => $s->name,
+                'company_id' => optional($s->supervisorProfile)->company_id,
+                'company_name' => optional(optional($s->supervisorProfile)->company)->name,
+            ];
+        })->values();
+
+        $advisersForJs = $ojtAdvisers->map(function ($a) {
+            return [
+                'id' => $a->id,
+                'name' => $a->name,
+            ];
+        })->values();
+
+        $companiesForJs = $companies->map(function ($c) {
+            return [
+                'id' => $c->id,
+                'name' => $c->name,
+            ];
+        })->values();
+    @endphp
+
     <div class="space-y-6" x-data='{
         deployments: @json($deploymentData),
-        supervisors: @json($supervisors->map(fn($s) => ["id" => $s->id, "name" => $s->name])),
-        advisers: @json($ojtAdvisers->map(fn($a) => ["id" => $a->id, "name" => $a->name])),
-        companies: @json($companies->map(fn($c) => ["id" => $c->id, "name" => $c->name])),
+        supervisors: @json($supervisorsForJs),
+        advisers: @json($advisersForJs),
+        companies: @json($companiesForJs),
         searchTerm: "",
         selectedCompany: "",
         selectedStatus: "",
@@ -75,10 +100,15 @@
                     // Update the deployment in the array
                     const index = this.deployments.findIndex(d => d.id === this.editingDeployment.id);
                     if (index !== -1) {
+                        const selectedSupervisor = this.supervisors.find(s => String(s.id) === String(this.editSupervisorId));
                         this.deployments[index].supervisor_id = this.editSupervisorId;
                         this.deployments[index].adviser_id = this.editAdviserId;
                         this.deployments[index].supervisor_name = this.supervisors.find(s => s.id == this.editSupervisorId)?.name || "Not Assigned";
                         this.deployments[index].adviser_name = this.advisers.find(a => a.id == this.editAdviserId)?.name || "Not Assigned";
+                        if (selectedSupervisor?.company_id) {
+                            this.deployments[index].company_id = selectedSupervisor.company_id;
+                            this.deployments[index].company_name = selectedSupervisor.company_name || this.deployments[index].company_name;
+                        }
                         this.deployments[index].deployment_status = (this.editSupervisorId && this.editAdviserId) ? "complete" : ((this.editSupervisorId || this.editAdviserId) ? "incomplete" : "unassigned");
                     }
                     this.closeEditModal();
@@ -236,7 +266,11 @@
                         >
                             <option value="">Select supervisor</option>
                             @foreach ($supervisors as $supervisor)
-                                <option value="{{ $supervisor->id }}">{{ $supervisor->name }}</option>
+                                <option
+                                    value="{{ $supervisor->id }}"
+                                    data-company-id="{{ $supervisor->supervisorProfile?->company_id ?? '' }}"
+                                    data-company-name="{{ $supervisor->supervisorProfile?->company?->name ?? '' }}"
+                                >{{ $supervisor->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -260,16 +294,17 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company *</label>
                         <select
-                            id="company_id"
-                            name="company_id"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
-                            required
+                            id="company_id_display"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 cursor-not-allowed"
+                            disabled
                         >
                             <option value="">Select company</option>
                             @foreach ($companies as $company)
                                 <option value="{{ $company->id }}">{{ $company->name }}</option>
                             @endforeach
                         </select>
+                        <input type="hidden" id="company_id" name="company_id" value="{{ old('company_id') }}" required>
+                        <p id="supervisor-company-validation" class="mt-1 text-xs text-red-600 dark:text-red-400 hidden"></p>
                     </div>
                 </div>
 
@@ -617,8 +652,72 @@
             });
             $('#supervisor_id').select2({ width: '100%' });
             $('#ojt_adviser_id').select2({ width: '100%' });
-            $('#company_id').select2({ width: '100%' });
+            $('#company_id_display').select2({ width: '100%' });
+
+            $('#supervisor_id').on('change', syncCompanyFromSupervisor);
+            syncCompanyFromSupervisor();
         });
+
+        function normalizeSupervisorIds(rawValue) {
+            if (Array.isArray(rawValue)) {
+                return rawValue.filter(Boolean);
+            }
+
+            if (rawValue) {
+                return [rawValue];
+            }
+
+            return [];
+        }
+
+        function setSupervisorValidationMessage(message) {
+            const messageElement = $('#supervisor-company-validation');
+            if (!message) {
+                messageElement.text('');
+                messageElement.addClass('hidden');
+                return;
+            }
+
+            messageElement.text(message);
+            messageElement.removeClass('hidden');
+        }
+
+        function setCompanyValue(companyId) {
+            const value = companyId ? String(companyId) : '';
+            $('#company_id').val(value);
+            $('#company_id_display').val(value).trigger('change.select2');
+        }
+
+        function syncCompanyFromSupervisor() {
+            const selectedSupervisorIds = normalizeSupervisorIds($('#supervisor_id').val());
+
+            if (selectedSupervisorIds.length === 0) {
+                setCompanyValue('');
+                setSupervisorValidationMessage('Select a supervisor to auto-fill company.');
+                return false;
+            }
+
+            const selectedCompanyIds = [...new Set(selectedSupervisorIds.map((supervisorId) => {
+                const option = $(`#supervisor_id option[value="${supervisorId}"]`);
+                return option.data('company-id') ? String(option.data('company-id')) : '';
+            }))];
+
+            if (selectedCompanyIds.includes('')) {
+                setCompanyValue('');
+                setSupervisorValidationMessage('One or more selected supervisors have no assigned company profile.');
+                return false;
+            }
+
+            if (selectedCompanyIds.length !== 1) {
+                setCompanyValue('');
+                setSupervisorValidationMessage('Selected supervisors belong to different companies. Please choose supervisors from the same company.');
+                return false;
+            }
+
+            setCompanyValue(selectedCompanyIds[0]);
+            setSupervisorValidationMessage('');
+            return true;
+        }
 
         function confirmDeployment() {
             const studentIds = $('#student_ids').val();
@@ -633,8 +732,12 @@
                 alert('Please select a supervisor.');
                 return;
             }
+            if (!syncCompanyFromSupervisor()) {
+                alert('Please fix supervisor and company mapping before creating deployment.');
+                return;
+            }
             if (!companyId) {
-                alert('Please select a company.');
+                alert('Company is auto-filled from the selected supervisor. Please select a valid supervisor with an assigned company.');
                 return;
             }
 
@@ -649,7 +752,7 @@
             $('#confirm-supervisor').text($('#supervisor_id option:selected').text().trim());
             const adviserText = $('#ojt_adviser_id').val() ? $('#ojt_adviser_id option:selected').text().trim() : 'None';
             $('#confirm-adviser').text(adviserText);
-            $('#confirm-company').text($('#company_id option:selected').text().trim());
+            $('#confirm-company').text($('#company_id_display option:selected').text().trim());
             
             const startDate = $('#start_date').val();
             const endDate = $('#end_date').val();

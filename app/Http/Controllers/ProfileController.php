@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -75,6 +77,48 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    public function avatarVersions(Request $request): JsonResponse
+    {
+        $ids = collect($request->input('ids', []));
+
+        if ($ids->isEmpty()) {
+            $idsParam = trim((string) $request->input('ids', ''));
+            if ($idsParam !== '') {
+                $ids = collect(explode(',', $idsParam));
+            }
+        }
+
+        $userIds = $ids
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->unique()
+            ->take(200)
+            ->values();
+
+        if ($userIds->isEmpty()) {
+            return response()->json([
+                'avatars' => [],
+                'generated_at' => now()->toIso8601String(),
+            ]);
+        }
+
+        $users = User::whereIn('id', $userIds)->get(['id', 'name', 'profile_photo_path', 'updated_at']);
+
+        $avatars = $users->mapWithKeys(function (User $user) {
+            return [
+                (string) $user->id => [
+                    'url' => $user->profile_photo_url,
+                    'updated_at' => optional($user->updated_at)->toIso8601String(),
+                ],
+            ];
+        });
+
+        return response()->json([
+            'avatars' => $avatars,
+            'generated_at' => now()->toIso8601String(),
+        ]);
     }
 
     /**

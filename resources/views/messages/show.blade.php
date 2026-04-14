@@ -8,13 +8,7 @@
                     </svg>
                 </a>
                 <div class="flex items-center gap-3">
-                    @if ($user->profile_photo_path)
-                        <img src="{{ Storage::url($user->profile_photo_path) }}" alt="{{ $user->name }}" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-500">
-                    @else
-                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-500 dark:to-purple-600 flex items-center justify-center text-white font-bold border-2 border-indigo-200 dark:border-indigo-500">
-                            {{ substr($user->name, 0, 1) }}
-                        </div>
-                    @endif
+                    <img src="{{ $user->profile_photo_url }}" data-avatar-user-id="{{ $user->id }}" alt="{{ $user->name }}" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-500">
                     <div>
                         <div class="font-bold text-gray-900 dark:text-white">{{ $user->name }}</div>
                         <div class="text-xs text-indigo-600 dark:text-indigo-300 uppercase tracking-wider">{{ ucfirst(str_replace('_', ' ', $user->role)) }}</div>
@@ -32,13 +26,7 @@
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-lg sticky top-32 overflow-hidden border border-gray-200 dark:border-gray-700">
                         <!-- User Header -->
                         <div class="p-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-600/20 dark:to-purple-600/20 border-b border-gray-200 dark:border-gray-700 text-center">
-                            @if ($user->profile_photo_path)
-                                <img src="{{ Storage::url($user->profile_photo_path) }}" alt="{{ $user->name }}" class="h-20 w-20 rounded-full object-cover border-4 border-indigo-300 dark:border-indigo-500 shadow-md dark:shadow-lg mx-auto mb-4">
-                            @else
-                                <div class="h-20 w-20 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-500 dark:to-purple-600 flex items-center justify-center text-white font-bold text-3xl border-4 border-indigo-300 dark:border-indigo-500 shadow-md dark:shadow-lg mx-auto mb-4">
-                                    {{ substr($user->name, 0, 1) }}
-                                </div>
-                            @endif
+                            <img src="{{ $user->profile_photo_url }}" data-avatar-user-id="{{ $user->id }}" alt="{{ $user->name }}" class="h-20 w-20 rounded-full object-cover border-4 border-indigo-300 dark:border-indigo-500 shadow-md dark:shadow-lg mx-auto mb-4">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">{{ $user->name }}</h3>
                             <p class="text-xs text-indigo-600 dark:text-indigo-300 uppercase tracking-widest font-bold">{{ ucfirst(str_replace('_', ' ', $user->role)) }}</p>
                         </div>
@@ -126,13 +114,7 @@
                                 
                                 @if(!$isMe)
                                     <div class="flex-shrink-0">
-                                        @if($message->sender->profile_photo_path)
-                                            <img class="h-8 w-8 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-500/50 shadow" src="{{ Storage::url($message->sender->profile_photo_path) }}" alt="{{ $message->sender->name }}" title="{{ $message->sender->name }}" />
-                                        @else
-                                            <div class="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-500 dark:to-purple-600 flex items-center justify-center text-xs font-bold text-white border-2 border-indigo-200 dark:border-indigo-400/50 shadow" title="{{ $message->sender->name }}">
-                                                {{ substr($message->sender->name, 0, 1) }}
-                                            </div>
-                                        @endif
+                                        <img class="h-8 w-8 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-500/50 shadow" src="{{ $message->sender->profile_photo_url }}" data-avatar-user-id="{{ $message->sender->id }}" alt="{{ $message->sender->name }}" title="{{ $message->sender->name }}" />
                                     </div>
                                 @endif
 
@@ -204,13 +186,7 @@
                             
                                 @if($isMe)
                                     <div class="flex-shrink-0">
-                                        @if(Auth::user()->profile_photo_path)
-                                            <img class="h-8 w-8 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-500/50 shadow" src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" />
-                                        @else
-                                            <div class="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 dark:from-purple-600 dark:to-indigo-600 flex items-center justify-center text-xs font-bold text-white border-2 border-indigo-200 dark:border-indigo-400/50 shadow">
-                                                {{ substr(Auth::user()->name, 0, 1) }}
-                                            </div>
-                                        @endif
+                                        <img class="h-8 w-8 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-500/50 shadow" src="{{ Auth::user()->profile_photo_url }}" data-avatar-user-id="{{ Auth::id() }}" alt="{{ Auth::user()->name }}" />
                                     </div>
                                 @endif
 

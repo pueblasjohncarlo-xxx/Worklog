@@ -57,8 +57,11 @@
                         
                         <div class="flex items-start gap-3">
                             <!-- Avatar -->
-                            <img :src="conversation.avatar" :alt="conversation.name" 
-                                class="w-12 h-12 rounded-full flex-shrink-0 object-cover border border-indigo-500/30">
+                            <div class="relative">
+                                <img :src="conversation.avatar" :alt="conversation.name" :data-avatar-user-id="conversation.id"
+                                    class="w-12 h-12 rounded-full flex-shrink-0 object-cover border border-indigo-500/30 transition-transform duration-200">
+                                <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-black" :class="isUserOnline(conversation.id) ? 'bg-emerald-400' : 'bg-gray-500'"></span>
+                            </div>
                             
                             <!-- Content -->
                             <div class="flex-1 min-w-0">
@@ -75,7 +78,7 @@
                                     <span class="text-xs text-gray-500" x-text="formatTime(conversation.last_message_time)"></span>
                                 </div>
                                 
-                                <p class="text-sm text-gray-400 truncate" x-text="conversation.last_message || 'No messages yet'"></p>
+                                <p class="text-sm text-gray-400 truncate" x-text="isUserTyping(conversation.id) ? 'typing...' : (conversation.last_message || 'No messages yet')"></p>
                             </div>
                         </div>
                     </button>
@@ -101,11 +104,14 @@
                 <!-- Chat Header -->
                 <div class="p-4 border-b border-indigo-500/20 bg-black/60 flex items-center justify-between sticky top-0 z-10">
                     <div class="flex items-center gap-3">
-                        <img :src="activeConversation.avatar" :alt="activeConversation.name" 
-                            class="w-10 h-10 rounded-full border border-indigo-500/30">
+                        <div class="relative">
+                            <img :src="activeConversation.avatar" :alt="activeConversation.name" :data-avatar-user-id="activeConversation.id"
+                                class="w-10 h-10 rounded-full border border-indigo-500/30">
+                            <span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border border-black" :class="isUserOnline(activeConversation.id) ? 'bg-emerald-400' : 'bg-gray-500'"></span>
+                        </div>
                         <div>
                             <h2 class="font-bold text-white" x-text="activeConversation.name"></h2>
-                            <p class="text-xs text-indigo-400 capitalize" x-text="activeConversation.role"></p>
+                            <p class="text-xs text-indigo-400 capitalize" x-text="isUserTyping(activeConversation.id) ? 'typing...' : (isUserOnline(activeConversation.id) ? 'online' : 'offline')"></p>
                         </div>
                     </div>
                     <button @click="activeConversation = null" class="p-2 hover:bg-gray-800 rounded-lg transition text-gray-400">
@@ -113,6 +119,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
+                </div>
+
+                <div class="px-4 py-2 border-b border-indigo-500/10 bg-black/30">
+                    <input x-model="messageSearchQuery" type="text" placeholder="Search messages in this chat..." class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition">
                 </div>
 
                 <!-- Messages -->
@@ -136,13 +146,13 @@
                         <template x-for="msg in group" :key="msg.id">
                             <div :class="msg.is_own ? 'justify-end' : 'justify-start'" class="flex">
                                 <div :class="msg.is_own ? 'bg-indigo-600 text-white rounded-3xl rounded-tr-lg' : 'bg-gray-800 text-gray-100 rounded-3xl rounded-tl-lg'" 
-                                    class="max-w-xs lg:max-w-md px-4 py-2 break-words">
+                                    class="max-w-xs lg:max-w-md px-4 py-2 break-words transition-all duration-150">
                                     <!-- Message Body -->
                                     <p class="text-sm" x-text="msg.body"></p>
                                     
                                     <!-- Attachment Preview -->
                                     <template x-if="msg.attachment_path && msg.attachment_type === 'image'">
-                                        <img :src="`/storage/${msg.attachment_path}`" :alt="msg.attachment_name" 
+                                        <img :src="messageAttachmentUrl(msg)" :alt="msg.attachment_name" 
                                             class="mt-2 rounded max-w-sm">
                                     </template>
                                     
@@ -157,32 +167,49 @@
                                     <div class="flex items-center justify-between gap-2 mt-1">
                                         <span class="text-xs opacity-70" x-text="formatMessageTime(msg.created_at)"></span>
                                         <template x-if="msg.is_own">
-                                            <template x-if="msg.read_at">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                                </svg>
-                                            </template>
-                                            <template x-if="!msg.read_at">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                            </template>
+                                            <span class="text-[10px] font-medium" x-text="messageDeliveryLabel(msg)"></span>
                                         </template>
                                     </div>
                                 </div>
                             </div>
                         </template>
                     </template>
+
+                    <template x-if="activeConversation !== null && isUserTyping(activeConversation.id)">
+                        <div class="flex justify-start" x-transition>
+                            <div class="bg-gray-800 text-gray-300 rounded-2xl px-3 py-2 text-xs">typing...</div>
+                        </div>
+                    </template>
                 </div>
 
                 <!-- Input Area -->
                 <div class="p-4 border-t border-indigo-500/20 bg-black/60">
+                    <template x-if="selectedAttachment">
+                        <div class="mb-3 rounded-lg border border-indigo-500/30 bg-indigo-900/20 p-3 flex items-start justify-between gap-3">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs text-indigo-200 truncate" x-text="selectedAttachmentName"></p>
+                                <template x-if="selectedAttachmentPreview">
+                                    <img :src="selectedAttachmentPreview" alt="Attachment preview" class="mt-2 max-h-28 rounded-md border border-indigo-500/30">
+                                </template>
+                            </div>
+                            <button type="button" @click="clearAttachment()" class="text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 transition">Remove</button>
+                        </div>
+                    </template>
+
                     <form @submit.prevent="sendMessage()" class="flex gap-3">
+                        <input type="file" x-ref="attachmentInput" class="hidden" @change="onAttachmentSelected($event)" accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar">
+                        <button type="button" @click="$refs.attachmentInput.click()" class="px-3 py-3 rounded-full bg-gray-800 hover:bg-gray-700 text-indigo-200 transition" title="Attach file">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l7.07-7.07a4 4 0 10-5.656-5.656l-7.778 7.778a6 6 0 108.486 8.486L21 12" />
+                            </svg>
+                        </button>
                         <input x-model="messageInput" type="text" placeholder="Type a message..." 
                             class="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition text-sm"
-                            @keydown.enter="sendMessage()">
-                        <button type="submit" :disabled="!messageInput.trim()" 
-                            :class="messageInput.trim() ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-700 opacity-50 cursor-not-allowed'"
+                            @keydown.enter="sendMessage()"
+                            @input="handleTypingInput()"
+                            @blur="sendTypingState(false)">
+                        <button type="submit" :disabled="!canSendMessage()" 
+                            :class="canSendMessage() ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-700 opacity-50 cursor-not-allowed'"
                             class="px-6 py-3 rounded-full text-white font-semibold transition flex items-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5.951-1.429 5.951 1.429a1 1 0 001.169-1.409l-7-14z"></path>
@@ -231,7 +258,7 @@
                         
                         <div class="flex items-center flex-1 min-w-0">
                             <!-- Avatar -->
-                            <img :src="user.avatar" :alt="user.name" 
+                            <img :src="user.avatar" :alt="user.name" :data-avatar-user-id="user.id"
                                 class="w-10 h-10 rounded-full flex-shrink-0 object-cover border border-indigo-500/30">
                             
                             <!-- User Info -->
@@ -279,11 +306,21 @@ function chatApp() {
         messageInput: '',
         isLoading: false,
         pollInterval: null,
+        heartbeatInterval: null,
+        relativeTimeInterval: null,
         showStartConversationModal: false,
         availableUsers: [],
         filteredAvailableUsers: [],
         startConversationSearch: '',
         searchTimeout: null,
+        typingStopTimer: null,
+        onlineState: {},
+        typingState: {},
+        relativeTimeTick: 0,
+        messageSearchQuery: '',
+        selectedAttachment: null,
+        selectedAttachmentPreview: '',
+        selectedAttachmentName: '',
 
         init() {
             console.log('=== CHATAPP INITIALIZED ===');
@@ -295,14 +332,32 @@ function chatApp() {
                 activeConversation: this.activeConversation,
             });
             this.loadConversations();
-            // Poll for new messages every 2 seconds
+            this.sendPresenceHeartbeat();
+
+            // Poll for real-time updates
             this.pollInterval = setInterval(() => {
-                if (this.activeConversation) {
-                    this.loadMessages();
-                }
-                this.loadConversations();
-            }, 2000);
+                this.performRealtimeSync();
+            }, 1200);
+
+            this.heartbeatInterval = setInterval(() => {
+                this.sendPresenceHeartbeat();
+            }, 15000);
+
+            this.relativeTimeInterval = setInterval(() => {
+                this.relativeTimeTick += 1;
+            }, 30000);
             console.log('=== INITIALIZATION COMPLETE ===');
+        },
+
+        async performRealtimeSync() {
+            await this.loadConversations();
+
+            if (this.activeConversation) {
+                await this.loadMessages();
+                await this.loadTypingStatus(this.activeConversation.id);
+            }
+
+            this.sendPresenceHeartbeat();
         },
 
         async loadConversations() {
@@ -312,10 +367,85 @@ function chatApp() {
                 if (data.success) {
                     this.conversations = data.conversations;
                     this.filterConversations();
+                    this.loadPresenceForConversations();
+                    this.loadTypingForConversations();
                 }
             } catch (error) {
                 console.error('Error loading conversations:', error);
             }
+        },
+
+        async loadPresenceForConversations() {
+            const ids = this.conversations.map((conversation) => conversation.id);
+            if (ids.length === 0) {
+                return;
+            }
+
+            try {
+                const params = new URLSearchParams();
+                params.set('ids', ids.join(','));
+
+                const response = await fetch(`/api/messages/presence?${params.toString()}`);
+                const data = await response.json();
+                if (data.success && data.presence) {
+                    this.onlineState = {
+                        ...this.onlineState,
+                        ...data.presence,
+                    };
+                }
+            } catch (error) {
+                console.error('Error loading presence:', error);
+            }
+        },
+
+        async sendPresenceHeartbeat() {
+            try {
+                await fetch('/api/messages/presence/heartbeat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({
+                        active_conversation_id: this.activeConversation ? this.activeConversation.id : null,
+                    }),
+                });
+            } catch (error) {
+                console.error('Error sending heartbeat:', error);
+            }
+        },
+
+        async loadTypingForConversations() {
+            const ids = this.conversations.map((conversation) => conversation.id);
+            if (ids.length === 0) {
+                return;
+            }
+
+            try {
+                const params = new URLSearchParams();
+                params.set('ids', ids.join(','));
+
+                const response = await fetch(`/api/messages/typing?${params.toString()}`);
+                const data = await response.json();
+
+                if (data.success && data.typing) {
+                    this.typingState = {
+                        ...this.typingState,
+                        ...data.typing,
+                    };
+                }
+            } catch (error) {
+                console.error('Error loading typing states:', error);
+            }
+        },
+
+        isUserOnline(userId) {
+            const state = this.onlineState[String(userId)];
+            return !!(state && state.online);
+        },
+
+        isUserTyping(userId) {
+            return !!this.typingState[String(userId)];
         },
 
         filterConversations() {
@@ -334,7 +464,10 @@ function chatApp() {
             this.activeConversation = conversation;
             this.messageInput = '';
             this.messages = [];
+            this.messageSearchQuery = '';
             await this.loadMessages();
+            await this.loadTypingStatus(conversation.id);
+            this.sendPresenceHeartbeat();
             this.scrollToBottom();
         },
 
@@ -347,6 +480,11 @@ function chatApp() {
                     // Check if there are new messages by comparing last message ID
                     const lastMsgId = this.messages.length > 0 ? this.messages[this.messages.length - 1].id : null;
                     this.messages = data.messages;
+                    if (data.user && this.activeConversation) {
+                        this.activeConversation.avatar = data.user.avatar;
+                        this.activeConversation.name = data.user.name;
+                        this.activeConversation.role = data.user.role;
+                    }
                     
                     if (lastMsgId === null || this.messages.some(m => m.id > lastMsgId)) {
                         setTimeout(() => this.scrollToBottom(), 100);
@@ -358,47 +496,138 @@ function chatApp() {
         },
 
         async sendMessage() {
-            if (!this.messageInput.trim() || !this.activeConversation) return;
+            if (!this.canSendMessage() || !this.activeConversation) return;
 
             const message = this.messageInput;
+            const attachment = this.selectedAttachment;
             this.messageInput = '';
             this.isLoading = true;
 
+            const tempId = `temp-${Date.now()}`;
+            const optimisticMessage = {
+                id: tempId,
+                sender_id: null,
+                receiver_id: this.activeConversation.id,
+                body: message,
+                read_at: null,
+                created_at: new Date().toISOString(),
+                attachment_path: null,
+                attachment_type: null,
+                attachment_name: attachment ? attachment.name : null,
+                is_own: true,
+                sender_name: 'You',
+            };
+
+            if (attachment) {
+                optimisticMessage.attachment_type = attachment.type && attachment.type.startsWith('image/')
+                    ? 'image'
+                    : (attachment.type && attachment.type.startsWith('video/') ? 'video' : 'file');
+                optimisticMessage.attachment_path = optimisticMessage.attachment_type === 'image' && this.selectedAttachmentPreview
+                    ? this.selectedAttachmentPreview
+                    : null;
+            }
+
+            this.messages.push(optimisticMessage);
+            this.scrollToBottom();
+
             try {
+                const formData = new FormData();
+                formData.append('receiver_id', this.activeConversation.id);
+                formData.append('body', message);
+                if (attachment) {
+                    formData.append('attachment', attachment);
+                }
+
                 const response = await fetch('/api/messages/send', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
-                    body: JSON.stringify({
-                        receiver_id: this.activeConversation.id,
-                        body: message,
-                    }),
+                    body: formData,
                 });
 
                 const data = await response.json();
                 if (data.success) {
-                    this.messages.push(data.message);
+                    const tempIndex = this.messages.findIndex((msg) => msg.id === tempId);
+                    if (tempIndex !== -1) {
+                        this.messages.splice(tempIndex, 1, data.message);
+                    } else {
+                        this.messages.push(data.message);
+                    }
+                    this.sendTypingState(false);
+                    this.clearAttachment();
                     this.scrollToBottom();
                     await this.loadConversations();
+                } else if (data.error) {
+                    throw new Error(data.error);
                 }
             } catch (error) {
                 console.error('Error sending message:', error);
                 this.messageInput = message; // Restore message on error
+                this.messages = this.messages.filter((msg) => msg.id !== tempId);
+                if (attachment) {
+                    this.selectedAttachment = attachment;
+                }
             } finally {
                 this.isLoading = false;
             }
         },
 
+        canSendMessage() {
+            return !!(this.activeConversation && (this.messageInput.trim().length > 0 || this.selectedAttachment));
+        },
+
+        onAttachmentSelected(event) {
+            const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+            if (!file) {
+                this.clearAttachment();
+                return;
+            }
+
+            this.selectedAttachment = file;
+            this.selectedAttachmentName = file.name;
+            this.selectedAttachmentPreview = '';
+
+            if (file.type && file.type.startsWith('image/')) {
+                this.selectedAttachmentPreview = URL.createObjectURL(file);
+            }
+        },
+
+        clearAttachment() {
+            if (this.selectedAttachmentPreview) {
+                URL.revokeObjectURL(this.selectedAttachmentPreview);
+            }
+
+            this.selectedAttachment = null;
+            this.selectedAttachmentPreview = '';
+            this.selectedAttachmentName = '';
+
+            if (this.$refs && this.$refs.attachmentInput) {
+                this.$refs.attachmentInput.value = '';
+            }
+        },
+
         groupMessagesByDate() {
             const groups = {};
-            this.messages.forEach(msg => {
+            this.filteredMessages().forEach(msg => {
                 const date = this.formatDate(msg.created_at);
                 if (!groups[date]) groups[date] = [];
                 groups[date].push(msg);
             });
             return groups;
+        },
+
+        filteredMessages() {
+            const query = this.messageSearchQuery.trim().toLowerCase();
+            if (!query) {
+                return this.messages;
+            }
+
+            return this.messages.filter((msg) => {
+                const bodyMatch = (msg.body || '').toLowerCase().includes(query);
+                const attachmentNameMatch = (msg.attachment_name || '').toLowerCase().includes(query);
+                return bodyMatch || attachmentNameMatch;
+            });
         },
 
         formatDate(dateString) {
@@ -417,6 +646,7 @@ function chatApp() {
         },
 
         formatTime(dateString) {
+            this.relativeTimeTick;
             if (!dateString) return '';
             const date = new Date(dateString);
             const now = new Date();
@@ -434,8 +664,88 @@ function chatApp() {
         },
 
         formatMessageTime(dateString) {
+            this.relativeTimeTick;
             const date = new Date(dateString);
             return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        },
+
+        messageDeliveryLabel(msg) {
+            if (msg.read_at) {
+                return 'Seen';
+            }
+
+            if (msg.id && String(msg.id).startsWith('temp-')) {
+                return 'Sending...';
+            }
+
+            return 'Delivered';
+        },
+
+        messageAttachmentUrl(msg) {
+            if (!msg || !msg.attachment_path) {
+                return '';
+            }
+
+            if (msg.attachment_path.startsWith('blob:') || msg.attachment_path.startsWith('http://') || msg.attachment_path.startsWith('https://')) {
+                return msg.attachment_path;
+            }
+
+            return `/storage/${msg.attachment_path}`;
+        },
+
+        async loadTypingStatus(userId) {
+            try {
+                const response = await fetch(`/api/messages/typing/${userId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    this.typingState = {
+                        ...this.typingState,
+                        [String(userId)]: !!data.typing,
+                    };
+                }
+            } catch (error) {
+                console.error('Error loading typing status:', error);
+            }
+        },
+
+        async sendTypingState(typing) {
+            if (!this.activeConversation) {
+                return;
+            }
+
+            try {
+                await fetch('/api/messages/typing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({
+                        receiver_id: this.activeConversation.id,
+                        typing: !!typing,
+                    }),
+                });
+            } catch (error) {
+                console.error('Error updating typing state:', error);
+            }
+        },
+
+        handleTypingInput() {
+            if (!this.activeConversation) {
+                return;
+            }
+
+            const hasText = this.messageInput.trim().length > 0;
+            this.sendTypingState(hasText);
+
+            if (this.typingStopTimer) {
+                clearTimeout(this.typingStopTimer);
+            }
+
+            this.typingStopTimer = setTimeout(() => {
+                this.sendTypingState(false);
+            }, 1200);
         },
 
         scrollToBottom() {
@@ -582,6 +892,16 @@ function chatApp() {
             if (this.pollInterval) {
                 clearInterval(this.pollInterval);
             }
+            if (this.heartbeatInterval) {
+                clearInterval(this.heartbeatInterval);
+            }
+            if (this.relativeTimeInterval) {
+                clearInterval(this.relativeTimeInterval);
+            }
+            if (this.typingStopTimer) {
+                clearTimeout(this.typingStopTimer);
+            }
+            this.sendTypingState(false);
         }
     };
 }

@@ -33,13 +33,7 @@
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-transparent hover:text-indigo-200 focus:outline-none transition ease-in-out duration-150 gap-2">
                             <div class="flex-shrink-0">
-                                @if (Auth::user()->profile_photo_path)
-                                    <img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" class="h-8 w-8 rounded-full object-cover border-2 border-indigo-400">
-                                @else
-                                    <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs border-2 border-indigo-400">
-                                        {{ substr(Auth::user()->name, 0, 1) }}
-                                    </div>
-                                @endif
+                                <img src="{{ Auth::user()->profile_photo_url }}" data-avatar-user-id="{{ Auth::id() }}" alt="{{ Auth::user()->name }}" class="h-8 w-8 rounded-full object-cover border-2 border-indigo-400">
                             </div>
                             
                             <div>{{ Auth::user()->name }}</div>

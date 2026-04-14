@@ -122,7 +122,7 @@
                         <div class="border-l-4 border-teal-500 pl-4 md:col-span-2">
                             <p class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase">Profile Photo</p>
                             <div class="mt-2 flex items-center gap-4">
-                                <img src="{{ asset('storage/' . $user->profile_photo_path) }}" alt="Profile Photo" class="w-16 h-16 rounded-full object-cover border-2 border-teal-300">
+                                <img src="{{ $user->profile_photo_url }}" data-avatar-user-id="{{ $user->id }}" alt="Profile Photo" class="w-16 h-16 rounded-full object-cover border-2 border-teal-300">
                                 <p class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ basename($user->profile_photo_path) }}</p>
                             </div>
                         </div>
@@ -364,3 +364,16 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+@if (session('status') === 'profile-updated')
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        if (window.WorkLogAvatarSync && typeof window.WorkLogAvatarSync.broadcast === 'function') {
+            window.WorkLogAvatarSync.broadcast();
+            window.WorkLogAvatarSync.refresh();
+        }
+    });
+</script>
+@endif
+@endpush

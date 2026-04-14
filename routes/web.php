@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/api/profile/avatar-versions', [ProfileController::class, 'avatarVersions'])->name('profile.avatar-versions');
 
     // Notifications
     Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -88,7 +89,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/api/messages/send', [MessageController::class, 'apiSend'])->name('api.messages.send');
     Route::post('/api/messages/{message}/read', [MessageController::class, 'apiMarkAsRead'])->name('api.messages.read');
     Route::get('/api/messages/unread-count', [MessageController::class, 'apiUnreadCount'])->name('api.messages.unread-count');
+    Route::get('/api/messages/realtime-summary', [MessageController::class, 'apiRealtimeSummary'])->name('api.messages.realtime-summary');
     Route::get('/api/messages/available-users', [MessageController::class, 'apiAvailableUsers'])->name('api.messages.available-users');
+    Route::post('/api/messages/presence/heartbeat', [MessageController::class, 'apiPresenceHeartbeat'])->name('api.messages.presence.heartbeat');
+    Route::get('/api/messages/presence', [MessageController::class, 'apiPresence'])->name('api.messages.presence');
+    Route::post('/api/messages/typing', [MessageController::class, 'apiTypingUpdate'])->name('api.messages.typing.update');
+    Route::get('/api/messages/typing', [MessageController::class, 'apiTypingStatuses'])->name('api.messages.typing.statuses');
+    Route::get('/api/messages/typing/{user}', [MessageController::class, 'apiTypingStatus'])->name('api.messages.typing.status');
 });
 
 use App\Http\Controllers\Student\StudentAnnouncementController;

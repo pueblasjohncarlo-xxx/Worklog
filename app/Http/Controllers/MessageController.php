@@ -10,10 +10,15 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class MessageController extends Controller
 {
+    private const ONLINE_TTL_SECONDS = 45;
+
+    private const TYPING_TTL_SECONDS = 6;
+
     public function index(Request $request): View
     {
         $userId = Auth::id();
@@ -298,7 +303,7 @@ class MessageController extends Controller
                 'name' => $contact->name,
                 'email' => $contact->email,
                 'role' => $contact->role,
-                'avatar' => sprintf('https://ui-avatars.com/api/?name=%s&background=random', urlencode($contact->name)),
+                'avatar' => $contact->profile_photo_url,
                 'last_message' => $lastMessage ? $lastMessage->body : null,
                 'last_message_time' => $lastMessage ? $lastMessage->created_at : null,
                 'unread_count' => Message::where('sender_id', $contact->id)
@@ -375,7 +380,7 @@ class MessageController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
-                'avatar' => sprintf('https://ui-avatars.com/api/?name=%s&background=random', urlencode($user->name)),
+                'avatar' => $user->profile_photo_url,
             ],
             'messages' => $messages,
         ]);
@@ -385,17 +390,44 @@ class MessageController extends Controller
     {
         $request->validate([
             'receiver_id' => 'required|exists:users,id|not_in:' . Auth::id(),
-            'body' => 'required|string|max:5000',
+            'body' => 'nullable|string|max:5000',
+            'attachment' => 'nullable|file|max:10240',
         ]);
+
+        if (! $request->filled('body') && ! $request->hasFile('attachment')) {
+            return response()->json(['error' => 'Message body or attachment is required.'], 422);
+        }
 
         if (!$this->canMessageUser($request->receiver_id)) {
             return response()->json(['error' => 'You cannot message this user'], 403);
         }
 
+        $attachmentPath = null;
+        $attachmentType = null;
+        $attachmentName = null;
+
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $attachmentPath = $file->store('message_attachments', 'public');
+            $attachmentName = $file->getClientOriginalName();
+
+            $mimeType = $file->getMimeType() ?? '';
+            if (str_starts_with($mimeType, 'image/')) {
+                $attachmentType = 'image';
+            } elseif (str_starts_with($mimeType, 'video/')) {
+                $attachmentType = 'video';
+            } else {
+                $attachmentType = 'file';
+            }
+        }
+
         $message = Message::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $request->receiver_id,
-            'body' => $request->body,
+            'body' => (string) ($request->input('body') ?? ''),
+            'attachment_path' => $attachmentPath,
+            'attachment_type' => $attachmentType,
+            'attachment_name' => $attachmentName,
         ]);
 
         $recipient = User::find($request->receiver_id);
@@ -412,6 +444,9 @@ class MessageController extends Controller
                 'body' => $message->body,
                 'read_at' => $message->read_at,
                 'created_at' => $message->created_at,
+                'attachment_path' => $message->attachment_path,
+                'attachment_type' => $message->attachment_type,
+                'attachment_name' => $message->attachment_name,
                 'is_own' => true,
                 'sender_name' => Auth::user()->name,
             ],
@@ -437,6 +472,35 @@ class MessageController extends Controller
         return response()->json([
             'success' => true,
             'unread_count' => $unreadCount,
+        ]);
+    }
+
+    public function apiRealtimeSummary(): JsonResponse
+    {
+        $userId = Auth::id();
+
+        $unreadQuery = Message::where('receiver_id', $userId)
+            ->whereNull('read_at');
+
+        $unreadCount = (clone $unreadQuery)->count();
+
+        $latestUnread = (clone $unreadQuery)
+            ->with('sender')
+            ->latest('created_at')
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $unreadCount,
+            'latest_unread' => $latestUnread ? [
+                'id' => $latestUnread->id,
+                'sender_id' => $latestUnread->sender_id,
+                'sender_name' => $latestUnread->sender?->name ?? 'Unknown',
+                'sender_avatar' => $latestUnread->sender?->profile_photo_url,
+                'body' => $latestUnread->body,
+                'attachment_type' => $latestUnread->attachment_type,
+                'created_at' => optional($latestUnread->created_at)->toIso8601String(),
+            ] : null,
         ]);
     }
 
@@ -478,7 +542,7 @@ class MessageController extends Controller
                     'name' => $u->name,
                     'email' => $u->email,
                     'role' => $u->role,
-                    'avatar' => sprintf('https://ui-avatars.com/api/?name=%s&background=random', urlencode($u->name)),
+                    'avatar' => $u->profile_photo_url,
                 ];
             })->values();
 
@@ -500,5 +564,158 @@ class MessageController extends Controller
                 'error' => 'Unable to load users',
             ], 500);
         }
+    }
+
+    public function apiPresenceHeartbeat(Request $request): JsonResponse
+    {
+        $request->validate([
+            'active_conversation_id' => 'nullable|integer|exists:users,id',
+        ]);
+
+        $userId = Auth::id();
+
+        Cache::put($this->onlineCacheKey($userId), now()->timestamp, now()->addSeconds(self::ONLINE_TTL_SECONDS));
+
+        $activeConversationId = $request->integer('active_conversation_id');
+        if ($activeConversationId > 0 && $this->canViewConversation($activeConversationId)) {
+            Cache::put(
+                $this->activeConversationCacheKey($userId),
+                $activeConversationId,
+                now()->addSeconds(self::ONLINE_TTL_SECONDS)
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'server_time' => now()->toIso8601String(),
+        ]);
+    }
+
+    public function apiPresence(Request $request): JsonResponse
+    {
+        $ids = collect($request->input('ids', []));
+
+        if ($ids->isEmpty()) {
+            $csv = trim((string) $request->input('ids', ''));
+            if ($csv !== '') {
+                $ids = collect(explode(',', $csv));
+            }
+        }
+
+        $requestedIds = $ids
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->unique()
+            ->take(100)
+            ->values();
+
+        $presence = [];
+        foreach ($requestedIds as $targetId) {
+            if ($targetId !== Auth::id() && ! $this->canViewConversation($targetId)) {
+                continue;
+            }
+
+            $lastOnline = Cache::get($this->onlineCacheKey($targetId));
+            $activeConversation = Cache::get($this->activeConversationCacheKey($targetId));
+
+            $presence[(string) $targetId] = [
+                'online' => is_numeric($lastOnline) && (now()->timestamp - (int) $lastOnline) <= self::ONLINE_TTL_SECONDS,
+                'last_online' => $lastOnline ? (int) $lastOnline : null,
+                'active_conversation_id' => $activeConversation ? (int) $activeConversation : null,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'presence' => $presence,
+            'server_time' => now()->toIso8601String(),
+        ]);
+    }
+
+    public function apiTypingUpdate(Request $request): JsonResponse
+    {
+        $request->validate([
+            'receiver_id' => 'required|integer|exists:users,id|not_in:'.Auth::id(),
+            'typing' => 'required|boolean',
+        ]);
+
+        $receiverId = (int) $request->input('receiver_id');
+        if (! $this->canMessageUser($receiverId)) {
+            return response()->json(['error' => 'You cannot message this user'], 403);
+        }
+
+        $cacheKey = $this->typingCacheKey($receiverId, Auth::id());
+        if ($request->boolean('typing')) {
+            Cache::put($cacheKey, now()->timestamp, now()->addSeconds(self::TYPING_TTL_SECONDS));
+        } else {
+            Cache::forget($cacheKey);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function apiTypingStatuses(Request $request): JsonResponse
+    {
+        $ids = collect($request->input('ids', []));
+
+        if ($ids->isEmpty()) {
+            $csv = trim((string) $request->input('ids', ''));
+            if ($csv !== '') {
+                $ids = collect(explode(',', $csv));
+            }
+        }
+
+        $requestedIds = $ids
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->unique()
+            ->take(100)
+            ->values();
+
+        $typing = [];
+        foreach ($requestedIds as $targetId) {
+            if (! $this->canViewConversation($targetId)) {
+                continue;
+            }
+
+            $timestamp = Cache::get($this->typingCacheKey(Auth::id(), $targetId));
+            $typing[(string) $targetId] = is_numeric($timestamp) && (now()->timestamp - (int) $timestamp) <= self::TYPING_TTL_SECONDS;
+        }
+
+        return response()->json([
+            'success' => true,
+            'typing' => $typing,
+        ]);
+    }
+
+    public function apiTypingStatus(User $user): JsonResponse
+    {
+        if (! $this->canViewConversation($user->id)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $timestamp = Cache::get($this->typingCacheKey(Auth::id(), $user->id));
+        $isTyping = is_numeric($timestamp) && (now()->timestamp - (int) $timestamp) <= self::TYPING_TTL_SECONDS;
+
+        return response()->json([
+            'success' => true,
+            'typing' => $isTyping,
+            'updated_at' => $timestamp ? (int) $timestamp : null,
+        ]);
+    }
+
+    private function onlineCacheKey(int $userId): string
+    {
+        return 'chat:online:'.$userId;
+    }
+
+    private function activeConversationCacheKey(int $userId): string
+    {
+        return 'chat:active-conversation:'.$userId;
+    }
+
+    private function typingCacheKey(int $receiverId, int $senderId): string
+    {
+        return 'chat:typing:'.$receiverId.':'.$senderId;
     }
 }

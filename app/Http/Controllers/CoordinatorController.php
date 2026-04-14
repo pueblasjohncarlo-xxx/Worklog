@@ -15,7 +15,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -215,7 +214,7 @@ class CoordinatorController extends Controller
                     'department' => $adviser->ojtAdviserProfile?->department ?? $adviser->department,
                     'phone' => $adviser->ojtAdviserProfile?->phone,
                     'address' => $adviser->ojtAdviserProfile?->address,
-                    'photo_url' => $adviser->profile_photo_path ? Storage::url($adviser->profile_photo_path) : null,
+                    'photo_url' => $adviser->profile_photo_path ? $adviser->profile_photo_url : null,
                     'active_assignments_count' => $adviser->active_assignments_count ?? 0,
                     'comptech_students' => $students->filter(function ($s) {
                         $dept = (string) ($s?->department ?? '');
@@ -599,7 +598,7 @@ class CoordinatorController extends Controller
                 'phone' => $supervisor->supervisorProfile?->phone ?? 'N/A',
                 'position_title' => $supervisor->supervisorProfile?->position_title ?? 'N/A',
                 'department' => $supervisor->supervisorProfile?->department ?? 'N/A',
-                'photo_url' => $supervisor->profile_photo_path ? Storage::url($supervisor->profile_photo_path) : null,
+                'photo_url' => $supervisor->profile_photo_path ? $supervisor->profile_photo_url : null,
                 'companies' => $companies->toArray(),
                 'total_students' => $totalStudents,
                 'active_students' => $activeStudents,
@@ -690,7 +689,7 @@ class CoordinatorController extends Controller
                 'email' => $adviser->email,
                 'department' => $adviser->ojtAdviserProfile?->department ?? 'N/A',
                 'phone' => $adviser->ojtAdviserProfile?->phone ?? 'N/A',
-                'photo_url' => $adviser->profile_photo_path ? Storage::url($adviser->profile_photo_path) : null,
+                'photo_url' => $adviser->profile_photo_path ? $adviser->profile_photo_url : null,
                 'total_students' => $totalStudents,
                 'active_students' => $activeStudents,
                 'completed_students' => $completedStudents,
@@ -888,7 +887,10 @@ class CoordinatorController extends Controller
                 return "Section: {$normalizedSection}";
             });
 
-        $supervisors = User::where('role', User::ROLE_SUPERVISOR)->orderBy('name')->get();
+        $supervisors = User::where('role', User::ROLE_SUPERVISOR)
+            ->with('supervisorProfile.company')
+            ->orderBy('name')
+            ->get();
         $ojtAdvisers = User::where('role', User::ROLE_OJT_ADVISER)->orderBy('name')->get();
         $companies = Company::orderBy('name')->get();
 
@@ -948,8 +950,10 @@ class CoordinatorController extends Controller
             'student_ids.*' => 'exists:users,id',
             'student_id' => 'nullable|exists:users,id',
             'supervisor_id' => 'required|exists:users,id',
+            'supervisor_ids' => 'nullable|array',
+            'supervisor_ids.*' => 'exists:users,id',
             'ojt_adviser_id' => 'nullable|exists:users,id',
-            'company_id' => 'required|exists:companies,id',
+            'company_id' => 'nullable|exists:companies,id',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -963,6 +967,61 @@ class CoordinatorController extends Controller
                 'student_ids' => 'The student ids field is required.',
             ]);
         }
+
+        $supervisorIds = collect($request->input('supervisor_ids', []))
+            ->filter()
+            ->map(fn ($id) => (int) $id);
+
+        if ($request->filled('supervisor_id')) {
+            $supervisorIds->push((int) $request->input('supervisor_id'));
+        }
+
+        $supervisorIds = $supervisorIds->unique()->values();
+
+        if ($supervisorIds->isEmpty()) {
+            return redirect()->back()->withErrors([
+                'supervisor_id' => 'Please select at least one supervisor.',
+            ])->withInput();
+        }
+
+        $supervisors = User::whereIn('id', $supervisorIds)
+            ->where('role', User::ROLE_SUPERVISOR)
+            ->with('supervisorProfile')
+            ->get();
+
+        if ($supervisors->count() !== $supervisorIds->count()) {
+            return redirect()->back()->withErrors([
+                'supervisor_id' => 'One or more selected supervisors are invalid.',
+            ])->withInput();
+        }
+
+        $missingCompanySupervisor = $supervisors->first(fn (User $supervisor) => ! $supervisor->supervisorProfile?->company_id);
+        if ($missingCompanySupervisor) {
+            return redirect()->back()->withErrors([
+                'supervisor_id' => 'Selected supervisor '.$missingCompanySupervisor->name.' has no assigned company. Please update supervisor profile first.',
+            ])->withInput();
+        }
+
+        $companyIds = $supervisors
+            ->map(fn (User $supervisor) => (int) $supervisor->supervisorProfile->company_id)
+            ->unique()
+            ->values();
+
+        if ($companyIds->count() !== 1) {
+            return redirect()->back()->withErrors([
+                'supervisor_id' => 'Selected supervisors belong to different companies. Please select supervisors from the same company only.',
+            ])->withInput();
+        }
+
+        $resolvedCompanyId = (int) $companyIds->first();
+
+        if ($request->filled('company_id') && (int) $request->input('company_id') !== $resolvedCompanyId) {
+            return redirect()->back()->withErrors([
+                'company_id' => 'Company must match the selected supervisor company.',
+            ])->withInput();
+        }
+
+        $primarySupervisorId = (int) ($request->input('supervisor_id') ?: $supervisorIds->first());
 
         $requiredHours = Assignment::select('required_hours', DB::raw('COUNT(*) as c'))
             ->groupBy('required_hours')
@@ -978,10 +1037,10 @@ class CoordinatorController extends Controller
             if (! $exists) {
                 Assignment::create([
                     'student_id' => $studentId,
-                    'supervisor_id' => $request->supervisor_id,
+                    'supervisor_id' => $primarySupervisorId,
                     'ojt_adviser_id' => $request->ojt_adviser_id,
                     'coordinator_id' => $request->user()->id,
-                    'company_id' => $request->company_id,
+                    'company_id' => $resolvedCompanyId,
                     'start_date' => $request->start_date,
                     'end_date' => $request->end_date,
                     'status' => 'active',
@@ -1001,7 +1060,39 @@ class CoordinatorController extends Controller
             'ojt_adviser_id' => 'nullable|exists:users,id',
         ]);
 
-        $assignment->update($request->only(['supervisor_id', 'ojt_adviser_id']));
+        $payload = [
+            'supervisor_id' => $request->input('supervisor_id') ?: null,
+            'ojt_adviser_id' => $request->input('ojt_adviser_id') ?: null,
+        ];
+
+        if (! empty($payload['supervisor_id'])) {
+            $supervisor = User::where('id', $payload['supervisor_id'])
+                ->where('role', User::ROLE_SUPERVISOR)
+                ->with('supervisorProfile.company')
+                ->first();
+
+            if (! $supervisor) {
+                return response()->json([
+                    'message' => 'Invalid supervisor selected.',
+                    'errors' => [
+                        'supervisor_id' => ['Invalid supervisor selected.'],
+                    ],
+                ], 422);
+            }
+
+            if (! $supervisor->supervisorProfile?->company_id) {
+                return response()->json([
+                    'message' => 'Selected supervisor has no assigned company.',
+                    'errors' => [
+                        'supervisor_id' => ['Selected supervisor has no assigned company.'],
+                    ],
+                ], 422);
+            }
+
+            $payload['company_id'] = $supervisor->supervisorProfile->company_id;
+        }
+
+        $assignment->update($payload);
 
         return response()->json(['success' => true]);
     }

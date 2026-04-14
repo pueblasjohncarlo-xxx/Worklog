@@ -12,61 +12,61 @@
         class="space-y-6"
     >
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-            <div class="bg-indigo-600/20 backdrop-blur-md border border-indigo-500/30 rounded-lg shadow-lg overflow-hidden hover:shadow-indigo-500/20 transition-all">
+            <a href="{{ route('coordinator.student-overview') }}" class="block bg-indigo-600/20 backdrop-blur-md border border-indigo-500/30 rounded-lg shadow-lg overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-indigo-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 transition-all">
                 <div class="p-4">
                     <div class="text-xs text-indigo-200 font-bold uppercase tracking-widest">Students</div>
                     <div class="mt-2 text-3xl font-black text-white">{{ $totalStudents ?? 0 }}</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="bg-sky-600/20 backdrop-blur-md border border-sky-500/30 rounded-lg shadow-lg overflow-hidden hover:shadow-sky-500/20 transition-all">
+            <a href="{{ route('coordinator.deployment.index') }}" class="block bg-sky-600/20 backdrop-blur-md border border-sky-500/30 rounded-lg shadow-lg overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-sky-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 transition-all">
                 <div class="p-4">
                     <div class="text-xs text-sky-200 font-bold uppercase tracking-widest">Active OJT</div>
                     <div class="mt-2 text-3xl font-black text-white">{{ $activeOJTs ?? 0 }}</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-lg shadow-lg overflow-hidden hover:shadow-emerald-500/20 transition-all">
+            <a href="{{ route('coordinator.adviser-overview') }}" class="block bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-lg shadow-lg overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-emerald-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 transition-all">
                 <div class="p-4">
                     <div class="text-xs text-emerald-200 font-bold uppercase tracking-widest">OJT Advisers</div>
                     <div class="mt-2 text-3xl font-black text-white">{{ $advisersCount ?? 0 }}</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="bg-cyan-600/20 backdrop-blur-md border border-cyan-500/30 rounded-lg shadow-lg overflow-hidden hover:shadow-cyan-500/20 transition-all">
+            <a href="{{ route('coordinator.supervisor-overview') }}" class="block bg-cyan-600/20 backdrop-blur-md border border-cyan-500/30 rounded-lg shadow-lg overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-cyan-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-all">
                 <div class="p-4">
                     <div class="text-xs text-cyan-200 font-bold uppercase tracking-widest">Supervisors</div>
                     <div class="mt-2 text-3xl font-black text-white">{{ $supervisorsCount ?? 0 }}</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="bg-amber-600/20 backdrop-blur-md border border-amber-500/30 rounded-lg shadow-lg overflow-hidden hover:shadow-amber-500/20 transition-all">
+            <a href="{{ route('coordinator.companies.index') }}" class="block bg-amber-600/20 backdrop-blur-md border border-amber-500/30 rounded-lg shadow-lg overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-amber-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-all">
                 <div class="p-4">
                     <div class="text-xs text-amber-200 font-bold uppercase tracking-widest">Industry</div>
                     <div class="mt-2 text-3xl font-black text-white">{{ $totalCompanies ?? 0 }}</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="bg-fuchsia-600/20 backdrop-blur-md border border-fuchsia-500/30 rounded-lg shadow-lg overflow-hidden hover:shadow-fuchsia-500/20 transition-all">
+            <a href="{{ route('coordinator.registrations.pending') }}" class="block bg-fuchsia-600/20 backdrop-blur-md border border-fuchsia-500/30 rounded-lg shadow-lg overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-fuchsia-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 transition-all">
                 <div class="p-4">
                     <div class="text-xs text-fuchsia-200 font-bold uppercase tracking-widest">Pending Approvals</div>
                     <div class="mt-2 text-3xl font-black text-white">{{ $pendingApprovals ?? 0 }}</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="bg-rose-600/20 backdrop-blur-md border border-rose-500/30 rounded-lg shadow-lg overflow-hidden hover:shadow-rose-500/20 transition-all">
+            <a href="{{ route('coordinator.accomplishment-reports') }}" class="block bg-rose-600/20 backdrop-blur-md border border-rose-500/30 rounded-lg shadow-lg overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-rose-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 transition-all">
                 <div class="p-4">
                     <div class="text-xs text-rose-200 font-bold uppercase tracking-widest">Pending AR</div>
                     <div class="mt-2 text-3xl font-black text-white">{{ $pendingAccomplishmentReports ?? 0 }}</div>
                 </div>
-            </div>
+            </a>
 
-            <div class="bg-orange-600/20 backdrop-blur-md border border-orange-500/30 rounded-lg shadow-lg overflow-hidden hover:shadow-orange-500/20 transition-all">
+            <a href="{{ route('coordinator.compliance-overview') }}" class="block bg-orange-600/20 backdrop-blur-md border border-orange-500/30 rounded-lg shadow-lg overflow-hidden cursor-pointer hover:-translate-y-0.5 hover:shadow-orange-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 transition-all">
                 <div class="p-4">
                     <div class="text-xs text-orange-200 font-bold uppercase tracking-widest">Needs Attention</div>
                     <div class="mt-2 text-3xl font-black text-white">{{ $studentsNeedingAttention?->count() ?? 0 }}</div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -203,7 +203,7 @@
                                 <div class="flex items-center gap-4 flex-1 min-w-0">
                                     <div class="h-12 w-12 rounded-full overflow-hidden border border-white/10 bg-indigo-600 flex items-center justify-center shrink-0 font-bold text-white">
                                         @if($adviser['photo_url'])
-                                            <img src="{{ $adviser['photo_url'] }}" alt="{{ $adviser['name'] }}" class="h-full w-full object-cover">
+                                            <img src="{{ $adviser['photo_url'] }}" data-avatar-user-id="{{ $adviser['id'] }}" alt="{{ $adviser['name'] }}" class="h-full w-full object-cover">
                                         @else
                                             {{ strtoupper(substr($adviser['name'], 0, 1)) }}
                                         @endif

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -254,5 +255,20 @@ class User extends Authenticatable
         }
 
         return self::inferStudentDepartmentFromSection($this->normalizedStudentSection());
+    }
+
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        $version = $this->updated_at?->timestamp ?? now()->timestamp;
+
+        if ($this->profile_photo_path) {
+            return Storage::url($this->profile_photo_path).'?v='.$version;
+        }
+
+        return sprintf(
+            'https://ui-avatars.com/api/?name=%s&background=4f46e5&color=ffffff&format=png&v=%s',
+            urlencode((string) $this->name),
+            $version
+        );
     }
 }

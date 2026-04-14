@@ -56,13 +56,7 @@
                                 <span class="text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
                             </div>
                             <div class="relative flex-shrink-0">
-                                @if (Auth::user()->profile_photo_path)
-                                    <img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->name }}" class="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover border-2 border-indigo-500 shadow-md">
-                                @else
-                                    <div class="h-8 sm:h-10 w-8 sm:w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs sm:text-sm border-2 border-indigo-400 shadow-md">
-                                        <span class="text-white font-bold">{{ substr(Auth::user()->name, 0, 1) }}</span>
-                                    </div>
-                                @endif
+                                <img src="{{ Auth::user()->profile_photo_url }}" data-avatar-user-id="{{ Auth::id() }}" alt="{{ Auth::user()->name }}" class="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover border-2 border-indigo-500 shadow-md">
                             </div>
                         </div>
                     </div>
@@ -76,5 +70,6 @@
                 </main>
             </div>
         </div>
+        @include('layouts.partials.avatar-sync')
     </body>
 </html>

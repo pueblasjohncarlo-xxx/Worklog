@@ -7,7 +7,7 @@
         <!-- ===== ENHANCED SUMMARY CARDS ===== -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-max">
             <!-- Assigned OJT Students -->
-            <div class="bg-gradient-to-br from-indigo-600/20 to-indigo-600/10 border border-indigo-500/30 rounded-xl p-5 shadow-lg hover:border-indigo-400/50 transition-all">
+            <a href="{{ route('ojt_adviser.students') }}" class="block bg-gradient-to-br from-indigo-600/20 to-indigo-600/10 border border-indigo-500/30 rounded-xl p-5 shadow-lg cursor-pointer hover:-translate-y-0.5 hover:border-indigo-400/50 hover:shadow-indigo-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 transition-all">
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
                         <p class="text-xs text-indigo-300 font-semibold uppercase tracking-widest">Assigned Students</p>
@@ -25,10 +25,10 @@
                         <span class="inline-block bg-indigo-500/20 px-2 py-1 rounded">{{ $completedHoursCount }} completed</span>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Incomplete Logs -->
-            <div class="bg-gradient-to-br from-red-600/20 to-red-600/10 border border-red-500/30 rounded-xl p-5 shadow-lg hover:border-red-400/50 transition-all">
+            <a href="{{ route('ojt_adviser.reports') }}" class="block bg-gradient-to-br from-red-600/20 to-red-600/10 border border-red-500/30 rounded-xl p-5 shadow-lg cursor-pointer hover:-translate-y-0.5 hover:border-red-400/50 hover:shadow-red-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 transition-all">
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
                         <p class="text-xs text-red-300 font-semibold uppercase tracking-widest">Incomplete Logs</p>
@@ -46,10 +46,10 @@
                         <span class="font-semibold">{{ round(($incompleteLogsCount/$totalStudents)*100, 0) }}%</span> of students
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Completed OJT -->
-            <div class="bg-gradient-to-br from-emerald-600/20 to-emerald-600/10 border border-emerald-500/30 rounded-xl p-5 shadow-lg hover:border-emerald-400/50 transition-all">
+            <a href="{{ route('ojt_adviser.accomplishment-reports') }}" class="block bg-gradient-to-br from-emerald-600/20 to-emerald-600/10 border border-emerald-500/30 rounded-xl p-5 shadow-lg cursor-pointer hover:-translate-y-0.5 hover:border-emerald-400/50 hover:shadow-emerald-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 transition-all">
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
                         <p class="text-xs text-emerald-300 font-semibold uppercase tracking-widest">Completed OJT</p>
@@ -67,10 +67,10 @@
                         <span class="font-semibold">{{ round(($completedHoursCount/$totalStudents)*100, 0) }}%</span> completion rate
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Evaluation Progress -->
-            <div class="bg-gradient-to-br from-amber-600/20 to-amber-600/10 border border-amber-500/30 rounded-xl p-5 shadow-lg hover:border-amber-400/50 transition-all">
+            <a href="{{ route('ojt_adviser.evaluations') }}" class="block bg-gradient-to-br from-amber-600/20 to-amber-600/10 border border-amber-500/30 rounded-xl p-5 shadow-lg cursor-pointer hover:-translate-y-0.5 hover:border-amber-400/50 hover:shadow-amber-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition-all">
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
                         <p class="text-xs text-amber-300 font-semibold uppercase tracking-widest">Evaluations</p>
@@ -88,10 +88,10 @@
                         <div class="bg-amber-500 h-1.5 rounded-full" style="width: {{ $evaluationProgress }}%"></div>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Pending Evaluations (New) - Wrapped to new row on sm screens -->
-            <div class="bg-gradient-to-br from-orange-600/20 to-orange-600/10 border border-orange-500/30 rounded-xl p-5 shadow-lg hover:border-orange-400/50 transition-all">
+            <a href="{{ route('ojt_adviser.evaluations', ['status' => 'pending']) }}" class="block bg-gradient-to-br from-orange-600/20 to-orange-600/10 border border-orange-500/30 rounded-xl p-5 shadow-lg cursor-pointer hover:-translate-y-0.5 hover:border-orange-400/50 hover:shadow-orange-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 transition-all">
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
                         <p class="text-xs text-orange-300 font-semibold uppercase tracking-widest">Pending Reviews</p>
@@ -104,7 +104,7 @@
                         </svg>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <!-- ===== CHARTS SECTION - IMPROVED SPACING ===== -->
