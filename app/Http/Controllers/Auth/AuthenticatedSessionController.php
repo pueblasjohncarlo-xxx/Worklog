@@ -67,19 +67,24 @@ class AuthenticatedSessionController extends Controller
 
     private function resolveAccessState(object $user): string
     {
-        // Internal roles are managed by trusted admins/coordinators and should not
-        // be blocked by student-style pending approval checks.
-        if (property_exists($user, 'role') && in_array((string) $user->role, [
-            User::ROLE_COORDINATOR,
-            User::ROLE_ADMIN,
-            User::ROLE_STAFF,
-        ], true)) {
+        $normalizedRole = strtolower(trim((string) ($user->role ?? '')));
+        $approvalGatedRoles = [
+            User::ROLE_STUDENT,
+            User::ROLE_SUPERVISOR,
+            User::ROLE_OJT_ADVISER,
+        ];
+
+        // Only these self-registration roles should be blocked by pending checks.
+        if (! in_array($normalizedRole, $approvalGatedRoles, true)) {
             return 'approved';
         }
 
-        // Legacy accounts that never requested public self-registration should
-        // remain able to sign in even if approval columns are empty.
-        if (Schema::hasColumn('users', 'has_requested_account') && (bool) ($user->has_requested_account ?? false) === false) {
+        $hasRequestedAccount = Schema::hasColumn('users', 'has_requested_account')
+            ? (bool) ($user->has_requested_account ?? false)
+            : true;
+
+        // Legacy gated-role records not created through self-registration should remain usable.
+        if (! $hasRequestedAccount) {
             return 'approved';
         }
 
@@ -97,6 +102,9 @@ class AuthenticatedSessionController extends Controller
 
                 return 'pending';
             }
+
+            // Request-based account with empty status should stay pending.
+            return 'pending';
         }
 
         if (Schema::hasColumn('users', 'rejected_at') && !empty($user->rejected_at)) {
@@ -109,6 +117,10 @@ class AuthenticatedSessionController extends Controller
 
         if (Schema::hasColumn('users', 'is_approved') && (bool) $user->is_approved === true) {
             return 'approved';
+        }
+
+        if (Schema::hasColumn('users', 'is_approved') && (bool) $user->is_approved === false) {
+            return 'pending';
         }
 
         return 'pending';
