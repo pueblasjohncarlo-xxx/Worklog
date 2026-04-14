@@ -43,12 +43,15 @@ class RegistrationInvitationLinkNotification extends Notification
         };
 
         $mail = (new MailMessage)
+            ->mailer('smtp')
+            ->from((string) config('mail.from.address'), (string) config('mail.from.name'))
             ->subject('WorkLog Registration Invitation')
             ->greeting('Hello,')
             ->line($this->inviterName.' invited you to register in WorkLog as '.$roleLabel.'.')
             ->line('Use the secure link below to complete your registration.')
             ->line('This invitation expires on '.$this->expiresAt->format('M d, Y h:i A').'.')
             ->action('Complete Registration', $this->registerUrl)
+            ->line('If you do not see this message in your inbox, please check your spam/junk folder.')
             ->line('If you were not expecting this invitation, you can ignore this email.');
 
         if (! is_null($this->companyName) && $this->companyName !== '') {
