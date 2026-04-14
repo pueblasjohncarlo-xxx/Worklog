@@ -1,7 +1,7 @@
 <x-coordinator-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Deployment Management</h2>
+            <h2 class="text-3xl font-extrabold text-white drop-shadow-md tracking-tight">Deployment Management</h2>
         </div>
     </x-slot>
 
@@ -152,78 +152,20 @@
             </div>
         @endif
 
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Deployments</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $totalDeployed }}</p>
-                    </div>
-                    <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                        <svg class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
+        @php
+            $summaryCards = [
+                ['label' => 'Students', 'value' => $topSummary['totalStudents'] ?? 0, 'href' => route('coordinator.student-overview'), 'tone' => 'indigo'],
+                ['label' => 'Active OJT', 'value' => $topSummary['activeOJTs'] ?? 0, 'href' => route('coordinator.deployment.index'), 'tone' => 'sky'],
+                ['label' => 'OJT Advisers', 'value' => $topSummary['advisersCount'] ?? 0, 'href' => route('coordinator.adviser-overview'), 'tone' => 'emerald'],
+                ['label' => 'Supervisors', 'value' => $topSummary['supervisorsCount'] ?? 0, 'href' => route('coordinator.supervisor-overview'), 'tone' => 'cyan'],
+                ['label' => 'Industry', 'value' => $topSummary['totalCompanies'] ?? 0, 'href' => route('coordinator.companies.index'), 'tone' => 'amber'],
+                ['label' => 'Pending Approvals', 'value' => $topSummary['pendingApprovals'] ?? 0, 'href' => route('coordinator.registrations.pending'), 'tone' => 'fuchsia'],
+                ['label' => 'Pending AR', 'value' => $topSummary['pendingAccomplishmentReports'] ?? 0, 'href' => route('coordinator.accomplishment-reports'), 'tone' => 'rose'],
+                ['label' => 'Needs Attention', 'value' => $topSummary['studentsNeedingAttention'] ?? 0, 'href' => route('coordinator.compliance-overview'), 'tone' => 'orange'],
+            ];
+        @endphp
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Fully Assigned</p>
-                        <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{{ $fullyAssigned }}</p>
-                    </div>
-                    <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
-                        <svg class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Incomplete</p>
-                        <p class="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">{{ $incomplete }}</p>
-                    </div>
-                    <div class="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
-                        <svg class="h-8 w-8 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active</p>
-                        <p class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-2">{{ $active }}</p>
-                    </div>
-                    <div class="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-full">
-                        <svg class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Supervisor Only</p>
-                        <p class="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">{{ $supervisorOnly }}</p>
-                    </div>
-                    <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                        <svg class="h-8 w-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 12H9m6 0a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <x-coordinator.summary-cards :cards="$summaryCards" />
 
         <!-- Create New Deployment Form -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">

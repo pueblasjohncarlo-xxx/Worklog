@@ -1,99 +1,28 @@
 <x-coordinator-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Compliance & Analytics</h2>
+            <h2 class="text-3xl font-extrabold text-white drop-shadow-md tracking-tight">Compliance & Analytics</h2>
             <div class="text-right">
-                <p class="text-sm text-gray-500 dark:text-gray-400">Last Updated: {{ now()->format('M d, Y H:i') }}</p>
+                <p class="text-sm text-indigo-100 font-medium">Last Updated: {{ now()->format('M d, Y H:i') }}</p>
             </div>
         </div>
     </x-slot>
 
     <div class="space-y-6">
-        <!-- Key Metrics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <!-- Total Students -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Students</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $totalStudents }}</p>
-                    </div>
-                    <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                        <svg class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 12H9m6 0a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
+        @php
+            $summaryCards = [
+                ['label' => 'Students', 'value' => $topSummary['totalStudents'] ?? 0, 'href' => route('coordinator.student-overview'), 'tone' => 'indigo'],
+                ['label' => 'Active OJT', 'value' => $topSummary['activeOJTs'] ?? 0, 'href' => route('coordinator.deployment.index'), 'tone' => 'sky'],
+                ['label' => 'OJT Advisers', 'value' => $topSummary['advisersCount'] ?? 0, 'href' => route('coordinator.adviser-overview'), 'tone' => 'emerald'],
+                ['label' => 'Supervisors', 'value' => $topSummary['supervisorsCount'] ?? 0, 'href' => route('coordinator.supervisor-overview'), 'tone' => 'cyan'],
+                ['label' => 'Industry', 'value' => $topSummary['totalCompanies'] ?? 0, 'href' => route('coordinator.companies.index'), 'tone' => 'amber'],
+                ['label' => 'Pending Approvals', 'value' => $topSummary['pendingApprovals'] ?? 0, 'href' => route('coordinator.registrations.pending'), 'tone' => 'fuchsia'],
+                ['label' => 'Pending AR', 'value' => $topSummary['pendingAccomplishmentReports'] ?? 0, 'href' => route('coordinator.accomplishment-reports'), 'tone' => 'rose'],
+                ['label' => 'Needs Attention', 'value' => $topSummary['studentsNeedingAttention'] ?? 0, 'href' => route('coordinator.compliance-overview'), 'tone' => 'orange'],
+            ];
+        @endphp
 
-            <!-- On Track -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">On Track</p>
-                        <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{{ $onTrackCount }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ $totalStudents > 0 ? round(($onTrackCount / $totalStudents) * 100, 0) : 0 }}%</p>
-                    </div>
-                    <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
-                        <svg class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- At Risk -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">At Risk</p>
-                        <p class="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">{{ $atRiskCount }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ $totalStudents > 0 ? round(($atRiskCount / $totalStudents) * 100, 0) : 0 }}%</p>
-                    </div>
-                    <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
-                        <svg class="h-8 w-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hours Completion -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Hours Completed</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ round($totalHoursCompleted, 1) }}</p>
-                        <p class="text-xs text-gray-400 mt-1">of {{ $totalHoursRequired }} hrs</p>
-                    </div>
-                    <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                        <svg class="h-8 w-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Overall Compliance -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Compliance Score</p>
-                        <p class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-2">{{ $complianceScore }}%</p>
-                    </div>
-                    <div class="flex items-center justify-center h-16 w-16">
-                        <div class="relative w-16 h-16">
-                            <svg class="transform -rotate-90" viewBox="0 0 36 36">
-                                <circle cx="18" cy="18" r="15.915" fill="none" class="text-gray-200 dark:text-gray-700" stroke="currentColor" stroke-width="3"></circle>
-                                <circle cx="18" cy="18" r="15.915" fill="none" 
-                                    :style="{ 'stroke-dasharray': ({{ $complianceScore }} / 100) * 100 + ' 100' }"
-                                    class="text-indigo-600 dark:text-indigo-400" stroke="currentColor" stroke-width="3" stroke-dasharray="0 100"></circle>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <x-coordinator.summary-cards :cards="$summaryCards" />
 
         <!-- Charts and Progress -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -760,6 +760,8 @@ class CoordinatorController extends Controller
 
     public function complianceOverview(): View
     {
+        $topSummary = $this->buildCoordinatorTopSummary();
+
         $assignments = Assignment::with([
             'student.studentProfile',
             'company',
@@ -828,6 +830,7 @@ class CoordinatorController extends Controller
         $complianceScore = round(($overallHoursPercentage + $overallTasksPercentage) / 2, 1);
 
         return view('coordinator.compliance-overview', [
+            'topSummary' => $topSummary,
             'totalStudents' => $totalStudents,
             'onTrackCount' => $onTrackCount,
             'atRiskCount' => $atRiskCount,
@@ -907,6 +910,8 @@ class CoordinatorController extends Controller
 
     public function deploymentIndex(): View
     {
+        $topSummary = $this->buildCoordinatorTopSummary();
+
         $assignments = Assignment::with(['student.studentProfile', 'supervisor', 'company', 'ojtAdviser'])
             ->orderByDesc('created_at')
             ->get();
@@ -972,6 +977,7 @@ class CoordinatorController extends Controller
         });
 
         return view('coordinator.deployment.index', [
+            'topSummary' => $topSummary,
             'deploymentData' => $deploymentData,
             'assignments' => $assignments,
             'groupedStudents' => $students,
@@ -985,6 +991,113 @@ class CoordinatorController extends Controller
             'incomplete' => $incomplete,
             'active' => $active,
         ]);
+    }
+
+    private function buildCoordinatorTopSummary(): array
+    {
+        $approvedStudentsQuery = User::query()->where('role', User::ROLE_STUDENT);
+
+        if (Schema::hasColumn('users', 'status')) {
+            $approvedStudentsQuery->where(function ($query) {
+                $query->whereIn('status', ['approved', 'active'])
+                    ->orWhereNull('status');
+            });
+        }
+
+        if (Schema::hasColumn('users', 'is_approved')) {
+            $approvedStudentsQuery->where('is_approved', true);
+        }
+
+        $approvedStudentIds = $approvedStudentsQuery->pluck('id');
+        $totalStudents = $approvedStudentIds->count();
+
+        $activeAssignments = Assignment::with(['workLogs'])
+            ->where('status', 'active')
+            ->when($approvedStudentIds->isNotEmpty(), function ($query) use ($approvedStudentIds) {
+                $query->whereIn('student_id', $approvedStudentIds->all());
+            }, function ($query) {
+                $query->whereRaw('1 = 0');
+            })
+            ->get()
+            ->unique('student_id')
+            ->values();
+
+        $activeOJTs = $activeAssignments->count();
+        $totalCompanies = Company::count();
+        $advisersCount = User::where('role', User::ROLE_OJT_ADVISER)->count();
+        $supervisorsCount = User::where('role', User::ROLE_SUPERVISOR)->count();
+
+        $pendingApprovalsQuery = User::query()
+            ->whereIn('role', [User::ROLE_STUDENT, User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER]);
+
+        if (Schema::hasColumn('users', 'has_requested_account')) {
+            $pendingApprovalsQuery->where('has_requested_account', true);
+        }
+
+        if (Schema::hasColumn('users', 'status')) {
+            $pendingApprovalsQuery->where('status', 'pending');
+        } elseif (Schema::hasColumn('users', 'is_approved')) {
+            $pendingApprovalsQuery->where('is_approved', false);
+        }
+
+        $pendingApprovals = (int) $pendingApprovalsQuery->count();
+
+        $pendingAccomplishmentReports = 0;
+        $studentsNeedingAttention = 0;
+        $submittedStatuses = ['submitted', 'approved', 'graded'];
+        $reportTypes = ['daily', 'weekly', 'monthly'];
+        $reportWindows = [
+            'daily' => Carbon::now()->subDays(7),
+            'weekly' => Carbon::now()->subDays(30),
+            'monthly' => Carbon::now()->subDays(90),
+        ];
+
+        foreach ($activeAssignments as $assignment) {
+            $logs = $assignment->workLogs ?? collect();
+            $requiredHours = max(1, (int) ($assignment->required_hours ?? 1600));
+            $approvedHours = (float) $logs->where('status', 'approved')->sum('hours');
+            $progress = ($approvedHours / $requiredHours) * 100;
+
+            $missingTypes = 0;
+            foreach ($reportTypes as $type) {
+                $hasRecent = $logs->contains(function ($log) use ($type, $submittedStatuses, $reportWindows) {
+                    return $log->type === $type
+                        && in_array($log->status, $submittedStatuses, true)
+                        && is_null($log->time_in)
+                        && $log->work_date
+                        && Carbon::parse($log->work_date)->greaterThanOrEqualTo($reportWindows[$type]);
+                });
+
+                if (! $hasRecent) {
+                    $missingTypes++;
+                }
+            }
+
+            if ($missingTypes > 0) {
+                $pendingAccomplishmentReports++;
+            }
+
+            $hasRecentAttendance = $logs->contains(function ($log) {
+                return ! is_null($log->time_in)
+                    && $log->work_date
+                    && Carbon::parse($log->work_date)->greaterThanOrEqualTo(Carbon::now()->subDays(7));
+            });
+
+            if ($missingTypes >= 2 || ! $hasRecentAttendance || $progress < 5) {
+                $studentsNeedingAttention++;
+            }
+        }
+
+        return [
+            'totalStudents' => $totalStudents,
+            'activeOJTs' => $activeOJTs,
+            'advisersCount' => $advisersCount,
+            'supervisorsCount' => $supervisorsCount,
+            'totalCompanies' => $totalCompanies,
+            'pendingApprovals' => $pendingApprovals,
+            'pendingAccomplishmentReports' => $pendingAccomplishmentReports,
+            'studentsNeedingAttention' => $studentsNeedingAttention,
+        ];
     }
 
     public function deploymentStore(Request $request): RedirectResponse

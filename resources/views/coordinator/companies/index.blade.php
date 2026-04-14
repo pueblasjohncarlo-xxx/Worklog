@@ -444,7 +444,7 @@
 
         <div id="companyEditModal" class="fixed inset-0 z-50 hidden">
             <div class="absolute inset-0 bg-gray-900/60" onclick="closeCompanyEditModal()"></div>
-            <div class="relative mx-auto mt-6 w-[95%] max-w-5xl rounded-xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[92vh] overflow-y-auto">
+            <div class="relative mx-auto mt-6 w-[95%] max-w-5xl rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[92vh] overflow-y-auto">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 z-10">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Company</h3>
@@ -457,51 +457,51 @@
                     @csrf
                     @method('PATCH')
 
-                    <div id="companyEditMissing" class="hidden rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20 p-3 text-sm text-amber-800 dark:text-amber-300"></div>
+                    <div id="companyEditMissing" class="hidden rounded-lg border border-amber-300 bg-amber-50 dark:border-amber-600 dark:bg-amber-900/30 p-3 text-sm font-medium text-amber-900 dark:text-amber-200"></div>
 
                     <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Basic Company Information</h4>
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-200">Basic Company Information</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
-                                <label for="edit_name" class="block text-sm font-medium">Company Name <span class="text-red-500">*</span></label>
-                                <input id="edit_name" name="name" type="text" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label for="edit_name" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Company Name <span class="text-red-500">*</span></label>
+                                <input id="edit_name" name="name" type="text" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
-                                <label for="edit_industry" class="block text-sm font-medium">Industry</label>
-                                <input id="edit_industry" name="industry" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label for="edit_industry" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Industry</label>
+                                <input id="edit_industry" name="industry" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
                     </div>
 
                     <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Location Details</h4>
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-200">Location Details</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
-                                <label for="edit_country" class="block text-sm font-medium">Country</label>
-                                <input id="edit_country" name="country" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" oninput="handleEditCountryInput()">
+                                <label for="edit_country" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Country</label>
+                                <input id="edit_country" name="country" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" oninput="handleEditCountryInput()">
                             </div>
                             <div>
-                                <label for="edit_street" class="block text-sm font-medium">Street Address</label>
-                                <input id="edit_street" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Building / street / block">
+                                <label for="edit_street" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Street Address</label>
+                                <input id="edit_street" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Building / street / block">
                             </div>
                         </div>
 
                         <div id="editPHLocationWrap" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 hidden">
                             <div>
-                                <label for="edit_province" class="block text-sm font-medium">Province</label>
-                                <select id="edit_province" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="handleEditProvinceChange()">
+                                <label for="edit_province" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Province</label>
+                                <select id="edit_province" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="handleEditProvinceChange()">
                                     <option value="">Select province</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="edit_city_ph" class="block text-sm font-medium">City / Municipality</label>
-                                <select id="edit_city_ph" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="handleEditCityChange()">
+                                <label for="edit_city_ph" class="block text-sm font-medium text-gray-700 dark:text-gray-200">City / Municipality</label>
+                                <select id="edit_city_ph" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" onchange="handleEditCityChange()">
                                     <option value="">Select city/municipality</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="edit_barangay" class="block text-sm font-medium">Barangay</label>
-                                <select id="edit_barangay" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label for="edit_barangay" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Barangay</label>
+                                <select id="edit_barangay" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Select barangay</option>
                                 </select>
                             </div>
@@ -509,35 +509,35 @@
 
                         <div id="editNonPHLocationWrap" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
-                                <label for="edit_city_manual" class="block text-sm font-medium">City</label>
-                                <input id="edit_city_manual" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label for="edit_city_manual" class="block text-sm font-medium text-gray-700 dark:text-gray-200">City</label>
+                                <input id="edit_city_manual" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
-                                <label for="edit_state_manual" class="block text-sm font-medium">State / Province</label>
-                                <input id="edit_state_manual" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label for="edit_state_manual" class="block text-sm font-medium text-gray-700 dark:text-gray-200">State / Province</label>
+                                <input id="edit_state_manual" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
 
                         <div class="mt-4">
-                            <label for="edit_postal_code" class="block text-sm font-medium">Postal Code</label>
-                            <input id="edit_postal_code" name="postal_code" type="text" maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <label for="edit_postal_code" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Postal Code</label>
+                            <input id="edit_postal_code" name="postal_code" type="text" maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
 
                     <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">Contact Information</h4>
+                        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-200">Contact Information</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                             <div>
-                                <label for="edit_contact_person" class="block text-sm font-medium">Contact Person</label>
-                                <input id="edit_contact_person" name="contact_person" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label for="edit_contact_person" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Contact Person</label>
+                                <input id="edit_contact_person" name="contact_person" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
-                                <label for="edit_contact_email" class="block text-sm font-medium">Contact Email</label>
-                                <input id="edit_contact_email" name="contact_email" type="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label for="edit_contact_email" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Contact Email</label>
+                                <input id="edit_contact_email" name="contact_email" type="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
-                                <label for="edit_contact_phone" class="block text-sm font-medium">Contact Phone</label>
-                                <input id="edit_contact_phone" name="contact_phone" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="e.g. +63 912 345 6789">
+                                <label for="edit_contact_phone" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Contact Phone</label>
+                                <input id="edit_contact_phone" name="contact_phone" type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="e.g. +63 912 345 6789">
                             </div>
                         </div>
                     </div>

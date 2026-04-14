@@ -24,8 +24,29 @@
 
         <!-- Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            .top-header-title-scope,
+            .top-header-title-scope * {
+                color: #ffffff !important;
+            }
+
+            .top-header-title-link {
+                display: block;
+                border-radius: 0.5rem;
+                padding: 0.125rem 0.375rem;
+                transition: background-color 150ms ease, color 150ms ease;
+            }
+
+            .top-header-title-link:hover,
+            .top-header-title-link:focus-visible {
+                background-color: rgba(255, 255, 255, 0.08);
+                color: #c7d2fe !important;
+                outline: none;
+            }
+        </style>
+        @include('layouts.partials.ui-visibility-hardening')
     </head>
-    <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed shimmer-bg overflow-x-hidden">
+    <body class="worklog-ui-hardening font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed shimmer-bg overflow-x-hidden">
         <div x-data="{ sidebarOpen: false }" class="min-h-screen flex flex-col md:flex-row">
             @include('layouts.student-sidebar')
 
@@ -40,9 +61,11 @@
                             </svg>
                         </button>
 
-                        <h2 class="font-black text-lg sm:text-xl text-white leading-tight drop-shadow-md tracking-tight flex-1 truncate">
-                            {{ $header ?? 'Student Dashboard' }}
-                        </h2>
+                        <div class="flex-1 min-w-0">
+                            <a href="{{ url()->current() }}" class="top-header-title-link top-header-title-scope font-black text-lg sm:text-xl leading-tight drop-shadow-md tracking-tight truncate" title="Refresh this page">
+                                {{ $header ?? 'Student Dashboard' }}
+                            </a>
+                        </div>
 
                         <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                             <x-notification-bell />
@@ -51,10 +74,10 @@
                                 <span class="text-xs text-indigo-300 uppercase font-bold tracking-wider">Student</span>
                                 <span class="text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
                             </div>
-                            <div class="relative flex-shrink-0">
+                            <a href="{{ route('profile.edit') }}" class="relative flex-shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400" title="Open profile">
                                 <img src="{{ Auth::user()->profile_photo_url }}" data-avatar-user-id="{{ Auth::id() }}" alt="{{ Auth::user()->name }}" class="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover border-2 border-indigo-500 shadow-md">
                                 <div class="absolute bottom-0 right-0 h-2 sm:h-3 w-2 sm:w-3 rounded-full bg-green-500 border-2 border-black"></div>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </header>

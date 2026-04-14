@@ -22,9 +22,10 @@
             <script src="https://cdn.tailwindcss.com"></script>
             <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
         @endif
+        @include('layouts.partials.ui-visibility-hardening')
         
     </head>
-    <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen">
+    <body class="worklog-ui-hardening font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen">
         <div class="min-h-screen flex flex-col">
             @include('layouts.navigation')
 
@@ -32,7 +33,9 @@
             @if (isset($header))
                 <header class="bg-black/50 backdrop-blur-md border-b border-indigo-500/30 shadow-lg">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+                        <a href="{{ url()->current() }}" class="top-header-title-link top-header-title-scope" title="Refresh this page">
+                            {{ $header }}
+                        </a>
                     </div>
                 </header>
             @endif

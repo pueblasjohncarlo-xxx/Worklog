@@ -22,9 +22,10 @@
             <script src="https://cdn.tailwindcss.com"></script>
             <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
         @endif
+        @include('layouts.partials.ui-visibility-hardening')
         
     </head>
-    <body class="font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-gray-100">
+    <body class="worklog-ui-hardening font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-gray-100">
         <div class="min-h-screen flex flex-col items-center justify-center px-4">
             <div class="w-full max-w-md">
                 {{ $slot }}

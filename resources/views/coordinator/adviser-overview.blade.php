@@ -1,7 +1,7 @@
 <x-coordinator-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">OJT Adviser Overview</h2>
+            <h2 class="text-3xl font-extrabold text-white drop-shadow-md tracking-tight">OJT Adviser Overview</h2>
         </div>
     </x-slot>
 
