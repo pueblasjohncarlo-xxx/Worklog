@@ -861,6 +861,45 @@ class CoordinatorController extends Controller
             ->with('status', 'company-created');
     }
 
+    public function companiesUpdate(Request $request, Company $company): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:companies,name,'.$company->id],
+            'industry' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'state' => ['nullable', 'string', 'max:255'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'contact_person' => ['nullable', 'string', 'max:255'],
+            'contact_email' => ['nullable', 'string', 'email', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $company->update($validated);
+
+        return redirect()->route('coordinator.companies.index')
+            ->with('status', 'company-updated');
+    }
+
+    public function companiesDestroy(Company $company): RedirectResponse
+    {
+        $assignmentCount = $company->assignments()->count();
+        $supervisorProfilesCount = $company->supervisorProfiles()->count();
+
+        if ($assignmentCount > 0 || $supervisorProfilesCount > 0) {
+            return redirect()->route('coordinator.companies.index')
+                ->withErrors([
+                    'error' => 'Cannot delete company while it is linked to deployment records or supervisor accounts.',
+                ]);
+        }
+
+        $company->delete();
+
+        return redirect()->route('coordinator.companies.index')
+            ->with('status', 'company-deleted');
+    }
+
     public function deploymentIndex(): View
     {
         $assignments = Assignment::with(['student.studentProfile', 'supervisor', 'company', 'ojtAdviser'])

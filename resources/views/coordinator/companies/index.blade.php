@@ -17,7 +17,15 @@
 
                 @if (session('status'))
                     <div class="text-sm text-green-600 dark:text-green-400">
-                        {{ session('status') }}
+                        @if (session('status') === 'company-created')
+                            Company added successfully.
+                        @elseif (session('status') === 'company-updated')
+                            Company updated successfully.
+                        @elseif (session('status') === 'company-deleted')
+                            Company deleted successfully.
+                        @else
+                            {{ session('status') }}
+                        @endif
                     </div>
                 @endif
 
@@ -272,19 +280,38 @@
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Students</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                                 @foreach ($companies as $company)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" x-data="{ showStudents: false }">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" x-data="{ showStudents: false, editing: false }">
                                         <td class="px-4 py-4 whitespace-nowrap">
-                                            <div class="font-medium text-gray-900 dark:text-gray-100">{{ $company->name }}</div>
+                                            <template x-if="!editing">
+                                                <div class="font-medium text-gray-900 dark:text-gray-100">{{ $company->name }}</div>
+                                            </template>
+                                            <template x-if="editing">
+                                                <input form="company-update-{{ $company->id }}" type="text" name="name" value="{{ $company->name }}" required class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm">
+                                            </template>
                                         </td>
                                         <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                            {{ $company->industry ?? '-' }}
+                                            <template x-if="!editing">
+                                                <span>{{ $company->industry ?? '-' }}</span>
+                                            </template>
+                                            <template x-if="editing">
+                                                <input form="company-update-{{ $company->id }}" type="text" name="industry" value="{{ $company->industry }}" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm">
+                                            </template>
                                         </td>
                                         <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                            {{ $company->city ?? '-' }}, {{ $company->country ?? '-' }}
+                                            <template x-if="!editing">
+                                                <span>{{ $company->city ?? '-' }}, {{ $company->country ?? '-' }}</span>
+                                            </template>
+                                            <template x-if="editing">
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    <input form="company-update-{{ $company->id }}" type="text" name="city" value="{{ $company->city }}" placeholder="City" class="rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm">
+                                                    <input form="company-update-{{ $company->id }}" type="text" name="country" value="{{ $company->country }}" placeholder="Country" class="rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm">
+                                                </div>
+                                            </template>
                                         </td>
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             @php
@@ -342,8 +369,44 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                            <div class="text-xs">{{ $company->contact_person ?? '-' }}</div>
-                                            <div class="text-[10px] text-gray-400">{{ $company->contact_email ?? '' }}</div>
+                                            <template x-if="!editing">
+                                                <div>
+                                                    <div class="text-xs">{{ $company->contact_person ?? '-' }}</div>
+                                                    <div class="text-[10px] text-gray-400">{{ $company->contact_email ?? '' }}</div>
+                                                </div>
+                                            </template>
+                                            <template x-if="editing">
+                                                <div class="space-y-2">
+                                                    <input form="company-update-{{ $company->id }}" type="text" name="contact_person" value="{{ $company->contact_person }}" placeholder="Contact person" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm">
+                                                    <input form="company-update-{{ $company->id }}" type="email" name="contact_email" value="{{ $company->contact_email }}" placeholder="Contact email" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-sm">
+                                                </div>
+                                            </template>
+                                        </td>
+                                        <td class="px-4 py-4 whitespace-nowrap">
+                                            <form id="company-update-{{ $company->id }}" method="POST" action="{{ route('coordinator.companies.update', $company) }}" class="hidden">
+                                                @csrf
+                                                @method('PATCH')
+                                            </form>
+
+                                            <div class="flex items-center gap-2">
+                                                <button type="button" x-show="!editing" @click="editing = true" class="px-2 py-1 text-xs font-semibold rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors">
+                                                    Edit
+                                                </button>
+                                                <button type="button" x-show="editing" @click="$el.closest('tr').querySelector('form[id^=\'company-update-\']').submit()" class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700 hover:bg-green-200 transition-colors">
+                                                    Save
+                                                </button>
+                                                <button type="button" x-show="editing" @click="editing = false" class="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                                                    Cancel
+                                                </button>
+
+                                                <form method="POST" action="{{ route('coordinator.companies.destroy', $company) }}" onsubmit="return confirm('Delete this company? This is blocked if linked to supervisors or active deployments.');" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

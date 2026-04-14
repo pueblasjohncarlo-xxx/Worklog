@@ -219,6 +219,8 @@ Route::middleware(['auth', 'verified', 'role:coordinator'])->group(function () {
 
     Route::get('/coordinator/companies', [CoordinatorController::class, 'companiesIndex'])->name('coordinator.companies.index');
     Route::post('/coordinator/companies', [CoordinatorController::class, 'companiesStore'])->name('coordinator.companies.store');
+    Route::patch('/coordinator/companies/{company}', [CoordinatorController::class, 'companiesUpdate'])->name('coordinator.companies.update');
+    Route::delete('/coordinator/companies/{company}', [CoordinatorController::class, 'companiesDestroy'])->name('coordinator.companies.destroy');
     
 
     
