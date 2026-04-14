@@ -2,6 +2,7 @@
     @php
         $studentSectionOptions = \App\Models\User::STUDENT_SECTIONS;
         $studentMajorOptions = \App\Models\User::STUDENT_MAJORS;
+        $companyOptions = $companies ?? collect();
     @endphp
     <div class="rounded-3xl bg-purple-900/60 border border-purple-500/30 shadow-2xl backdrop-blur-md px-8 py-10 space-y-8">
         <div class="text-center space-y-2">
@@ -99,6 +100,31 @@
                         @endforeach
                     </select>
                 </div>
+            </div>
+
+            <!-- Supervisor Specific Field -->
+            <div class="space-y-1" x-show="role === 'supervisor'" x-transition>
+                <label for="company_id" class="block text-sm font-medium text-purple-100">
+                    Company
+                </label>
+                <select
+                    id="company_id"
+                    name="company_id"
+                    :required="role === 'supervisor'"
+                    class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                >
+                    <option value="">Select company</option>
+                    @foreach ($companyOptions as $companyOption)
+                        <option value="{{ $companyOption->id }}" @selected((string) old('company_id') === (string) $companyOption->id)>
+                            {{ $companyOption->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @if ($companyOptions->isEmpty())
+                    <p class="text-xs text-amber-300">
+                        No companies are available right now. Please contact the coordinator to create your supervisor account.
+                    </p>
+                @endif
             </div>
 
             <div class="space-y-1">

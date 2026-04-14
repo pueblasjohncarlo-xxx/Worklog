@@ -304,6 +304,7 @@
                             @endforeach
                         </select>
                         <input type="hidden" id="company_id" name="company_id" value="{{ old('company_id') }}" required>
+                        <p id="supervisor-company-status" class="mt-1 text-xs text-gray-600 dark:text-gray-300">Select a supervisor to view assigned company.</p>
                         <p id="supervisor-company-validation" class="mt-1 text-xs text-red-600 dark:text-red-400 hidden"></p>
                     </div>
                 </div>
@@ -682,6 +683,21 @@
             messageElement.removeClass('hidden');
         }
 
+        function setSupervisorCompanyStatus(message, tone = 'neutral') {
+            const statusElement = $('#supervisor-company-status');
+            statusElement.removeClass('text-gray-600 text-gray-300 text-green-700 text-green-300 text-amber-700 text-amber-300');
+
+            if (tone === 'success') {
+                statusElement.addClass('text-green-700 dark:text-green-300');
+            } else if (tone === 'warning') {
+                statusElement.addClass('text-amber-700 dark:text-amber-300');
+            } else {
+                statusElement.addClass('text-gray-600 dark:text-gray-300');
+            }
+
+            statusElement.text(message);
+        }
+
         function setCompanyValue(companyId) {
             const value = companyId ? String(companyId) : '';
             $('#company_id').val(value);
@@ -694,28 +710,40 @@
             if (selectedSupervisorIds.length === 0) {
                 setCompanyValue('');
                 setSupervisorValidationMessage('Select a supervisor to auto-fill company.');
+                setSupervisorCompanyStatus('Select a supervisor to view assigned company.', 'neutral');
                 return false;
             }
 
-            const selectedCompanyIds = [...new Set(selectedSupervisorIds.map((supervisorId) => {
-                const option = $(`#supervisor_id option[value="${supervisorId}"]`);
+            const selectedSupervisorOptions = selectedSupervisorIds.map((supervisorId) =>
+                $(`#supervisor_id option[value="${supervisorId}"]`)
+            );
+
+            const selectedCompanyIds = [...new Set(selectedSupervisorOptions.map((option) => {
                 return option.data('company-id') ? String(option.data('company-id')) : '';
             }))];
 
             if (selectedCompanyIds.includes('')) {
                 setCompanyValue('');
-                setSupervisorValidationMessage('One or more selected supervisors have no assigned company profile.');
+                setSupervisorValidationMessage('No company assigned to this supervisor.');
+                setSupervisorCompanyStatus('No company assigned to this supervisor.', 'warning');
                 return false;
             }
 
             if (selectedCompanyIds.length !== 1) {
                 setCompanyValue('');
                 setSupervisorValidationMessage('Selected supervisors belong to different companies. Please choose supervisors from the same company.');
+                setSupervisorCompanyStatus('Selected supervisors map to different companies.', 'warning');
                 return false;
             }
 
+            const resolvedCompanyName = String(selectedSupervisorOptions[0].data('company-name') || '').trim();
+
             setCompanyValue(selectedCompanyIds[0]);
             setSupervisorValidationMessage('');
+            setSupervisorCompanyStatus(
+                resolvedCompanyName ? `Assigned company: ${resolvedCompanyName}` : 'Assigned company loaded from supervisor profile.',
+                'success'
+            );
             return true;
         }
 

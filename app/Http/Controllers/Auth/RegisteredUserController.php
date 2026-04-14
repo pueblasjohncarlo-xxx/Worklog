@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
+use App\Models\SupervisorProfile;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -19,7 +22,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        return view('auth.register', [
+            'companies' => Company::orderBy('name')->get(),
+        ]);
     }
 
     /**
@@ -36,8 +41,12 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'string', Rule::in([User::ROLE_STUDENT, User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER])],
+            'company_id' => ['required_if:role,'.User::ROLE_SUPERVISOR, 'nullable', 'integer', 'exists:companies,id'],
             'section' => ['required_if:role,'.User::ROLE_STUDENT, 'nullable', 'string', Rule::in(User::STUDENT_SECTIONS)],
             'department' => ['required_if:role,'.User::ROLE_STUDENT, 'nullable', 'string', Rule::in(User::STUDENT_MAJORS)],
+        ], [
+            'company_id.required_if' => 'Please select a company for supervisor registration.',
+            'company_id.exists' => 'The selected company is invalid.',
         ]);
 
         $role = $validated['role'] ?? User::ROLE_STUDENT;
@@ -87,7 +96,21 @@ class RegisteredUserController extends Controller
             $userData['rejection_reason'] = null;
         }
 
-        $user = User::create($userData);
+        $user = DB::transaction(function () use ($userData, $role, $validated) {
+            $user = User::create($userData);
+
+            if ($role === User::ROLE_SUPERVISOR) {
+                SupervisorProfile::create([
+                    'user_id' => $user->id,
+                    'company_id' => (int) $validated['company_id'],
+                    'position_title' => null,
+                    'department' => null,
+                    'phone' => null,
+                ]);
+            }
+
+            return $user;
+        });
 
         return redirect()->route('login')->with('status', 'Your account has been created and is pending coordinator approval.');
     }
