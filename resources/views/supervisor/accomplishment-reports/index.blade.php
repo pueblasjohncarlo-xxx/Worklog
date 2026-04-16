@@ -133,9 +133,19 @@
                                                                 </span>
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                                                <a href="{{ route('supervisor.worklogs.print', $log->id) }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold hover:underline">
-                                                                    Print
-                                                                </a>
+                                                                @if($log->attachment_path)
+                                                                    <a href="{{ route('supervisor.worklogs.attachment', $log->id) }}?inline=1" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold hover:underline">
+                                                                        View File
+                                                                    </a>
+                                                                    <span class="mx-2 text-gray-300">|</span>
+                                                                    <a href="{{ route('supervisor.worklogs.attachment', $log->id) }}" class="text-emerald-700 dark:text-emerald-300 hover:underline font-semibold">
+                                                                        Download
+                                                                    </a>
+                                                                @else
+                                                                    <a href="{{ route('supervisor.worklogs.print', $log->id) }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold hover:underline">
+                                                                        Print
+                                                                    </a>
+                                                                @endif
                                                             </td>
                                                         </tr>
                                                     @endforeach

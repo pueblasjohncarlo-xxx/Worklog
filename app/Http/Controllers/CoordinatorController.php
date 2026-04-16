@@ -738,7 +738,7 @@ class CoordinatorController extends Controller
     public function accomplishmentReports(): View
     {
         $workLogs = WorkLog::with(['assignment.student', 'assignment.company', 'reviewer'])
-            ->whereNotNull('description')
+            ->whereNull('time_in')
             ->orderByDesc('work_date')
             ->get();
 

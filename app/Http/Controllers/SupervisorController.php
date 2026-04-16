@@ -176,7 +176,7 @@ class SupervisorController extends Controller
 
         $workLogsQuery = WorkLog::with(['assignment.student', 'assignment.company'])
             ->whereIn('assignment_id', $assignments)
-            ->whereNotNull('description')
+            ->whereNull('time_in')
             ->orderByDesc('work_date');
 
         if ($type) {

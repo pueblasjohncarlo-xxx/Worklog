@@ -40,9 +40,17 @@
                                             {{ $log->status }}
                                         </td>
                                         <td class="px-3 py-2">
-                                            <a href="{{ route('ojt_adviser.worklogs.print', $log->id) }}" target="_blank" class="text-indigo-600 hover:underline font-semibold">
-                                                Print
-                                            </a>
+                                            @if($log->attachment_path)
+                                                <a href="{{ route('ojt_adviser.worklogs.attachment', $log->id) }}?inline=1" target="_blank" class="text-indigo-600 hover:underline font-semibold">
+                                                    View File
+                                                </a>
+                                                <span class="mx-2 text-gray-300">|</span>
+                                                <a href="{{ route('ojt_adviser.worklogs.attachment', $log->id) }}" class="text-emerald-700 hover:underline font-semibold">
+                                                    Download
+                                                </a>
+                                            @else
+                                                <span class="text-gray-500">No file</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty

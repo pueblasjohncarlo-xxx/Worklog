@@ -24,6 +24,7 @@ class WorkLog extends Model
         'skills_applied',
         'reflection',
         'attachment_path',
+        'attachment_disk',
         'status',
         'submitted_to',
         'grade',

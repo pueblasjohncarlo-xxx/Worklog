@@ -189,7 +189,7 @@ class OjtAdviserController extends Controller
 
         $workLogs = WorkLog::with(['assignment.student', 'assignment.company'])
             ->whereIn('assignment_id', $assignmentIds)
-            ->whereNotNull('description')
+            ->whereNull('time_in')
             ->orderByDesc('work_date')
             ->paginate(30);
 

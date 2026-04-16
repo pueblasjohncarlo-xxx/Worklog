@@ -142,8 +142,14 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
     Route::post('/student/tasks/{task}/submit', [StudentTaskController::class, 'submit'])->name('student.tasks.submit');
     Route::post('/student/tasks/{task}/unsubmit', [StudentTaskController::class, 'unsubmit'])->name('student.tasks.unsubmit');
     Route::get('/student/journal', [JournalController::class, 'index'])->name('student.journal.index');
+
+    // Accomplishment report workflow (template-based)
+    Route::get('/student/accomplishment-reports/template', [WorkLogController::class, 'downloadAccomplishmentTemplate'])
+        ->name('student.accomplishment-reports.template');
+
     Route::resource('/student/worklogs', WorkLogController::class, ['as' => 'student']);
     Route::get('/student/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('student.worklogs.print');
+    Route::get('/student/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('student.worklogs.attachment');
     Route::post('/student/worklogs/{workLog}/submit', [WorkLogController::class, 'submit'])->name('student.worklogs.submit');
     Route::patch('/student/worklogs/{workLog}/manual-clock-out', [StudentController::class, 'manualClockOut'])->name('student.worklogs.manual-clock-out');
 
@@ -173,6 +179,7 @@ Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
 
     Route::get('/supervisor/accomplishment-reports', [SupervisorController::class, 'accomplishmentReports'])->name('supervisor.accomplishment-reports');
     Route::get('/supervisor/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('supervisor.worklogs.print');
+    Route::get('/supervisor/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('supervisor.worklogs.attachment');
 
     Route::get('/supervisor/leaves', [SupervisorController::class, 'leavesIndex'])->name('supervisor.leaves.index');
     Route::post('/supervisor/leaves/{leave}/approve', [SupervisorController::class, 'approveLeave'])->name('supervisor.leaves.approve');
@@ -225,6 +232,7 @@ Route::middleware(['auth', 'verified', 'role:coordinator'])->group(function () {
     Route::get('/coordinator/daily-journals', [CoordinatorController::class, 'dailyJournals'])->name('coordinator.daily-journals');
     Route::get('/coordinator/accomplishment-reports', [CoordinatorController::class, 'accomplishmentReports'])->name('coordinator.accomplishment-reports');
     Route::get('/coordinator/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('coordinator.worklogs.print');
+    Route::get('/coordinator/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('coordinator.worklogs.attachment');
     Route::get('/coordinator/leaves/{leave}/print', [LeaveController::class, 'print'])->name('coordinator.leaves.print');
     Route::get('/coordinator/compliance-overview', [CoordinatorController::class, 'complianceOverview'])->name('coordinator.compliance-overview');
 
@@ -267,6 +275,7 @@ Route::middleware(['auth', 'verified', 'role:ojt_adviser'])->group(function () {
     Route::post('/ojt-adviser/journals/{journal}/comment', [OjtAdviserController::class, 'commentJournal'])->name('ojt_adviser.journals.comment');
     Route::get('/ojt-adviser/accomplishment-reports', [OjtAdviserController::class, 'accomplishmentReports'])->name('ojt_adviser.accomplishment-reports');
     Route::get('/ojt-adviser/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('ojt_adviser.worklogs.print');
+    Route::get('/ojt-adviser/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('ojt_adviser.worklogs.attachment');
     Route::get('/ojt-adviser/leaves/{leave}/print', [LeaveController::class, 'print'])->name('ojt_adviser.leaves.print');
     Route::get('/ojt-adviser/leaves', [OjtAdviserController::class, 'leavesIndex'])->name('ojt_adviser.leaves.index');
     Route::post('/ojt-adviser/leaves/{leave}/approve', [OjtAdviserController::class, 'approveLeave'])->name('ojt_adviser.leaves.approve');

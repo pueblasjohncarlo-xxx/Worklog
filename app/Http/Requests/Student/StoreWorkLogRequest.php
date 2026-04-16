@@ -17,12 +17,17 @@ class StoreWorkLogRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'type' => ['required', 'in:daily,weekly,monthly'],
             'work_date' => ['required', 'date'],
             'hours' => ['required', 'numeric', 'min:0', 'max:24'],
-            'description' => ['required', 'string'],
+
+            // Template-based workflow: students upload a completed document instead of typing the report in the form.
+            'attachment' => ['required', 'file', 'mimes:doc,docx,odt,pdf', 'max:10240'], // 10MB max
+
+            // Keep backward compatibility with existing DB structure.
+            'description' => ['nullable', 'string'],
             'skills_applied' => ['nullable', 'string'],
             'reflection' => ['nullable', 'string'],
-            'attachment' => ['nullable', 'file', 'mimes:doc,docx,ppt,pptx,pdf', 'max:10240'], // 10MB max
         ];
     }
 }
