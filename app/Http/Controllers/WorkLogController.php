@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\View\View;
 
 class WorkLogController extends Controller
@@ -418,14 +419,15 @@ class WorkLogController extends Controller
         ]);
     }
 
-    public function print($id): View
+    public function print(Request $request, WorkLog $workLog): Response
     {
-        $workLog = WorkLog::with(['assignment.student', 'assignment.company', 'assignment.supervisor', 'assignment.ojtAdviser'])->findOrFail($id);
         $user = Auth::user();
 
         if (! $user) {
             abort(403);
         }
+
+        $workLog->loadMissing(['assignment.student', 'assignment.company', 'assignment.supervisor', 'assignment.ojtAdviser', 'assignment.coordinator']);
 
         if (! $workLog->assignment || ! $workLog->assignment->student) {
             abort(404);
@@ -444,40 +446,41 @@ class WorkLogController extends Controller
             abort(403);
         }
 
-        $reports = collect([$workLog]);
-        if ($workLog->type === 'daily') {
-            // Fetch all daily reports for the same week
-            $startOfWeek = $workLog->work_date->copy()->startOfWeek(\Carbon\CarbonInterface::MONDAY);
-            $endOfWeek = $workLog->work_date->copy()->endOfWeek(\Carbon\CarbonInterface::FRIDAY);
+        // If an uploaded attachment exists, it is the source of truth for viewing/printing.
+        // Serve it inline so the browser can preview/print when supported.
+        if (! empty($workLog->attachment_path)) {
+            $path = $workLog->attachment_path;
+            $disk = $workLog->attachment_disk ?: 'public';
 
-            $reports = WorkLog::where('assignment_id', $workLog->assignment_id)
-                ->where('type', 'daily')
-                ->whereBetween('work_date', [$startOfWeek, $endOfWeek])
-                ->orderBy('work_date')
-                ->get();
-        } elseif ($workLog->type === 'weekly') {
-            // Fetch all weekly reports for the same month
-            $startOfMonth = $workLog->work_date->copy()->startOfMonth();
-            $endOfMonth = $workLog->work_date->copy()->endOfMonth();
+            // Match downloadAttachment() fallback behavior (older records may have been stored on a different disk).
+            if (! Storage::disk($disk)->exists($path)) {
+                if (Storage::disk('local')->exists($path)) {
+                    $disk = 'local';
+                } elseif (Storage::disk('public')->exists($path)) {
+                    $disk = 'public';
+                } else {
+                    return response()->view('worklogs.attachment-missing', [
+                        'workLog' => $workLog,
+                        'missingFile' => true,
+                    ]);
+                }
+            }
 
-            $reports = WorkLog::where('assignment_id', $workLog->assignment_id)
-                ->where('type', 'weekly')
-                ->whereBetween('work_date', [$startOfMonth, $endOfMonth])
-                ->orderBy('work_date')
-                ->get();
+            $baseName = basename($path);
+            $dateLabel = $workLog->work_date?->format('Y-m-d') ?? 'date';
+            $typeLabel = Str::ucfirst((string) ($workLog->type ?? 'report'));
+            $studentSlug = Str::slug((string) ($workLog->assignment?->student?->name ?? 'student'));
+            $downloadName = $typeLabel.'_Accomplishment_'.$dateLabel.'_'.$studentSlug.'_'.$baseName;
+
+            return Storage::disk($disk)->response($path, $downloadName, [
+                'Content-Disposition' => 'inline; filename="'.$downloadName.'"',
+                'X-Content-Type-Options' => 'nosniff',
+            ]);
         }
 
-        $view = match ($workLog->type) {
-            'weekly' => 'student.worklogs.print_weekly',
-            'monthly' => 'student.worklogs.print_monthly',
-            default => 'student.worklogs.print_daily',
-        };
-
-        return view($view, [
-            'report' => $workLog,
-            'reports' => $reports,
-            'student' => $workLog->assignment->student,
-            'assignment' => $workLog->assignment,
+        return response()->view('worklogs.attachment-missing', [
+            'workLog' => $workLog,
+            'missingFile' => false,
         ]);
     }
 }

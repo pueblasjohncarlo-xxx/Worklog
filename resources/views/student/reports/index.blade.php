@@ -71,8 +71,11 @@
                                             </span>
                                         </p>
                                     </div>
-                                    <a href="{{ route('student.worklogs.print', $report) }}" target="_blank" 
-                                       class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg text-sm hover:bg-indigo-700 transition-colors whitespace-nowrap">
+                                    <a
+                                        href="{{ $report->attachment_path ? route('student.worklogs.attachment', $report) . '?inline=1' : route('student.worklogs.print', $report) }}"
+                                        target="_blank"
+                                        class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg text-sm hover:bg-indigo-700 transition-colors whitespace-nowrap"
+                                    >
                                         View Report
                                     </a>
                                 </div>
