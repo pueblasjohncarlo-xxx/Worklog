@@ -15,10 +15,8 @@ class StudentAnnouncementController extends Controller
     {
         $user = Auth::user();
 
-        // Get my supervisor's ID
-        $supervisorId = Assignment::where('student_id', $user->id)
-            ->where('status', 'active')
-            ->value('supervisor_id');
+        $assignment = Assignment::resolveActiveForStudent($user->id);
+        $supervisorId = $assignment?->supervisor_id;
 
         $announcements = Announcement::where(function ($query) {
             // Announcements from Coordinators (audience 'all' or 'students')

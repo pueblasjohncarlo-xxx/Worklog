@@ -24,9 +24,10 @@ class WorkLogController extends Controller
         $type = $request->query('type', 'daily');
         $date = $request->query('date', now()->format('Y-m-d'));
 
-        $assignment = Assignment::where('student_id', $user->id)
-            ->where('status', 'active')
-            ->firstOrFail();
+        $assignment = Assignment::resolveActiveForStudent($user->id);
+        if (! $assignment) {
+            abort(404);
+        }
 
         $attendance = null;
         $approvedDates = collect();
@@ -81,9 +82,10 @@ class WorkLogController extends Controller
         $validated = $request->validated();
         $type = $request->input('type', 'daily');
 
-        $assignment = Assignment::where('student_id', $user->id)
-            ->where('status', 'active')
-            ->firstOrFail();
+        $assignment = Assignment::resolveActiveForStudent($user->id);
+        if (! $assignment) {
+            abort(404);
+        }
 
         if ($type === 'daily') {
             $hasApprovedAttendance = WorkLog::where('assignment_id', $assignment->id)

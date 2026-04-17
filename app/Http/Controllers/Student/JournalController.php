@@ -20,10 +20,7 @@ class JournalController extends Controller
         $startOfMonth = $date->copy()->startOfMonth();
         $endOfMonth = $date->copy()->endOfMonth();
 
-        // Fetch assignment
-        $assignment = Assignment::where('student_id', $user->id)
-            ->where('status', 'active')
-            ->first();
+        $assignment = Assignment::resolveActiveForStudent($user->id);
 
         $calendar = [];
         $logs = collect();

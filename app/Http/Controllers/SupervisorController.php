@@ -33,7 +33,10 @@ class SupervisorController extends Controller
         $pendingAttendanceLogs = WorkLog::with(['assignment.student'])
             ->whereIn('assignment_id', $assignmentIds)
             ->where('status', 'submitted')
-            ->where('submitted_to', 'supervisor')
+            ->where(function ($q) {
+                $q->where('submitted_to', 'supervisor')
+                    ->orWhereNull('submitted_to');
+            })
             ->whereNotNull('time_in')
             ->whereNull('time_out')
             ->orderBy('work_date')
@@ -45,7 +48,14 @@ class SupervisorController extends Controller
         $pendingHoursLogs = WorkLog::with(['assignment.student'])
             ->whereIn('assignment_id', $assignmentIds)
             ->where('status', 'submitted')
-            ->where('submitted_to', 'supervisor')
+            ->where(function ($q) {
+                $q->where('submitted_to', 'supervisor')
+                    ->orWhere(function ($q2) {
+                        // Back-compat: attendance worklogs created before submitted_to existed
+                        // (or before clock-out started setting it) should still reach supervisors.
+                        $q2->whereNull('submitted_to')->whereNotNull('time_in');
+                    });
+            })
             ->where(function ($query) {
                 $query->where(function ($q) {
                     $q->whereNotNull('time_in')->whereNotNull('time_out');

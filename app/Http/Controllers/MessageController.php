@@ -241,6 +241,7 @@ class MessageController extends Controller
     {
         return $user->role === User::ROLE_COORDINATOR ||
             Assignment::where('student_id', Auth::id())
+                ->active()
                 ->where('supervisor_id', $user->id)
                 ->exists();
     }
@@ -255,6 +256,7 @@ class MessageController extends Controller
     {
         return $user->role === User::ROLE_COORDINATOR ||
             Assignment::where('supervisor_id', Auth::id())
+                ->active()
                 ->where('student_id', $user->id)
                 ->exists();
     }
@@ -276,7 +278,10 @@ class MessageController extends Controller
                 
         } elseif ($user->role === User::ROLE_STUDENT) {
             // Students can message: their supervisors + coordinators
-            $supervisorIds = Assignment::where('student_id', $user->id)->pluck('supervisor_id');
+            $supervisorIds = Assignment::where('student_id', $user->id)
+                ->active()
+                ->whereNotNull('supervisor_id')
+                ->pluck('supervisor_id');
             $supervisors = User::whereIn('id', $supervisorIds)->orderBy('name')->get();
             
             // Also get coordinators as a fallback

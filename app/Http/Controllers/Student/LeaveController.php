@@ -21,10 +21,10 @@ class LeaveController extends Controller
 {
     public function index(Request $request): View
     {
-        $assignment = Assignment::with(['company', 'supervisor', 'ojtAdviser'])
-            ->where('student_id', Auth::id())
-            ->where('status', 'active')
-            ->first();
+        $assignment = Assignment::resolveActiveForStudent((int) Auth::id());
+        if ($assignment) {
+            $assignment->loadMissing(['company', 'supervisor', 'ojtAdviser']);
+        }
 
         $assignmentIds = Assignment::where('student_id', Auth::id())->pluck('id');
 
@@ -69,9 +69,7 @@ class LeaveController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $assignment = Assignment::where('student_id', Auth::id())
-            ->where('status', 'active')
-            ->first();
+        $assignment = Assignment::resolveActiveForStudent((int) Auth::id());
 
         if (! $assignment) {
             return redirect()->back()->withErrors([

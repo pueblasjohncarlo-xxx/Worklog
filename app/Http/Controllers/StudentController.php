@@ -6,6 +6,7 @@ use App\Models\Assignment;
 use App\Models\Leave;
 use App\Models\Task;
 use App\Models\WorkLog;
+use App\Notifications\WorkLogSubmittedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,10 +24,10 @@ class StudentController extends Controller
         \Log::info('========== STUDENT DASHBOARD CALLED ==========');
         \Log::info('Route: student.dashboard | Controller: StudentController@index | User: ' . $user->id . ' (' . $user->name . ')');
 
-        $assignment = Assignment::with(['company', 'supervisor'])
-            ->where('student_id', $user->id)
-            ->where('status', 'active')
-            ->first();
+        $assignment = Assignment::resolveActiveForStudent($user->id);
+        if ($assignment) {
+            $assignment->loadMissing(['company', 'supervisor']);
+        }
 
         // Get calendar current date from request or use today
         $calendarCurrentDate = Carbon::now();
@@ -185,16 +186,19 @@ class StudentController extends Controller
     public function clockIn(): RedirectResponse
     {
         $user = Auth::user();
-        $assignment = Assignment::where('student_id', $user->id)
-            ->where('status', 'active')
-            ->first();
+        $assignment = Assignment::resolveActiveForStudent($user->id);
 
         if (! $assignment) {
             return redirect()->back()->with('error', 'No active assignment found.');
         }
 
+        $activeAssignmentIds = Assignment::query()
+            ->where('student_id', $user->id)
+            ->active()
+            ->pluck('id');
+
         // Check for any open session (even from previous days)
-        $openLog = WorkLog::where('assignment_id', $assignment->id)
+        $openLog = WorkLog::whereIn('assignment_id', $activeAssignmentIds)
             ->whereNotNull('time_in')
             ->whereNull('time_out')
             ->first();
@@ -209,7 +213,7 @@ class StudentController extends Controller
         }
 
         // Check if already clocked in today
-        $existingLog = WorkLog::where('assignment_id', $assignment->id)
+        $existingLog = WorkLog::whereIn('assignment_id', $activeAssignmentIds)
             ->where('work_date', now()->toDateString())
             ->first();
 
@@ -232,15 +236,18 @@ class StudentController extends Controller
     public function clockOut(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        $assignment = Assignment::where('student_id', $user->id)
-            ->where('status', 'active')
-            ->first();
 
-        if (! $assignment) {
+        $activeAssignmentIds = Assignment::query()
+            ->where('student_id', $user->id)
+            ->active()
+            ->pluck('id');
+
+        if ($activeAssignmentIds->isEmpty()) {
             return redirect()->back()->with('error', 'No active assignment found.');
         }
 
-        $log = WorkLog::where('assignment_id', $assignment->id)
+        $log = WorkLog::with('assignment')
+            ->whereIn('assignment_id', $activeAssignmentIds)
             ->where('work_date', now()->toDateString())
             ->whereNull('time_out')
             ->first();
@@ -254,6 +261,7 @@ class StudentController extends Controller
         $log->update([
             'time_out' => $timeOutStr,
             'status' => 'submitted', // Auto-submit for approval
+            'submitted_to' => 'supervisor',
         ]);
 
         // Recalculate precise hours (avoid concatenating a date with a Carbon datetime string).
@@ -272,6 +280,11 @@ class StudentController extends Controller
 
         $hours = $start->diffInMinutes($end) / 60;
         $log->update(['hours' => round($hours, 2)]);
+
+        $log->loadMissing(['assignment.supervisor']);
+        if ($log->assignment?->supervisor) {
+            $log->assignment->supervisor->notify(new WorkLogSubmittedNotification($log));
+        }
 
         return redirect()->back()->with('status', 'Successfully clocked out.');
     }
@@ -323,8 +336,14 @@ class StudentController extends Controller
             'time_out' => $validated['time_out'],
             'hours' => round($hours, 2),
             'status' => 'submitted', // Submit for approval
+            'submitted_to' => 'supervisor',
             'description' => $description,
         ]);
+
+        $workLog->loadMissing(['assignment.supervisor']);
+        if ($workLog->assignment?->supervisor) {
+            $workLog->assignment->supervisor->notify(new WorkLogSubmittedNotification($workLog));
+        }
 
         return redirect()->back()->with('status', 'Manual clock-out submitted for approval.');
     }
