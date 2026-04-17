@@ -79,7 +79,7 @@
                                     <td class="px-3 py-2 font-semibold text-gray-900 dark:text-gray-100">
                                         <div class="flex items-center gap-2">
                                             {{ $leave->assignment?->student?->name ?? 'N/A' }}
-                                            @if(in_array($leave->status, ['submitted', 'pending']))
+                                            @if(in_array($leave->status, ['submitted', 'pending'], true))
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-orange-500 text-white">NEW</span>
                                             @endif
                                         </div>
@@ -100,54 +100,54 @@
                                             ];
                                         @endphp
                                         <span class="px-2 py-1 rounded-full text-xs font-bold {{ $statusClasses[$leave->status] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">{{ ucfirst($leave->status) }}</span>
+                                        @if($leave->reviewer_remarks)
+                                            <div class="mt-2 rounded-md bg-gray-50 dark:bg-gray-700/30 p-2">
+                                                <div class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">Remarks</div>
+                                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 break-words">{{ $leave->reviewer_remarks }}</div>
+                                            </div>
+                                        @endif
                                     </td>
-                                    <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{{ optional($leave->submitted_at)->format('M d, Y h:i A') ?? '-' }}</td>
+                                    <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ optional($leave->submitted_at)->format('M d, Y h:i A') ?? '-' }}</td>
                                     <td class="px-3 py-2">
-                                        <div class="flex flex-col gap-2 min-w-[280px]">
-                                            <a href="{{ route('supervisor.leaves.print', $leave->id) }}" target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-center text-sm font-semibold shadow-sm transition-colors">
-                                                View Full Details
-                                            </a>
-                                                @if($leave->reviewer_remarks)
-                                                    <div class="mt-2 rounded-md bg-gray-50 dark:bg-gray-700/30 p-2">
-                                                        <div class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">Remarks</div>
-                                                        <div class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 break-words">{{ $leave->reviewer_remarks }}</div>
-                                                    </div>
+                                        <div class="flex flex-col gap-2 min-w-[220px]">
+                                            <div class="flex flex-wrap gap-2">
+                                                <a href="{{ route('supervisor.leaves.print', $leave->id) }}" target="_blank" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-center text-xs sm:text-sm font-semibold shadow-sm transition-colors">
+                                                    Details
+                                                </a>
+
+                                                @if($leave->attachment_path)
+                                                    <a href="{{ Storage::url($leave->attachment_path) }}" target="_blank" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-center text-xs sm:text-sm font-semibold shadow-sm transition-colors">
+                                                        Attachment
+                                                    </a>
                                                 @endif
+                                            </div>
 
-                                            @if($leave->attachment_path)
-                                                <a href="{{ Storage::url($leave->attachment_path) }}" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-center text-sm font-semibold shadow-sm transition-colors">
-                                                <div class="flex flex-col gap-2 min-w-[220px]">
-                                                    <div class="flex flex-wrap gap-2">
-                                                        <a href="{{ route('supervisor.leaves.print', $leave->id) }}" target="_blank" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-center text-xs sm:text-sm font-semibold shadow-sm transition-colors">
-                                                            Details
-                                                        </a>
+                                            @if(in_array($leave->status, ['submitted', 'pending'], true))
+                                                <details class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/20 p-2">
+                                                    <summary class="cursor-pointer select-none text-xs font-bold text-gray-800 dark:text-gray-200">Review (approve / reject)</summary>
+                                                    <div class="mt-2 space-y-2">
+                                                        <form method="POST" action="{{ route('supervisor.leaves.approve', $leave->id) }}" onsubmit="return confirm('Approve this leave request?');">
+                                                            @csrf
+                                                            <textarea name="reviewer_remarks" rows="2" placeholder="Optional remarks (approve)" class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-xs p-2 shadow-sm"></textarea>
+                                                            <button type="submit" class="mt-2 w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-semibold shadow-sm transition-colors">Approve</button>
+                                                        </form>
 
-                                                        @if($leave->attachment_path)
-                                                            <a href="{{ Storage::url($leave->attachment_path) }}" target="_blank" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-center text-xs sm:text-sm font-semibold shadow-sm transition-colors">
-                                                                Attachment
-                                                            </a>
-                                                        @endif
+                                                        <form method="POST" action="{{ route('supervisor.leaves.reject', $leave->id) }}" onsubmit="return confirm('Reject this leave request? Please provide a reason.');">
+                                                            @csrf
+                                                            <textarea name="reviewer_remarks" rows="2" placeholder="Required remarks (reject)" class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-xs p-2 shadow-sm" required></textarea>
+                                                            <button type="submit" class="mt-2 w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-semibold shadow-sm transition-colors">Reject</button>
+                                                        </form>
                                                     </div>
-
-                                                    @if(in_array($leave->status, ['submitted', 'pending'], true))
-                                                        <details class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/20 p-2">
-                                                            <summary class="cursor-pointer select-none text-xs font-bold text-gray-800 dark:text-gray-200">Review (approve / reject)</summary>
-                                                            <div class="mt-2 space-y-2">
-                                                                <form method="POST" action="{{ route('supervisor.leaves.approve', $leave->id) }}" onsubmit="return confirm('Approve this leave request?');">
-                                                                    @csrf
-                                                                    <textarea name="reviewer_remarks" rows="2" placeholder="Optional remarks (approve)" class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-xs p-2 shadow-sm"></textarea>
-                                                                    <button type="submit" class="mt-2 w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-semibold shadow-sm transition-colors">Approve</button>
-                                                                </form>
-
-                                                                <form method="POST" action="{{ route('supervisor.leaves.reject', $leave->id) }}" onsubmit="return confirm('Reject this leave request? Please provide a reason.');">
-                                                                    @csrf
-                                                                    <textarea name="reviewer_remarks" rows="2" placeholder="Required remarks (reject)" class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-xs p-2 shadow-sm" required></textarea>
-                                                                    <button type="submit" class="mt-2 w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-semibold shadow-sm transition-colors">Reject</button>
-                                                                </form>
-                                                            </div>
-                                                        </details>
-                                                    @endif
-                                                </div>
+                                                </details>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="px-3 py-6 text-center text-gray-500">No leave requests found.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
 
