@@ -7,6 +7,7 @@ use App\Http\Requests\Student\UpdateWorkLogRequest;
 use App\Models\Assignment;
 use App\Models\User;
 use App\Models\WorkLog;
+use App\Notifications\WorkLogSubmittedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -219,6 +220,11 @@ class WorkLogController extends Controller
             'status' => 'submitted',
             'submitted_to' => $submittedTo,
         ]);
+
+        $assignment->loadMissing(['supervisor']);
+        if ($assignment->supervisor) {
+            $assignment->supervisor->notify(new WorkLogSubmittedNotification($workLog));
+        }
 
         return redirect()->route('student.dashboard')
             ->with('status', 'Worklog submitted to Supervisor for approval.');

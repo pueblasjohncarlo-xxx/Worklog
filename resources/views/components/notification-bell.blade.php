@@ -1,8 +1,25 @@
 @php
-    $initialUnreadCount = auth()->user()->unreadNotifications->count();
+    $user = auth()->user();
+    $initialUnreadCount = $user->unreadNotifications()->count();
+    $initialItems = $user->unreadNotifications()
+        ->latest()
+        ->take(10)
+        ->get()
+        ->map(function ($notification) {
+            return [
+                'id' => $notification->id,
+                'type' => $notification->data['type'] ?? null,
+                'title' => $notification->data['title'] ?? $notification->data['subject'] ?? 'Notification',
+                'content' => $notification->data['content'] ?? '',
+                'url' => $notification->data['url'] ?? null,
+                'read_url' => route('notifications.read', $notification->id),
+                'created_at_human' => $notification->created_at?->diffForHumans(),
+            ];
+        })
+        ->values();
 @endphp
 
-<div x-data="notificationBell({ initialUnreadCount: {{ $initialUnreadCount }}, userId: {{ auth()->id() }} })" x-init="init()" class="relative mr-4">
+<div x-data="notificationBell({ initialUnreadCount: {{ $initialUnreadCount }}, initialItems: @js($initialItems), userId: {{ auth()->id() }} })" x-init="init()" class="relative mr-4">
     <button @click="open = !open" class="relative p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
         <span class="sr-only">View notifications</span>
         <div class="relative">
@@ -28,45 +45,73 @@
         
         <div class="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
             <span class="text-sm font-semibold text-gray-700">Notifications</span>
-            @if(auth()->user()->unreadNotifications->count() > 0)
-                <form action="{{ route('notifications.mark-all-read') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-800">Mark all read</button>
-                </form>
-            @endif
+            <form x-show="unreadCount > 0" action="{{ route('notifications.mark-all-read') }}" method="POST" @if($initialUnreadCount === 0) style="display: none;" @endif>
+                @csrf
+                <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-800">Mark all read</button>
+            </form>
         </div>
 
         <div class="max-h-64 overflow-y-auto">
-            @forelse(auth()->user()->unreadNotifications as $notification)
-                <a href="{{ route('notifications.read', $notification->id) }}" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0">
-                    <p class="text-sm font-medium text-gray-900">{{ $notification->data['title'] ?? $notification->data['subject'] ?? 'Notification' }}</p>
-                    <p class="text-xs text-gray-500 mt-1 truncate">{{ $notification->data['content'] ?? '' }}</p>
-                    <p class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
-                </a>
-            @empty
-                <div class="px-4 py-3 text-center text-sm text-gray-500">
-                    No new notifications
-                </div>
-            @endforelse
+            <div x-show="!jsReady">
+                @forelse($initialItems as $item)
+                    <a href="{{ $item['read_url'] }}" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0">
+                        <p class="text-sm font-medium text-gray-900">{{ $item['title'] ?? 'Notification' }}</p>
+                        <p class="text-xs text-gray-500 mt-1 truncate">{{ $item['content'] ?? '' }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ $item['created_at_human'] ?? '' }}</p>
+                    </a>
+                @empty
+                    <div class="px-4 py-3 text-center text-sm text-gray-500">
+                        No new notifications
+                    </div>
+                @endforelse
+            </div>
+
+            <div x-show="jsReady" style="display: none;">
+                <template x-if="items && items.length">
+                    <div>
+                        <template x-for="item in items" :key="item.id">
+                            <a :href="item.read_url" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0">
+                                <p class="text-sm font-medium text-gray-900" x-text="item.title || 'Notification'"></p>
+                                <p class="text-xs text-gray-500 mt-1 truncate" x-text="item.content || ''"></p>
+                                <p class="text-xs text-gray-400 mt-1" x-text="item.created_at_human || ''"></p>
+                            </a>
+                        </template>
+                    </div>
+                </template>
+                <template x-if="!items || !items.length">
+                    <div class="px-4 py-3 text-center text-sm text-gray-500">
+                        No new notifications
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div class="px-4 py-2 border-t border-gray-100">
+            <a href="{{ route('notifications.index') }}" class="block text-center text-xs font-semibold text-indigo-700 hover:text-indigo-900">
+                View all notifications
+            </a>
         </div>
     </div>
 </div>
 
 <script>
-function notificationBell({ initialUnreadCount, userId }) {
+function notificationBell({ initialUnreadCount, initialItems, userId }) {
     return {
         open: false,
         unreadCount: initialUnreadCount,
+        items: initialItems || [],
+        jsReady: false,
         pollTimer: null,
-        lastNotifiedMessageId: null,
+        lastNotifiedNotificationId: null,
 
         init() {
-            const storageKey = `worklog:last-message-notified:${userId}`;
+            this.jsReady = true;
+            const storageKey = `worklog:last-notification-notified:${userId}`;
             const fromStorage = window.localStorage.getItem(storageKey);
-            this.lastNotifiedMessageId = fromStorage ? parseInt(fromStorage, 10) : null;
+            this.lastNotifiedNotificationId = fromStorage || null;
 
-            this.fetchRealtimeSummary();
-            this.pollTimer = setInterval(() => this.fetchRealtimeSummary(), 2000);
+            this.fetchNotificationSummary();
+            this.pollTimer = setInterval(() => this.fetchNotificationSummary(), 5000);
 
             window.addEventListener('beforeunload', () => {
                 if (this.pollTimer) {
@@ -75,9 +120,9 @@ function notificationBell({ initialUnreadCount, userId }) {
             });
         },
 
-        async fetchRealtimeSummary() {
+        async fetchNotificationSummary() {
             try {
-                const response = await fetch('/api/messages/realtime-summary', {
+                const response = await fetch('/api/notifications/summary?limit=10', {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     cache: 'no-store',
                 });
@@ -93,24 +138,28 @@ function notificationBell({ initialUnreadCount, userId }) {
 
                 this.unreadCount = data.unread_count || 0;
 
+                if (Array.isArray(data.items)) {
+                    this.items = data.items;
+                }
+
                 if (!data.latest_unread || !data.latest_unread.id) {
                     return;
                 }
 
-                const latestId = Number(data.latest_unread.id);
-                if (!Number.isFinite(latestId)) {
+                const latestId = String(data.latest_unread.id);
+                if (!latestId) {
                     return;
                 }
 
-                if (this.lastNotifiedMessageId === null) {
-                    this.lastNotifiedMessageId = latestId;
-                    window.localStorage.setItem(`worklog:last-message-notified:${userId}`, String(latestId));
+                if (this.lastNotifiedNotificationId === null) {
+                    this.lastNotifiedNotificationId = latestId;
+                    window.localStorage.setItem(`worklog:last-notification-notified:${userId}`, latestId);
                     return;
                 }
 
-                if (latestId > this.lastNotifiedMessageId) {
-                    this.lastNotifiedMessageId = latestId;
-                    window.localStorage.setItem(`worklog:last-message-notified:${userId}`, String(latestId));
+                if (latestId !== this.lastNotifiedNotificationId) {
+                    this.lastNotifiedNotificationId = latestId;
+                    window.localStorage.setItem(`worklog:last-notification-notified:${userId}`, latestId);
                     this.showBrowserNotification(data.latest_unread);
                 }
             } catch (error) {
@@ -118,21 +167,26 @@ function notificationBell({ initialUnreadCount, userId }) {
             }
         },
 
-        showBrowserNotification(message) {
+        showBrowserNotification(notification) {
             if (!('Notification' in window)) {
                 return;
             }
 
-            const text = message.body && message.body.trim().length
-                ? message.body
-                : (message.attachment_type ? `Sent an attachment (${message.attachment_type})` : 'New message');
+            const title = notification.title || 'Notification';
+            const text = notification.content || '';
 
             const notify = () => {
-                new Notification(`New message from ${message.sender_name}`, {
+                const n = new Notification(title, {
                     body: text,
-                    icon: message.sender_avatar || undefined,
-                    tag: `worklog-message-${message.id}`,
+                    tag: `worklog-notification-${notification.id}`,
                 });
+
+                const url = notification.url || notification.read_url;
+                if (url) {
+                    n.onclick = () => {
+                        try { window.location.href = url; } catch (e) {}
+                    };
+                }
             };
 
             if (Notification.permission === 'granted') {

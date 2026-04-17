@@ -34,6 +34,23 @@
         color: #cbd5e1 !important;
     }
 
+    /* Some pages use translucent dark panels; rescue accidental dark text there too. */
+    body.worklog-ui-hardening [class*="bg-black/"] .text-gray-900,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-gray-800,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-gray-700,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-slate-900,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-slate-800,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-slate-700,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-black {
+        color: #f8fafc !important;
+    }
+
+    body.worklog-ui-hardening [class*="bg-black/"] .text-gray-600,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-gray-500,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-gray-400 {
+        color: #cbd5e1 !important;
+    }
+
     .top-header-title-scope,
     .top-header-title-scope * {
         color: #ffffff !important;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Task;
+use App\Notifications\TaskSubmittedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -119,6 +120,14 @@ class TaskController extends Controller
             'attachment_path' => $path,
             'original_filename' => $originalName,
         ]);
+
+        $assignment = Assignment::with('supervisor')
+            ->where('id', $task->assignment_id)
+            ->first();
+
+        if ($assignment?->supervisor) {
+            $assignment->supervisor->notify(new TaskSubmittedNotification($task));
+        }
 
         return redirect()->back()->with('status', 'Task submitted successfully.');
     }

@@ -7,6 +7,7 @@ use App\Models\Leave;
 use App\Models\Task;
 use App\Models\WorkLog;
 use App\Notifications\LeaveStatusUpdatedNotification;
+use App\Notifications\WorkLogReviewedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -127,6 +128,11 @@ class SupervisorController extends Controller
             'reviewed_at' => now(),
         ]);
 
+        $workLog->loadMissing(['assignment.student']);
+        if ($workLog->assignment?->student) {
+            $workLog->assignment->student->notify(new WorkLogReviewedNotification($workLog));
+        }
+
         return redirect()->back()->with('status', 'Work log approved successfully.');
     }
 
@@ -139,6 +145,11 @@ class SupervisorController extends Controller
             'reviewer_id' => Auth::id(),
             'reviewed_at' => now(),
         ]);
+
+        $workLog->loadMissing(['assignment.student']);
+        if ($workLog->assignment?->student) {
+            $workLog->assignment->student->notify(new WorkLogReviewedNotification($workLog));
+        }
 
         return redirect()->back()->with('status', 'Work log rejected.');
     }
@@ -160,6 +171,11 @@ class SupervisorController extends Controller
             'reviewer_id' => Auth::id(),
             'reviewed_at' => now(),
         ]);
+
+        $workLog->loadMissing(['assignment.student']);
+        if ($workLog->assignment?->student) {
+            $workLog->assignment->student->notify(new WorkLogReviewedNotification($workLog));
+        }
 
         return redirect('/supervisor/dashboard');
     }

@@ -7,3 +7,4 @@ php artisan view:clear
 php artisan config:clear
 # SQL ERROR IN LIVE SERVE
 php artisan migrate
+

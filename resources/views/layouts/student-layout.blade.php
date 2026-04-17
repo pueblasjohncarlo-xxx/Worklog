@@ -70,6 +70,12 @@
                         <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                             <x-notification-bell />
                             @include('layouts.partials.language-switcher-compact')
+                            <form method="POST" action="{{ route('logout') }}" class="flex-shrink-0">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-semibold text-white border border-white/10">
+                                    Logout
+                                </button>
+                            </form>
                             <div class="hidden sm:flex flex-col items-end">
                                 <span class="text-xs text-indigo-300 uppercase font-bold tracking-wider">Student</span>
                                 <span class="text-sm font-semibold text-white">{{ Auth::user()->name }}</span>

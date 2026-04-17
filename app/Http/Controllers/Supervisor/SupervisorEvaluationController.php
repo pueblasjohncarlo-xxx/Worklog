@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\PerformanceEvaluation;
 use App\Models\User;
+use App\Notifications\PerformanceEvaluationSubmittedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -91,6 +92,26 @@ class SupervisorEvaluationController extends Controller
         $evaluation->document_path = $path;
         $evaluation->document_type = 'doc';
         $evaluation->save();
+
+        $assignment = Assignment::with(['coordinator', 'ojtAdviser'])
+            ->where('student_id', $evaluation->student_id)
+            ->where('supervisor_id', $evaluation->supervisor_id)
+            ->where('status', 'active')
+            ->latest('start_date')
+            ->first();
+
+        $student = User::find($evaluation->student_id);
+        if ($student) {
+            $student->notify(new PerformanceEvaluationSubmittedNotification($evaluation, route('student.dashboard')));
+        }
+
+        if ($assignment?->coordinator) {
+            $assignment->coordinator->notify(new PerformanceEvaluationSubmittedNotification($evaluation, route('coordinator.evaluations.index')));
+        }
+
+        if ($assignment?->ojtAdviser) {
+            $assignment->ojtAdviser->notify(new PerformanceEvaluationSubmittedNotification($evaluation, route('ojt_adviser.evaluations.student', ['student' => $evaluation->student_id])));
+        }
 
         return redirect()->route('supervisor.evaluations.index')
             ->with('status', 'Performance evaluation submitted. Coordinators can view it in Performance Evaluation.');

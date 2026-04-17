@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Task;
 use App\Notifications\NewTaskAssignedNotification;
+use App\Notifications\TaskReviewedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -86,6 +87,11 @@ class SupervisorTaskController extends Controller
             'grade' => $validated['grade'],
         ]);
 
+        $task->loadMissing(['assignment.student']);
+        if ($task->assignment?->student) {
+            $task->assignment->student->notify(new TaskReviewedNotification($task));
+        }
+
         return redirect()->back()->with('status', 'Task approved with grade.');
     }
 
@@ -113,6 +119,11 @@ class SupervisorTaskController extends Controller
             'supervisor_attachment_path' => $path,
             'supervisor_original_filename' => $originalName,
         ]);
+
+        $task->loadMissing(['assignment.student']);
+        if ($task->assignment?->student) {
+            $task->assignment->student->notify(new TaskReviewedNotification($task));
+        }
 
         return redirect()->back()->with('status', 'Task rejected with feedback.');
     }

@@ -72,8 +72,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/profile/avatar-versions', [ProfileController::class, 'avatarVersions'])->name('profile.avatar-versions');
 
     // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/api/notifications/summary', [NotificationController::class, 'apiSummary'])->name('api.notifications.summary');
 
     // Messages (Available to all authenticated users)
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
