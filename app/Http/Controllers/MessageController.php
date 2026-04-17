@@ -132,7 +132,7 @@ class MessageController extends Controller
             $recipient->notify(new NewMessageNotification($message));
         }
 
-        return redirect()->route('messages.show', $request->receiver_id);
+        return redirect()->route('messages.index', ['open' => (int) $request->receiver_id]);
     }
 
     public function show(User $user): View

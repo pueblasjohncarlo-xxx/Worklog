@@ -281,7 +281,10 @@ Route::middleware(['auth', 'verified', 'role:ojt_adviser'])->group(function () {
     Route::post('/ojt-adviser/leaves/{leave}/approve', [OjtAdviserController::class, 'approveLeave'])->name('ojt_adviser.leaves.approve');
     Route::post('/ojt-adviser/leaves/{leave}/reject', [OjtAdviserController::class, 'rejectLeave'])->name('ojt_adviser.leaves.reject');
     Route::get('/ojt-adviser/evaluations', [OjtAdviserController::class, 'evaluations'])->name('ojt_adviser.evaluations');
+    Route::get('/ojt-adviser/evaluations/student/{student}', [OjtAdviserController::class, 'evaluationStudent'])->name('ojt_adviser.evaluations.student');
+    Route::get('/ojt-adviser/evaluations/{evaluation}/export', [OjtAdviserController::class, 'exportEvaluation'])->name('ojt_adviser.evaluations.export');
     Route::get('/ojt-adviser/reports', [OjtAdviserController::class, 'reports'])->name('ojt_adviser.reports');
+    Route::get('/ojt-adviser/reports/attendance/export', [OjtAdviserController::class, 'exportAttendance'])->name('ojt_adviser.reports.attendance.export');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin,staff'])->group(function () {

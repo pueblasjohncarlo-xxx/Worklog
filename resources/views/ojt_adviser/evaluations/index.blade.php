@@ -40,7 +40,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     @if($latestEval)
-                                        <a href="{{ route('coordinator.evaluations.export', $latestEval) }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">
+                                        <a href="{{ route('ojt_adviser.evaluations.export', $latestEval) }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                             </svg>

@@ -16,12 +16,25 @@
                     <h3 class="text-lg font-bold text-white">Attendance Summary</h3>
                 </div>
                 <p class="text-sm text-gray-400 mb-6">Generate a complete overview of OJT student clock-in/out records, total hours, and status for all your assigned students.</p>
-                <button class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export Attendance (PDF)
-                </button>
+                <form method="GET" action="{{ route('ojt_adviser.reports.attendance.export') }}" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Date From (optional)</label>
+                            <input type="date" name="date_from" value="{{ request('date_from') }}" class="w-full rounded-xl bg-black/30 border border-white/10 text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/60" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Date To (optional)</label>
+                            <input type="date" name="date_to" value="{{ request('date_to') }}" class="w-full rounded-xl bg-black/30 border border-white/10 text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/60" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Export Attendance (CSV)
+                    </button>
+                </form>
             </div>
 
             <!-- Task & Journal Report -->

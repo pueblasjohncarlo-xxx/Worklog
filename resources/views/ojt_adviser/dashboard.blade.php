@@ -162,7 +162,7 @@
                                     <p class="text-sm font-semibold text-white truncate">{{ $assignment->student->name }}</p>
                                     <p class="text-xs text-gray-400 truncate mt-1">{{ $assignment->company->name }}</p>
                                 </div>
-                                <a href="#" class="px-3 py-1.5 bg-red-600/50 hover:bg-red-600 text-white text-xs font-semibold rounded transition flex-shrink-0">
+                                <a href="{{ route('ojt_adviser.student-logs', $assignment->student) }}" class="px-3 py-1.5 bg-red-600/50 hover:bg-red-600 text-white text-xs font-semibold rounded transition flex-shrink-0">
                                     Review
                                 </a>
                             </div>
@@ -191,7 +191,7 @@
                                     <p class="text-sm font-semibold text-white truncate">{{ $assignment->student->name }}</p>
                                     <p class="text-xs text-gray-400 truncate mt-1">{{ $assignment->company->name }}</p>
                                 </div>
-                                <a href="#" class="px-3 py-1.5 bg-amber-600/50 hover:bg-amber-600 text-white text-xs font-semibold rounded transition flex-shrink-0">
+                                <a href="{{ route('ojt_adviser.evaluations.student', $assignment->student) }}" class="px-3 py-1.5 bg-amber-600/50 hover:bg-amber-600 text-white text-xs font-semibold rounded transition flex-shrink-0">
                                     Evaluate
                                 </a>
                             </div>
@@ -266,12 +266,12 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </a>
-                                        <a href="#" class="p-1.5 hover:bg-white/10 rounded transition" title="Evaluate">
+                                        <a href="{{ route('ojt_adviser.evaluations.student', $assignment->student) }}" class="p-1.5 hover:bg-white/10 rounded transition" title="Evaluate">
                                             <svg class="h-4 w-4 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </a>
-                                        <a href="#" class="p-1.5 hover:bg-white/10 rounded transition" title="View Logs">
+                                        <a href="{{ route('ojt_adviser.student-logs', $assignment->student) }}" class="p-1.5 hover:bg-white/10 rounded transition" title="View Logs">
                                             <svg class="h-4 w-4 text-gray-400 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
