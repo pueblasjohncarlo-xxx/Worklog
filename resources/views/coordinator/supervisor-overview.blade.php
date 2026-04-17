@@ -7,9 +7,10 @@
 
     <div class="space-y-6" x-data='{
         supervisors: @json($supervisors),
-        searchTerm: "",
-        selectedCompany: "",
-        selectedStatus: "",
+        panel: @json(request('panel', 'supervisors')),
+        searchTerm: @json(request('q', '')),
+        selectedCompany: @json(request('company', '')),
+        selectedStatus: @json(request('status', '')),
         selectedSupervisor: null,
         showDetailsModal: false,
         
@@ -39,12 +40,60 @@
             this.searchTerm = "";
             this.selectedCompany = "";
             this.selectedStatus = "";
+        },
+
+        getConnectedCompanies() {
+            const map = new Map();
+            this.supervisors.forEach(s => {
+                (s.companies || []).forEach(c => {
+                    const key = String(c.id);
+                    if (!map.has(key)) {
+                        map.set(key, { id: c.id, name: c.name });
+                    }
+                });
+            });
+            return Array.from(map.values()).sort((a, b) => String(a.name).localeCompare(String(b.name)));
+        },
+
+        getStudentsSupervised() {
+            // Unique students across supervisors; if duplicates exist, prefer an active assignment.
+            const map = new Map();
+
+            this.supervisors.forEach(s => {
+                (s.students || []).forEach(st => {
+                    const key = String(st.id);
+                    const entry = {
+                        id: st.id,
+                        name: st.name,
+                        email: st.email,
+                        program: st.program,
+                        company_id: st.company_id ?? null,
+                        company_name: st.company_name ?? null,
+                        status: st.status,
+                        supervisor_name: s.name,
+                    };
+
+                    if (!map.has(key)) {
+                        map.set(key, entry);
+                        return;
+                    }
+
+                    const current = map.get(key);
+                    const currentIsActive = String(current.status).toLowerCase() === 'active';
+                    const entryIsActive = String(entry.status).toLowerCase() === 'active';
+                    if (!currentIsActive && entryIsActive) {
+                        map.set(key, entry);
+                    }
+                });
+            });
+
+            return Array.from(map.values()).sort((a, b) => String(a.name).localeCompare(String(b.name)));
         }
     }'>
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Total Supervisors -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'supervisors']) }}#roster" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Supervisors</p>
@@ -56,10 +105,10 @@
                         </svg>
                     </div>
                 </div>
-            </div>
+                </a>
 
             <!-- Active Supervisors -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'supervisors', 'status' => 'Active']) }}#roster" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Supervisors</p>
@@ -72,10 +121,10 @@
                         </svg>
                     </div>
                 </div>
-            </div>
+                </a>
 
             <!-- Total Companies -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'companies']) }}#companies" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Companies</p>
@@ -87,10 +136,10 @@
                         </svg>
                     </div>
                 </div>
-            </div>
+                </a>
 
             <!-- Total Students Supervised -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'students']) }}#students" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Students Supervised</p>
@@ -102,11 +151,114 @@
                         </svg>
                     </div>
                 </div>
-            </div>
+                </a>
         </div>
 
+            <!-- Result Panels (opened by summary cards) -->
+            <template x-if="panel === 'companies'">
+                <div id="companies" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Companies Connected to Supervisors</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Showing companies that currently appear under supervisor assignments.</p>
+                        </div>
+                        <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'supervisors']) }}#roster" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Back to roster</a>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-[640px] w-full">
+                            <thead class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Supervisors</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Active Students</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <template x-for="company in getConnectedCompanies()" :key="company.id">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="company.name"></p>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="text-sm text-gray-700 dark:text-gray-200" x-text="supervisors.filter(s => (s.companies || []).some(c => String(c.id) === String(company.id))).length"></span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="text-sm text-gray-700 dark:text-gray-200" x-text="getStudentsSupervised().filter(st => String(st.company_id) === String(company.id) && String(st.status).toLowerCase() === 'active').length"></span>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <template x-if="getConnectedCompanies().length === 0">
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No companies found for supervisor assignments.</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="panel === 'students'">
+                <div id="students" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Students Supervised</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Unique students currently associated with supervisors (status shown per assignment).</p>
+                        </div>
+                        <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'supervisors']) }}#roster" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Back to roster</a>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-[760px] w-full">
+                            <thead class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Student</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Program</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Supervisor</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <template x-for="student in getStudentsSupervised()" :key="student.id">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="student.name"></p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="student.email"></p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm text-gray-700 dark:text-gray-200" x-text="student.program"></p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm text-gray-700 dark:text-gray-200" x-text="student.company_name || '—'"></p>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <p class="text-sm text-gray-700 dark:text-gray-200" x-text="student.supervisor_name"></p>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <template x-if="String(student.status).toLowerCase() === 'active'">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">Active</span>
+                                            </template>
+                                            <template x-if="String(student.status).toLowerCase() !== 'active'">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200" x-text="student.status"></span>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <template x-if="getStudentsSupervised().length === 0">
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No students found under supervisors.</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </template>
+
         <!-- Filters Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div id="roster" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Supervisor Roster</h3>
                 <div class="flex gap-2">

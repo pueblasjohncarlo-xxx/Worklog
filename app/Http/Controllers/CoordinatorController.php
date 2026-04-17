@@ -587,6 +587,8 @@ class CoordinatorController extends Controller
                     'name' => $assignment->student->name,
                     'email' => $assignment->student->email,
                     'program' => $assignment->student->studentProfile?->program ?? 'N/A',
+                    'company_id' => $assignment->company?->id,
+                    'company_name' => $assignment->company?->name,
                     'status' => $assignment->status,
                 ];
             })->values();
