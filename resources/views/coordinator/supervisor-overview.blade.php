@@ -5,12 +5,12 @@
         </div>
     </x-slot>
 
-    <div class="space-y-6" x-data='{
-        supervisors: @json($supervisors),
-        panel: @json(request('panel', 'supervisors')),
-        searchTerm: @json(request('q', '')),
-        selectedCompany: @json(request('company', '')),
-        selectedStatus: @json(request('status', '')),
+    <div class="space-y-6" x-data="{
+        supervisors: @js($supervisors),
+        panel: @js(request('panel', 'supervisors')),
+        searchTerm: @js(request('q', '')),
+        selectedCompany: @js(request('company', '')),
+        selectedStatus: @js(request('status', '')),
         selectedSupervisor: null,
         showDetailsModal: false,
         
@@ -18,9 +18,9 @@
             return this.supervisors.filter(s => {
                 const matchesSearch = s.name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
                                     s.email.toLowerCase().includes(this.searchTerm.toLowerCase());
-                const matchesCompany = this.selectedCompany === "" || 
+                const matchesCompany = this.selectedCompany === '' || 
                                     s.companies.some(c => String(c.id) == String(this.selectedCompany));
-                const matchesStatus = this.selectedStatus === "" || s.status === this.selectedStatus;
+                const matchesStatus = this.selectedStatus === '' || s.status === this.selectedStatus;
                 
                 return matchesSearch && matchesCompany && matchesStatus;
             });
@@ -37,9 +37,9 @@
         },
         
         clearFilters() {
-            this.searchTerm = "";
-            this.selectedCompany = "";
-            this.selectedStatus = "";
+            this.searchTerm = '';
+            this.selectedCompany = '';
+            this.selectedStatus = '';
         },
 
         getConnectedCompanies() {
@@ -89,7 +89,7 @@
 
             return Array.from(map.values()).sort((a, b) => String(a.name).localeCompare(String(b.name)));
         }
-    }'>
+    }">
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Total Supervisors -->
