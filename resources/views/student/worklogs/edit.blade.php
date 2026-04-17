@@ -387,8 +387,9 @@
                                 Save Changes
                             </button>
                             <button
-                                type="button"
-                                onclick="submitWorkLog()"
+                                type="submit"
+                                name="submit_after_save"
+                                value="1"
                                 class="inline-flex items-center px-10 py-4 rounded-2xl bg-emerald-600 text-sm font-black uppercase tracking-widest text-white hover:bg-emerald-700 shadow-xl shadow-emerald-200 dark:shadow-none transition-all hover:-translate-y-0.5"
                             >
                                 Save & Submit
@@ -424,7 +425,6 @@
                         const diffInMs = end - start;
                         const diffInHrs = diffInMs / (1000 * 60 * 60);
 
-                        // Update the hours input field
                         hoursInput.value = diffInHrs.toFixed(2);
                     } else {
                         hoursInput.value = '0.00';
@@ -434,72 +434,8 @@
                 timeInInput.addEventListener('change', calculateHours);
                 timeOutInput.addEventListener('change', calculateHours);
 
-                // Initial calculation if values exist
                 calculateHours();
             }
-
-            // Submit worklog function
-            window.submitWorkLog = function() {
-                const form = document.querySelector('form');
-                if (form) {
-                    // Create a submit button to trigger form submission
-                    const submitBtn = document.createElement('button');
-                    submitBtn.type = 'submit';
-                    submitBtn.style.display = 'none';
-                    
-                    // Add data attribute to indicate this is a submit action
-                    submitBtn.setAttribute('data-action', 'submit-worklog');
-                    
-                    form.appendChild(submitBtn);
-                    
-                    // Create form data from current form
-                    const formData = new FormData(form);
-                    
-                    // Submit the form first (for saving changes)
-                    fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            // After save succeeds, submit the worklog
-                            const submitUrl = '{{ route("student.worklogs.submit", $workLog->id) }}';
-                            return fetch(submitUrl, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                },
-                                body: JSON.stringify({})
-                            });
-                        } else {
-                            throw new Error('Failed to save changes');
-                        }
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            // Show success message
-                            alert('Worklog saved and submitted successfully!');
-                            // Redirect to dashboard
-                            window.location.href = '{{ route("student.dashboard") }}';
-                        } else {
-                            throw new Error('Failed to submit worklog');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred: ' + error.message);
-                    })
-                    .finally(() => {
-                        // Clean up
-                        submitBtn.remove();
-                    });
-                }
-            };
         });
     </script>
 </x-student-layout>

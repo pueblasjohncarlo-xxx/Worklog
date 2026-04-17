@@ -196,6 +196,10 @@ class WorkLogController extends Controller
 
         $workLog->update($data);
 
+        if ($request->boolean('submit_after_save')) {
+            return $this->submit($request, $workLog->id);
+        }
+
         return redirect()->route('student.dashboard')
             ->with('status', 'Worklog updated and reset to draft. Please submit again.');
     }
