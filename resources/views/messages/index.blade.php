@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="h-[calc(100vh-120px)]" x-data="chatApp()" @load="init()" @destroy="destroy()">
+<div class="h-[calc(100vh-120px)]" x-data="chatApp()" x-init="init(); return () => destroy()">
     <div class="grid grid-cols-1 lg:grid-cols-3 h-full gap-0 bg-gray-900/30">
         <!-- Left Panel: Conversations List -->
         <div class="lg:col-span-1 border-r border-indigo-500/20 flex flex-col bg-black/40 min-h-[400px] lg:min-h-auto">
@@ -148,18 +148,25 @@
                                 <div :class="msg.is_own ? 'bg-indigo-600 text-white rounded-3xl rounded-tr-lg' : 'bg-gray-800 text-gray-100 rounded-3xl rounded-tl-lg'" 
                                     class="max-w-xs lg:max-w-md px-4 py-2 break-words transition-all duration-150">
                                     <!-- Message Body -->
-                                    <p class="text-sm" x-text="msg.body"></p>
+                                    <template x-if="(msg.body || '').trim().length > 0">
+                                        <p class="text-sm whitespace-pre-wrap" x-text="msg.body"></p>
+                                    </template>
                                     
                                     <!-- Attachment Preview -->
                                     <template x-if="msg.attachment_path && msg.attachment_type === 'image'">
-                                        <img :src="messageAttachmentUrl(msg)" :alt="msg.attachment_name" 
-                                            class="mt-2 rounded max-w-sm">
+                                        <img :src="messageAttachmentUrl(msg)" :alt="msg.attachment_name" class="mt-2 rounded max-w-sm">
+                                    </template>
+
+                                    <template x-if="msg.attachment_path && msg.attachment_type === 'video'">
+                                        <video controls class="mt-2 rounded max-w-sm w-full">
+                                            <source :src="messageAttachmentUrl(msg)">
+                                        </video>
                                     </template>
                                     
                                     <template x-if="msg.attachment_path && msg.attachment_type === 'file'">
-                                        <a :href="`/storage/${msg.attachment_path}`" download 
+                                        <a :href="messageAttachmentUrl(msg)" target="_blank" rel="noopener noreferrer"
                                             class="mt-2 text-xs underline inline-block hover:opacity-80">
-                                            📎 <span x-text="msg.attachment_name"></span>
+                                            📎 <span x-text="msg.attachment_name || 'Attachment'"></span>
                                         </a>
                                     </template>
 
@@ -205,7 +212,6 @@
                         </button>
                         <input x-model="messageInput" type="text" placeholder="Type a message..." 
                             class="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-full text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition text-sm"
-                            @keydown.enter="sendMessage()"
                             @input="handleTypingInput()"
                             @blur="sendTypingState(false)">
                         <button type="submit" :disabled="!canSendMessage()" 
@@ -322,7 +328,7 @@ function chatApp() {
         selectedAttachmentPreview: '',
         selectedAttachmentName: '',
 
-        init() {
+        async init() {
             console.log('=== CHATAPP INITIALIZED ===');
             console.log('Component state:', {
                 conversations: this.conversations.length,
@@ -331,7 +337,24 @@ function chatApp() {
                 showStartConversationModal: this.showStartConversationModal,
                 activeConversation: this.activeConversation,
             });
-            this.loadConversations();
+            await this.loadConversations();
+
+            // Deep-link support: /messages?open={userId}
+            try {
+                const openIdRaw = new URLSearchParams(window.location.search).get('open');
+                const openId = openIdRaw ? parseInt(openIdRaw, 10) : null;
+                if (openId && Number.isFinite(openId)) {
+                    const match = this.conversations.find((c) => Number(c.id) === openId);
+                    if (match) {
+                        await this.selectConversation(match);
+                    } else {
+                        // If not in list (rare), try to open directly.
+                        await this.startConversationWithUser({ id: openId, name: 'Conversation', email: '', role: '', avatar: '' });
+                    }
+                }
+            } catch (e) {
+                // no-op
+            }
             this.sendPresenceHeartbeat();
 
             // Poll for real-time updates
@@ -457,7 +480,11 @@ function chatApp() {
                 const matchesRole = !this.roleFilter || conv.role === this.roleFilter;
                 
                 return matchesSearch && matchesRole;
-            }).sort((a, b) => new Date(b.last_message_time) - new Date(a.last_message_time));
+            }).sort((a, b) => {
+                const aTime = a.last_message_time ? new Date(a.last_message_time).getTime() : 0;
+                const bTime = b.last_message_time ? new Date(b.last_message_time).getTime() : 0;
+                return bTime - aTime;
+            });
         },
 
         async selectConversation(conversation) {
@@ -474,19 +501,39 @@ function chatApp() {
         async loadMessages() {
             if (!this.activeConversation) return;
             try {
-                const response = await fetch(`/api/messages/conversation/${this.activeConversation.id}`);
+                const lastId = this.messages.length > 0 ? this.messages[this.messages.length - 1].id : 0;
+                const url = new URL(`/api/messages/conversation/${this.activeConversation.id}`, window.location.origin);
+                if (lastId && Number.isFinite(Number(lastId)) && String(lastId).startsWith('temp-') === false) {
+                    url.searchParams.set('after_id', String(lastId));
+                }
+
+                const response = await fetch(url.toString());
                 const data = await response.json();
                 if (data.success) {
-                    // Check if there are new messages by comparing last message ID
-                    const lastMsgId = this.messages.length > 0 ? this.messages[this.messages.length - 1].id : null;
-                    this.messages = data.messages;
+                    const newMessages = data.messages || [];
+
+                    if (lastId && String(lastId).startsWith('temp-')) {
+                        // If we have optimistic messages, do a full reload once to reconcile.
+                        const fullResponse = await fetch(`/api/messages/conversation/${this.activeConversation.id}`);
+                        const fullData = await fullResponse.json();
+                        if (fullData.success) {
+                            this.messages = fullData.messages || [];
+                        }
+                    } else if (lastId > 0) {
+                        if (newMessages.length > 0) {
+                            this.messages = [...this.messages, ...newMessages];
+                        }
+                    } else {
+                        this.messages = newMessages;
+                    }
+
                     if (data.user && this.activeConversation) {
                         this.activeConversation.avatar = data.user.avatar;
                         this.activeConversation.name = data.user.name;
                         this.activeConversation.role = data.user.role;
                     }
                     
-                    if (lastMsgId === null || this.messages.some(m => m.id > lastMsgId)) {
+                    if (newMessages.length > 0) {
                         setTimeout(() => this.scrollToBottom(), 100);
                     }
                 }
@@ -684,6 +731,10 @@ function chatApp() {
         messageAttachmentUrl(msg) {
             if (!msg || !msg.attachment_path) {
                 return '';
+            }
+
+            if (msg.attachment_url) {
+                return msg.attachment_url;
             }
 
             if (msg.attachment_path.startsWith('blob:') || msg.attachment_path.startsWith('http://') || msg.attachment_path.startsWith('https://')) {

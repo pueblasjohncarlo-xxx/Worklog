@@ -41,7 +41,7 @@
                 </a>
 
                 <!-- Pending -->
-                <a href="{{ route('admin.users.pending') }}" class="group block bg-gradient-to-br from-red-600/20 to-red-600/10 border border-red-500/30 rounded-lg p-3 cursor-pointer hover:border-red-500/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 transition-all">
+                <a href="{{ route('admin.worklogs.pending') }}" class="group block bg-gradient-to-br from-red-600/20 to-red-600/10 border border-red-500/30 rounded-lg p-3 cursor-pointer hover:border-red-500/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 transition-all">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-[10px] text-red-200 font-bold uppercase tracking-wider">Pending</p>

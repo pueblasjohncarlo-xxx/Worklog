@@ -15,27 +15,47 @@
         background-color: #1a1a1a; /* Fallback */
     }
 
-    body, p, span, div, h1, h2, h3, h4, h5, h6, label, li, td, th { font-weight: 500; letter-spacing: -0.005em; }
-    .bg-white, .bg-gray-50, .bg-gray-100, .bg-slate-50 { color: #0f172a !important; }
+    /*
+      Contrast hardening (safe + non-destructive)
+      - Avoid broad `!important` overrides that break `bg-white dark:bg-*` patterns.
+      - Prefer low-specificity defaults that utilities can override.
+    */
+    body.worklog-ui-hardening :where(p, span, div, li, td, th) {
+        font-weight: 500;
+        letter-spacing: -0.005em;
+    }
+    body.worklog-ui-hardening :where(h1, h2, h3, h4, h5, h6) {
+        letter-spacing: -0.005em;
+    }
 
-    /* Inputs - Keep them readable */
-    input, textarea, select {
-        @apply bg-white/10 border-white/20 text-white backdrop-blur-sm;
-        border-width: 2px !important;
-        color: #ffffff !important;
+    /* Light surfaces should default to dark text (only when they DON'T swap to dark via `dark:bg-*`). */
+    body.worklog-ui-hardening :where(.bg-white, .bg-gray-50, .bg-gray-100, .bg-slate-50):not([class*="dark:bg-"]) {
+        color: #0f172a;
     }
-    .bg-white input, .bg-white textarea, .bg-white select,
-    .bg-gray-50 input, .bg-gray-50 textarea, .bg-gray-50 select,
-    .bg-gray-100 input, .bg-gray-100 textarea, .bg-gray-100 select {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        border-color: #e5e7eb !important;
+
+    /* Default label color when a template forgot to set it explicitly. */
+    body.worklog-ui-hardening :where(label):not([class*="text-"]) {
+        @apply text-gray-200;
     }
-    .bg-white .text-gray-400, .bg-white .text-gray-500, .bg-white .text-gray-600,
-    .bg-gray-50 .text-gray-400, .bg-gray-50 .text-gray-500, .bg-gray-50 .text-gray-600,
-    .bg-gray-100 .text-gray-400, .bg-gray-100 .text-gray-500, .bg-gray-100 .text-gray-600 {
-        color: #0f172a !important;
-        font-weight: 600 !important;
+    body.worklog-ui-hardening :where(.bg-white, .bg-gray-50, .bg-gray-100, .bg-slate-50):not([class*="dark:bg-"]) :where(label):not([class*="text-"]) {
+        @apply text-gray-700;
+    }
+
+    /* Form element defaults (only when the element itself doesn't declare bg/text utilities). */
+    body.worklog-ui-hardening :where(input, textarea, select) {
+        border-width: 2px;
+    }
+    body.worklog-ui-hardening :where(input, textarea, select):not([class*="bg-"]) {
+        @apply bg-white/10 border-white/20 backdrop-blur-sm;
+    }
+    body.worklog-ui-hardening :where(input, textarea, select):not([class*="text-"]) {
+        @apply text-white;
+    }
+    body.worklog-ui-hardening :where(.bg-white, .bg-gray-50, .bg-gray-100, .bg-slate-50):not([class*="dark:bg-"]) :where(input, textarea, select):not([class*="bg-"]) {
+        @apply bg-white border-gray-300;
+    }
+    body.worklog-ui-hardening :where(.bg-white, .bg-gray-50, .bg-gray-100, .bg-slate-50):not([class*="dark:bg-"]) :where(input, textarea, select):not([class*="text-"]) {
+        @apply text-gray-900;
     }
     
     /* Ensure legibility on dark gradient backgrounds */
@@ -92,36 +112,18 @@
     .glass-panel td {
         @apply text-gray-200 !important;
     }
-    
-    /* Label visibility improvements */
-    label {
-        @apply text-gray-200 !important;
-    }
-    .glass-panel label {
-        @apply text-white !important;
-    }
-    .dark label {
-        @apply text-gray-200 !important;
-    }
-
-    /* Form input improvements */
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    input[type="date"],
-    input[type="search"],
-    select,
-    textarea {
-        @apply bg-gray-900 text-white border-gray-700 !important;
-    }
 
     input::placeholder,
     textarea::placeholder {
-        @apply text-gray-500 !important;
-        color: #9ca3af !important;
-        font-weight: 500 !important;
-        opacity: 1 !important;
+        @apply text-gray-400;
+        color: #9ca3af;
+        font-weight: 500;
+        opacity: 1;
+    }
+
+    /* Disabled controls should remain readable (override overly-faded utility defaults). */
+    body.worklog-ui-hardening :where(button, input, textarea, select):disabled {
+        opacity: 0.65 !important;
     }
 
     [x-cloak] {

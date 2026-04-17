@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\User;
 use App\Models\WorkLog;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -121,6 +122,26 @@ class AdminController extends Controller
             'userDistribution' => $userDistribution,
             'registrationTrends' => $registrationTrends,
             'workLogTrends' => $workLogTrends,
+        ]);
+    }
+
+    public function pendingWorkLogs(Request $request): View
+    {
+        $workLogs = WorkLog::with([
+            'assignment.student',
+            'assignment.company',
+            'assignment.supervisor',
+            'assignment.coordinator',
+            'assignment.ojtAdviser',
+        ])
+            ->where('status', 'submitted')
+            ->orderByDesc('work_date')
+            ->orderByDesc('id')
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('admin.worklogs.pending', [
+            'workLogs' => $workLogs,
         ]);
     }
 }

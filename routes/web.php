@@ -287,6 +287,9 @@ Route::middleware(['auth', 'verified', 'role:ojt_adviser'])->group(function () {
 Route::middleware(['auth', 'verified', 'role:admin,staff'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
+    Route::get('/admin/worklogs/pending', [AdminController::class, 'pendingWorkLogs'])->name('admin.worklogs.pending');
+    Route::get('/admin/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('admin.worklogs.attachment');
+
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
     Route::get('/admin/users/{user}', [AdminUserController::class, 'show'])->name('admin.users.show');
 

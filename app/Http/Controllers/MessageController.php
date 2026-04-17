@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class MessageController extends Controller
@@ -202,6 +203,12 @@ class MessageController extends Controller
             return false;
         }
 
+        // If a conversation already exists, allow replying even if role rules would block
+        // starting a brand-new chat. This prevents "I received a message but can't open/reply".
+        if ($this->hasExistingConversationWith((int) $receiverId)) {
+            return true;
+        }
+
         return match ($user->role) {
             User::ROLE_STUDENT => $this->studentCanMessage($receiverUser),
             User::ROLE_COORDINATOR => $this->coordinatorCanMessage($receiverUser),
@@ -213,7 +220,21 @@ class MessageController extends Controller
 
     private function canViewConversation($userId): bool
     {
-        return $this->canMessageUser($userId);
+        return $this->canMessageUser($userId) || $this->hasExistingConversationWith((int) $userId);
+    }
+
+    private function hasExistingConversationWith(int $otherUserId): bool
+    {
+        $authId = Auth::id();
+        if (! $authId || $otherUserId <= 0 || $otherUserId === $authId) {
+            return false;
+        }
+
+        return Message::where(function ($q) use ($authId, $otherUserId) {
+            $q->where('sender_id', $authId)->where('receiver_id', $otherUserId);
+        })->orWhere(function ($q) use ($authId, $otherUserId) {
+            $q->where('sender_id', $otherUserId)->where('receiver_id', $authId);
+        })->exists();
     }
 
     private function studentCanMessage(User $user): bool
@@ -285,38 +306,83 @@ class MessageController extends Controller
         $q = trim((string) $request->input('q', ''));
         $roleFilter = $request->input('role', '');
 
+        $authUser = Auth::user();
+
         // Get all unique users that the current user has exchanged messages with
         $sentTo = Message::where('sender_id', $userId)->pluck('receiver_id');
         $receivedFrom = Message::where('receiver_id', $userId)->pluck('sender_id');
 
         $contactIds = $sentTo->merge($receivedFrom)->unique();
 
-        $contacts = User::whereIn('id', $contactIds)->get()->map(function ($contact) use ($userId) {
-            $lastMessage = Message::where(function ($q) use ($userId, $contact) {
-                $q->where('sender_id', $userId)->where('receiver_id', $contact->id);
-            })->orWhere(function ($q) use ($userId, $contact) {
-                $q->where('sender_id', $contact->id)->where('receiver_id', $userId);
-            })->latest()->first();
+        // Messenger-like behavior:
+        // - Show recent conversations by default.
+        // - If user has no conversations yet, fall back to allowed recipients so the UI isn't empty.
+        // - Allow forcing a merged list via include_contacts=1.
+        $includeContacts = (bool) $request->boolean('include_contacts');
+        $allowedRecipients = $this->getPotentialRecipients($authUser)->pluck('id');
 
-            return [
-                'id' => $contact->id,
-                'name' => $contact->name,
-                'email' => $contact->email,
-                'role' => $contact->role,
-                'avatar' => $contact->profile_photo_url,
-                'last_message' => $lastMessage ? $lastMessage->body : null,
-                'last_message_time' => $lastMessage ? $lastMessage->created_at : null,
-                'unread_count' => Message::where('sender_id', $contact->id)
-                    ->where('receiver_id', $userId)
-                    ->whereNull('read_at')
-                    ->count(),
-            ];
-        })->sortByDesc('last_message_time');
+        if ($includeContacts) {
+            $allContactIds = $contactIds->merge($allowedRecipients)->unique()->values();
+        } elseif ($contactIds->isEmpty()) {
+            $allContactIds = $allowedRecipients->unique()->values();
+        } else {
+            $allContactIds = $contactIds->unique()->values();
+        }
+
+        $contacts = User::whereIn('id', $allContactIds)
+            ->orderBy('name')
+            ->get()
+            ->filter(function (User $contact) use ($userId) {
+                // Safety: never return users you can't open/message.
+                return $contact->id !== $userId && $this->canViewConversation($contact->id);
+            })
+            ->map(function (User $contact) use ($userId) {
+                $lastMessage = Message::where(function ($q) use ($userId, $contact) {
+                    $q->where('sender_id', $userId)->where('receiver_id', $contact->id);
+                })->orWhere(function ($q) use ($userId, $contact) {
+                    $q->where('sender_id', $contact->id)->where('receiver_id', $userId);
+                })->latest('created_at')->first();
+
+                $lastMessagePreview = null;
+                $lastMessageTime = null;
+                if ($lastMessage) {
+                    $lastMessageTime = $lastMessage->created_at;
+                    $lastMessagePreview = trim((string) $lastMessage->body);
+
+                    if ($lastMessagePreview === '' && $lastMessage->attachment_name) {
+                        $lastMessagePreview = '📎 '.$lastMessage->attachment_name;
+                    }
+                }
+
+                return [
+                    'id' => $contact->id,
+                    'name' => $contact->name,
+                    'email' => $contact->email,
+                    'role' => $contact->role,
+                    'avatar' => $contact->profile_photo_url,
+                    'last_message' => $lastMessagePreview,
+                    'last_message_time' => $lastMessageTime,
+                    'unread_count' => Message::where('sender_id', $contact->id)
+                        ->where('receiver_id', $userId)
+                        ->whereNull('read_at')
+                        ->count(),
+                ];
+            })
+            ->sort(function ($a, $b) {
+                $aTime = $a['last_message_time'] ? strtotime((string) $a['last_message_time']) : 0;
+                $bTime = $b['last_message_time'] ? strtotime((string) $b['last_message_time']) : 0;
+                return $bTime <=> $aTime;
+            })
+            ->values();
 
         // Apply filters
         if ($q !== '') {
             $contacts = $contacts->filter(function ($contact) use ($q) {
-                return stripos($contact['name'], $q) !== false || stripos($contact['email'], $q) !== false;
+                $nameMatch = stripos($contact['name'], $q) !== false;
+                $emailMatch = stripos($contact['email'], $q) !== false;
+                $lastMatch = $contact['last_message'] ? stripos((string) $contact['last_message'], $q) !== false : false;
+
+                return $nameMatch || $emailMatch || $lastMatch;
             });
         }
 
@@ -339,6 +405,8 @@ class MessageController extends Controller
     {
         $authId = Auth::id();
 
+        $afterId = (int) $request->input('after_id', 0);
+
         if (!$this->canViewConversation($user->id)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -349,14 +417,26 @@ class MessageController extends Controller
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        $messages = Message::where(function ($q) use ($authId, $user) {
+        $baseQuery = Message::where(function ($q) use ($authId, $user) {
             $q->where('sender_id', $authId)->where('receiver_id', $user->id);
         })->orWhere(function ($q) use ($authId, $user) {
             $q->where('sender_id', $user->id)->where('receiver_id', $authId);
-        })->with(['sender', 'receiver'])
+        });
+
+        if ($afterId > 0) {
+            $baseQuery->where('id', '>', $afterId);
+        }
+
+        $messages = $baseQuery
+            ->with(['sender', 'receiver'])
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($msg) use ($authId) {
+                $attachmentUrl = null;
+                if ($msg->attachment_path) {
+                    $attachmentUrl = Storage::disk('public')->url($msg->attachment_path);
+                }
+
                 return [
                     'id' => $msg->id,
                     'sender_id' => $msg->sender_id,
@@ -368,6 +448,7 @@ class MessageController extends Controller
                     'attachment_path' => $msg->attachment_path,
                     'attachment_type' => $msg->attachment_type,
                     'attachment_name' => $msg->attachment_name,
+                    'attachment_url' => $attachmentUrl,
                     'is_own' => $msg->sender_id === $authId,
                     'sender_name' => $msg->sender->name,
                 ];
@@ -383,6 +464,7 @@ class MessageController extends Controller
                 'avatar' => $user->profile_photo_url,
             ],
             'messages' => $messages,
+            'server_time' => now()->toIso8601String(),
         ]);
     }
 
@@ -447,6 +529,7 @@ class MessageController extends Controller
                 'attachment_path' => $message->attachment_path,
                 'attachment_type' => $message->attachment_type,
                 'attachment_name' => $message->attachment_name,
+                'attachment_url' => $message->attachment_path ? Storage::disk('public')->url($message->attachment_path) : null,
                 'is_own' => true,
                 'sender_name' => Auth::user()->name,
             ],
@@ -510,33 +593,23 @@ class MessageController extends Controller
             $userId = Auth::id();
             $search = $request->input('search', '');
 
-            // Debug logging
-            \Log::info('apiAvailableUsers called', [
-                'user_id' => $userId,
-                'search' => $search,
-            ]);
+            $authUser = Auth::user();
 
-            // Fetch all users except the currently logged-in user
-            $query = User::where('id', '!=', $userId)->orderBy('name');
+            // Return users the current user is actually allowed to message.
+            // This avoids "pick user -> 403" which feels broken.
+            $allowedUsers = $this->getPotentialRecipients($authUser)
+                ->filter(fn (User $u) => $u->id !== $userId && $this->canMessageUser($u->id));
 
-            // Apply search filter if provided
             if (!empty($search)) {
-                $searchTerm = '%' . $search . '%';
-                $query->where(function ($q) use ($searchTerm) {
-                    $q->where('name', 'LIKE', $searchTerm)
-                      ->orWhere('email', 'LIKE', $searchTerm);
+                $needle = mb_strtolower(trim((string) $search));
+                $allowedUsers = $allowedUsers->filter(function (User $u) use ($needle) {
+                    return str_contains(mb_strtolower((string) $u->name), $needle)
+                        || str_contains(mb_strtolower((string) $u->email), $needle);
                 });
             }
 
-            $allUsers = $query->get();
-
-            \Log::info('apiAvailableUsers users found', [
-                'count' => $allUsers->count(),
-                'search' => $search,
-            ]);
-
             // Format response
-            $users = $allUsers->map(function ($u) {
+            $users = $allowedUsers->values()->map(function ($u) {
                 return [
                     'id' => $u->id,
                     'name' => $u->name,
@@ -552,10 +625,8 @@ class MessageController extends Controller
                 'total' => $users->count(),
             ]);
         } catch (\Exception $e) {
-            // Log the error for debugging
             \Log::error('Error in apiAvailableUsers', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
             
             return response()->json([
