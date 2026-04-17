@@ -213,21 +213,39 @@ class WorkLogController extends Controller
             abort(403);
         }
 
-        // Force submission to supervisor
-        $submittedTo = 'supervisor';
+        $isAccomplishmentReport = $workLog->time_in === null
+            && $workLog->time_out === null
+            && in_array($workLog->type, ['daily', 'weekly', 'monthly'], true)
+            && ! empty($workLog->attachment_path);
+
+        // Attendance/HRS logs go to Supervisor; accomplishment reports go to Coordinator/OJT Adviser.
+        $submittedTo = $isAccomplishmentReport ? 'coordinator' : 'supervisor';
 
         $workLog->update([
             'status' => 'submitted',
             'submitted_to' => $submittedTo,
         ]);
 
-        $assignment->loadMissing(['supervisor']);
-        if ($assignment->supervisor) {
-            $assignment->supervisor->notify(new WorkLogSubmittedNotification($workLog));
+        if ($submittedTo === 'supervisor') {
+            $assignment->loadMissing(['supervisor']);
+            if ($assignment->supervisor) {
+                $assignment->supervisor->notify(new WorkLogSubmittedNotification($workLog));
+            }
+
+            return redirect()->route('student.dashboard')
+                ->with('status', 'Worklog submitted to Supervisor for approval.');
+        }
+
+        $assignment->loadMissing(['coordinator', 'ojtAdviser']);
+        if ($assignment->coordinator) {
+            $assignment->coordinator->notify(new WorkLogSubmittedNotification($workLog));
+        }
+        if ($assignment->ojtAdviser) {
+            $assignment->ojtAdviser->notify(new WorkLogSubmittedNotification($workLog));
         }
 
         return redirect()->route('student.dashboard')
-            ->with('status', 'Worklog submitted to Supervisor for approval.');
+            ->with('status', 'Accomplishment report submitted to Coordinator/OJT Adviser for review.');
     }
 
     public function downloadAccomplishmentTemplate(Request $request)

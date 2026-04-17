@@ -193,6 +193,7 @@ class SupervisorController extends Controller
         $workLogsQuery = WorkLog::with(['assignment.student', 'assignment.company'])
             ->whereIn('assignment_id', $assignments)
             ->whereNull('time_in')
+            ->where('submitted_to', 'supervisor')
             ->orderByDesc('work_date');
 
         if ($type) {
@@ -322,6 +323,10 @@ class SupervisorController extends Controller
 
     private function authorizeSupervisor($model)
     {
+        if ($model instanceof WorkLog && ($model->submitted_to ?? null) !== 'supervisor') {
+            abort(403, 'Unauthorized action.');
+        }
+
         if ($model->assignment->supervisor_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }

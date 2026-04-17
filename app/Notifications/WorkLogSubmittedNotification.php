@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\WorkLog;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -25,11 +26,19 @@ class WorkLogSubmittedNotification extends Notification
         $studentName = $this->workLog->assignment?->student?->name ?? 'Student';
         $workDate = $this->workLog->work_date ? $this->workLog->work_date->format('M d, Y') : 'a date';
 
+        $url = route('supervisor.accomplishment-reports', ['status' => 'submitted']);
+        $role = $notifiable->role ?? null;
+        if ($role === User::ROLE_COORDINATOR) {
+            $url = route('coordinator.accomplishment-reports');
+        } elseif ($role === User::ROLE_OJT_ADVISER) {
+            $url = route('ojt_adviser.accomplishment-reports');
+        }
+
         return [
             'type' => 'worklog_submitted',
             'title' => 'Work log submitted',
             'content' => $studentName." submitted a work log for {$workDate}.",
-            'url' => route('supervisor.accomplishment-reports', ['status' => 'submitted']),
+            'url' => $url,
             'worklog_id' => $this->workLog->id,
             'student_id' => $this->workLog->assignment?->student_id,
         ];
