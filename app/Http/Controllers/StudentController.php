@@ -249,17 +249,28 @@ class StudentController extends Controller
             return redirect()->back()->with('error', 'No active session found to clock out.');
         }
 
+        $timeOutStr = now()->format('H:i:s');
+
         $log->update([
-            'time_out' => now()->toTimeString(),
-            'hours' => now()->diffInHours($log->time_in), // Simple calculation
+            'time_out' => $timeOutStr,
             'status' => 'submitted', // Auto-submit for approval
         ]);
 
-        // Recalculate precise hours
-        $start = Carbon::parse($log->work_date->format('Y-m-d').' '.$log->time_in);
-        $end = now();
-        $hours = $start->diffInMinutes($end) / 60;
+        // Recalculate precise hours (avoid concatenating a date with a Carbon datetime string).
+        $workDateStr = $log->work_date?->toDateString() ?? now()->toDateString();
+        $timeInStr = $log->time_in instanceof Carbon
+            ? $log->time_in->format('H:i:s')
+            : (string) $log->time_in;
 
+        $start = Carbon::createFromFormat('Y-m-d H:i:s', $workDateStr.' '.$timeInStr);
+        $end = Carbon::createFromFormat('Y-m-d H:i:s', $workDateStr.' '.$timeOutStr);
+
+        // If time out is earlier than time in, assume it's next day (night shift)
+        if ($end->lessThan($start)) {
+            $end->addDay();
+        }
+
+        $hours = $start->diffInMinutes($end) / 60;
         $log->update(['hours' => round($hours, 2)]);
 
         return redirect()->back()->with('status', 'Successfully clocked out.');
