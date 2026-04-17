@@ -35,25 +35,25 @@
 
     <div class="space-y-6" x-data='phAddress(@json($companyFormInitial))'>
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+            <a href="{{ route('coordinator.companies.index', ['focus' => 'all']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Companies</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $totalCompanies }}</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+            </a>
+            <a href="{{ route('coordinator.companies.index', ['focus' => 'active']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Active Partners</p>
                 <p class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">{{ $activeCompanies }}</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+            </a>
+            <a href="{{ route('coordinator.companies.index', ['focus' => 'with-students']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">With Assigned Students</p>
                 <p class="mt-2 text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ $companiesWithStudents }}</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+            </a>
+            <a href="{{ route('coordinator.companies.index', ['focus' => 'incomplete']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Incomplete Profiles</p>
                 <p class="mt-2 text-3xl font-bold text-amber-600 dark:text-amber-400">{{ $incompleteCompanies }}</p>
-            </div>
+            </a>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <div id="partnerDirectory" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
             <div class="p-6 lg:p-8 text-gray-900 dark:text-gray-100 space-y-5">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
@@ -323,6 +323,7 @@
                                         data-update-url="{{ route('coordinator.companies.update', $company) }}"
                                         data-industry="{{ strtolower((string) $company->industry) }}"
                                         data-students="{{ $studentCount }}"
+                                        data-incomplete="{{ $hasIncompleteProfile ? 1 : 0 }}"
                                         data-search="{{ $searchBlob }}"
                                         x-data="{ editing: false }"
                                     >
@@ -396,16 +397,16 @@
                                             </form>
 
                                             <div class="flex items-center gap-2">
-                                                <button type="button" class="px-2 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors" onclick="toggleCompanyDetails({{ $company->id }})">View</button>
+                                                <button type="button" class="px-2 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:bg-slate-900/60 transition-colors" onclick="toggleCompanyDetails({{ $company->id }})">View</button>
 
-                                                <button type="button" class="px-2 py-1 text-xs font-semibold rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors" onclick="openCompanyEditModal({{ $company->id }})">Edit</button>
-                                                <button type="button" x-show="editing" @click="$el.closest('tr').querySelector('form[id^=\'company-update-\']').submit()" class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700 hover:bg-green-200 transition-colors">Save</button>
-                                                <button type="button" x-show="editing" @click="editing = false" class="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Cancel</button>
+                                                <button type="button" class="px-2 py-1 text-xs font-semibold rounded bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-200 dark:hover:bg-indigo-900/50 transition-colors" onclick="openCompanyEditModal({{ $company->id }})">Edit</button>
+                                                <button type="button" x-show="editing" @click="$el.closest('tr').querySelector('form[id^=\'company-update-\']').submit()" class="px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-200 dark:hover:bg-green-900/50 transition-colors">Save</button>
+                                                <button type="button" x-show="editing" @click="editing = false" class="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-900/40 dark:text-gray-200 dark:hover:bg-gray-900/60 transition-colors">Cancel</button>
 
                                                 <form method="POST" action="{{ route('coordinator.companies.destroy', $company) }}" onsubmit="return confirm('Delete this company? This is blocked if linked to deployments or supervisors.');" class="inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700 hover:bg-red-200 transition-colors">Delete</button>
+                                                    <button type="submit" class="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-200 dark:hover:bg-red-900/50 transition-colors">Delete</button>
                                                 </form>
                                             </div>
                                         </td>
@@ -1043,6 +1044,9 @@
                 return;
             }
 
+            const url = new URL(window.location.href);
+            const focus = String(url.searchParams.get('focus') || '').toLowerCase();
+
             const search = (document.getElementById('companySearch')?.value || '').toLowerCase().trim();
             const industry = (document.getElementById('industryFilter')?.value || '').toLowerCase();
             const studentsFilter = document.getElementById('studentsFilter')?.value || 'all';
@@ -1086,6 +1090,13 @@
                 const rowSearch = row.dataset.search || '';
                 const rowIndustry = row.dataset.industry || '';
                 const rowStudents = Number(row.dataset.students || 0);
+                const rowIncomplete = Number(row.dataset.incomplete || 0);
+
+                const matchesFocus = focus === ''
+                    || focus === 'all'
+                    || (focus === 'active' && rowStudents > 0)
+                    || (focus === 'with-students' && rowStudents > 0)
+                    || (focus === 'incomplete' && rowIncomplete === 1);
 
                 const matchesSearch = search === '' || rowSearch.includes(search);
                 const matchesIndustry = industry === '' || rowIndustry === industry;
@@ -1093,7 +1104,7 @@
                     || (studentsFilter === 'with' && rowStudents > 0)
                     || (studentsFilter === 'none' && rowStudents === 0);
 
-                const show = matchesSearch && matchesIndustry && matchesStudents;
+                const show = matchesFocus && matchesSearch && matchesIndustry && matchesStudents;
                 row.style.display = show ? '' : 'none';
 
                 if (!show && details) {
@@ -1113,6 +1124,16 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            const url = new URL(window.location.href);
+            const focus = String(url.searchParams.get('focus') || '').toLowerCase();
+
+            if (focus === 'active' || focus === 'with-students') {
+                const students = document.getElementById('studentsFilter');
+                if (students) {
+                    students.value = 'with';
+                }
+            }
+
             const controls = ['companySearch', 'industryFilter', 'studentsFilter', 'sortBy'];
             controls.forEach((id) => {
                 const element = document.getElementById(id);

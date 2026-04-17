@@ -81,6 +81,24 @@ class DashboardController extends Controller
 
             $activeOJTs = $activeAssignments->count();
 
+            // Pending accomplishment reports = submitted (not yet reviewed) attachment-based ARs.
+            // This matches the latest AR workflow (template upload), not the older “missing submissions” metric.
+            $pendingAccomplishmentReports = WorkLog::query()
+                ->where('status', 'submitted')
+                ->where(function ($query) {
+                    $query->where('submitted_to', 'coordinator')
+                        ->orWhereNull('submitted_to');
+                })
+                ->whereNull('time_in')
+                ->whereNull('time_out')
+                ->whereIn('type', $reportTypes)
+                ->whereNotNull('attachment_path')
+                ->whereHas('assignment', function ($query) use ($approvedStudentIds) {
+                    $query->where('status', 'active')
+                        ->whereIn('student_id', $approvedStudentIds->all());
+                })
+                ->count();
+
             $sectionProgress = $activeAssignments
                 ->groupBy(function ($assignment) {
                     return User::normalizeStudentSection($assignment->student?->section, $assignment->student?->department)
@@ -140,10 +158,6 @@ class DashboardController extends Controller
                         && $log->work_date
                         && Carbon::parse($log->work_date)->greaterThanOrEqualTo(Carbon::now()->subDays(7));
                 });
-
-                if ($missingTypes > 0) {
-                    $pendingAccomplishmentReports++;
-                }
 
                 $studentStatus = 'In Progress';
                 if ($progress >= 100) {

@@ -419,8 +419,6 @@
                 </template>
             </div>
         </template>
-    </div>
-
     <!-- Details Modal -->
     <div x-show="showDetailsModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
         <!-- Backdrop -->
@@ -544,5 +542,7 @@
                 </div>
             </template>
         </div>
+    </div>
+
     </div>
 </x-coordinator-layout>
