@@ -4,7 +4,20 @@
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-5">
             @php
-                $pendingCount = $leaves->getCollection()->whereIn('status', ['submitted', 'pending'])->count();
+                $usesStaged = $usesStagedLeaveApproval ?? false;
+                $pendingCount = $leaves->getCollection()
+                    ->filter(function ($leave) use ($usesStaged) {
+                        if (! in_array($leave->status, ['submitted', 'pending'], true)) {
+                            return false;
+                        }
+
+                        if ($usesStaged && ($leave->supervisor_decision ?? null) === 'approved') {
+                            return false;
+                        }
+
+                        return true;
+                    })
+                    ->count();
             @endphp
 
             @if($pendingCount > 0)
@@ -75,11 +88,19 @@
                         </thead>
                         <tbody>
                             @forelse($leaves as $leave)
+                                @php
+                                    $usesStaged = $usesStagedLeaveApproval ?? false;
+                                    $supervisorDecision = $leave->supervisor_decision ?? null;
+                                    $isForwardedToAdviser = $usesStaged && ($leave->status === 'pending' && $supervisorDecision === 'approved');
+                                    $canSupervisorReview = in_array($leave->status, ['submitted', 'pending'], true) && (! $usesStaged || ! $isForwardedToAdviser);
+                                @endphp
                                 <tr class="border-b align-top {{ in_array($leave->status, ['submitted', 'pending']) ? 'bg-orange-50 dark:bg-orange-900/10 hover:bg-orange-100 dark:hover:bg-orange-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                                     <td class="px-3 py-2 font-semibold text-gray-900 dark:text-gray-100">
                                         <div class="flex items-center gap-2">
                                             {{ $leave->assignment?->student?->name ?? 'N/A' }}
-                                            @if(in_array($leave->status, ['submitted', 'pending'], true))
+                                            @if($isForwardedToAdviser)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-sky-600 text-white">FORWARDED</span>
+                                            @elseif(in_array($leave->status, ['submitted', 'pending'], true))
                                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-orange-500 text-white">NEW</span>
                                             @endif
                                         </div>
@@ -99,8 +120,20 @@
                                                 'cancelled' => 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
                                             ];
                                         @endphp
-                                        <span class="px-2 py-1 rounded-full text-xs font-bold {{ $statusClasses[$leave->status] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">{{ ucfirst($leave->status) }}</span>
-                                        @if($leave->reviewer_remarks)
+                                        @php
+                                            $statusLabel = ucfirst($leave->status);
+                                            if ($isForwardedToAdviser) {
+                                                $statusLabel = 'Pending (Awaiting Adviser)';
+                                            }
+                                        @endphp
+                                        <span class="px-2 py-1 rounded-full text-xs font-bold {{ $statusClasses[$leave->status] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">{{ $statusLabel }}</span>
+
+                                        @if($leave->supervisor_reviewer_remarks)
+                                            <div class="mt-2 rounded-md bg-gray-50 dark:bg-gray-700/30 p-2">
+                                                <div class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">Supervisor Remarks</div>
+                                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 break-words">{{ $leave->supervisor_reviewer_remarks }}</div>
+                                            </div>
+                                        @elseif($leave->reviewer_remarks)
                                             <div class="mt-2 rounded-md bg-gray-50 dark:bg-gray-700/30 p-2">
                                                 <div class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">Remarks</div>
                                                 <div class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 break-words">{{ $leave->reviewer_remarks }}</div>
@@ -122,7 +155,7 @@
                                                 @endif
                                             </div>
 
-                                            @if(in_array($leave->status, ['submitted', 'pending'], true))
+                                            @if($canSupervisorReview)
                                                 <details class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/20 p-2">
                                                     <summary class="cursor-pointer select-none text-xs font-bold text-gray-800 dark:text-gray-200">Review (approve / reject)</summary>
                                                     <div class="mt-2 space-y-2">
@@ -139,6 +172,10 @@
                                                         </form>
                                                     </div>
                                                 </details>
+                                            @elseif($isForwardedToAdviser)
+                                                <div class="rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs font-semibold text-sky-900">
+                                                    Forwarded to OJT adviser for final review.
+                                                </div>
                                             @endif
                                         </div>
                                     </td>

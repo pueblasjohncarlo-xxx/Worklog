@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -381,6 +382,8 @@ class OjtAdviserController extends Controller
             ->where('status', 'active')
             ->pluck('id');
 
+        $usesStagedLeaveApproval = Schema::hasColumn('leaves', 'supervisor_decision');
+
         Leave::whereIn('assignment_id', $assignments)
             ->where('status', Leave::STATUS_SUBMITTED)
             ->update(['status' => Leave::STATUS_PENDING]);
@@ -412,7 +415,7 @@ class OjtAdviserController extends Controller
 
         $leaves = $query->paginate(30)->withQueryString();
 
-        return view('ojt_adviser.leaves.index', compact('leaves'));
+        return view('ojt_adviser.leaves.index', compact('leaves', 'usesStagedLeaveApproval'));
     }
 
     public function approveLeave(Request $request, Leave $leave)
@@ -425,6 +428,12 @@ class OjtAdviserController extends Controller
 
         if (! in_array($leave->status, [Leave::STATUS_SUBMITTED, Leave::STATUS_PENDING], true)) {
             return back()->withErrors(['leave' => 'Only submitted/pending leave requests can be approved.']);
+        }
+
+        if (Schema::hasColumn('leaves', 'supervisor_decision')) {
+            if (($leave->supervisor_decision ?? null) !== 'approved') {
+                return back()->withErrors(['leave' => 'Supervisor approval is required before adviser review.']);
+            }
         }
 
         $leave->update([
@@ -457,6 +466,12 @@ class OjtAdviserController extends Controller
 
         if (! in_array($leave->status, [Leave::STATUS_SUBMITTED, Leave::STATUS_PENDING], true)) {
             return back()->withErrors(['leave' => 'Only submitted/pending leave requests can be rejected.']);
+        }
+
+        if (Schema::hasColumn('leaves', 'supervisor_decision')) {
+            if (($leave->supervisor_decision ?? null) !== 'approved') {
+                return back()->withErrors(['leave' => 'Supervisor approval is required before adviser review.']);
+            }
         }
 
         $leave->update([

@@ -172,6 +172,7 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
 });
 
 use App\Http\Controllers\Supervisor\SupervisorEvaluationController;
+use App\Http\Controllers\Supervisor\SupervisorConcernController;
 
 Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
     Route::get('/supervisor/dashboard', [SupervisorController::class, 'index'])->name('supervisor.dashboard');
@@ -189,12 +190,14 @@ Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
     Route::get('/supervisor/leaves/{leave}/print', [LeaveController::class, 'print'])->name('supervisor.leaves.print');
 
     // Task Assignment
+    Route::get('/supervisor/tasks', [SupervisorTaskController::class, 'index'])->name('supervisor.tasks.index');
     Route::get('/supervisor/tasks/create', [SupervisorTaskController::class, 'create'])->name('supervisor.tasks.create');
     Route::post('/supervisor/tasks', [SupervisorTaskController::class, 'store'])->name('supervisor.tasks.store');
     Route::post('/supervisor/tasks/{task}/approve', [SupervisorTaskController::class, 'approve'])->name('supervisor.tasks.approve');
     Route::post('/supervisor/tasks/{task}/reject', [SupervisorTaskController::class, 'reject'])->name('supervisor.tasks.reject');
     Route::post('/supervisor/tasks/{task}/unapprove', [SupervisorTaskController::class, 'unapprove'])->name('supervisor.tasks.unapprove');
 
+    Route::get('/supervisor/team/{assignment}', [\App\Http\Controllers\Supervisor\SupervisorTeamController::class, 'show'])->name('supervisor.team.show');
     // Performance Reports (Hours/Tasks)
     Route::get('/supervisor/reports/create', [SupervisorReportController::class, 'create'])->name('supervisor.reports.create');
     Route::post('/supervisor/reports', [SupervisorReportController::class, 'store'])->name('supervisor.reports.store');
@@ -210,6 +213,11 @@ Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
 
     // Team Overview
     Route::get('/supervisor/team', [SupervisorTeamController::class, 'index'])->name('supervisor.team.index');
+
+    // Concerns / Incidents
+    Route::get('/supervisor/concerns', [SupervisorConcernController::class, 'index'])->name('supervisor.concerns.index');
+    Route::get('/supervisor/concerns/create', [SupervisorConcernController::class, 'create'])->name('supervisor.concerns.create');
+    Route::post('/supervisor/concerns', [SupervisorConcernController::class, 'store'])->name('supervisor.concerns.store');
 
     // Supervisor Announcements
     Route::get('/supervisor/announcements', [SupervisorAnnouncementController::class, 'index'])->name('supervisor.announcements.index');

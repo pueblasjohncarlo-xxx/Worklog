@@ -23,6 +23,10 @@ class Leave extends Model
         'reason',
         'attachment_path',
         'status',
+        'supervisor_decision',
+        'supervisor_reviewer_id',
+        'supervisor_reviewed_at',
+        'supervisor_reviewer_remarks',
         'submitted_at',
         'cancelled_at',
         'cancellation_reason',
@@ -48,6 +52,7 @@ class Leave extends Model
         'submitted_at' => 'datetime',
         'cancelled_at' => 'datetime',
         'reviewed_at' => 'datetime',
+        'supervisor_reviewed_at' => 'datetime',
     ];
 
     public function assignment(): BelongsTo
@@ -58,5 +63,10 @@ class Leave extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewer_id');
+    }
+
+    public function supervisorReviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'supervisor_reviewer_id');
     }
 }

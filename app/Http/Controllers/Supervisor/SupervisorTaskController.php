@@ -14,6 +14,22 @@ use Illuminate\View\View;
 
 class SupervisorTaskController extends Controller
 {
+    public function index(): View
+    {
+        $supervisorId = Auth::id();
+
+        $assignmentIds = Assignment::where('supervisor_id', $supervisorId)
+            ->where('status', 'active')
+            ->pluck('id');
+
+        $tasks = Task::with(['assignment.student', 'assignment.company'])
+            ->whereIn('assignment_id', $assignmentIds)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('supervisor.tasks.index', compact('tasks'));
+    }
+
     public function create(): View
     {
         $supervisorId = Auth::id();

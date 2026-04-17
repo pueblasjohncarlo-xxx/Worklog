@@ -8,7 +8,20 @@
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
             @php
-                $pendingCount = $leaves->getCollection()->whereIn('status', ['submitted', 'pending'])->count();
+                $usesStaged = $usesStagedLeaveApproval ?? false;
+                $pendingCount = $leaves->getCollection()
+                    ->filter(function ($leave) use ($usesStaged) {
+                        if (! in_array($leave->status, ['submitted', 'pending'], true)) {
+                            return false;
+                        }
+
+                        if ($usesStaged) {
+                            return ($leave->supervisor_decision ?? null) === 'approved';
+                        }
+
+                        return true;
+                    })
+                    ->count();
             @endphp
 
             @if($pendingCount > 0)
@@ -71,6 +84,17 @@
                         </thead>
                         <tbody>
                             @forelse($leaves as $leave)
+                                @php
+                                    $usesStaged = $usesStagedLeaveApproval ?? false;
+                                    $supervisorDecision = $leave->supervisor_decision ?? null;
+                                    $isAwaitingSupervisor = $usesStaged && in_array($leave->status, ['submitted', 'pending'], true) && $supervisorDecision !== 'approved';
+                                    $canAdviserReview = in_array($leave->status, ['submitted', 'pending'], true) && (! $usesStaged || $supervisorDecision === 'approved');
+
+                                    $statusLabel = ucfirst($leave->status);
+                                    if ($usesStaged && $leave->status === 'pending' && $supervisorDecision === 'approved') {
+                                        $statusLabel = 'Pending (Supervisor Approved)';
+                                    }
+                                @endphp
                                 <tr class="border-b align-top {{ in_array($leave->status, ['submitted', 'pending']) ? 'bg-orange-50 dark:bg-orange-900/10 hover:bg-orange-100 dark:hover:bg-orange-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800' }}">
                                     <td class="px-3 py-2 font-semibold text-gray-900 dark:text-gray-100">{{ $leave->assignment?->student?->name ?? 'N/A' }}</td>
                                     <td class="px-3 py-2 font-semibold text-gray-900 dark:text-gray-100">{{ $leave->type }}</td>
@@ -78,14 +102,26 @@
                                     <td class="px-3 py-2 font-bold text-gray-900 dark:text-gray-100">{{ $leave->number_of_days ?? '-' }}</td>
                                     <td class="px-3 py-2 max-w-[220px] truncate text-gray-700 dark:text-gray-300" title="{{ $leave->reason }}">{{ $leave->reason }}</td>
                                     <td class="px-3 py-2">
-                                        <span class="px-2 py-1 rounded-full text-xs font-bold {{ $leave->status === 'approved' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : ($leave->status === 'rejected' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300') }}">{{ ucfirst($leave->status) }}</span>
+                                        <span class="px-2 py-1 rounded-full text-xs font-bold {{ $leave->status === 'approved' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : ($leave->status === 'rejected' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300') }}">{{ $statusLabel }}</span>
+                                        @if ($leave->supervisor_reviewer_remarks)
+                                            <div class="mt-2 rounded-md bg-gray-50 dark:bg-gray-700/30 p-2">
+                                                <div class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">Supervisor Remarks</div>
+                                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 break-words">{{ $leave->supervisor_reviewer_remarks }}</div>
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{{ optional($leave->submitted_at)->format('M d, Y h:i A') ?? '-' }}</td>
                                     <td class="px-3 py-2">
                                         <div class="flex flex-col gap-2 min-w-[260px]">
                                             <a href="{{ route('ojt_adviser.leaves.print', $leave->id) }}" target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-center text-sm font-semibold shadow-sm transition-colors">View Full Details</a>
 
-                                            @if(in_array($leave->status, ['submitted', 'pending'], true))
+                                            @if($isAwaitingSupervisor)
+                                                <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+                                                    Awaiting supervisor approval before adviser review.
+                                                </div>
+                                            @endif
+
+                                            @if($canAdviserReview)
                                                 <form method="POST" action="{{ route('ojt_adviser.leaves.approve', $leave->id) }}" onsubmit="return confirm('Approve this leave request?');">
                                                     @csrf
                                                     <textarea name="reviewer_remarks" rows="2" placeholder="Optional approval remarks..." class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-gray-900 text-xs p-2 shadow-sm"></textarea>

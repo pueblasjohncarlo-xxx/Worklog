@@ -6,6 +6,7 @@ use App\Models\Assignment;
 use App\Models\Leave;
 use App\Models\Task;
 use App\Models\WorkLog;
+use App\Notifications\LeaveNeedsAdviserReviewNotification;
 use App\Notifications\LeaveStatusUpdatedNotification;
 use App\Notifications\WorkLogReviewedNotification;
 use Carbon\Carbon;
@@ -13,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class SupervisorController extends Controller
@@ -67,9 +69,15 @@ class SupervisorController extends Controller
             ->get();
 
         // 3. Pending Leave Requests
-        $pendingLeaves = Leave::with(['assignment.student'])
+        $pendingLeavesQuery = Leave::with(['assignment.student'])
             ->whereIn('assignment_id', $assignmentIds)
-            ->where('status', 'pending')
+            ->where('status', 'pending');
+
+        if (Schema::hasColumn('leaves', 'supervisor_decision')) {
+            $pendingLeavesQuery->whereNull('supervisor_decision');
+        }
+
+        $pendingLeaves = $pendingLeavesQuery
             ->orderBy('start_date')
             ->get();
 
@@ -233,6 +241,8 @@ class SupervisorController extends Controller
             ->where('status', 'active')
             ->pluck('id');
 
+        $usesStagedLeaveApproval = Schema::hasColumn('leaves', 'supervisor_decision');
+
         Leave::whereIn('assignment_id', $assignments)
             ->where('status', Leave::STATUS_SUBMITTED)
             ->update(['status' => Leave::STATUS_PENDING]);
@@ -264,7 +274,7 @@ class SupervisorController extends Controller
 
         $leaves = $query->paginate(30)->withQueryString();
 
-        return view('supervisor.leaves.index', compact('leaves'));
+        return view('supervisor.leaves.index', compact('leaves', 'usesStagedLeaveApproval'));
     }
 
     public function approveLeave(Request $request, Leave $leave): RedirectResponse
@@ -279,15 +289,47 @@ class SupervisorController extends Controller
             return back()->withErrors(['leave' => 'Only submitted/pending leave requests can be approved.']);
         }
 
-        $leave->update([
-            'status' => 'approved',
-            'reviewer_remarks' => $validated['reviewer_remarks'] ?? null,
-            'reviewer_id' => Auth::id(),
-            'reviewed_at' => now(),
-        ]);
+        if (! Schema::hasColumn('leaves', 'supervisor_decision')) {
+            $leave->update([
+                'status' => Leave::STATUS_APPROVED,
+                'reviewer_remarks' => $validated['reviewer_remarks'] ?? null,
+                'reviewer_id' => Auth::id(),
+                'reviewed_at' => now(),
+            ]);
 
-        if ($leave->assignment?->student) {
-            $leave->assignment->student->notify(new LeaveStatusUpdatedNotification($leave->fresh()));
+            if ($leave->assignment?->student) {
+                $leave->assignment->student->notify(new LeaveStatusUpdatedNotification($leave->fresh()));
+            }
+
+            Log::info('Supervisor approved leave (legacy)', [
+                'leave_id' => $leave->id,
+                'supervisor_id' => Auth::id(),
+                'status' => $leave->status,
+            ]);
+
+            return redirect()->back()->with('status', 'Leave request approved.');
+        }
+
+        $update = [
+            'status' => Leave::STATUS_PENDING,
+        ];
+
+        $update['supervisor_decision'] = 'approved';
+        if (Schema::hasColumn('leaves', 'supervisor_reviewer_remarks')) {
+            $update['supervisor_reviewer_remarks'] = $validated['reviewer_remarks'] ?? null;
+        }
+        if (Schema::hasColumn('leaves', 'supervisor_reviewer_id')) {
+            $update['supervisor_reviewer_id'] = Auth::id();
+        }
+        if (Schema::hasColumn('leaves', 'supervisor_reviewed_at')) {
+            $update['supervisor_reviewed_at'] = now();
+        }
+
+        $leave->update($update);
+
+        $leave->loadMissing(['assignment.ojtAdviser', 'assignment.student']);
+        if ($leave->assignment?->ojtAdviser) {
+            $leave->assignment->ojtAdviser->notify(new LeaveNeedsAdviserReviewNotification($leave->fresh()));
         }
 
         Log::info('Supervisor approved leave', [
@@ -296,7 +338,7 @@ class SupervisorController extends Controller
             'status' => $leave->status,
         ]);
 
-        return redirect()->back()->with('status', 'Leave request approved.');
+        return redirect()->back()->with('status', 'Supervisor approval recorded. Forwarded to OJT adviser for final review.');
     }
 
     public function rejectLeave(Request $request, Leave $leave): RedirectResponse
@@ -311,12 +353,27 @@ class SupervisorController extends Controller
             return back()->withErrors(['leave' => 'Only submitted/pending leave requests can be rejected.']);
         }
 
-        $leave->update([
+        $update = [
             'status' => 'rejected',
             'reviewer_remarks' => $validated['reviewer_remarks'],
             'reviewer_id' => Auth::id(),
             'reviewed_at' => now(),
-        ]);
+        ];
+
+        if (Schema::hasColumn('leaves', 'supervisor_decision')) {
+            $update['supervisor_decision'] = 'rejected';
+        }
+        if (Schema::hasColumn('leaves', 'supervisor_reviewer_remarks')) {
+            $update['supervisor_reviewer_remarks'] = $validated['reviewer_remarks'];
+        }
+        if (Schema::hasColumn('leaves', 'supervisor_reviewer_id')) {
+            $update['supervisor_reviewer_id'] = Auth::id();
+        }
+        if (Schema::hasColumn('leaves', 'supervisor_reviewed_at')) {
+            $update['supervisor_reviewed_at'] = now();
+        }
+
+        $leave->update($update);
 
         if ($leave->assignment?->student) {
             $leave->assignment->student->notify(new LeaveStatusUpdatedNotification($leave->fresh()));

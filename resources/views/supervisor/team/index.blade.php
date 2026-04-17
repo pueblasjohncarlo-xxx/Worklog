@@ -95,7 +95,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs uppercase">View Profile</a>
+                                    <a href="{{ route('supervisor.team.show', $member['assignment_id']) }}" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs uppercase">View Profile</a>
                                 </td>
                             </tr>
                         @endforeach

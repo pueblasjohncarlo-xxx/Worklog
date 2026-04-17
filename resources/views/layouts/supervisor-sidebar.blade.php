@@ -35,7 +35,18 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 @php
-                    $pendingLeavesCount = \App\Models\Leave::whereIn('assignment_id', \App\Models\Assignment::where('supervisor_id', Auth::id())->where('status', 'active')->pluck('id'))->whereIn('status', ['submitted', 'pending'])->count();
+                    $assignmentIds = \App\Models\Assignment::where('supervisor_id', Auth::id())
+                        ->where('status', 'active')
+                        ->pluck('id');
+
+                    $pendingLeavesQuery = \App\Models\Leave::whereIn('assignment_id', $assignmentIds)
+                        ->whereIn('status', ['submitted', 'pending']);
+
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('leaves', 'supervisor_decision')) {
+                        $pendingLeavesQuery->whereNull('supervisor_decision');
+                    }
+
+                    $pendingLeavesCount = $pendingLeavesQuery->count();
                 @endphp
                 @if($pendingLeavesCount > 0)
                     <span class="absolute -top-2 -right-2 flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-[10px] font-bold text-white bg-orange-600 rounded-full border-2 border-black">
@@ -62,6 +73,24 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             <span class="font-medium">Team Overview</span>
+        </a>
+
+        <!-- Task History & Tracking -->
+        <a href="{{ route('supervisor.tasks.index') }}" 
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('supervisor.tasks.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-6 0a2 2 0 002 2h2a2 2 0 002-2m-6 0a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <span class="font-medium">Tasks</span>
+        </a>
+
+        <!-- Concerns / Incidents -->
+        <a href="{{ route('supervisor.concerns.index') }}" 
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('supervisor.concerns.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 3c.132 0 .263.003.393.01a9 9 0 11-9.383 9.383C3.003 12.263 3 12.132 3 12a9 9 0 019-9z" />
+            </svg>
+            <span class="font-medium">Concerns & Incidents</span>
         </a>
 
         <!-- Announcements -->
