@@ -278,6 +278,35 @@ class WorkLogController extends Controller
             $periodLabel = $workDate->format('F Y');
         }
 
+        // If you have a manually created template file, place it here and it will be used.
+        // Supported per-type filenames (first match wins): daily.docx|daily.doc|daily.odt (same for weekly/monthly)
+        $templateBaseDir = storage_path('app/templates/accomplishment-report');
+        $candidateTemplates = [
+            $templateBaseDir.DIRECTORY_SEPARATOR.$type.'.docx',
+            $templateBaseDir.DIRECTORY_SEPARATOR.$type.'.doc',
+            $templateBaseDir.DIRECTORY_SEPARATOR.$type.'.odt',
+        ];
+
+        foreach ($candidateTemplates as $templatePath) {
+            if (! is_file($templatePath)) {
+                continue;
+            }
+
+            $ext = strtolower(pathinfo($templatePath, PATHINFO_EXTENSION));
+            $downloadName = 'Accomplishment_Report_Template_'.Str::ucfirst($type).'.'.$ext;
+
+            $contentType = match ($ext) {
+                'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'odt' => 'application/vnd.oasis.opendocument.text',
+                default => 'application/msword',
+            };
+
+            return response()->download($templatePath, $downloadName, [
+                'Content-Type' => $contentType,
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            ]);
+        }
+
         $assignment = Assignment::with(['company'])
             ->where('student_id', $user->id)
             ->where('status', 'active')
