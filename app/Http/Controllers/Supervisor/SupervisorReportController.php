@@ -6,18 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\WorkLog;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View; // Assuming dompdf is installed, or just a view for now
 
 class SupervisorReportController extends Controller
 {
-    public function index(): View
+    public function index(): RedirectResponse
     {
-        // Reports are generated dynamically from task and work log data
-        // In a real app, we might save generated PDFs to storage and list them here.
-        // For now, let's just show a static list or empty state.
-        return view('supervisor.reports.index');
+        // Reports are generated on-demand (not persisted yet).
+        // Keep one canonical entry point: the generator form.
+        return redirect()
+            ->route('supervisor.reports.create')
+            ->with('status', 'Reports are generated on demand. Use the form below to generate a performance report.');
     }
 
     public function create(): View

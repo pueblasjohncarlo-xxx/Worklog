@@ -37,6 +37,8 @@ class InvitationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $viewer = $request->user();
+
         $validated = $request->validate([
             'email' => ['required', 'string', 'email', 'max:255'],
             'role' => ['required', 'string', Rule::in([User::ROLE_STUDENT, User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER])],
@@ -47,6 +49,32 @@ class InvitationController extends Controller
         ]);
 
         $email = strtolower(trim($validated['email']));
+
+        $todayStart = now()->startOfDay();
+        $viewerDailyLimit = $viewer->role === User::ROLE_ADMIN ? 200 : 50;
+        $emailDailyLimit = 3;
+
+        $viewerInvitesToday = RegistrationInvitation::query()
+            ->where('invited_by_user_id', $viewer->id)
+            ->where('created_at', '>=', $todayStart)
+            ->count();
+
+        if ($viewerInvitesToday >= $viewerDailyLimit) {
+            return back()->withInput()->withErrors([
+                'email' => 'Daily invitation limit reached. Please try again tomorrow.',
+            ]);
+        }
+
+        $emailInvitesToday = RegistrationInvitation::query()
+            ->where('email', $email)
+            ->where('created_at', '>=', $todayStart)
+            ->count();
+
+        if ($emailInvitesToday >= $emailDailyLimit) {
+            return back()->withInput()->withErrors([
+                'email' => 'Too many invitations have been sent to this email today. Please try again tomorrow.',
+            ]);
+        }
 
         if (User::where('email', $email)->exists()) {
             return back()->withInput()->withErrors([
@@ -76,7 +104,7 @@ class InvitationController extends Controller
             'email' => $email,
             'role' => $validated['role'],
             'company_id' => $validated['role'] === User::ROLE_SUPERVISOR ? (int) $validated['company_id'] : null,
-            'invited_by_user_id' => $request->user()->id,
+            'invited_by_user_id' => $viewer->id,
             'token_hash' => $tokenHash,
             'expires_at' => $expiresAt,
             'metadata' => [
@@ -90,7 +118,7 @@ class InvitationController extends Controller
         try {
             Notification::route('mail', $invitation->email)
                 ->notify(new RegistrationInvitationLinkNotification(
-                    inviterName: (string) $request->user()->name,
+                    inviterName: (string) $viewer->name,
                     role: $invitation->role,
                     registerUrl: $registerUrl,
                     companyName: optional($invitation->company)->name,
@@ -101,7 +129,11 @@ class InvitationController extends Controller
             $warning = 'Invitation created, but the email could not be sent. Share the link manually.';
         }
 
-        return back()->with('status', 'Invitation created. Email dispatch completed for '.$invitation->email.'.')
+        $status = $warning
+            ? 'Invitation created for '.$invitation->email.'.'
+            : 'Invitation created and emailed to '.$invitation->email.'.';
+
+        return back()->with('status', $status)
             ->with('invite_link', $registerUrl)
             ->with('warning', $warning);
     }
