@@ -5,6 +5,11 @@
 
     @php
         $allTasks = collect($sem1_tasks ?? [])->merge($sem2_tasks ?? []);
+        $activeFilter = $activeTaskFilter ?? (string) request('filter', 'all');
+        $totalCount = $totalTasksCount ?? $allTasks->count();
+        $doneCount = $completedTasksCount ?? $allTasks->where('status', 'approved')->count();
+        $pendingCount = $pendingTasksCount ?? $allTasks->where('status', 'pending')->count();
+        $rejectedCount = $rejectedTasksCount ?? $allTasks->where('status', 'rejected')->count();
     @endphp
 
     <div class="px-3 md:px-6 lg:px-8 py-3 sm:py-4">
@@ -25,25 +30,35 @@
                 <div>
                     <h3 class="text-sm sm:text-base md:text-lg font-bold text-gray-900 dark:text-white">Task Workflow</h3>
                     <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300 mt-1">Review each task, complete required outputs, then open the task details page to submit progress on time.</p>
+                    @if ($activeFilter && $activeFilter !== 'all')
+                        <p class="mt-2 text-xs font-semibold text-gray-500 dark:text-gray-300">
+                            Showing: {{ ucfirst($activeFilter) }}
+                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="ml-2 text-indigo-600 dark:text-indigo-300 hover:underline">Clear</a>
+                        </p>
+                    @endif
                     <div class="mt-2 flex flex-wrap gap-1 sm:gap-2 text-xs">
                         <span class="px-2 sm:px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-[11px] sm:text-xs">1. Review</span>
                         <span class="px-2 sm:px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-[11px] sm:text-xs">2. Complete</span>
                         <span class="px-2 sm:px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-[11px] sm:text-xs">3. Update</span>
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 w-full lg:w-auto">
-                    <div class="rounded-md bg-indigo-50 dark:bg-indigo-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px]">
-                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-indigo-700 dark:text-indigo-300">Total</p>
-                        <p class="text-base sm:text-lg font-extrabold text-indigo-600 dark:text-indigo-300">{{ $allTasks->count() }}</p>
-                    </div>
-                    <div class="rounded-md bg-green-50 dark:bg-green-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px]">
-                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-green-700 dark:text-green-300">Done</p>
-                        <p class="text-base sm:text-lg font-extrabold text-green-600 dark:text-green-300">{{ $allTasks->where('status', 'approved')->count() }}</p>
-                    </div>
-                    <div class="rounded-md bg-yellow-50 dark:bg-yellow-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px]">
-                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-yellow-700 dark:text-yellow-300">Pending</p>
-                        <p class="text-base sm:text-lg font-extrabold text-yellow-600 dark:text-yellow-300">{{ $allTasks->where('status', 'pending')->count() }}</p>
-                    </div>
+                <div class="grid grid-cols-4 gap-1 sm:gap-2 md:gap-3 w-full lg:w-auto">
+                    <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="rounded-md bg-slate-50 dark:bg-slate-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px] hover:ring-2 hover:ring-slate-300 dark:hover:ring-slate-600 transition">
+                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-slate-700 dark:text-slate-300">Total</p>
+                        <p class="text-base sm:text-lg font-extrabold text-slate-700 dark:text-slate-200">{{ $totalCount }}</p>
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['filter' => 'done']) }}" class="rounded-md bg-emerald-50 dark:bg-emerald-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px] hover:ring-2 hover:ring-emerald-300 dark:hover:ring-emerald-600 transition">
+                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-300">Done</p>
+                        <p class="text-base sm:text-lg font-extrabold text-emerald-700 dark:text-emerald-200">{{ $doneCount }}</p>
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['filter' => 'pending']) }}" class="rounded-md bg-amber-50 dark:bg-amber-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px] hover:ring-2 hover:ring-amber-300 dark:hover:ring-amber-600 transition">
+                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-amber-700 dark:text-amber-300">Pending</p>
+                        <p class="text-base sm:text-lg font-extrabold text-amber-700 dark:text-amber-200">{{ $pendingCount }}</p>
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['filter' => 'rejected']) }}" class="rounded-md bg-rose-50 dark:bg-rose-900/30 px-2 sm:px-3 py-2 text-center min-w-[60px] sm:min-w-[90px] hover:ring-2 hover:ring-rose-300 dark:hover:ring-rose-600 transition">
+                        <p class="text-[8px] sm:text-[10px] uppercase font-bold text-rose-700 dark:text-rose-300">Rejected</p>
+                        <p class="text-base sm:text-lg font-extrabold text-rose-700 dark:text-rose-200">{{ $rejectedCount }}</p>
+                    </a>
                 </div>
             </div>
         </div>
@@ -59,14 +74,22 @@
             @else
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-blue-50 p-3 rounded">
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="bg-slate-50 p-3 rounded block">
                             <p class="text-xs font-bold">Tasks</p>
-                            <p class="text-2xl font-bold">{{ count($sem1_tasks ?? []) + count($sem2_tasks ?? []) }}</p>
-                        </div>
-                        <div class="bg-green-50 p-3 rounded">
+                            <p class="text-2xl font-bold">{{ $totalCount }}</p>
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'done']) }}" class="bg-emerald-50 p-3 rounded block">
                             <p class="text-xs font-bold">Done</p>
-                            <p class="text-2xl font-bold">{{ collect($sem1_tasks ?? [])->merge($sem2_tasks ?? [])->where('status', 'approved')->count() }}</p>
-                        </div>
+                            <p class="text-2xl font-bold">{{ $doneCount }}</p>
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'pending']) }}" class="bg-amber-50 p-3 rounded block">
+                            <p class="text-xs font-bold">Pending</p>
+                            <p class="text-2xl font-bold">{{ $pendingCount }}</p>
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'rejected']) }}" class="bg-rose-50 p-3 rounded block">
+                            <p class="text-xs font-bold">Rejected</p>
+                            <p class="text-2xl font-bold">{{ $rejectedCount }}</p>
+                        </a>
                     </div>
 
                     @if((count($sem1_tasks ?? []) + count($sem2_tasks ?? [])) === 0)
@@ -79,7 +102,12 @@
                                 <div class="bg-white border rounded p-3">
                                     <h4 class="font-bold text-sm mb-1">{{ Str::limit($task['title'], 35) }}</h4>
                                     <p class="text-xs text-gray-600 mb-2">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
-                                    <span class="text-xs inline-block bg-indigo-100 px-2 py-1 rounded mb-2">{{ ucfirst($task['status'] ?? 'pending') }}</span>
+                                    @php
+                                        $rawStatus = strtolower($task['status'] ?? 'pending');
+                                        $uiStatus = in_array($rawStatus, ['approved', 'completed'], true) ? 'Done' : ($rawStatus === 'rejected' ? 'Rejected' : 'Pending');
+                                        $uiClass = $uiStatus === 'Done' ? 'bg-emerald-100 text-emerald-700' : ($uiStatus === 'Rejected' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700');
+                                    @endphp
+                                    <span class="text-xs inline-block px-2 py-1 rounded mb-2 font-semibold {{ $uiClass }}">{{ $uiStatus }}</span>
                                     <a href="{{ route('student.tasks.show', $task['id']) }}" class="block px-3 py-2 bg-indigo-600 text-white text-xs text-center rounded font-semibold mt-2">View</a>
                                 </div>
                             @endforeach
@@ -87,7 +115,12 @@
                                 <div class="bg-white border rounded p-3">
                                     <h4 class="font-bold text-sm mb-1">{{ Str::limit($task['title'], 35) }}</h4>
                                     <p class="text-xs text-gray-600 mb-2">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
-                                    <span class="text-xs inline-block bg-indigo-100 px-2 py-1 rounded mb-2">{{ ucfirst($task['status'] ?? 'pending') }}</span>
+                                    @php
+                                        $rawStatus = strtolower($task['status'] ?? 'pending');
+                                        $uiStatus = in_array($rawStatus, ['approved', 'completed'], true) ? 'Done' : ($rawStatus === 'rejected' ? 'Rejected' : 'Pending');
+                                        $uiClass = $uiStatus === 'Done' ? 'bg-emerald-100 text-emerald-700' : ($uiStatus === 'Rejected' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700');
+                                    @endphp
+                                    <span class="text-xs inline-block px-2 py-1 rounded mb-2 font-semibold {{ $uiClass }}">{{ $uiStatus }}</span>
                                     <a href="{{ route('student.tasks.show', $task['id']) }}" class="block px-3 py-2 bg-indigo-600 text-white text-xs text-center rounded font-semibold mt-2">View</a>
                                 </div>
                             @endforeach
@@ -109,22 +142,22 @@
                     </div>
                 @else
                     <div class="mb-8 grid grid-cols-4 gap-6">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="bg-slate-50 border border-slate-200 rounded-lg p-6 block hover:ring-2 hover:ring-slate-200 transition">
                             <p class="text-xs font-bold text-blue-700 uppercase">Total Tasks</p>
-                            <p class="text-4xl font-bold text-blue-600 mt-2">{{ count($sem1_tasks ?? []) + count($sem2_tasks ?? []) }}</p>
-                        </div>
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                            <p class="text-4xl font-bold text-slate-700 mt-2">{{ $totalCount }}</p>
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'done']) }}" class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 block hover:ring-2 hover:ring-emerald-200 transition">
                             <p class="text-xs font-bold text-green-700 uppercase">Completed</p>
-                            <p class="text-4xl font-bold text-green-600 mt-2">{{ collect($sem1_tasks ?? [])->merge($sem2_tasks ?? [])->where('status', 'approved')->count() }}</p>
-                        </div>
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                            <p class="text-4xl font-bold text-emerald-700 mt-2">{{ $doneCount }}</p>
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'pending']) }}" class="bg-amber-50 border border-amber-200 rounded-lg p-6 block hover:ring-2 hover:ring-amber-200 transition">
                             <p class="text-xs font-bold text-yellow-700 uppercase">Pending</p>
-                            <p class="text-4xl font-bold text-yellow-600 mt-2">{{ collect($sem1_tasks ?? [])->merge($sem2_tasks ?? [])->where('status', 'pending')->count() }}</p>
-                        </div>
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                            <p class="text-4xl font-bold text-amber-700 mt-2">{{ $pendingCount }}</p>
+                        </a>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'rejected']) }}" class="bg-rose-50 border border-rose-200 rounded-lg p-6 block hover:ring-2 hover:ring-rose-200 transition">
                             <p class="text-xs font-bold text-red-700 uppercase">Rejected</p>
-                            <p class="text-4xl font-bold text-red-600 mt-2">{{ collect($sem1_tasks ?? [])->merge($sem2_tasks ?? [])->where('status', 'rejected')->count() }}</p>
-                        </div>
+                            <p class="text-4xl font-bold text-rose-700 mt-2">{{ $rejectedCount }}</p>
+                        </a>
                     </div>
 
                     @if((count($sem1_tasks ?? []) + count($sem2_tasks ?? [])) === 0)
@@ -145,7 +178,12 @@
                                 <div class="bg-white border rounded-lg shadow p-6 hover:shadow-lg">
                                     <h3 class="font-bold text-lg mb-2">{{ $task['title'] }}</h3>
                                     <p class="text-sm text-gray-600 mb-3">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
-                                    <p class="text-xs font-semibold mb-3">Status: <span class="text-indigo-600">{{ ucfirst($task['status'] ?? 'pending') }}</span></p>
+                                    @php
+                                        $rawStatus = strtolower($task['status'] ?? 'pending');
+                                        $uiStatus = in_array($rawStatus, ['approved', 'completed'], true) ? 'Done' : ($rawStatus === 'rejected' ? 'Rejected' : 'Pending');
+                                        $uiClass = $uiStatus === 'Done' ? 'text-emerald-700' : ($uiStatus === 'Rejected' ? 'text-rose-700' : 'text-amber-700');
+                                    @endphp
+                                    <p class="text-xs font-semibold mb-3">Status: <span class="{{ $uiClass }}">{{ $uiStatus }}</span></p>
                                     @if(!empty($task['description']))
                                         <p class="text-sm text-gray-700 mb-4">{{ Str::limit($task['description'], 100) }}</p>
                                     @endif
@@ -162,7 +200,12 @@
                                 <div class="bg-white border rounded-lg shadow p-6 hover:shadow-lg">
                                     <h3 class="font-bold text-lg mb-2">{{ $task['title'] }}</h3>
                                     <p class="text-sm text-gray-600 mb-3">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
-                                    <p class="text-xs font-semibold mb-3">Status: <span class="text-indigo-600">{{ ucfirst($task['status'] ?? 'pending') }}</span></p>
+                                    @php
+                                        $rawStatus = strtolower($task['status'] ?? 'pending');
+                                        $uiStatus = in_array($rawStatus, ['approved', 'completed'], true) ? 'Done' : ($rawStatus === 'rejected' ? 'Rejected' : 'Pending');
+                                        $uiClass = $uiStatus === 'Done' ? 'text-emerald-700' : ($uiStatus === 'Rejected' ? 'text-rose-700' : 'text-amber-700');
+                                    @endphp
+                                    <p class="text-xs font-semibold mb-3">Status: <span class="{{ $uiClass }}">{{ $uiStatus }}</span></p>
                                     @if(!empty($task['description']))
                                         <p class="text-sm text-gray-700 mb-4">{{ Str::limit($task['description'], 100) }}</p>
                                     @endif

@@ -45,6 +45,14 @@ class StudentController extends Controller
         $pastPendingLog = null;
         $monthlyTotalHours = 0;
 
+        $attendanceSelectedDate = null;
+        $attendanceSelectedLogs = collect();
+        $attendanceFilter = (string) request('attendance_filter', '');
+        if (! in_array($attendanceFilter, ['', 'approved', 'pending', 'rejected', 'remaining'], true)) {
+            $attendanceFilter = '';
+        }
+        $attendanceFilteredLogs = collect();
+
         if ($assignment) {
             $workLogs = WorkLog::where('assignment_id', $assignment->id)
                 ->orderByDesc('work_date')
@@ -105,6 +113,29 @@ class StudentController extends Controller
             $monthlyPendingHours = $monthlyLogs->whereIn('status', ['submitted', 'draft'])->sum('hours');
             $monthlyRejectedHours = $monthlyLogs->where('status', 'rejected')->sum('hours');
             $monthlyRemainingHours = max(0, $assignment->required_hours - $monthlyApprovedHours);
+
+            $attendanceDateStr = (string) request('attendance_date', '');
+            if ($attendanceDateStr !== '') {
+                try {
+                    $attendanceSelectedDate = Carbon::parse($attendanceDateStr)->startOfDay();
+                } catch (\Throwable) {
+                    $attendanceSelectedDate = null;
+                }
+            }
+
+            if ($attendanceSelectedDate) {
+                $selectedStr = $attendanceSelectedDate->toDateString();
+                $attendanceSelectedLogs = $workLogs->filter(fn ($log) => $log->work_date?->toDateString() === $selectedStr)->values();
+            }
+
+            if ($attendanceFilter !== '') {
+                $attendanceFilteredLogs = match ($attendanceFilter) {
+                    'approved' => $monthlyLogs->where('status', 'approved')->values(),
+                    'pending' => $monthlyLogs->whereIn('status', ['submitted', 'draft'])->values(),
+                    'rejected' => $monthlyLogs->where('status', 'rejected')->values(),
+                    default => collect(),
+                };
+            }
 
             // Build Attendance Calendar for Month
             $attendanceCalendar = [];
@@ -180,6 +211,10 @@ class StudentController extends Controller
             'monthlyRejectedHours' => $monthlyRejectedHours,
             'monthlyRemainingHours' => $monthlyRemainingHours,
             'attendanceCalendar' => $attendanceCalendar,
+            'attendanceSelectedDate' => $attendanceSelectedDate,
+            'attendanceSelectedLogs' => $attendanceSelectedLogs,
+            'attendanceFilter' => $attendanceFilter,
+            'attendanceFilteredLogs' => $attendanceFilteredLogs,
         ]);
     }
 

@@ -68,37 +68,120 @@
                             elseif($day['status'] === 'rejected') $statusClass = 'bg-rose-500 text-white';
                             elseif($day['status'] === 'draft') $statusClass = 'bg-yellow-500 text-gray-900';
                             if(!$day['is_current_month']) $statusClass = 'bg-gray-900 text-gray-500 opacity-40';
+
+                            $isClickable = $day['is_current_month'] && ! empty($day['status']);
+                            $cellTitle = "Status: ".ucfirst($day['status'] ?? 'N/A')."\nIn: ".($day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-')."\nOut: ".($day['time_out'] ? \Carbon\Carbon::parse($day['time_out'])->format('h:i A') : '-')."\nHours: ".($day['hours'] !== null ? number_format($day['hours'], 2).'h' : '-');
                         @endphp
-                        <div class="h-12 sm:h-16 p-1 border border-gray-700 {{ $statusClass }}" title="Status: {{ ucfirst($day['status'] ?? 'N/A') }}\nIn: {{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}\nOut: {{ $day['time_out'] ? \Carbon\Carbon::parse($day['time_out'])->format('h:i A') : '-' }}\nHours: {{ $day['hours'] !== null ? number_format($day['hours'], 2).'h' : '-' }}">
-                            <div class="text-xs sm:text-sm font-black">{{ $day['date']->day }}</div>
-                            @if($day['time_in'] || $day['time_out'])
-                                <div class="text-[7px] sm:text-[8px] uppercase">{{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}</div>
-                            @endif
-                            @if($day['hours'] !== null)
-                                <div class="text-[7px] sm:text-[9px] uppercase font-bold">{{ number_format($day['hours'], 2) }}h</div>
-                            @endif
-                        </div>
+                        @if ($isClickable)
+                            <a href="{{ request()->fullUrlWithQuery(['attendance_date' => $day['date']->toDateString()]) }}" class="h-12 sm:h-16 p-1 border border-gray-700 {{ $statusClass }} hover:ring-2 hover:ring-white/30 transition" title="{{ $cellTitle }}">
+                                <div class="text-xs sm:text-sm font-black">{{ $day['date']->day }}</div>
+                                @if($day['time_in'] || $day['time_out'])
+                                    <div class="text-[7px] sm:text-[8px] uppercase">{{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}</div>
+                                @endif
+                                @if($day['hours'] !== null)
+                                    <div class="text-[7px] sm:text-[9px] uppercase font-bold">{{ number_format($day['hours'], 2) }}h</div>
+                                @endif
+                            </a>
+                        @else
+                            <div class="h-12 sm:h-16 p-1 border border-gray-700 {{ $statusClass }}" title="{{ $cellTitle }}">
+                                <div class="text-xs sm:text-sm font-black">{{ $day['date']->day }}</div>
+                                @if($day['time_in'] || $day['time_out'])
+                                    <div class="text-[7px] sm:text-[8px] uppercase">{{ $day['time_in'] ? \Carbon\Carbon::parse($day['time_in'])->format('h:i A') : '-' }}</div>
+                                @endif
+                                @if($day['hours'] !== null)
+                                    <div class="text-[7px] sm:text-[9px] uppercase font-bold">{{ number_format($day['hours'], 2) }}h</div>
+                                @endif
+                            </div>
+                        @endif
                     @endforeach
                     </div>
                 </div>
                 <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
-                    <div class="bg-emerald-500/20 p-2 sm:p-3 rounded border border-emerald-500/30">
+                    <a href="{{ request()->fullUrlWithQuery(['attendance_filter' => 'approved']) }}" class="bg-emerald-500/20 p-2 sm:p-3 rounded border border-emerald-500/30 hover:border-emerald-400/60 hover:ring-2 hover:ring-emerald-400/20 transition block">
                         <div class="text-emerald-300 font-bold text-sm sm:text-base">{{ number_format($monthlyApprovedHours ?? 0, 2) }}h</div>
                         <div class="text-gray-400 text-[10px] sm:text-xs">Approved</div>
-                    </div>
-                    <div class="bg-blue-500/20 p-2 sm:p-3 rounded border border-blue-500/30">
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['attendance_filter' => 'pending']) }}" class="bg-blue-500/20 p-2 sm:p-3 rounded border border-blue-500/30 hover:border-blue-400/60 hover:ring-2 hover:ring-blue-400/20 transition block">
                         <div class="text-blue-300 font-bold text-sm sm:text-base">{{ number_format($monthlyPendingHours ?? 0, 2) }}h</div>
                         <div class="text-gray-400 text-[10px] sm:text-xs">Pending</div>
-                    </div>
-                    <div class="bg-rose-500/20 p-2 sm:p-3 rounded border border-rose-500/30">
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['attendance_filter' => 'rejected']) }}" class="bg-rose-500/20 p-2 sm:p-3 rounded border border-rose-500/30 hover:border-rose-400/60 hover:ring-2 hover:ring-rose-400/20 transition block">
                         <div class="text-rose-300 font-bold text-sm sm:text-base">{{ number_format($monthlyRejectedHours ?? 0, 2) }}h</div>
                         <div class="text-gray-400 text-[10px] sm:text-xs">Rejected</div>
-                    </div>
-                    <div class="bg-slate-500/20 p-2 sm:p-3 rounded border border-slate-500/30">
+                    </a>
+                    <a href="{{ request()->fullUrlWithQuery(['attendance_filter' => 'remaining']) }}" class="bg-slate-500/20 p-2 sm:p-3 rounded border border-slate-500/30 hover:border-slate-400/60 hover:ring-2 hover:ring-slate-400/20 transition block">
                         <div class="text-slate-300 font-bold text-sm sm:text-base">{{ number_format($monthlyRemainingHours ?? 0, 2) }}h</div>
                         <div class="text-gray-400 text-[10px] sm:text-xs">Remaining</div>
-                    </div>
+                    </a>
                 </div>
+
+                @if (!empty($attendanceSelectedDate) || !empty($attendanceFilter))
+                    <div class="mt-4 bg-black/20 border border-white/10 rounded-lg p-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="text-sm font-black text-white uppercase tracking-widest">
+                                @if (!empty($attendanceSelectedDate))
+                                    Details: {{ $attendanceSelectedDate->format('M d, Y') }}
+                                @else
+                                    {{ ucfirst($attendanceFilter) }} Records ({{ $calendarCurrentDate->format('F Y') }})
+                                @endif
+                            </div>
+                            <a href="{{ request()->fullUrlWithQuery(['attendance_date' => null, 'attendance_filter' => null]) }}" class="text-xs font-bold text-gray-300 hover:text-white underline">Clear</a>
+                        </div>
+
+                        @if (!empty($attendanceSelectedDate))
+                            @if (($attendanceSelectedLogs ?? collect())->isEmpty())
+                                <div class="mt-3 text-sm text-gray-300">No work log records found for this date.</div>
+                            @else
+                                <div class="mt-3 space-y-2">
+                                    @foreach(($attendanceSelectedLogs ?? collect()) as $log)
+                                        <div class="rounded-lg bg-gray-900/40 border border-white/10 p-3">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div>
+                                                    <div class="text-sm font-bold text-white">{{ strtoupper($log->type ?? 'log') }}</div>
+                                                    <div class="text-xs text-gray-400">Status: {{ ucfirst($log->status ?? 'n/a') }}</div>
+                                                </div>
+                                                <div class="text-right text-xs text-gray-300">
+                                                    <div>Hours: {{ $log->hours !== null ? number_format($log->hours, 2) : '0.00' }}h</div>
+                                                    @if ($log->time_in || $log->time_out)
+                                                        <div>In: {{ $log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('h:i A') : '-' }}</div>
+                                                        <div>Out: {{ $log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('h:i A') : '-' }}</div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        @elseif (($attendanceFilter ?? '') === 'remaining')
+                            <div class="mt-3 grid grid-cols-2 gap-3 text-xs sm:text-sm">
+                                <div class="rounded-lg bg-gray-900/40 border border-white/10 p-3">
+                                    <div class="text-gray-400">Approved this month</div>
+                                    <div class="text-white font-black">{{ number_format($monthlyApprovedHours ?? 0, 2) }}h</div>
+                                </div>
+                                <div class="rounded-lg bg-gray-900/40 border border-white/10 p-3">
+                                    <div class="text-gray-400">Remaining this month</div>
+                                    <div class="text-white font-black">{{ number_format($monthlyRemainingHours ?? 0, 2) }}h</div>
+                                </div>
+                            </div>
+                        @else
+                            @if (($attendanceFilteredLogs ?? collect())->isEmpty())
+                                <div class="mt-3 text-sm text-gray-300">No records found for this filter.</div>
+                            @else
+                                <div class="mt-3 space-y-2">
+                                    @foreach(($attendanceFilteredLogs ?? collect())->sortByDesc('work_date') as $log)
+                                        <div class="rounded-lg bg-gray-900/40 border border-white/10 p-3 flex items-center justify-between gap-3">
+                                            <div>
+                                                <div class="text-sm font-bold text-white">{{ $log->work_date?->format('M d, Y') ?? 'Date' }}</div>
+                                                <div class="text-xs text-gray-400">{{ strtoupper($log->type ?? 'log') }} • {{ ucfirst($log->status ?? 'n/a') }}</div>
+                                            </div>
+                                            <div class="text-xs font-bold text-gray-200">{{ number_format((float) ($log->hours ?? 0), 2) }}h</div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        @endif
+                    </div>
+                @endif
             </div>
 
             <!-- OJT Completion Bars -->

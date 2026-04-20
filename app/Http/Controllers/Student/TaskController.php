@@ -18,6 +18,10 @@ class TaskController extends Controller
     {
         $user = Auth::user();
         $sortOrder = $request->query('sort', 'desc');
+        $filter = (string) $request->query('filter', 'all');
+        if (! in_array($filter, ['all', 'done', 'pending', 'rejected'], true)) {
+            $filter = 'all';
+        }
 
         // DEBUG: Log execution
         \Log::info('========== STUDENT TASKS CALLED ==========');
@@ -49,9 +53,21 @@ class TaskController extends Controller
                 return $task;
             });
 
+        $totalTasksCount = $allTasks->count();
+        $completedTasksCount = $allTasks->whereIn('status', ['approved', 'completed'])->count();
+        $pendingTasksCount = $allTasks->whereIn('status', ['pending', 'in_progress', 'submitted'])->count();
+        $rejectedTasksCount = $allTasks->where('status', 'rejected')->count();
+
+        $filteredTasks = match ($filter) {
+            'done' => $allTasks->whereIn('status', ['approved', 'completed']),
+            'pending' => $allTasks->whereIn('status', ['pending', 'in_progress', 'submitted']),
+            'rejected' => $allTasks->where('status', 'rejected'),
+            default => $allTasks,
+        };
+
         // Separate by semester
-        $sem1_tasks = $allTasks->where('semester', '1st');
-        $sem2_tasks = $allTasks->where('semester', '2nd');
+        $sem1_tasks = $filteredTasks->where('semester', '1st');
+        $sem2_tasks = $filteredTasks->where('semester', '2nd');
 
         return view('student.tasks.index', [
             'sem1_tasks' => $sem1_tasks->values()->toArray(),
@@ -59,6 +75,11 @@ class TaskController extends Controller
             'sortOrder' => $sortOrder,
             'assignment' => $assignment,
             'totalTasks' => $allTasks->count(),
+            'activeTaskFilter' => $filter,
+            'totalTasksCount' => $totalTasksCount,
+            'completedTasksCount' => $completedTasksCount,
+            'pendingTasksCount' => $pendingTasksCount,
+            'rejectedTasksCount' => $rejectedTasksCount,
         ]);
     }
 
