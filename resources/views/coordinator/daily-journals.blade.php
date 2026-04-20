@@ -17,7 +17,7 @@
                                     {{ $section }}
                                 </span>
                                 <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                                    {{ $students->count() }} Students with Logs
+                                    {{ $students->count() }} OJT Students with Logs
                                 </span>
                             </div>
                             <svg class="h-5 w-5 text-gray-500 transform transition-transform duration-200" :class="{ 'rotate-180': openSection }" fill="none" stroke="currentColor" viewBox="0 0 24 24">

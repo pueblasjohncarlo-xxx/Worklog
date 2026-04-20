@@ -10,7 +10,7 @@
                 <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                     Evaluations by {{ $supervisor->name }}
                 </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Viewing students assigned to this supervisor</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Viewing OJT students assigned to this supervisor</p>
             </div>
         </div>
     </x-slot>
@@ -139,7 +139,7 @@
                 </div>
             @empty
                 <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-                    <p class="text-gray-500 font-medium">No students assigned to this supervisor were found.</p>
+                    <p class="text-gray-500 font-medium">No OJT students assigned to this supervisor were found.</p>
                 </div>
             @endforelse
         </div>

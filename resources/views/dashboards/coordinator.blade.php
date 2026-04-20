@@ -217,7 +217,7 @@
                             <div class="mt-4 space-y-2">
                                 <template x-if="studentsFor(dept).length === 0">
                                     <div class="text-sm text-gray-300">
-                                        No students found.
+                                        No OJT students found.
                                     </div>
                                 </template>
                                 <template x-for="student in studentsFor(dept)" :key="student.id">

@@ -153,7 +153,7 @@
                     <!-- Work Opportunities -->
                     <div class="space-y-4">
                         <h3 class="text-md font-medium text-gray-700 dark:text-gray-300 border-b pb-2">{{ __('Available Work Opportunities') }}</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 italic">{{ __('Specify the types of work students can perform at this company.') }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 italic">{{ __('Specify the types of work OJT students can perform at this company.') }}</p>
                         
                         <div class="space-y-2">
                             <template x-for="(opportunity, index) in workOpportunities" :key="index">

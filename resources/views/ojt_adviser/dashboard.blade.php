@@ -10,7 +10,7 @@
             <a href="{{ route('ojt_adviser.students') }}" class="block bg-gradient-to-br from-indigo-600/20 to-indigo-600/10 border border-indigo-500/30 rounded-xl p-5 shadow-lg cursor-pointer hover:-translate-y-0.5 hover:border-indigo-400/50 hover:shadow-indigo-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 transition-all">
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
-                        <p class="text-xs text-indigo-300 font-semibold uppercase tracking-widest">Assigned Students</p>
+                        <p class="text-xs text-indigo-300 font-semibold uppercase tracking-widest">Assigned OJT Students</p>
                         <h3 class="text-3xl font-black text-white mt-2">{{ $totalStudents }}</h3>
                         <p class="text-xs text-indigo-400 mt-1">Total under supervision</p>
                     </div>
@@ -43,7 +43,7 @@
                 </div>
                 <div class="mt-3 pt-3 border-t border-red-500/20">
                     <div class="text-xs text-red-300">
-                        <span class="font-semibold">{{ $totalStudents > 0 ? round(($incompleteLogsCount / $totalStudents) * 100, 0) : 0 }}%</span> of students
+                        <span class="font-semibold">{{ $totalStudents > 0 ? round(($incompleteLogsCount / $totalStudents) * 100, 0) : 0 }}%</span> of OJT students
                     </div>
                 </div>
             </a>
@@ -75,7 +75,7 @@
                     <div class="flex-1">
                         <p class="text-xs text-amber-300 font-semibold uppercase tracking-widest">Evaluations</p>
                         <h3 class="text-3xl font-black text-white mt-2">{{ $evaluationProgress }}%</h3>
-                        <p class="text-xs text-amber-400 mt-1">Students evaluated</p>
+                        <p class="text-xs text-amber-400 mt-1">OJT students evaluated</p>
                     </div>
                     <div class="p-2.5 bg-amber-500/30 rounded-lg">
                         <svg class="h-6 w-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,13 +146,13 @@
 
         <!-- ===== CRITICAL SECTIONS - BETTER SPACING ===== -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Students Needing Attention -->
+            <!-- OJT Students Needing Attention -->
             <div class="bg-white/5 border border-red-500/30 rounded-xl p-6 shadow-lg backdrop-blur-sm overflow-hidden">
                 <h3 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
                     <svg class="h-5 w-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 5v1m8.5-15a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>Students Needing Attention</span>
+                    <span>OJT Students Needing Attention</span>
                 </h3>
                 <div class="space-y-3 max-h-96 overflow-y-auto">
                     @forelse($studentsNeedingAttention as $assignment)
@@ -169,7 +169,7 @@
                         </div>
                     @empty
                         <div class="p-8 text-center text-gray-400">
-                            <p class="text-sm">✓ All students on track</p>
+                            <p class="text-sm">✓ All OJT students on track</p>
                         </div>
                     @endforelse
                 </div>
@@ -282,7 +282,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-6 py-8 text-center text-gray-400">
-                                    No assigned students. Check back later.
+                                    No assigned OJT students. Check back later.
                                 </td>
                             </tr>
                         @endforelse

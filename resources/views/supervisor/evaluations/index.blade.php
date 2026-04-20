@@ -48,7 +48,7 @@
                     <label class="text-xs uppercase text-white font-bold">Search</label>
                     <input x-model="q" @input.debounce.150ms="submit()" list="students-list"
                            class="mt-1 w-full rounded-md border-gray-300 bg-white text-gray-900 font-semibold placeholder-gray-500 focus:ring-indigo-500 focus:border-indigo-500"
-                           name="q" placeholder="Type a student name..." />
+                           name="q" placeholder="Type an OJT student name..." />
                     <datalist id="students-list">
                         @foreach($students as $s)
                             <option value="{{ $s->name }}"></option>
@@ -72,7 +72,7 @@
 
         <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg w-full">
             @if($students->isEmpty())
-                <div class="text-center text-gray-500 py-10">No students found.</div>
+                <div class="text-center text-gray-500 py-10">No OJT students found.</div>
             @else
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

@@ -34,7 +34,7 @@
                                         {{ $groupName }}
                                     </span>
                                     <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                                        {{ $departmentLogs->groupBy(fn($log) => $log->assignment?->student?->id)->count() }} Student{{ $departmentLogs->groupBy(fn($log) => $log->assignment?->student?->id)->count() !== 1 ? 's' : '' }}
+                                        {{ $departmentLogs->groupBy(fn($log) => $log->assignment?->student?->id)->count() }} OJT Student{{ $departmentLogs->groupBy(fn($log) => $log->assignment?->student?->id)->count() !== 1 ? 's' : '' }}
                                     </span>
                                 </div>
                                 <div class="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-400 group-hover:text-indigo-500 shadow-sm transition-colors">
@@ -44,7 +44,7 @@
                                 </div>
                             </button>
 
-                            <!-- Modal - List of Students -->
+                            <!-- Modal - List of OJT Students -->
                             <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
                                 <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
                                     <!-- Overlay -->
@@ -58,7 +58,7 @@
                                         <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-900/40 px-6 py-5 border-b border-indigo-200 dark:border-indigo-800">
                                             <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-4">
                                                 <span class="px-3 py-1 rounded text-sm bg-indigo-600 text-white font-bold">{{ $groupName }}</span>
-                                                <span>Students</span>
+                                                <span>OJT Students</span>
                                             </h3>
                                             
                                             <!-- Search Bar -->
@@ -70,12 +70,12 @@
                                             </div>
                                         </div>
 
-                                        <!-- Content - List of Students with Details -->
+                                        <!-- Content - List of OJT Students with Details -->
                                         <div class="bg-white dark:bg-gray-800 max-h-[65vh] overflow-y-auto">
                                             <!-- Table Header -->
                                             <div class="sticky top-0 bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-900/50 dark:to-gray-900/30 border-b border-gray-200 dark:border-gray-700">
                                                 <div class="grid grid-cols-12 gap-4 px-6 py-3 text-xs font-bold uppercase text-gray-600 dark:text-gray-400 tracking-wider">
-                                                    <div class="col-span-3">Student Name</div>
+                                                    <div class="col-span-3">OJT Student Name</div>
                                                     <div class="col-span-2">Course</div>
                                                     <div class="col-span-3">Company</div>
                                                     <div class="col-span-1 text-center">Hours</div>
@@ -151,13 +151,13 @@
                                                     </div>
                                                 </template>
 
-                                                <!-- No Students Found -->
+                                                <!-- No OJT Students Found -->
                                                 <template x-if="filteredStudents.length === 0">
                                                     <div class="px-6 py-12 text-center col-span-full">
                                                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                                         </svg>
-                                                        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mt-2">No students found</p>
+                                                        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mt-2">No OJT students found</p>
                                                         <p class="text-gray-400 dark:text-gray-500 text-xs mt-1" x-text="`Try searching for "${searchQuery}"`"></p>
                                                     </div>
                                                 </template>
@@ -166,7 +166,7 @@
 
                                         <!-- Footer -->
                                         <div class="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                                            <span class="text-sm text-gray-600 dark:text-gray-400" x-text="`${filteredStudents.length} of ${allStudents.length} students`"></span>
+                                            <span class="text-sm text-gray-600 dark:text-gray-400" x-text="`${filteredStudents.length} of ${allStudents.length} OJT students`"></span>
                                             <button @click="showModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">
                                                 Close
                                             </button>
@@ -211,7 +211,7 @@
                                 <!-- Header -->
                                 <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-900/40 px-8 py-6 border-b border-gray-200 dark:border-gray-700">
                                     <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                                        <span x-text="student?.studentName || 'Student'"></span> - Accomplishment Reports
+                                        <span x-text="student?.studentName || 'OJT Student'"></span> - Accomplishment Reports
                                     </h2>
                                     <p class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 flex-wrap">
                                         <span class="px-2 py-1 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-bold text-xs" x-text="student?.department || 'Department'"></span>

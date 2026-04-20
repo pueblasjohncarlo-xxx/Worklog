@@ -44,7 +44,7 @@
                 <p class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">{{ $activeCompanies }}</p>
             </a>
             <a href="{{ route('coordinator.companies.index', ['focus' => 'with-students']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">With Assigned Students</p>
+                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">With Assigned OJT Students</p>
                 <p class="mt-2 text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ $companiesWithStudents }}</p>
             </a>
             <a href="{{ route('coordinator.companies.index', ['focus' => 'incomplete']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -246,15 +246,15 @@
                             @endforeach
                         </select>
                         <select id="studentsFilter" class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="all">All Student Loads</option>
-                            <option value="with">With Assigned Students</option>
-                            <option value="none">No Assigned Students</option>
+                            <option value="all">All OJT Student Loads</option>
+                            <option value="with">With Assigned OJT Students</option>
+                            <option value="none">No Assigned OJT Students</option>
                         </select>
                         <select id="sortBy" class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="name_asc">Sort: Name (A-Z)</option>
                             <option value="name_desc">Sort: Name (Z-A)</option>
-                            <option value="students_desc">Sort: Most Students</option>
-                            <option value="students_asc">Sort: Least Students</option>
+                            <option value="students_desc">Sort: Most OJT Students</option>
+                            <option value="students_asc">Sort: Least OJT Students</option>
                         </select>
                     </div>
 
@@ -265,7 +265,7 @@
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Industry</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Students</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">OJT Students</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                                     <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -360,7 +360,7 @@
                                         </td>
 
                                         <td class="px-4 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">{{ $studentCount }} students</span>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">{{ $studentCount }} OJT students</span>
                                         </td>
 
                                         <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
@@ -430,7 +430,7 @@
                                                     <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Assignments</p>
                                                     <p class="mt-1 text-gray-700 dark:text-gray-200">Supervisors: {{ $assignedSupervisors->isNotEmpty() ? $assignedSupervisors->implode(', ') : 'None' }}</p>
                                                     <p class="text-gray-500 dark:text-gray-400">Advisers: {{ $assignedAdvisers->isNotEmpty() ? $assignedAdvisers->implode(', ') : 'None' }}</p>
-                                                    <p class="text-gray-500 dark:text-gray-400">Students: {{ $activeStudents->pluck('student.name')->filter()->unique()->values()->implode(', ') ?: 'None' }}</p>
+                                                    <p class="text-gray-500 dark:text-gray-400">OJT Students: {{ $activeStudents->pluck('student.name')->filter()->unique()->values()->implode(', ') ?: 'None' }}</p>
                                                 </div>
                                             </div>
                                         </td>

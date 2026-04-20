@@ -7,7 +7,7 @@
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 dark:text-gray-100">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold">Bulk Upload Students</h3>
+                    <h3 class="text-lg font-semibold">Bulk Upload OJT Students</h3>
                     <div class="flex gap-4">
                         <a href="{{ route('coordinator.students.import.template') }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                             Download CSV Template
@@ -55,20 +55,20 @@
 
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 dark:text-gray-100">
-                <h3 class="text-lg font-semibold mb-4">Manual Guide: Adding Students</h3>
+                <h3 class="text-lg font-semibold mb-4">Manual Guide: Adding OJT Students</h3>
                 <div class="prose dark:prose-invert max-w-none text-sm space-y-4">
                     <div>
                         <h4 class="font-bold">1. Bulk Import (Recommended)</h4>
-                        <p>To add multiple students at once, use the form above. Download the CSV template, fill in the student names, emails, and temporary passwords, then upload the file here. The system will automatically create accounts for all students in the list.</p>
+                        <p>To add multiple OJT students at once, use the form above. Download the CSV template, fill in the student names, emails, and temporary passwords, then upload the file here. The system will automatically create accounts for all OJT students in the list.</p>
                     </div>
                     <div>
                         <h4 class="font-bold">2. Admin Management</h4>
-                        <p>The System Administrator has exclusive authority to create student accounts manually from the Admin panel. User registration is restricted to administrators only to ensure proper account management and security oversight.</p>
+                        <p>The System Administrator has exclusive authority to create OJT student accounts manually from the Admin panel. User registration is restricted to administrators only to ensure proper account management and security oversight.</p>
                     </div>
                     </div>
                     <div class="p-4 bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-500 text-indigo-700 dark:text-indigo-300">
                         <p class="font-bold">Note:</p>
-                        <p>After accounts are created (via any method), you must go to the "Manage Assignments" section to link students with their respective supervisors and companies to start their OJT work logs.</p>
+                        <p>After accounts are created (via any method), you must go to the "Manage Assignments" section to link OJT students with their respective supervisors and companies to start their OJT work logs.</p>
                     </div>
                 </div>
             </div>

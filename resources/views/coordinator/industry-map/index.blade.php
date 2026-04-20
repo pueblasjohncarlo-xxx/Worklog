@@ -87,18 +87,18 @@
                 </button>
             </div>
 
-            <!-- Students Section -->
+            <!-- OJT Students Section -->
             <div>
                 <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
-                    <span class="mr-3">👥</span> Assigned Students
+                    <span class="mr-3">👥</span> Assigned OJT Students
                 </h3>
 
-                <!-- No Students State -->
+                <!-- No OJT Students State -->
                 <div id="noStudentsDiv" class="text-center py-16 bg-white/5 rounded-lg border-2 border-dashed border-white/20">
-                    <p class="text-gray-400 text-lg">No students assigned to this company</p>
+                    <p class="text-gray-400 text-lg">No OJT students assigned to this company</p>
                 </div>
 
-                <!-- Students Grid -->
+                <!-- OJT Students Grid -->
                 <div id="studentsGridDiv" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Student cards will be inserted here by JavaScript -->
                 </div>

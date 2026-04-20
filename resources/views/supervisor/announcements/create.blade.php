@@ -26,12 +26,12 @@
                 <x-input-error :messages="$errors->get('type')" class="mt-2" />
             </div>
 
-            <!-- Audience (Hidden - Always Students) -->
+            <!-- Audience (Hidden - Always OJT Students) -->
             <input type="hidden" name="audience" value="students">
             <div>
                 <x-input-label for="audience_display" :value="__('Send To')" class="font-semibold" />
                 <div class="block mt-1 w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-md text-gray-700 dark:text-gray-100 font-medium border border-gray-300 dark:border-gray-600">
-                    Assigned Students
+                    Assigned OJT Students
                 </div>
             </div>
 

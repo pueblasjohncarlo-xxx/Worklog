@@ -13,7 +13,7 @@
     >
         @php
             $summaryCards = [
-                ['label' => 'Students', 'value' => $totalStudents ?? 0, 'href' => route('coordinator.student-overview'), 'tone' => 'indigo'],
+                ['label' => 'OJT Students', 'value' => $totalStudents ?? 0, 'href' => route('coordinator.student-overview'), 'tone' => 'indigo'],
                 ['label' => 'Active OJT', 'value' => $activeOJTs ?? 0, 'href' => route('coordinator.deployment.index'), 'tone' => 'sky'],
                 ['label' => 'OJT Advisers', 'value' => $advisersCount ?? 0, 'href' => route('coordinator.adviser-overview'), 'tone' => 'emerald'],
                 ['label' => 'Supervisors', 'value' => $supervisorsCount ?? 0, 'href' => route('coordinator.supervisor-overview'), 'tone' => 'cyan'],
@@ -78,7 +78,7 @@
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="text-sm font-bold text-white">{{ $section['section'] }}</div>
-                                    <div class="text-xs text-gray-300">{{ $section['total_students'] }} students</div>
+                                    <div class="text-xs text-gray-300">{{ $section['total_students'] }} OJT students</div>
                                 </div>
                                 <div class="mt-3">
                                     <div class="flex justify-between text-xs text-gray-300 mb-1">
@@ -144,7 +144,7 @@
             <div class="flex items-center justify-between gap-4 mb-6">
                 <h3 class="text-lg font-bold text-white">OJT Adviser Dashboard</h3>
                 <span class="text-xs text-indigo-200 bg-indigo-500/20 border border-indigo-400/30 rounded-full px-3 py-1">
-                    Click an adviser to view assigned students
+                    Click an adviser to view assigned OJT students
                 </span>
             </div>
 
@@ -200,7 +200,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-lg p-6 shadow-xl">
-                <h3 class="text-lg font-bold text-white mb-4">Students Needing Attention</h3>
+                <h3 class="text-lg font-bold text-white mb-4">OJT Students Needing Attention</h3>
                 @if(($studentsNeedingAttention?->count() ?? 0) > 0)
                     <div class="space-y-3 max-h-80 overflow-auto pr-1">
                         @foreach($studentsNeedingAttention->take(10) as $student)
@@ -219,7 +219,7 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="text-sm text-gray-300">No students currently flagged for attention.</div>
+                    <div class="text-sm text-gray-300">No OJT students currently flagged for attention.</div>
                 @endif
             </div>
 
@@ -317,7 +317,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="adviser-student-search" class="sr-only">Search students</label>
+                            <label for="adviser-student-search" class="sr-only">Search OJT students</label>
                             <div class="relative">
                                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                     <svg class="h-4 w-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -338,7 +338,7 @@
                             <table class="min-w-full text-sm">
                                 <thead class="bg-white/10 text-left">
                                     <tr>
-                                        <th class="px-4 py-3">Student</th>
+                                        <th class="px-4 py-3">OJT Student</th>
                                         <th class="px-4 py-3">Section</th>
                                         <th class="px-4 py-3">Company</th>
                                         <th class="px-4 py-3">Reports</th>
@@ -349,7 +349,7 @@
                                 <tbody>
                                     <template x-if="getFilteredAdviserStudents().length === 0">
                                         <tr>
-                                            <td colspan="6" class="px-4 py-6 text-center text-slate-300">No students found.</td>
+                                            <td colspan="6" class="px-4 py-6 text-center text-slate-300">No OJT students found.</td>
                                         </tr>
                                     </template>
                                     <template x-for="student in getFilteredAdviserStudents()" :key="student.assignment_id">
@@ -452,7 +452,7 @@
                         data: {
                             labels: hasData ? studentLabels : ['No Data Available'],
                             datasets: [{
-                                label: 'Students',
+                                label: 'OJT Students',
                                 data: hasData ? studentValues : [0],
                                 backgroundColor: 'rgba(99, 102, 241, 0.8)',
                                 borderColor: 'rgba(99, 102, 241, 1)',

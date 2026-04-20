@@ -20,7 +20,7 @@
             <span class="font-medium">Dashboard</span>
         </a>
 
-        <!-- Students Monitoring -->
+        <!-- OJT Students Monitoring -->
         <a href="{{ route('ojt_adviser.students') }}" 
            class="flex items-center justify-between px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('ojt_adviser.students*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
             <div class="flex items-center gap-3">

@@ -15,7 +15,7 @@
                     </div>
                     <h3 class="text-lg font-bold text-white">Attendance Summary</h3>
                 </div>
-                <p class="text-sm text-gray-400 mb-6">Generate a complete overview of OJT student clock-in/out records, total hours, and status for all your assigned students.</p>
+                <p class="text-sm text-gray-400 mb-6">Generate a complete overview of OJT student clock-in/out records, total hours, and status for all your assigned OJT students.</p>
                 <form method="GET" action="{{ route('ojt_adviser.reports.attendance.export') }}" class="space-y-3">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>

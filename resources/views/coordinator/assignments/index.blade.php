@@ -152,7 +152,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Students Search -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Student(s)</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Student(s)</label>
                         <select
                             id="student_ids"
                             name="student_ids[]"
@@ -272,7 +272,7 @@
                         </div>
                         <div class="space-y-3 text-sm">
                             <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg space-y-2">
-                                <p class="font-medium text-gray-700 dark:text-gray-300">Students: <span id="confirm-count" class="text-indigo-600 dark:text-indigo-400 font-bold">0</span></p>
+                                <p class="font-medium text-gray-700 dark:text-gray-300">OJT Students: <span id="confirm-count" class="text-indigo-600 dark:text-indigo-400 font-bold">0</span></p>
                                 <div id="confirm-students-list" class="text-xs text-gray-600 dark:text-gray-300 max-h-32 overflow-y-auto pl-4 border-l-2 border-indigo-500 space-y-1"></div>
                                 <p class="font-medium text-gray-700 dark:text-gray-300 pt-2">Supervisor: <span id="confirm-supervisor" class="text-indigo-600 dark:text-indigo-400 font-bold">-</span></p>
                                 <p class="font-medium text-gray-700 dark:text-gray-300">OJT Adviser: <span id="confirm-adviser" class="text-indigo-600 dark:text-indigo-400 font-bold">-</span></p>

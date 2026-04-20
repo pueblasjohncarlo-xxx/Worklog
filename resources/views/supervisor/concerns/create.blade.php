@@ -18,7 +18,7 @@
 
                 @if (($assignments->count() ?? 0) === 0)
                     <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                        No active students found under your supervision.
+                        No active OJT students found under your supervision.
                     </div>
                 @endif
 

@@ -7,7 +7,7 @@
         <!-- Team Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white rounded-xl shadow p-6 border-l-4 border-indigo-500">
-                <div class="text-gray-500 text-sm font-bold uppercase">Total Students</div>
+                <div class="text-gray-500 text-sm font-bold uppercase">Total OJT Students</div>
                 <div class="text-3xl font-black text-gray-800 mt-2">{{ $teamMembers->count() }}</div>
             </div>
             <div class="bg-white rounded-xl shadow p-6 border-l-4 border-emerald-500">
@@ -23,9 +23,9 @@
         <!-- Team List -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <h3 class="font-bold text-gray-800 text-lg">My Students</h3>
+                <h3 class="font-bold text-gray-800 text-lg">My OJT Students</h3>
                 <div class="w-full sm:w-80">
-                    <label for="team-student-search" class="sr-only">Search students</label>
+                    <label for="team-student-search" class="sr-only">Search OJT students</label>
                     <div class="relative">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@
                             </tr>
                         @endforeach
                         <tr id="team-no-results" class="hidden">
-                            <td colspan="5" class="px-6 py-6 text-center text-gray-500 font-medium">No students found.</td>
+                            <td colspan="5" class="px-6 py-6 text-center text-gray-500 font-medium">No OJT students found.</td>
                         </tr>
                     </tbody>
                 </table>

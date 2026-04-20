@@ -1,6 +1,6 @@
 <x-coordinator-layout>
     <x-slot name="header">
-        Student Overview
+        OJT Student Overview
     </x-slot>
 
     <div class="space-y-6">
@@ -14,7 +14,7 @@
                         <!-- Search Bar -->
                         <form method="GET" action="{{ route('coordinator.student-overview') }}" class="flex items-center gap-2">
                             <div class="relative">
-                                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search students..." 
+                                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search OJT students..." 
                                         class="text-sm rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-8 w-full sm:w-64"
                                        oninput="this.form.submit()">
                                 <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
@@ -50,7 +50,7 @@
                                         {{ $groupName }}
                                     </span>
                                     <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                                        {{ $students->count() }} Students
+                                        {{ $students->count() }} OJT Students
                                     </span>
                                 </div>
                                 <div class="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-400 group-hover:text-indigo-500 shadow-sm transition-colors">
@@ -74,7 +74,7 @@
                                         <div class="bg-gray-50 dark:bg-gray-900/80 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
                                             <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                                 <span class="px-2 py-1 rounded text-sm bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">{{ $groupName }}</span>
-                                                <span>Student Roster</span>
+                                                <span>OJT Student Roster</span>
                                             </h3>
                                             
                                             <!-- Search Input -->
@@ -188,7 +188,7 @@
                                             
                                             <!-- No Results Message -->
                                             <div class="p-8 text-center text-gray-500 dark:text-gray-400" x-show="$el.previousElementSibling.querySelectorAll('tr[x-show]').length === 0 && search !== ''" style="display: none;">
-                                                No students found matching "<span x-text="search" class="font-bold"></span>"
+                                                No OJT students found matching "<span x-text="search" class="font-bold"></span>"
                                             </div>
                                         </div>
 
@@ -207,8 +207,8 @@
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No students found</h3>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters or import new students.</p>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No OJT students found</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters or import new OJT students.</p>
                         </div>
                     @endforelse
                 </div>
@@ -223,7 +223,7 @@
                     <div class="flex items-center gap-4">
                         <div id="modalAvatar" class="h-12 w-12 rounded-full bg-white flex items-center justify-center text-indigo-600 font-bold text-lg">S</div>
                         <div>
-                            <h3 id="modalStudentName" class="text-2xl font-bold text-white">Student</h3>
+                            <h3 id="modalStudentName" class="text-2xl font-bold text-white">OJT Student</h3>
                             <p id="modalStudentEmail" class="text-indigo-100 text-sm">email@example.com</p>
                         </div>
                     </div>

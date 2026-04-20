@@ -30,8 +30,8 @@
             <div>
                 <x-input-label for="audience" :value="__('Send To')" class="font-semibold" />
                 <select id="audience" name="audience" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 text-gray-900 font-medium focus:border-indigo-500 focus:ring-indigo-500">
-                    <option value="all">Everyone (Students & Supervisors)</option>
-                    <option value="students">Students Only</option>
+                    <option value="all">Everyone (OJT Students & Supervisors)</option>
+                    <option value="students">OJT Students Only</option>
                     <option value="supervisors">Supervisors Only</option>
                 </select>
                 <x-input-error :messages="$errors->get('audience')" class="mt-2" />

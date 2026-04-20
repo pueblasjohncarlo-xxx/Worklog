@@ -142,7 +142,7 @@
                 <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'students']) }}#students" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Students Supervised</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">OJT Students Supervised</p>
                         <p class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-2">{{ $totalStudents }}</p>
                     </div>
                     <div class="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-full">
@@ -171,7 +171,7 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Supervisors</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Active Students</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Active OJT Students</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -203,8 +203,8 @@
                 <div id="students" class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Students Supervised</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Unique students currently associated with supervisors (status shown per assignment).</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">OJT Students Supervised</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Unique OJT students currently associated with supervisors (status shown per assignment).</p>
                         </div>
                         <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'supervisors']) }}#roster" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Back to roster</a>
                     </div>
@@ -213,7 +213,7 @@
                         <table class="min-w-[760px] w-full">
                             <thead class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Student</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">OJT Student</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Program</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Supervisor</th>
@@ -248,7 +248,7 @@
                                 </template>
                                 <template x-if="getStudentsSupervised().length === 0">
                                     <tr>
-                                        <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No students found under supervisors.</td>
+                                        <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No OJT students found under supervisors.</td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -342,7 +342,7 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Supervisor</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Students</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">OJT Students</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Evaluations</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Monitoring</th>
                                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
@@ -492,7 +492,7 @@
                     <div class="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                         <div class="text-center">
                             <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400" x-text="selectedSupervisor.total_students"></p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Total Students</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Total OJT Students</p>
                         </div>
                         <div class="text-center">
                             <p class="text-2xl font-bold text-green-600 dark:text-green-400" x-text="selectedSupervisor.completed_evaluations"></p>
@@ -506,7 +506,7 @@
 
                     <!-- Students List -->
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Supervised Students</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Supervised OJT Students</h3>
                         <template x-if="selectedSupervisor.students.length > 0">
                             <div class="space-y-2 max-h-64 overflow-y-auto">
                                 <template x-for="student in selectedSupervisor.students" :key="student.id">
@@ -526,7 +526,7 @@
                             </div>
                         </template>
                         <template x-if="selectedSupervisor.students.length === 0">
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">No students assigned</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">No OJT students assigned</p>
                         </template>
                     </div>
 

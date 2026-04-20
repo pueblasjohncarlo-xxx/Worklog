@@ -315,7 +315,7 @@
                                     
                                     <!-- No Results Message -->
                                     <div class="p-8 text-center text-gray-500 dark:text-gray-400" x-show="$el.previousElementSibling.querySelectorAll('tr[x-show]').length === 0 && search !== ''" style="display: none;">
-                                        No students found matching "<span x-text="search" class="font-bold"></span>"
+                                        No OJT students found matching "<span x-text="search" class="font-bold"></span>"
                                     </div>
                                 </div>
 
@@ -331,7 +331,7 @@
                 </div>
             @empty
                 <div class="text-center py-8 text-gray-500 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                    No students found.
+                    No OJT students found.
                 </div>
             @endforelse
         </div>

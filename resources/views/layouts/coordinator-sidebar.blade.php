@@ -38,8 +38,14 @@
                 </svg>
                 <span class="font-medium">OJT Student Overview</span>
             </div>
-            @php $studentCount = \App\Models\User::where('role', \App\Models\User::ROLE_STUDENT)->count(); @endphp
-            <span class="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">{{ $studentCount }}</span>
+            @php
+                $ojtStudentCount = \App\Models\Assignment::query()
+                    ->active()
+                    ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+                    ->distinct('student_id')
+                    ->count('student_id');
+            @endphp
+            <span class="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">{{ $ojtStudentCount }}</span>
         </a>
 
         <!-- OJT Advisory -->

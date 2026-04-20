@@ -75,7 +75,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No active students found.</td>
+                                    <td colspan="6" class="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No active OJT students found.</td>
                                 </tr>
                             @endforelse
                         </tbody>

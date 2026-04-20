@@ -24,7 +24,7 @@
                             @forelse($assignments as $assignment)
                                 <option value="{{ $assignment->id }}">{{ $assignment->student->name }} ({{ $assignment->company->name ?? 'No Company' }})</option>
                             @empty
-                                <option value="" disabled>No students assigned to you</option>
+                                <option value="" disabled>No OJT students assigned to you</option>
                             @endforelse
                         </select>
                         @error('assignment_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror

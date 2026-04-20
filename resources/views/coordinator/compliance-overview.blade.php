@@ -11,7 +11,7 @@
     <div class="space-y-6">
         @php
             $summaryCards = [
-                ['label' => 'Students', 'value' => $topSummary['totalStudents'] ?? 0, 'href' => route('coordinator.student-overview'), 'tone' => 'indigo'],
+                ['label' => 'OJT Students', 'value' => $topSummary['totalStudents'] ?? 0, 'href' => route('coordinator.student-overview'), 'tone' => 'indigo'],
                 ['label' => 'Active OJT', 'value' => $topSummary['activeOJTs'] ?? 0, 'href' => route('coordinator.deployment.index'), 'tone' => 'sky'],
                 ['label' => 'OJT Advisers', 'value' => $topSummary['advisersCount'] ?? 0, 'href' => route('coordinator.adviser-overview'), 'tone' => 'emerald'],
                 ['label' => 'Supervisors', 'value' => $topSummary['supervisorsCount'] ?? 0, 'href' => route('coordinator.supervisor-overview'), 'tone' => 'cyan'],
@@ -148,7 +148,7 @@
                                         <svg class="h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                         </svg>
-                                        <p class="text-gray-500 dark:text-gray-400 text-sm">No students assigned yet</p>
+                                        <p class="text-gray-500 dark:text-gray-400 text-sm">No OJT students assigned yet</p>
                                     </div>
                                 </td>
                             </tr>

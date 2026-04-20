@@ -91,7 +91,7 @@
                                                     <tr>
                                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Supervisor Name</th>
                                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Department</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned Students</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned OJT Students</th>
                                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Evaluations</th>
                                                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
                                                     </tr>
@@ -134,7 +134,7 @@
                                                                         </div>
                                                                     @endif
                                                                 </div>
-                                                                <span class="text-xs text-gray-500 mt-1 block">{{ $assignments->count() }} Students Assigned</span>
+                                                                <span class="text-xs text-gray-500 mt-1 block">{{ $assignments->count() }} OJT Students Assigned</span>
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap">
                                                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
