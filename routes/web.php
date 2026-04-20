@@ -6,6 +6,7 @@ use App\Http\Controllers\Coordinator\AnnouncementController;
 use App\Http\Controllers\Coordinator\CoordinatorEvaluationController;
 use App\Http\Controllers\Coordinator\CoordinatorSupervisorController;
 use App\Http\Controllers\Coordinator\StudentImportController;
+use App\Http\Controllers\Coordinator\MoppingController as CoordinatorMoppingController;
 use App\Http\Controllers\Coordinator\DashboardController;
 use App\Http\Controllers\CoordinatorController;
 use App\Http\Controllers\LeaveController;
@@ -243,6 +244,10 @@ Route::middleware(['auth', 'verified', 'role:coordinator'])->group(function () {
     Route::get('/coordinator/accomplishment-reports', [CoordinatorController::class, 'accomplishmentReports'])->name('coordinator.accomplishment-reports');
     Route::get('/coordinator/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('coordinator.worklogs.print');
     Route::get('/coordinator/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('coordinator.worklogs.attachment');
+
+    // Mopping (Monthly AR vs Attendance)
+    Route::get('/coordinator/mopping', [CoordinatorMoppingController::class, 'index'])->name('coordinator.mopping.index');
+    Route::get('/coordinator/mopping/{assignment}', [CoordinatorMoppingController::class, 'show'])->name('coordinator.mopping.show');
     Route::get('/coordinator/leaves/{leave}/print', [LeaveController::class, 'print'])->name('coordinator.leaves.print');
     Route::get('/coordinator/compliance-overview', [CoordinatorController::class, 'complianceOverview'])->name('coordinator.compliance-overview');
 
@@ -276,6 +281,7 @@ Route::middleware(['auth', 'verified', 'role:coordinator'])->group(function () {
 });
 
 use App\Http\Controllers\OjtAdviserController;
+use App\Http\Controllers\OjtAdviser\MoppingController as OjtAdviserMoppingController;
 
 Route::middleware(['auth', 'verified', 'role:ojt_adviser'])->group(function () {
     Route::get('/ojt-adviser/dashboard', [OjtAdviserController::class, 'index'])->name('ojt_adviser.dashboard');
@@ -286,6 +292,10 @@ Route::middleware(['auth', 'verified', 'role:ojt_adviser'])->group(function () {
     Route::get('/ojt-adviser/accomplishment-reports', [OjtAdviserController::class, 'accomplishmentReports'])->name('ojt_adviser.accomplishment-reports');
     Route::get('/ojt-adviser/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('ojt_adviser.worklogs.print');
     Route::get('/ojt-adviser/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('ojt_adviser.worklogs.attachment');
+
+    // Mopping (Monthly AR vs Attendance)
+    Route::get('/ojt-adviser/mopping', [OjtAdviserMoppingController::class, 'index'])->name('ojt_adviser.mopping.index');
+    Route::get('/ojt-adviser/mopping/{assignment}', [OjtAdviserMoppingController::class, 'show'])->name('ojt_adviser.mopping.show');
     Route::get('/ojt-adviser/leaves/{leave}/print', [LeaveController::class, 'print'])->name('ojt_adviser.leaves.print');
     Route::get('/ojt-adviser/leaves', [OjtAdviserController::class, 'leavesIndex'])->name('ojt_adviser.leaves.index');
     Route::post('/ojt-adviser/leaves/{leave}/approve', [OjtAdviserController::class, 'approveLeave'])->name('ojt_adviser.leaves.approve');
