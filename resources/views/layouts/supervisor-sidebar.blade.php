@@ -84,15 +84,6 @@
             <span class="font-medium">Tasks</span>
         </a>
 
-        <!-- Concerns / Incidents -->
-        <a href="{{ route('supervisor.concerns.index') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('supervisor.concerns.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 3c.132 0 .263.003.393.01a9 9 0 11-9.383 9.383C3.003 12.263 3 12.132 3 12a9 9 0 019-9z" />
-            </svg>
-            <span class="font-medium">Concerns & Incidents</span>
-        </a>
-
         <!-- Announcements -->
         <a href="{{ route('supervisor.announcements.index') }}" 
            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('supervisor.announcements.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">

@@ -28,6 +28,7 @@
                             <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider">Submission</th>
                             <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider text-right">Files</th>
+                            <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
@@ -42,6 +43,7 @@
                                 $badge = match ($status) {
                                     'approved' => 'bg-emerald-100 text-emerald-700',
                                     'rejected' => 'bg-rose-100 text-rose-700',
+                                    'completed' => 'bg-emerald-100 text-emerald-700',
                                     'submitted' => 'bg-sky-100 text-sky-700',
                                     'in_progress' => 'bg-amber-100 text-amber-700',
                                     'missing' => 'bg-amber-100 text-amber-700',
@@ -50,6 +52,20 @@
 
                                 $studentName = $task->assignment?->student?->name ?? 'N/A';
                                 $companyName = $task->assignment?->company?->name ?? 'N/A';
+                                $canEdit = in_array($task->status, ['pending', 'in_progress'], true) && $task->submitted_at === null;
+                                $canDelete = $canEdit;
+                                $canComplete = in_array($task->status, ['pending', 'in_progress'], true);
+
+                                $taskFilePath = $task->task_attachment_path ?? null;
+                                $taskFileName = $task->task_original_filename ?? null;
+
+                                // Back-compat: older tasks stored the supervisor-provided file in attachment_path
+                                if (! $taskFilePath && $task->submitted_at === null && ! in_array($task->status, ['submitted', 'approved', 'rejected'], true)) {
+                                    $taskFilePath = $task->attachment_path;
+                                    $taskFileName = $task->original_filename;
+                                }
+
+                                $hasSubmission = ! empty($task->attachment_path) && ($task->submitted_at !== null || in_array($task->status, ['submitted', 'approved', 'rejected'], true));
                             @endphp
 
                             <tr class="hover:bg-gray-50 transition-colors">
@@ -84,12 +100,15 @@
                                 </td>
                                 <td class="px-6 py-4 text-right text-xs">
                                     <div class="space-x-3">
-                                        @if ($task->attachment_path)
-                                            @php
-                                                $label = in_array($task->status, ['submitted', 'approved', 'rejected'], true) ? 'Submission' : 'Task File';
-                                                $color = in_array($task->status, ['submitted', 'approved', 'rejected'], true) ? 'text-sky-700 hover:text-sky-900' : 'text-indigo-700 hover:text-indigo-900';
-                                            @endphp
-                                            <a href="{{ Storage::url($task->attachment_path) }}" target="_blank" class="font-bold {{ $color }}">{{ $label }}</a>
+                                        @if ($taskFilePath)
+                                            <a href="{{ Storage::url($taskFilePath) }}" target="_blank" class="font-bold text-indigo-700 hover:text-indigo-900">
+                                                Task File
+                                            </a>
+                                        @endif
+
+                                        @if ($hasSubmission)
+                                            <a href="{{ route('supervisor.tasks.submission.view', $task) }}" target="_blank" class="font-bold text-sky-700 hover:text-sky-900">Submission</a>
+                                            <a href="{{ route('supervisor.tasks.submission.download', $task) }}" class="font-bold text-sky-700 hover:text-sky-900">Download</a>
                                         @endif
 
                                         @if ($task->status === 'rejected' && $task->supervisor_attachment_path)
@@ -97,10 +116,33 @@
                                         @endif
                                     </div>
                                 </td>
+
+                                <td class="px-6 py-4 text-right text-xs">
+                                    <div class="flex items-center justify-end gap-3">
+                                        @if ($canEdit)
+                                            <a href="{{ route('supervisor.tasks.edit', $task) }}" class="font-bold text-indigo-700 hover:text-indigo-900">Edit</a>
+                                        @endif
+
+                                        @if ($canComplete)
+                                            <form method="POST" action="{{ route('supervisor.tasks.complete', $task) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="font-bold text-emerald-700 hover:text-emerald-900">Mark Done</button>
+                                            </form>
+                                        @endif
+
+                                        @if ($canDelete)
+                                            <form method="POST" action="{{ route('supervisor.tasks.destroy', $task) }}" class="inline" onsubmit="return confirm('Delete this task? This will hide it from the student.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="font-bold text-rose-700 hover:text-rose-900">Delete</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-gray-500 font-medium">
+                                <td colspan="7" class="px-6 py-10 text-center text-gray-500 font-medium">
                                     No tasks assigned yet.
                                 </td>
                             </tr>

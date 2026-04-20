@@ -71,11 +71,35 @@
                     </div>
                 @endif
 
-                @if ($task->attachment_path)
+                @php
+                    $taskFilePath = $task->task_attachment_path ?? null;
+                    $taskFileName = $task->task_original_filename ?? null;
+
+                    // Back-compat: older tasks stored supervisor file in attachment_path before submissions existed.
+                    if (! $taskFilePath && $task->submitted_at === null && ! in_array($task->status, ['submitted', 'approved', 'rejected'], true)) {
+                        $taskFilePath = $task->attachment_path;
+                        $taskFileName = $task->original_filename;
+                    }
+
+                    $submissionPath = $task->attachment_path;
+                    $submissionName = $task->original_filename;
+                    $hasSubmission = ! empty($submissionPath) && ($task->submitted_at !== null || in_array($task->status, ['submitted', 'approved', 'rejected'], true));
+                @endphp
+
+                @if ($taskFilePath)
                     <div class="mt-5 rounded-lg border border-indigo-200 bg-indigo-50 p-3">
                         <div class="text-xs uppercase font-bold text-indigo-700">Supervisor Attachment</div>
-                        <a href="{{ Storage::url($task->attachment_path) }}" target="_blank" download class="mt-1 inline-flex text-sm font-semibold text-indigo-700 hover:text-indigo-900">
-                            {{ $task->original_filename ?? 'Download attachment' }}
+                        <a href="{{ Storage::url($taskFilePath) }}" target="_blank" download class="mt-1 inline-flex text-sm font-semibold text-indigo-700 hover:text-indigo-900">
+                            {{ $taskFileName ?? 'Download attachment' }}
+                        </a>
+                    </div>
+                @endif
+
+                @if ($hasSubmission)
+                    <div class="mt-5 rounded-lg border border-sky-200 bg-sky-50 p-3">
+                        <div class="text-xs uppercase font-bold text-sky-700">Your Submission</div>
+                        <a href="{{ Storage::url($submissionPath) }}" target="_blank" download class="mt-1 inline-flex text-sm font-semibold text-sky-700 hover:text-sky-900">
+                            {{ $submissionName ?? 'Download submission' }}
                         </a>
                     </div>
                 @endif

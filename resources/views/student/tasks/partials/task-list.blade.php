@@ -50,7 +50,21 @@
                             <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $task->title }}</div>
                             <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ Str::limit($task->description, 80) }}</div>
                             
-                            @if($task->attachment_path)
+                            @php
+                                $taskFilePath = $task->task_attachment_path ?? null;
+                                $taskFileName = $task->task_original_filename ?? null;
+
+                                if (! $taskFilePath && $task->submitted_at === null && ! in_array($task->status, ['submitted', 'approved', 'rejected'], true)) {
+                                    $taskFilePath = $task->attachment_path;
+                                    $taskFileName = $task->original_filename;
+                                }
+
+                                $submissionPath = $task->attachment_path;
+                                $submissionName = $task->original_filename;
+                                $hasSubmission = ! empty($submissionPath) && ($task->submitted_at !== null || in_array($task->status, ['submitted', 'approved', 'rejected'], true));
+                            @endphp
+
+                            @if($taskFilePath)
                                 <div class="mt-3 p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border border-indigo-200 dark:border-indigo-800">
                                     <div class="flex items-center gap-2">
                                         <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,8 +72,24 @@
                                         </svg>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">Supervisor Provided File</p>
-                                            <a href="{{ Storage::url($task->attachment_path) }}" target="_blank" download class="text-xs text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-200 font-medium truncate block">
-                                                {{ $task->original_filename ?? 'Download File' }}
+                                            <a href="{{ Storage::url($taskFilePath) }}" target="_blank" download class="text-xs text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-200 font-medium truncate block">
+                                                {{ $taskFileName ?? 'Download File' }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($hasSubmission)
+                                <div class="mt-3 p-2.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-semibold text-blue-600 dark:text-blue-400">Your Submission</p>
+                                            <a href="{{ Storage::url($submissionPath) }}" target="_blank" download class="text-xs text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-200 font-medium truncate block">
+                                                {{ $submissionName ?? 'Download Submission' }}
                                             </a>
                                         </div>
                                     </div>

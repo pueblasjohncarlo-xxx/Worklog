@@ -9,6 +9,7 @@ use App\Notifications\TaskSubmittedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class TaskController extends Controller
@@ -114,12 +115,28 @@ class TaskController extends Controller
             $path = $file->store('task_submissions', 'public');
         }
 
-        $task->update([
+        $update = [
             'status' => 'submitted',
             'submitted_at' => now(),
             'attachment_path' => $path,
             'original_filename' => $originalName,
-        ]);
+        ];
+
+        // Back-compat: tasks created before task_attachment_* existed may have the supervisor-provided
+        // file stored in attachment_path. Preserve it before overwriting with the student's submission.
+        if (
+            Schema::hasColumn('tasks', 'task_attachment_path') &&
+            Schema::hasColumn('tasks', 'task_original_filename') &&
+            empty($task->task_attachment_path) &&
+            ! empty($task->attachment_path) &&
+            empty($task->submitted_at) &&
+            ! in_array($task->status, ['submitted', 'approved', 'rejected'], true)
+        ) {
+            $update['task_attachment_path'] = $task->attachment_path;
+            $update['task_original_filename'] = $task->original_filename;
+        }
+
+        $task->update($update);
 
         $assignment = Assignment::with('supervisor')
             ->where('id', $task->assignment_id)

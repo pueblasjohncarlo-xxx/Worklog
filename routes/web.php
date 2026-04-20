@@ -172,7 +172,6 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
 });
 
 use App\Http\Controllers\Supervisor\SupervisorEvaluationController;
-use App\Http\Controllers\Supervisor\SupervisorConcernController;
 
 Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
     Route::get('/supervisor/dashboard', [SupervisorController::class, 'index'])->name('supervisor.dashboard');
@@ -193,6 +192,12 @@ Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
     Route::get('/supervisor/tasks', [SupervisorTaskController::class, 'index'])->name('supervisor.tasks.index');
     Route::get('/supervisor/tasks/create', [SupervisorTaskController::class, 'create'])->name('supervisor.tasks.create');
     Route::post('/supervisor/tasks', [SupervisorTaskController::class, 'store'])->name('supervisor.tasks.store');
+    Route::get('/supervisor/tasks/{task}/edit', [SupervisorTaskController::class, 'edit'])->name('supervisor.tasks.edit');
+    Route::put('/supervisor/tasks/{task}', [SupervisorTaskController::class, 'update'])->name('supervisor.tasks.update');
+    Route::delete('/supervisor/tasks/{task}', [SupervisorTaskController::class, 'destroy'])->name('supervisor.tasks.destroy');
+    Route::post('/supervisor/tasks/{task}/complete', [SupervisorTaskController::class, 'complete'])->name('supervisor.tasks.complete');
+    Route::get('/supervisor/tasks/{task}/submission', [SupervisorTaskController::class, 'viewSubmission'])->name('supervisor.tasks.submission.view');
+    Route::get('/supervisor/tasks/{task}/submission/download', [SupervisorTaskController::class, 'downloadSubmission'])->name('supervisor.tasks.submission.download');
     Route::post('/supervisor/tasks/{task}/approve', [SupervisorTaskController::class, 'approve'])->name('supervisor.tasks.approve');
     Route::post('/supervisor/tasks/{task}/reject', [SupervisorTaskController::class, 'reject'])->name('supervisor.tasks.reject');
     Route::post('/supervisor/tasks/{task}/unapprove', [SupervisorTaskController::class, 'unapprove'])->name('supervisor.tasks.unapprove');
@@ -213,11 +218,6 @@ Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
 
     // Team Overview
     Route::get('/supervisor/team', [SupervisorTeamController::class, 'index'])->name('supervisor.team.index');
-
-    // Concerns / Incidents
-    Route::get('/supervisor/concerns', [SupervisorConcernController::class, 'index'])->name('supervisor.concerns.index');
-    Route::get('/supervisor/concerns/create', [SupervisorConcernController::class, 'create'])->name('supervisor.concerns.create');
-    Route::post('/supervisor/concerns', [SupervisorConcernController::class, 'store'])->name('supervisor.concerns.store');
 
     // Supervisor Announcements
     Route::get('/supervisor/announcements', [SupervisorAnnouncementController::class, 'index'])->name('supervisor.announcements.index');
