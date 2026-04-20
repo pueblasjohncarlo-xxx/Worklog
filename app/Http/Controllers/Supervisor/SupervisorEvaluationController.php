@@ -20,8 +20,14 @@ class SupervisorEvaluationController extends Controller
     {
         $semester = $request->input('semester');
         $q = $request->input('q');
-        $studentIds = Assignment::where('supervisor_id', Auth::id())->pluck('student_id');
-        $studentsQuery = User::whereIn('id', $studentIds)->orderBy('name');
+        $studentIds = Assignment::query()
+            ->where('supervisor_id', Auth::id())
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+            ->pluck('student_id')
+            ->unique();
+
+        $studentsQuery = User::eligibleStudentForRoster()->whereIn('id', $studentIds)->orderBy('name');
         if ($q) {
             $studentsQuery->where('name', 'like', $q.'%');
         }
@@ -42,11 +48,16 @@ class SupervisorEvaluationController extends Controller
 
     public function create(): View
     {
-        $students = Assignment::where('supervisor_id', Auth::id())
-            ->where('status', 'active')
+        $students = Assignment::query()
+            ->where('supervisor_id', Auth::id())
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
             ->with('student')
+            ->orderByDesc('updated_at')
             ->get()
-            ->pluck('student');
+            ->pluck('student')
+            ->unique('id')
+            ->values();
 
         return view('supervisor.evaluations.create', compact('students'));
     }

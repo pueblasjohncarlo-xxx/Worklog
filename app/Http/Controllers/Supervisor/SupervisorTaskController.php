@@ -18,8 +18,10 @@ class SupervisorTaskController extends Controller
     {
         $supervisorId = Auth::id();
 
-        $assignmentIds = Assignment::where('supervisor_id', $supervisorId)
-            ->where('status', 'active')
+        $assignmentIds = Assignment::query()
+            ->where('supervisor_id', $supervisorId)
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
             ->pluck('id');
 
         $tasks = Task::with(['assignment.student', 'assignment.company'])
@@ -33,13 +35,16 @@ class SupervisorTaskController extends Controller
     public function create(): View
     {
         $supervisorId = Auth::id();
-        $assignments = Assignment::with('student')
+        $assignments = Assignment::query()
             ->where('supervisor_id', $supervisorId)
-            ->where('status', 'active')
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+            ->with('student')
+            ->orderByDesc('updated_at')
             ->get()
-            ->sortBy(function ($assignment) {
-                return $assignment->student->name;
-            });
+            ->unique('student_id')
+            ->values()
+            ->sortBy(fn ($assignment) => $assignment->student->name);
 
         return view('supervisor.tasks.create', compact('assignments'));
     }

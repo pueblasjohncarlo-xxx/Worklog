@@ -266,8 +266,13 @@ class MessageController extends Controller
         if ($user->role === User::ROLE_SUPERVISOR) {
             // Supervisors can message: coordinators + students assigned to them
             $coordinators = User::where('role', User::ROLE_COORDINATOR)->orderBy('name')->get();
-            $studentIds = Assignment::where('supervisor_id', $user->id)->pluck('student_id');
-            $students = User::whereIn('id', $studentIds)->orderBy('name')->get();
+            $studentIds = Assignment::query()
+                ->where('supervisor_id', $user->id)
+                ->active()
+                ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+                ->pluck('student_id')
+                ->unique();
+            $students = User::eligibleStudentForRoster()->whereIn('id', $studentIds)->orderBy('name')->get();
             return $coordinators->merge($students)->unique('id')->sortBy('name');
             
         } elseif ($user->role === User::ROLE_COORDINATOR) {

@@ -58,11 +58,14 @@ class SupervisorAnnouncementController extends Controller
 
         // Send notifications to assigned students
         $supervisorId = Auth::id();
-        $studentIds = Assignment::where('supervisor_id', $supervisorId)
-            ->where('status', 'active')
-            ->pluck('student_id');
+        $studentIds = Assignment::query()
+            ->where('supervisor_id', $supervisorId)
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+            ->pluck('student_id')
+            ->unique();
 
-        $students = User::whereIn('id', $studentIds)->get();
+        $students = User::eligibleStudentForRoster()->whereIn('id', $studentIds)->get();
 
         Notification::send($students, new NewAnnouncementNotification($announcement));
 

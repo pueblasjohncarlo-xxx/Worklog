@@ -23,9 +23,15 @@ class OjtAdviserController extends Controller
     public function index(): View
     {
         $user = Auth::user();
-        $assignments = Assignment::where('ojt_adviser_id', $user->id)
+        $assignments = Assignment::query()
+            ->where('ojt_adviser_id', $user->id)
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
             ->with(['student', 'company', 'supervisor'])
-            ->get();
+            ->orderByDesc('updated_at')
+            ->get()
+            ->unique('student_id')
+            ->values();
 
         $totalStudents = $assignments->count();
 
@@ -142,9 +148,15 @@ class OjtAdviserController extends Controller
     public function students(): View
     {
         $user = Auth::user();
-        $assignments = Assignment::where('ojt_adviser_id', $user->id)
+        $assignments = Assignment::query()
+            ->where('ojt_adviser_id', $user->id)
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
             ->with(['student.studentProfile', 'company', 'supervisor'])
-            ->get();
+            ->orderByDesc('updated_at')
+            ->get()
+            ->unique('student_id')
+            ->values();
 
         return view('ojt_adviser.students.index', compact('assignments'));
     }
@@ -189,7 +201,11 @@ class OjtAdviserController extends Controller
 
     public function accomplishmentReports(): View
     {
-        $assignmentIds = Assignment::where('ojt_adviser_id', Auth::id())->pluck('id');
+        $assignmentIds = Assignment::query()
+            ->where('ojt_adviser_id', Auth::id())
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+            ->pluck('id');
 
         $workLogs = WorkLog::with(['assignment.student', 'assignment.company'])
             ->whereIn('assignment_id', $assignmentIds)
@@ -203,9 +219,15 @@ class OjtAdviserController extends Controller
     public function evaluations(): View
     {
         $user = Auth::user();
-        $assignments = Assignment::where('ojt_adviser_id', $user->id)
+        $assignments = Assignment::query()
+            ->where('ojt_adviser_id', $user->id)
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
             ->with(['student', 'company', 'supervisor'])
-            ->get();
+            ->orderByDesc('updated_at')
+            ->get()
+            ->unique('student_id')
+            ->values();
 
         return view('ojt_adviser.evaluations.index', compact('assignments'));
     }
@@ -213,9 +235,15 @@ class OjtAdviserController extends Controller
     public function reports(): View
     {
         $user = Auth::user();
-        $assignments = Assignment::where('ojt_adviser_id', $user->id)
+        $assignments = Assignment::query()
+            ->where('ojt_adviser_id', $user->id)
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
             ->with(['student', 'company'])
-            ->get();
+            ->orderByDesc('updated_at')
+            ->get()
+            ->unique('student_id')
+            ->values();
 
         return view('ojt_adviser.reports.index', compact('assignments'));
     }
@@ -224,7 +252,10 @@ class OjtAdviserController extends Controller
     {
         $adviserId = Auth::id();
 
-        $assignmentIds = Assignment::where('ojt_adviser_id', $adviserId)
+        $assignmentIds = Assignment::query()
+            ->where('ojt_adviser_id', $adviserId)
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
             ->pluck('id');
 
         $dateFrom = $request->input('date_from');
@@ -379,7 +410,8 @@ class OjtAdviserController extends Controller
     public function leavesIndex(Request $request): View
     {
         $assignments = Assignment::where('ojt_adviser_id', Auth::id())
-            ->where('status', 'active')
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
             ->pluck('id');
 
         $usesStagedLeaveApproval = Schema::hasColumn('leaves', 'supervisor_decision');

@@ -13,10 +13,15 @@ class SupervisorTeamController extends Controller
     {
         $supervisorId = Auth::id();
 
-        $teamMembers = Assignment::with(['student', 'company', 'workLogs', 'tasks'])
+        $teamMembers = Assignment::query()
             ->where('supervisor_id', $supervisorId)
-            ->where('status', 'active')
+            ->active()
+            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+            ->with(['student', 'company', 'workLogs', 'tasks'])
+            ->orderByDesc('updated_at')
             ->get()
+            ->unique('student_id')
+            ->values()
             ->map(function ($assignment) {
                 return [
                     'assignment_id' => $assignment->id,

@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
@@ -270,5 +272,47 @@ class User extends Authenticatable
             urlencode((string) $this->name),
             $version
         );
+    }
+
+    public function scopeEligibleForAccess(Builder $query): Builder
+    {
+        if (Schema::hasColumn('users', 'rejected_at')) {
+            $query->whereNull('rejected_at');
+        }
+
+        if (Schema::hasColumn('users', 'rejection_reason')) {
+            $query->where(function (Builder $q) {
+                $q->whereNull('rejection_reason')->orWhere('rejection_reason', '');
+            });
+        }
+
+        return $query->where(function (Builder $q) {
+            if (Schema::hasColumn('users', 'status')) {
+                $q->whereRaw('LOWER(status) IN (?, ?)', ['approved', 'active']);
+
+                if (Schema::hasColumn('users', 'is_approved')) {
+                    $q->orWhere(function (Builder $legacy) {
+                        $legacy
+                            ->where(function (Builder $s) {
+                                $s->whereNull('status')->orWhere('status', '');
+                            })
+                            ->where('is_approved', true);
+                    });
+                }
+
+                return;
+            }
+
+            if (Schema::hasColumn('users', 'is_approved')) {
+                $q->where('is_approved', true);
+            }
+        });
+    }
+
+    public function scopeEligibleStudentForRoster(Builder $query): Builder
+    {
+        return $query
+            ->where('role', self::ROLE_STUDENT)
+            ->eligibleForAccess();
     }
 }
