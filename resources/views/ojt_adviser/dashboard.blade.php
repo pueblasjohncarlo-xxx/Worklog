@@ -43,7 +43,7 @@
                 </div>
                 <div class="mt-3 pt-3 border-t border-red-500/20">
                     <div class="text-xs text-red-300">
-                        <span class="font-semibold">{{ round(($incompleteLogsCount/$totalStudents)*100, 0) }}%</span> of students
+                        <span class="font-semibold">{{ $totalStudents > 0 ? round(($incompleteLogsCount / $totalStudents) * 100, 0) : 0 }}%</span> of students
                     </div>
                 </div>
             </a>
@@ -64,7 +64,7 @@
                 </div>
                 <div class="mt-3 pt-3 border-t border-emerald-500/20">
                     <div class="text-xs text-emerald-300">
-                        <span class="font-semibold">{{ round(($completedHoursCount/$totalStudents)*100, 0) }}%</span> completion rate
+                        <span class="font-semibold">{{ $totalStudents > 0 ? round(($completedHoursCount / $totalStudents) * 100, 0) : 0 }}%</span> completion rate
                     </div>
                 </div>
             </a>
