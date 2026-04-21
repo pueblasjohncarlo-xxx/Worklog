@@ -42,6 +42,7 @@
         selectedSupervisor: "",
         selectedAdviser: "",
         editingDeployment: null,
+        editFormAction: "",
         editSupervisorId: "",
         editAdviserId: "",
         
@@ -70,6 +71,7 @@
         
         openEditModal(deployment) {
             this.editingDeployment = { ...deployment };
+            this.editFormAction = `/coordinator/deployment-management/${deployment.id}`;
             this.editSupervisorId = deployment.supervisor_id || "";
             this.editAdviserId = deployment.adviser_id || "";
             document.getElementById("editDeploymentModal").classList.remove("hidden");
@@ -77,6 +79,7 @@
         
         closeEditModal() {
             this.editingDeployment = null;
+            this.editFormAction = "";
             this.editSupervisorId = "";
             this.editAdviserId = "";
             document.getElementById("editDeploymentModal").classList.add("hidden");
@@ -178,23 +181,29 @@
                     <!-- OJT Students Search -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Student(s)</label>
-                        <select
-                            id="student_ids"
-                            name="student_ids[]"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
-                            multiple="multiple"
-                            required
-                        >
-                            @foreach ($groupedStudents as $group => $students)
-                                <optgroup label="{{ $group }}">
-                                    @foreach ($students as $student)
-                                        <option value="{{ $student->id }}" data-email="{{ $student->email }}">
-                                            {{ $student->lastname }}, {{ $student->firstname }}
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
-                        </select>
+                        @if($groupedStudents->isNotEmpty())
+                            <select
+                                id="student_ids"
+                                name="student_ids[]"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                multiple="multiple"
+                                required
+                            >
+                                @foreach ($groupedStudents as $group => $students)
+                                    <optgroup label="{{ $group }}">
+                                        @foreach ($students as $student)
+                                            <option value="{{ $student->id }}" data-email="{{ $student->email }}">
+                                                {{ $student->lastname }}, {{ $student->firstname }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                        @else
+                            <div class="w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-3 text-sm text-gray-600 dark:text-gray-300">
+                                No eligible students are available for deployment.
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Supervisor -->
@@ -273,16 +282,26 @@
                 </div>
 
                 <div class="flex justify-end gap-2 pt-2">
-                    <button
-                        type="button"
-                        onclick="confirmDeployment()"
-                        class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-sm font-semibold uppercase tracking-wide text-white hover:bg-indigo-700 transition-colors"
-                    >
-                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Create Deployment
-                    </button>
+                    @if($groupedStudents->isNotEmpty())
+                        <button
+                            type="button"
+                            onclick="confirmDeployment()"
+                            class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-sm font-semibold uppercase tracking-wide text-white hover:bg-indigo-700 transition-colors"
+                        >
+                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Create Deployment
+                        </button>
+                    @else
+                        <button
+                            type="button"
+                            class="inline-flex items-center px-4 py-2 rounded-lg bg-gray-400 text-sm font-semibold uppercase tracking-wide text-white cursor-not-allowed"
+                            disabled
+                        >
+                            No Eligible Students
+                        </button>
+                    @endif
                 </div>
             </form>
         </div>
@@ -328,8 +347,10 @@
         <!-- Edit Deployment Modal -->
         <div id="editDeploymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                <div class="fixed inset-0 z-0 bg-black bg-opacity-50 transition-opacity pointer-events-none"></div>
+                <form x-show="editingDeployment" method="POST" :action="editFormAction" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    @csrf
+                    @method('PATCH')
                     <div class="bg-white dark:bg-gray-800 px-6 pt-5 pb-4 sm:p-6">
                         <div class="flex items-center mb-4">
                             <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30">
@@ -347,7 +368,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supervisor *</label>
-                                    <select x-model="editSupervisorId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    <select name="supervisor_id" x-model="editSupervisorId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select supervisor</option>
                                         <template x-for="supervisor in supervisors" :key="supervisor.id">
                                             <option :value="supervisor.id" x-text="supervisor.name"></option>
@@ -356,7 +377,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Adviser</label>
-                                    <select x-model="editAdviserId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    <select name="ojt_adviser_id" x-model="editAdviserId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select adviser</option>
                                         <template x-for="adviser in advisers" :key="adviser.id">
                                             <option :value="adviser.id" x-text="adviser.name"></option>
@@ -375,10 +396,11 @@
                         <button type="button" @click="closeEditModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
                             Cancel
                         </button>
-                        <button type="button" @click="saveDeployment()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
                             Save Changes
                         </button>
                     </div>
+                </form>
                 </div>
             </div>
         </div>
@@ -587,12 +609,14 @@
     @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#student_ids').select2({
-                placeholder: "Search by Name or Email...",
-                allowClear: true,
-                width: '100%',
-                closeOnSelect: false,
-            });
+            if ($('#student_ids').length) {
+                $('#student_ids').select2({
+                    placeholder: "Search by Name or Email...",
+                    allowClear: true,
+                    width: '100%',
+                    closeOnSelect: false,
+                });
+            }
             $('#supervisor_id').select2({ width: '100%' });
             $('#ojt_adviser_id').select2({ width: '100%' });
             $('#company_id_display').select2({ width: '100%' });
@@ -690,6 +714,11 @@
         }
 
         function confirmDeployment() {
+            if (!$('#student_ids').length) {
+                alert('No eligible students are available for deployment.');
+                return;
+            }
+
             const studentIds = $('#student_ids').val();
             const supervisorId = $('#supervisor_id').val();
             const companyId = $('#company_id').val();

@@ -10,8 +10,8 @@ use App\Models\PerformanceEvaluation;
 use App\Models\User;
 use App\Models\WorkLog;
 use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -918,17 +918,8 @@ class CoordinatorController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        // Get students and group by section for Select2
-        $students = User::where('role', User::ROLE_STUDENT)
-            ->when(Schema::hasColumn('users', 'status'), function ($q) {
-                $q->where(function ($s) {
-                    $s->whereIn('status', ['approved', 'active'])
-                        ->orWhereNull('status');
-                });
-            })
-            ->when(Schema::hasColumn('users', 'is_approved'), function ($q) {
-                $q->where('is_approved', true);
-            })
+        // Get only deployable students and group by section for Select2
+        $students = User::eligibleStudentForDeployment()
             ->orderBy('section')
             ->orderBy('lastname')
             ->get()
@@ -1127,6 +1118,19 @@ class CoordinatorController extends Controller
             ]);
         }
 
+        $eligibleStudentIds = User::eligibleStudentForDeployment()
+            ->whereIn('id', $studentIds)
+            ->pluck('id')
+            ->map(fn ($id) => (string) $id)
+            ->all();
+
+        $invalidStudentIds = array_values(array_diff(array_map('strval', $studentIds), $eligibleStudentIds));
+        if (! empty($invalidStudentIds)) {
+            return redirect()->back()->withErrors([
+                'student_ids' => 'One or more selected students are already deployed or assigned and cannot be deployed again.',
+            ])->withInput();
+        }
+
         $supervisorIds = collect($request->input('supervisor_ids', []))
             ->filter()
             ->map(fn ($id) => (int) $id);
@@ -1188,10 +1192,8 @@ class CoordinatorController extends Controller
             ->value('required_hours') ?? 1600;
 
         foreach ($studentIds as $studentId) {
-            // Check if active assignment exists to avoid duplicates (optional but good practice)
-            $exists = Assignment::where('student_id', $studentId)
-                ->where('status', 'active')
-                ->exists();
+            // Prevent duplicate deployment records for already assigned students.
+            $exists = Assignment::where('student_id', $studentId)->exists();
 
             if (! $exists) {
                 Assignment::create([
@@ -1212,7 +1214,7 @@ class CoordinatorController extends Controller
             ->with('status', 'Deployments created successfully.');
     }
 
-    public function deploymentUpdate(Request $request, Assignment $assignment): JsonResponse
+    public function deploymentUpdate(Request $request, Assignment $assignment): JsonResponse|RedirectResponse
     {
         $request->validate([
             'supervisor_id' => 'nullable|exists:users,id',
@@ -1253,7 +1255,12 @@ class CoordinatorController extends Controller
 
         $assignment->update($payload);
 
-        return response()->json(['success' => true]);
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('coordinator.deployment.index')
+            ->with('status', 'Deployment updated successfully.');
     }
 
     public function updateRequiredHours(Request $request, Assignment $assignment): RedirectResponse

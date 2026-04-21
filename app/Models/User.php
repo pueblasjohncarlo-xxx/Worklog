@@ -315,4 +315,11 @@ class User extends Authenticatable
             ->where('role', self::ROLE_STUDENT)
             ->eligibleForAccess();
     }
+
+    public function scopeEligibleStudentForDeployment(Builder $query): Builder
+    {
+        return $query
+            ->eligibleStudentForRoster()
+            ->whereDoesntHave('studentAssignments');
+    }
 }
