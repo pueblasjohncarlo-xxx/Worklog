@@ -45,7 +45,7 @@
                     ->distinct('student_id')
                     ->count('student_id');
             @endphp
-            <span class="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">{{ $ojtStudentCount }}</span>
+            <span class="bg-gray-800 text-gray-200 text-xs px-2 py-0.5 rounded-full">{{ $ojtStudentCount }}</span>
         </a>
 
         <!-- OJT Advisory -->
@@ -165,7 +165,7 @@
                 <span class="font-medium">Company Directory</span>
             </div>
             @php $companyCount = \App\Models\Company::count(); @endphp
-            <span class="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">{{ $companyCount }}</span>
+            <span class="bg-gray-800 text-gray-200 text-xs px-2 py-0.5 rounded-full">{{ $companyCount }}</span>
         </a>
 
 

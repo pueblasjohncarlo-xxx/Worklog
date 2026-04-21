@@ -29,8 +29,15 @@
                 </svg>
                 <span class="font-medium">OJT Students</span>
             </div>
-            @php $studentCount = \App\Models\Assignment::where('ojt_adviser_id', auth()->id())->count(); @endphp
-            <span class="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">{{ $studentCount }}</span>
+            @php
+                $studentCount = \App\Models\Assignment::query()
+                    ->where('ojt_adviser_id', auth()->id())
+                    ->active()
+                    ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+                    ->distinct('student_id')
+                    ->count('student_id');
+            @endphp
+            <span class="bg-gray-800 text-gray-200 text-xs px-2 py-0.5 rounded-full">{{ $studentCount }}</span>
         </a>
 
         <a href="{{ route('ojt_adviser.accomplishment-reports') }}" 

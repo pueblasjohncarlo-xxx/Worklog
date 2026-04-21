@@ -957,7 +957,7 @@ class CoordinatorController extends Controller
                 'adviser_id' => $assignment->ojt_adviser_id,
                 'adviser_name' => $assignment->ojtAdviser?->name ?? 'Not Assigned',
                 'company_id' => $assignment->company_id,
-                'company_name' => $assignment->company->name ?? 'N/A',
+                'company_name' => $assignment->company?->name ?? 'N/A',
                 'start_date' => $assignment->start_date?->format('Y-m-d'),
                 'end_date' => $assignment->end_date?->format('Y-m-d'),
                 'status' => $assignment->status,

@@ -45,17 +45,31 @@
         editFormAction: "",
         editSupervisorId: "",
         editAdviserId: "",
+
+        normalizeId(value) {
+            if (value === null || value === undefined || value === "") return "";
+            return String(value);
+        },
+
+        isDeploymentVisible(id) {
+            const targetId = this.normalizeId(id);
+            return this.getFilteredDeployments().some(a => this.normalizeId(a && a.id) === targetId);
+        },
         
         getFilteredDeployments() {
-            return this.deployments.filter(a => {
-                const matchesSearch = a.student_name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
-                                    a.student_email.toLowerCase().includes(this.searchTerm.toLowerCase());
-                const matchesCompany = this.selectedCompany === "" || String(a.company_id) === String(this.selectedCompany);
-                const matchesStatus = this.selectedStatus === "" || a.status === this.selectedStatus;
-                const matchesDeployStatus = this.selectedDeploymentStatus === "" || a.deployment_status === this.selectedDeploymentStatus;
-                const matchesSupervisor = this.selectedSupervisor === "" || a.supervisor_id == this.selectedSupervisor;
-                const matchesAdviser = this.selectedAdviser === "" || a.adviser_id == this.selectedAdviser;
-                
+            const search = String(this.searchTerm || "").toLowerCase();
+
+            return (this.deployments || []).filter(a => {
+                const studentName = String((a && a.student_name) || "").toLowerCase();
+                const studentEmail = String((a && a.student_email) || "").toLowerCase();
+
+                const matchesSearch = studentName.includes(search) || studentEmail.includes(search);
+                const matchesCompany = this.selectedCompany === "" || this.normalizeId(a && a.company_id) === this.normalizeId(this.selectedCompany);
+                const matchesStatus = this.selectedStatus === "" || String((a && a.status) || "") === String(this.selectedStatus);
+                const matchesDeployStatus = this.selectedDeploymentStatus === "" || String((a && a.deployment_status) || "") === String(this.selectedDeploymentStatus);
+                const matchesSupervisor = this.selectedSupervisor === "" || this.normalizeId(a && a.supervisor_id) === this.normalizeId(this.selectedSupervisor);
+                const matchesAdviser = this.selectedAdviser === "" || this.normalizeId(a && a.adviser_id) === this.normalizeId(this.selectedAdviser);
+
                 return matchesSearch && matchesCompany && matchesStatus && matchesDeployStatus && matchesSupervisor && matchesAdviser;
             });
         },
@@ -101,7 +115,7 @@
             .then(response => {
                 if (response.ok) {
                     // Update the deployment in the array
-                    const index = this.deployments.findIndex(d => d.id === this.editingDeployment.id);
+                    const index = this.deployments.findIndex(d => this.normalizeId(d && d.id) === this.normalizeId(this.editingDeployment && this.editingDeployment.id));
                     if (index !== -1) {
                         const selectedSupervisor = this.supervisors.find(s => String(s.id) === String(this.editSupervisorId));
                         this.deployments[index].supervisor_id = this.editSupervisorId;
@@ -510,7 +524,7 @@
                                 @endphp
                                 <tr
                                     class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ $rowClass }}"
-                                    x-show="getFilteredDeployments().some(a => a.id === {{ $deployment['id'] }})"
+                                    x-show="isDeploymentVisible({{ $deployment['id'] }})"
                                 >
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($deployment['deployment_status'] === 'complete')
@@ -520,6 +534,10 @@
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200">✕ Unassigned</span>
                                         @endif
+
+                                        <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                            {{ ucfirst((string) ($deployment['status'] ?? '')) }}
+                                        </div>
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap">

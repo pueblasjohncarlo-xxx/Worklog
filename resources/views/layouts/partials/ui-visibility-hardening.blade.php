@@ -71,26 +71,31 @@
         outline: none;
     }
 
-    /* Keep text dark inside white cards/tables for clarity */
-    body.worklog-ui-hardening .bg-white:not([class*="dark:bg-"]) .text-gray-900,
-    body.worklog-ui-hardening .bg-white:not([class*="dark:bg-"]) .text-gray-800,
-    body.worklog-ui-hardening .bg-white:not([class*="dark:bg-"]) .text-gray-700,
-    body.worklog-ui-hardening .bg-gray-50:not([class*="dark:bg-"]) .text-gray-900,
-    body.worklog-ui-hardening .bg-gray-50:not([class*="dark:bg-"]) .text-gray-800,
-    body.worklog-ui-hardening .bg-gray-50:not([class*="dark:bg-"]) .text-gray-700,
-    body.worklog-ui-hardening .bg-gray-100:not([class*="dark:bg-"]) .text-gray-900,
-    body.worklog-ui-hardening .bg-gray-100:not([class*="dark:bg-"]) .text-gray-800,
-    body.worklog-ui-hardening .bg-gray-100:not([class*="dark:bg-"]) .text-gray-700 {
-        color: #0f172a !important;
-    }
+    /* Keep text dark inside light cards/tables in LIGHT MODE for clarity.
+       This intentionally applies even when the card also has `dark:bg-*`.
+       Dark mode is handled by the `@media (prefers-color-scheme: dark)` rescue below.
+    */
+    @media (prefers-color-scheme: light) {
+        body.worklog-ui-hardening .bg-white .text-gray-900,
+        body.worklog-ui-hardening .bg-white .text-gray-800,
+        body.worklog-ui-hardening .bg-white .text-gray-700,
+        body.worklog-ui-hardening .bg-gray-50 .text-gray-900,
+        body.worklog-ui-hardening .bg-gray-50 .text-gray-800,
+        body.worklog-ui-hardening .bg-gray-50 .text-gray-700,
+        body.worklog-ui-hardening .bg-gray-100 .text-gray-900,
+        body.worklog-ui-hardening .bg-gray-100 .text-gray-800,
+        body.worklog-ui-hardening .bg-gray-100 .text-gray-700 {
+            color: #0f172a !important;
+        }
 
-    body.worklog-ui-hardening .bg-white:not([class*="dark:bg-"]) .text-gray-600,
-    body.worklog-ui-hardening .bg-white:not([class*="dark:bg-"]) .text-gray-500,
-    body.worklog-ui-hardening .bg-gray-50:not([class*="dark:bg-"]) .text-gray-600,
-    body.worklog-ui-hardening .bg-gray-50:not([class*="dark:bg-"]) .text-gray-500,
-    body.worklog-ui-hardening .bg-gray-100:not([class*="dark:bg-"]) .text-gray-600,
-    body.worklog-ui-hardening .bg-gray-100:not([class*="dark:bg-"]) .text-gray-500 {
-        color: #334155 !important;
+        body.worklog-ui-hardening .bg-white .text-gray-600,
+        body.worklog-ui-hardening .bg-white .text-gray-500,
+        body.worklog-ui-hardening .bg-gray-50 .text-gray-600,
+        body.worklog-ui-hardening .bg-gray-50 .text-gray-500,
+        body.worklog-ui-hardening .bg-gray-100 .text-gray-600,
+        body.worklog-ui-hardening .bg-gray-100 .text-gray-500 {
+            color: #334155 !important;
+        }
     }
 
     /* Dark-mode rescue: if a surface switches to dark via `dark:bg-*`, ensure text never stays dark by mistake. */
@@ -122,6 +127,28 @@
         color: #c7d2fe !important;
     }
 
+    /* Prevent overly-faded helper text on dark shells */
+    body.worklog-ui-hardening .glass-panel .text-gray-500,
+    body.worklog-ui-hardening .glass-panel .text-gray-400,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-gray-500,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-gray-400 {
+        color: #e2e8f0 !important;
+    }
+
+    body.worklog-ui-hardening .bg-black .text-gray-500,
+    body.worklog-ui-hardening .bg-black .text-gray-400,
+    body.worklog-ui-hardening [class*="bg-indigo-"] .text-gray-500,
+    body.worklog-ui-hardening [class*="bg-indigo-"] .text-gray-400,
+    body.worklog-ui-hardening [class*="bg-purple-"] .text-gray-500,
+    body.worklog-ui-hardening [class*="bg-purple-"] .text-gray-400 {
+        color: #e2e8f0 !important;
+    }
+
+    body.worklog-ui-hardening .bg-black svg.text-gray-500,
+    body.worklog-ui-hardening .bg-black svg.text-gray-400 {
+        color: #e2e8f0 !important;
+    }
+
     body.worklog-ui-hardening :focus-visible {
         outline: 2px solid #818cf8;
         outline-offset: 2px;
@@ -132,7 +159,7 @@
     body.worklog-ui-hardening input:disabled,
     body.worklog-ui-hardening select:disabled,
     body.worklog-ui-hardening textarea:disabled {
-        opacity: 0.65 !important;
+        opacity: 0.75 !important;
     }
 </style>
 
