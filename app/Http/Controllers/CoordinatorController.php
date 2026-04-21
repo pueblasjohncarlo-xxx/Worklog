@@ -388,8 +388,8 @@ class CoordinatorController extends Controller
                 'total' => $totalActive,
                 'period' => 'Last 7 days',
             ],
-            'mopping' => [
-                'label' => 'Mopping',
+            'mapping' => [
+                'label' => 'Mapping',
                 'count' => 0,
                 'total' => null,
                 'period' => 'Not configured',

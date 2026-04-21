@@ -17,6 +17,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\JournalController;
 use App\Http\Controllers\Student\TaskController as StudentTaskController;
 use App\Http\Controllers\Student\LeaveController as StudentLeaveController;
+use App\Http\Controllers\Student\MappingController as StudentMappingController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\Supervisor\SupervisorReportController;
 use App\Http\Controllers\Supervisor\SupervisorTaskController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Supervisor\SupervisorTeamController;
 use App\Http\Controllers\SupervisorController;
 use App\Http\Controllers\WorkLogController;
 
+use App\Models\Assignment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -135,6 +137,7 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
     Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
     Route::post('/student/clock-in', [StudentController::class, 'clockIn'])->name('student.clock-in');
     Route::post('/student/clock-out', [StudentController::class, 'clockOut'])->name('student.clock-out');
+    Route::get('/student/mapping', [StudentMappingController::class, 'index'])->name('student.mapping.index');
     // Hours log is now part of Reports
     Route::get('/student/hours-log', function () {
         return redirect()->route('student.reports.index');
@@ -245,9 +248,17 @@ Route::middleware(['auth', 'verified', 'role:coordinator'])->group(function () {
     Route::get('/coordinator/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('coordinator.worklogs.print');
     Route::get('/coordinator/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('coordinator.worklogs.attachment');
 
-    // Mopping (Monthly AR vs Attendance)
-    Route::get('/coordinator/mopping', [CoordinatorMoppingController::class, 'index'])->name('coordinator.mopping.index');
-    Route::get('/coordinator/mopping/{assignment}', [CoordinatorMoppingController::class, 'show'])->name('coordinator.mopping.show');
+    // Mapping (Monthly AR vs Attendance + calendar summary)
+    Route::get('/coordinator/mapping', [CoordinatorMoppingController::class, 'index'])->name('coordinator.mapping.index');
+    Route::get('/coordinator/mapping/{assignment}', [CoordinatorMoppingController::class, 'show'])->name('coordinator.mapping.show');
+
+    // Backward-compatible redirects (old URLs)
+    Route::get('/coordinator/mopping', function (Request $request) {
+        return redirect()->route('coordinator.mapping.index', $request->query());
+    })->name('coordinator.mopping.index');
+    Route::get('/coordinator/mopping/{assignment}', function (Request $request, Assignment $assignment) {
+        return redirect()->route('coordinator.mapping.show', ['assignment' => $assignment->id] + $request->query());
+    })->name('coordinator.mopping.show');
     Route::get('/coordinator/leaves/{leave}/print', [LeaveController::class, 'print'])->name('coordinator.leaves.print');
     Route::get('/coordinator/compliance-overview', [CoordinatorController::class, 'complianceOverview'])->name('coordinator.compliance-overview');
 
@@ -293,9 +304,17 @@ Route::middleware(['auth', 'verified', 'role:ojt_adviser'])->group(function () {
     Route::get('/ojt-adviser/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('ojt_adviser.worklogs.print');
     Route::get('/ojt-adviser/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('ojt_adviser.worklogs.attachment');
 
-    // Mopping (Monthly AR vs Attendance)
-    Route::get('/ojt-adviser/mopping', [OjtAdviserMoppingController::class, 'index'])->name('ojt_adviser.mopping.index');
-    Route::get('/ojt-adviser/mopping/{assignment}', [OjtAdviserMoppingController::class, 'show'])->name('ojt_adviser.mopping.show');
+    // Mapping (Monthly AR vs Attendance + calendar summary)
+    Route::get('/ojt-adviser/mapping', [OjtAdviserMoppingController::class, 'index'])->name('ojt_adviser.mapping.index');
+    Route::get('/ojt-adviser/mapping/{assignment}', [OjtAdviserMoppingController::class, 'show'])->name('ojt_adviser.mapping.show');
+
+    // Backward-compatible redirects (old URLs)
+    Route::get('/ojt-adviser/mopping', function (Request $request) {
+        return redirect()->route('ojt_adviser.mapping.index', $request->query());
+    })->name('ojt_adviser.mopping.index');
+    Route::get('/ojt-adviser/mopping/{assignment}', function (Request $request, Assignment $assignment) {
+        return redirect()->route('ojt_adviser.mapping.show', ['assignment' => $assignment->id] + $request->query());
+    })->name('ojt_adviser.mopping.show');
     Route::get('/ojt-adviser/leaves/{leave}/print', [LeaveController::class, 'print'])->name('ojt_adviser.leaves.print');
     Route::get('/ojt-adviser/leaves', [OjtAdviserController::class, 'leavesIndex'])->name('ojt_adviser.leaves.index');
     Route::post('/ojt-adviser/leaves/{leave}/approve', [OjtAdviserController::class, 'approveLeave'])->name('ojt_adviser.leaves.approve');

@@ -1,11 +1,49 @@
 <x-ojt-adviser-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Mopping Details') }}
+            {{ __('Mapping Details') }}
         </h2>
     </x-slot>
 
+    <style>
+        @media print {
+            .app-sidebar, header, nav, .no-print { display: none !important; }
+            main { padding: 0 !important; }
+            body { background: #fff !important; }
+        }
+    </style>
+
     <div class="space-y-6">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900 dark:text-gray-100 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold">Mapping of OJT Hours</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Calendar-style breakdown with weekly and monthly totals (attendance-based).</p>
+                    </div>
+
+                    <div class="no-print flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+                        <form method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+                            <div>
+                                <label for="from" class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">From</label>
+                                <input id="from" name="from" type="month" value="{{ $fromKey ?? '' }}" class="mt-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" />
+                            </div>
+                            <div>
+                                <label for="to" class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">To</label>
+                                <input id="to" name="to" type="month" value="{{ $toKey ?? '' }}" class="mt-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" />
+                            </div>
+                            <button type="submit" class="h-[42px] px-4 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700">Apply</button>
+                        </form>
+                        <button type="button" onclick="window.print()" class="h-[42px] px-4 rounded-md bg-gray-900 text-white text-sm font-semibold hover:bg-black">Print</button>
+                    </div>
+                </div>
+
+                @if(!empty($mapping))
+                    @include('partials.mapping.calendar-range', ['mapping' => $mapping])
+                @endif
+            </div>
+        </div>
+
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 dark:text-gray-100 space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -17,8 +55,10 @@
                     <form method="GET" class="flex items-center gap-2">
                         <label for="month" class="text-sm text-gray-600 dark:text-gray-400">Month</label>
                         <input id="month" name="month" type="month" value="{{ $monthKey }}" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" />
+                        <input type="hidden" name="from" value="{{ $fromKey ?? '' }}" />
+                        <input type="hidden" name="to" value="{{ $toKey ?? '' }}" />
                         <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700">Apply</button>
-                        <a href="{{ route('ojt_adviser.mopping.index', ['month' => $monthKey]) }}" class="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-sm font-semibold">Back</a>
+                        <a href="{{ route('ojt_adviser.mapping.index', ['month' => $monthKey]) }}" class="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-sm font-semibold">Back</a>
                     </form>
                 </div>
 

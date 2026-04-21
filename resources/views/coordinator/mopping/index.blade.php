@@ -1,7 +1,7 @@
 <x-coordinator-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Mopping') }}
+            {{ __('Mapping') }}
         </h2>
     </x-slot>
 
@@ -10,8 +10,8 @@
             <div class="p-6 text-gray-900 dark:text-gray-100 space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                        <h3 class="text-lg font-semibold">Monthly AR vs Attendance</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Compare attendance logs with submitted accomplishment reports.</p>
+                        <h3 class="text-lg font-semibold">Attendance Mapping (AR Validation)</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Attendance-based hours mapping to validate submitted accomplishment reports.</p>
                     </div>
 
                     <form method="GET" class="flex items-center gap-2">
@@ -68,7 +68,7 @@
                                         @endif
                                     </td>
                                     <td class="px-4 py-4 text-right">
-                                        <a href="{{ route('coordinator.mopping.show', ['assignment' => $assignment->id, 'month' => $monthKey]) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-gray-900 text-white text-sm font-semibold hover:bg-black">
+                                        <a href="{{ route('coordinator.mapping.show', ['assignment' => $assignment->id, 'from' => $monthKey, 'to' => $monthKey, 'month' => $monthKey]) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-gray-900 text-white text-sm font-semibold hover:bg-black">
                                             View
                                         </a>
                                     </td>

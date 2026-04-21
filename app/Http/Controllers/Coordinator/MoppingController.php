@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Coordinator;
 use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\WorkLog;
+use App\Services\MappingCalendarBuilder;
 use App\Services\MoppingAnalyzer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -52,21 +54,40 @@ class MoppingController extends Controller
         ]);
     }
 
-    public function show(Request $request, Assignment $assignment, MoppingAnalyzer $analyzer): View
+    public function show(Request $request, Assignment $assignment, MoppingAnalyzer $analyzer, MappingCalendarBuilder $builder): View
     {
-        $monthStart = $analyzer->monthRangeFromKey($request->query('month'));
-        $monthKey = $analyzer->monthKey($monthStart);
-        $monthEnd = $analyzer->monthEnd($monthStart);
+        $fromKey = (string) $request->query('from', '');
+        $toKey = (string) $request->query('to', '');
+
+        $monthKeyParam = (string) $request->query('month', '');
+        if ($fromKey === '' && $monthKeyParam !== '') {
+            $fromKey = $monthKeyParam;
+        }
+        if ($toKey === '' && $monthKeyParam !== '') {
+            $toKey = $monthKeyParam;
+        }
+
+        $fromMonth = $fromKey !== '' ? $analyzer->monthRangeFromKey($fromKey) : Carbon::now()->subMonths(4)->startOfMonth();
+        $toMonth = $toKey !== '' ? $analyzer->monthRangeFromKey($toKey) : Carbon::now()->startOfMonth();
+
+        if ($toMonth->lt($fromMonth)) {
+            [$fromMonth, $toMonth] = [$toMonth, $fromMonth];
+        }
+
+        // Keep legacy month-based details (defaults to the range start month)
+        $detailMonth = $monthKeyParam !== '' ? $analyzer->monthRangeFromKey($monthKeyParam) : $fromMonth;
+        $monthKey = $analyzer->monthKey($detailMonth);
+        $monthEnd = $analyzer->monthEnd($detailMonth);
 
         $assignment->loadMissing(['student', 'company']);
 
         $monthLogs = WorkLog::query()
             ->where('assignment_id', $assignment->id)
-            ->whereBetween('work_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->whereBetween('work_date', [$detailMonth->toDateString(), $monthEnd->toDateString()])
             ->orderBy('work_date')
             ->get();
 
-        $summary = $analyzer->analyzeMonth($monthLogs, $monthStart);
+        $summary = $analyzer->analyzeMonth($monthLogs, $detailMonth);
 
         $attendanceLogs = $monthLogs
             ->filter(fn (WorkLog $log) => ! is_null($log->time_in))
@@ -76,13 +97,21 @@ class MoppingController extends Controller
             ->filter(fn (WorkLog $log) => is_null($log->time_in) && in_array($log->type, ['daily', 'weekly', 'monthly'], true))
             ->values();
 
+        $mapping = $builder->buildForAssignment($assignment, $fromMonth, $toMonth, $analyzer);
+
+        $rangeIsSingleMonth = ($mapping['fromKey'] ?? '') === ($mapping['toKey'] ?? '');
+
         return view('coordinator.mopping.show', [
             'monthKey' => $monthKey,
-            'monthStart' => $monthStart,
+            'monthStart' => $detailMonth,
             'assignment' => $assignment,
             'summary' => $summary,
             'attendanceLogs' => $attendanceLogs,
             'arLogs' => $arLogs,
+            'mapping' => $mapping,
+            'fromKey' => $mapping['fromKey'] ?? $fromMonth->format('Y-m'),
+            'toKey' => $mapping['toKey'] ?? $toMonth->format('Y-m'),
+            'rangeIsSingleMonth' => $rangeIsSingleMonth,
         ]);
     }
 }

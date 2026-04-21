@@ -312,14 +312,14 @@
 
             <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 shadow-xl">
                 <h3 class="text-lg font-bold text-white mb-4">
-                    Mopping
+                    Mapping
                 </h3>
                 <div class="border border-white/10 rounded-xl p-4 bg-black/20">
                     <div class="text-2xl font-black text-white">
-                        {{ $trackingBoxes['mopping']['count'] }}
+                        {{ $trackingBoxes['mapping']['count'] }}
                     </div>
                     <div class="text-xs text-gray-300 font-semibold mt-1">
-                        {{ $trackingBoxes['mopping']['period'] }}
+                        {{ $trackingBoxes['mapping']['period'] }}
                     </div>
                 </div>
             </div>
