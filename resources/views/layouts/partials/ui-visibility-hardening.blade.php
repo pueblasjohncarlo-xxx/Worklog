@@ -154,6 +154,29 @@
         color: #e2e8f0 !important;
     }
 
+    body.worklog-ui-hardening .text-gray-500,
+    body.worklog-ui-hardening .text-gray-400,
+    body.worklog-ui-hardening .text-slate-500,
+    body.worklog-ui-hardening .text-slate-400 {
+        color: #cbd5e1;
+    }
+
+    body.worklog-ui-hardening .bg-black .text-gray-300,
+    body.worklog-ui-hardening .bg-black .text-slate-300,
+    body.worklog-ui-hardening .bg-black .text-indigo-300,
+    body.worklog-ui-hardening .bg-black/50 .text-gray-300,
+    body.worklog-ui-hardening .bg-black/50 .text-slate-300,
+    body.worklog-ui-hardening .bg-black/50 .text-indigo-300,
+    body.worklog-ui-hardening .bg-black/40 .text-gray-300,
+    body.worklog-ui-hardening .bg-black/40 .text-slate-300,
+    body.worklog-ui-hardening .bg-black/40 .text-indigo-300,
+    body.worklog-ui-hardening .bg-indigo-950 .text-gray-300,
+    body.worklog-ui-hardening .bg-indigo-950 .text-slate-300,
+    body.worklog-ui-hardening .bg-purple-950 .text-gray-300,
+    body.worklog-ui-hardening .bg-purple-950 .text-slate-300 {
+        color: #e2e8f0 !important;
+    }
+
     /* Sidebars and top navigation need brighter default/menu contrast across all roles. */
     body.worklog-ui-hardening .app-sidebar,
     body.worklog-ui-hardening nav[class*="bg-black"] {

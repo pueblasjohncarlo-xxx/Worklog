@@ -2,7 +2,7 @@
     <!-- Header/Logo -->
     <div class="p-6 flex items-center justify-between border-b border-indigo-500/30 bg-black/20">
         <x-wl-sidebar-logo />
-        <button @click="sidebarOpen = false" class="md:hidden text-gray-400 hover:text-white">
+        <button @click="sidebarOpen = false" class="md:hidden text-gray-200 hover:text-white">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -13,7 +13,7 @@
     <nav class="flex-1 mt-6 px-4 space-y-1" @click="if (window.innerWidth < 768) sidebarOpen = false">
         <!-- Dashboard -->
         <a href="{{ route('student.dashboard') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.dashboard') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.dashboard') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2-0 012-2h2a2 2-0 012 2v2a2 2-0 01-2 2H6a2 2-0 01-2-2V6zM14 6a2 2-0 012-2h2a2 2-0 012 2v2a2 2-0 01-2 2h-2a2 2-0 01-2-2V6zM14 6a2 2-0 012-2h2a2 2-0 012 2v2a2 2-0 01-2 2h-2a2 2-0 01-2-2V6zM4 16a2 2-0 012-2h2a2 2-0 01-2 2H6a2 2-0 01-2-2v-2zM14 16a2 2-0 012-2h2a2 2-0 01-2 2h-2a2 2-0 01-2-2v-2z" />
             </svg>
@@ -22,7 +22,7 @@
 
         <!-- My Tasks -->
         <a href="{{ route('student.tasks.index') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.tasks.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.tasks.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
             </svg>
@@ -31,7 +31,7 @@
 
         <!-- Accomplishment Report -->
         <a href="{{ route('student.journal.index') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.journal.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.journal.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2-0 01-2-2V5a2 2-0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -40,7 +40,7 @@
 
         <!-- Hours Log -->
         <a href="{{ route('student.reports.index') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->url() == route('student.reports.index') && !request()->has('view') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->url() == route('student.reports.index') && !request()->has('view') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -49,7 +49,7 @@
 
         <!-- Mapping -->
         <a href="{{ route('student.mapping.index') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.mapping.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.mapping.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2-0 01-2-2V5a2 2-0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2-0 01-2 2z" />
             </svg>
@@ -58,7 +58,7 @@
 
         <!-- Announcements -->
         <a href="{{ route('student.announcements.index') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.announcements.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.announcements.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
             </svg>
@@ -67,7 +67,7 @@
 
         <!-- Reports -->
         <a href="{{ route('student.reports.index', ['view' => 'reports']) }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->get('view') == 'reports' ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->get('view') == 'reports' ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -76,7 +76,7 @@
 
         <!-- Messages -->
         <a href="{{ route('messages.index') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('messages.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-300' }}">
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('messages.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
             <div class="relative">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -95,19 +95,19 @@
     </nav>
 
     <!-- Footer / Profile -->
-    <div class="p-4 border-t border-indigo-900 text-gray-300 bg-black/40">
+    <div class="p-4 border-t border-indigo-900 text-gray-200 bg-black/40">
         <div class="px-4 py-3 mb-2">
             <p class="text-[12px] uppercase tracking-[0.2em] text-gray-500 font-black">Signed in as</p>
             <p class="text-base font-black text-indigo-400 truncate mt-1" data-user-name-id="{{ Auth::id() }}">{{ Auth::user()->name }}</p>
         </div>
         <a href="{{ route('profile.edit') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('profile.edit') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900' }}">
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('profile.edit') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             <span class="text-base font-bold">My Profile</span>
         </a>
-        <a href="{{ route('logout.get') }}" class="mt-2 w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-900/20 text-red-400 transition-colors text-left group">
+        <a href="{{ route('logout.get') }}" class="mt-2 w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-900/20 text-red-300 transition-colors text-left group">
                 <svg class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
