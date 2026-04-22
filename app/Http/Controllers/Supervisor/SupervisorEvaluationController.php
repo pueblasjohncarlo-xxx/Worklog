@@ -173,9 +173,7 @@ class SupervisorEvaluationController extends Controller
 
         $templateBaseDir = storage_path('app/templates/performance-evaluation');
         $candidateTemplates = [
-            $templateBaseDir.DIRECTORY_SEPARATOR.'official-template.docx',
-            $templateBaseDir.DIRECTORY_SEPARATOR.'OJT-PERFORMANCE-EVALUATION (2).docx',
-            $templateBaseDir.DIRECTORY_SEPARATOR.'template.docx',
+            $templateBaseDir.DIRECTORY_SEPARATOR.'official-template.doc',
         ];
 
         foreach ($candidateTemplates as $path) {
@@ -183,11 +181,19 @@ class SupervisorEvaluationController extends Controller
                 continue;
             }
 
+            $ext = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+            $downloadName = 'OJT_Performance_Evaluation_Template.'.($ext ?: 'doc');
+            $contentType = match ($ext) {
+                'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'odt' => 'application/vnd.oasis.opendocument.text',
+                default => 'application/msword',
+            };
+
             return response()->download(
                 $path,
-                'OJT_Performance_Evaluation_Template.docx',
+                $downloadName,
                 [
-                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'Content-Type' => $contentType,
                     'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
                 ]
             );
