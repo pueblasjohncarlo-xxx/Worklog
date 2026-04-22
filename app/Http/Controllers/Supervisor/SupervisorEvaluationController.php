@@ -154,66 +154,20 @@ class SupervisorEvaluationController extends Controller
 
     public function template(Request $request): Response
     {
-        $supervisorId = (int) Auth::id();
+        $templatePath = resource_path('templates/performance-evaluation/official-template.docx');
 
-        $studentId = (int) $request->integer('student_id');
-        $evaluationDate = (string) $request->query('evaluation_date', now()->toDateString());
-        $semester = (string) $request->query('semester', '1st Semester');
-
-        $assignment = null;
-        if ($studentId > 0) {
-            $assignment = Assignment::query()
-                ->where('supervisor_id', $supervisorId)
-                ->where('student_id', $studentId)
-                ->active()
-                ->with(['student', 'company'])
-                ->latest('updated_at')
-                ->first();
-        }
-
-        $templateBaseDir = storage_path('app/templates/performance-evaluation');
-        $candidateTemplates = [
-            $templateBaseDir.DIRECTORY_SEPARATOR.'official-template.docx',
-        ];
-
-        foreach ($candidateTemplates as $path) {
-            if (! is_file($path)) {
-                continue;
-            }
-
-            $ext = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
-            $downloadName = 'OJT_Performance_Evaluation_Template.'.($ext ?: 'doc');
-            $contentType = match ($ext) {
-                'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'odt' => 'application/vnd.oasis.opendocument.text',
-                default => 'application/msword',
-            };
-
+        if (is_file($templatePath)) {
             return response()->download(
-                $path,
-                $downloadName,
+                $templatePath,
+                'OJT_Performance_Evaluation_Template_v2.docx',
                 [
-                    'Content-Type' => $contentType,
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                     'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
                 ]
             );
         }
 
-        $studentName = $assignment?->student?->name ?? '________________________';
-        $companyName = $assignment?->company?->name ?? '________________________';
-
-        $html = view('templates.performance-evaluation-word', [
-            'studentName' => $studentName,
-            'companyName' => $companyName,
-            'semester' => $semester,
-            'evaluationDate' => $evaluationDate,
-            'supervisorName' => Auth::user()?->name ?? '________________________',
-        ])->render();
-
-        return response($html, 200)
-            ->header('Content-Type', 'application/msword; charset=UTF-8')
-            ->header('Content-Disposition', 'attachment; filename="OJT_Performance_Evaluation_Template.doc"')
-            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        abort(404, 'Performance evaluation template file is missing.');
     }
 
     protected function generateDoc(PerformanceEvaluation $evaluation): array
