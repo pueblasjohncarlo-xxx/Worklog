@@ -62,6 +62,8 @@
         padding: 0.125rem 0.375rem;
         line-height: 1.2;
         text-decoration: none;
+        font-weight: 800;
+        letter-spacing: -0.01em;
     }
 
     .top-header-title-link:hover,
@@ -149,6 +151,41 @@
         color: #e2e8f0 !important;
     }
 
+    /* Sidebars and top navigation need brighter default/menu contrast across all roles. */
+    body.worklog-ui-hardening .app-sidebar,
+    body.worklog-ui-hardening nav[class*="bg-black"] {
+        color: #f8fafc;
+    }
+
+    body.worklog-ui-hardening .app-sidebar .text-gray-500,
+    body.worklog-ui-hardening .app-sidebar .text-gray-400,
+    body.worklog-ui-hardening .app-sidebar .text-gray-300,
+    body.worklog-ui-hardening nav[class*="bg-black"] .text-gray-500,
+    body.worklog-ui-hardening nav[class*="bg-black"] .text-gray-400,
+    body.worklog-ui-hardening nav[class*="bg-black"] .text-gray-300 {
+        color: #e5e7eb !important;
+        opacity: 1 !important;
+    }
+
+    body.worklog-ui-hardening .app-sidebar a,
+    body.worklog-ui-hardening nav[class*="bg-black"] a {
+        color: inherit;
+    }
+
+    body.worklog-ui-hardening .app-sidebar a:hover,
+    body.worklog-ui-hardening .app-sidebar button:hover,
+    body.worklog-ui-hardening nav[class*="bg-black"] a:hover,
+    body.worklog-ui-hardening nav[class*="bg-black"] button:hover {
+        color: #ffffff !important;
+    }
+
+    body.worklog-ui-hardening .text-gray-400.uppercase,
+    body.worklog-ui-hardening .text-gray-500.uppercase,
+    body.worklog-ui-hardening .text-slate-500.uppercase {
+        letter-spacing: 0.08em;
+        font-weight: 700 !important;
+    }
+
     body.worklog-ui-hardening :focus-visible {
         outline: 2px solid #818cf8;
         outline-offset: 2px;
@@ -177,6 +214,17 @@
         letter-spacing: 0.04em;
     }
 
+    body.worklog-ui-hardening .bg-white td,
+    body.worklog-ui-hardening .bg-gray-50 td,
+    body.worklog-ui-hardening .bg-white label,
+    body.worklog-ui-hardening .bg-gray-50 label,
+    body.worklog-ui-hardening .bg-white p,
+    body.worklog-ui-hardening .bg-gray-50 p,
+    body.worklog-ui-hardening .bg-white span,
+    body.worklog-ui-hardening .bg-gray-50 span {
+        color: inherit;
+    }
+
     body.worklog-ui-hardening .bg-white .text-white,
     body.worklog-ui-hardening .bg-gray-50 .text-white {
         color: #ffffff !important;
@@ -201,6 +249,62 @@
     body.worklog-ui-hardening .bg-gray-50 textarea::placeholder {
         color: #64748b !important;
         opacity: 1 !important;
+    }
+
+    body.worklog-ui-hardening input,
+    body.worklog-ui-hardening select,
+    body.worklog-ui-hardening textarea {
+        color: inherit;
+    }
+
+    body.worklog-ui-hardening .bg-white input,
+    body.worklog-ui-hardening .bg-white select,
+    body.worklog-ui-hardening .bg-white textarea,
+    body.worklog-ui-hardening .bg-gray-50 input,
+    body.worklog-ui-hardening .bg-gray-50 select,
+    body.worklog-ui-hardening .bg-gray-50 textarea {
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+        background-color: #ffffff !important;
+    }
+
+    body.worklog-ui-hardening [class*="bg-black/"] input,
+    body.worklog-ui-hardening [class*="bg-black/"] select,
+    body.worklog-ui-hardening [class*="bg-black/"] textarea,
+    body.worklog-ui-hardening [class*="dark:bg-gray-"] input,
+    body.worklog-ui-hardening [class*="dark:bg-gray-"] select,
+    body.worklog-ui-hardening [class*="dark:bg-gray-"] textarea {
+        color: #f8fafc !important;
+        border-color: rgba(99, 102, 241, 0.25) !important;
+    }
+
+    body.worklog-ui-hardening option {
+        color: #0f172a;
+        background: #ffffff;
+    }
+
+    /* Modal/read-only panels */
+    body.worklog-ui-hardening [role="dialog"] .bg-white,
+    body.worklog-ui-hardening [role="dialog"] [class*="bg-white"],
+    body.worklog-ui-hardening .fixed .bg-white {
+        color: #0f172a !important;
+    }
+
+    body.worklog-ui-hardening [role="dialog"] .text-gray-500,
+    body.worklog-ui-hardening [role="dialog"] .text-gray-400,
+    body.worklog-ui-hardening .fixed .text-gray-500,
+    body.worklog-ui-hardening .fixed .text-gray-400 {
+        color: #475569 !important;
+        opacity: 1 !important;
+    }
+
+    body.worklog-ui-hardening .bg-white.rounded-lg,
+    body.worklog-ui-hardening .bg-white.rounded-xl,
+    body.worklog-ui-hardening .bg-white.rounded-2xl,
+    body.worklog-ui-hardening .bg-gray-50.rounded-lg,
+    body.worklog-ui-hardening .bg-gray-50.rounded-xl,
+    body.worklog-ui-hardening .bg-gray-50.rounded-2xl {
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
     }
 
     /* Student cards and tabs should remain readable even before CSS assets are rebuilt. */
@@ -262,12 +366,42 @@
         border-color: #e2e8f0 !important;
     }
 
+    body.worklog-ui-hardening table thead th {
+        font-weight: 800 !important;
+    }
+
+    body.worklog-ui-hardening table tbody td {
+        vertical-align: middle;
+    }
+
+    body.worklog-ui-hardening .inline-flex.rounded-full.text-xs,
+    body.worklog-ui-hardening .inline-flex.rounded-full.text-\[10px\],
+    body.worklog-ui-hardening .inline-flex.rounded-full.text-\[11px\] {
+        font-weight: 700 !important;
+    }
+
+    /* Select2 surfaces used by coordinator/admin flows */
+    body.worklog-ui-hardening .select2-container--default .select2-selection--single,
+    body.worklog-ui-hardening .select2-container--default .select2-selection--multiple {
+        border-color: rgba(99, 102, 241, 0.24) !important;
+        color: #f8fafc !important;
+    }
+
+    body.worklog-ui-hardening .select2-container--default .select2-selection--single .select2-selection__rendered,
+    body.worklog-ui-hardening .select2-container--default .select2-selection--multiple .select2-selection__rendered,
+    body.worklog-ui-hardening .select2-container--default .select2-selection--single .select2-selection__placeholder,
+    body.worklog-ui-hardening .select2-dropdown,
+    body.worklog-ui-hardening .select2-search__field {
+        color: #e5e7eb !important;
+    }
+
     /* Disabled controls should not become invisible */
     body.worklog-ui-hardening button:disabled,
     body.worklog-ui-hardening input:disabled,
     body.worklog-ui-hardening select:disabled,
     body.worklog-ui-hardening textarea:disabled {
-        opacity: 0.75 !important;
+        opacity: 0.8 !important;
+        color: #94a3b8 !important;
     }
 </style>
 
