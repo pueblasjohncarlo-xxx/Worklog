@@ -34,8 +34,12 @@
                         class="px-3 py-1 rounded text-xs text-white transition">Students</button>
                     <button @click="roleFilter = 'supervisor'" :class="roleFilter === 'supervisor' ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-gray-700'" 
                         class="px-3 py-1 rounded text-xs text-white transition">Supervisors</button>
+                    <button @click="roleFilter = 'ojt_adviser'" :class="roleFilter === 'ojt_adviser' ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-gray-700'" 
+                        class="px-3 py-1 rounded text-xs text-white transition">OJT Advisers</button>
                     <button @click="roleFilter = 'coordinator'" :class="roleFilter === 'coordinator' ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-gray-700'" 
                         class="px-3 py-1 rounded text-xs text-white transition">Coordinators</button>
+                    <button @click="roleFilter = 'admin'" :class="roleFilter === 'admin' ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-gray-700'" 
+                        class="px-3 py-1 rounded text-xs text-white transition">Admins</button>
                 </div>
             </div>
 

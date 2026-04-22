@@ -227,7 +227,7 @@
                                                 <div class="text-sm font-bold text-white truncate" x-text="student.name"></div>
                                                 <template x-if="student.has_assignment">
                                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/30 text-emerald-300 border border-emerald-500/50">
-                                                        ✓ Active
+                                                        Active
                                                     </span>
                                                 </template>
                                             </div>

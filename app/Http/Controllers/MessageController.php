@@ -248,7 +248,7 @@ class MessageController extends Controller
 
     private function coordinatorCanMessage(User $user): bool
     {
-        return $user->role === User::ROLE_SUPERVISOR ||
+        return in_array($user->role, [User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER], true) ||
             Assignment::where('student_id', $user->id)->exists();
     }
 
@@ -276,10 +276,11 @@ class MessageController extends Controller
             return $coordinators->merge($students)->unique('id')->sortBy('name');
             
         } elseif ($user->role === User::ROLE_COORDINATOR) {
-            // Coordinators can message: supervisors + students (any user with student role)
+            // Coordinators can message: supervisors + OJT advisers + students
             $supervisors = User::where('role', User::ROLE_SUPERVISOR)->orderBy('name')->get();
+            $ojtAdvisers = User::where('role', User::ROLE_OJT_ADVISER)->orderBy('name')->get();
             $students = User::where('role', User::ROLE_STUDENT)->orderBy('name')->get();
-            return $supervisors->merge($students)->unique('id')->sortBy('name');
+            return $supervisors->merge($ojtAdvisers)->merge($students)->unique('id')->sortBy('name');
                 
         } elseif ($user->role === User::ROLE_STUDENT) {
             // Students can message: their supervisors + coordinators
@@ -360,7 +361,7 @@ class MessageController extends Controller
                     $lastMessagePreview = trim((string) $lastMessage->body);
 
                     if ($lastMessagePreview === '' && $lastMessage->attachment_name) {
-                        $lastMessagePreview = '📎 '.$lastMessage->attachment_name;
+                        $lastMessagePreview = 'Attachment: ' . $lastMessage->attachment_name;
                     }
                 }
 

@@ -1,15 +1,15 @@
 <x-guest-layout>
-    <div class="rounded-3xl bg-purple-900/60 border border-purple-500/30 shadow-2xl backdrop-blur-md px-8 py-10 space-y-6">
+    <div class="guest-auth-card rounded-3xl px-8 py-10 space-y-6">
         <div class="text-center space-y-2">
             <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 shadow-lg">
                 <span class="text-lg font-extrabold text-white">W</span>
             </div>
-            <div class="text-xl font-semibold text-white tracking-tight">
+            <div class="guest-auth-title text-xl font-semibold tracking-tight">
                 Reset password
             </div>
         </div>
 
-        <div class="mb-2 text-sm text-purple-100 text-center">
+        <div class="guest-auth-body mb-2 text-sm text-center">
             {{ __('Forgot your password? No problem. Enter your email and we will send you a reset link.') }}
         </div>
 

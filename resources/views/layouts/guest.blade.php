@@ -23,7 +23,70 @@
             <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
         @endif
         @include('layouts.partials.ui-visibility-hardening')
-        
+        <style>
+            body.worklog-ui-hardening .guest-auth-card {
+                background: rgba(15, 23, 42, 0.72);
+                border: 1px solid rgba(129, 140, 248, 0.22);
+                box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+                backdrop-filter: blur(16px);
+                color: #f8fafc;
+            }
+
+            body.worklog-ui-hardening .guest-auth-title {
+                color: #ffffff;
+                font-weight: 800;
+                letter-spacing: -0.01em;
+            }
+
+            body.worklog-ui-hardening .guest-auth-body,
+            body.worklog-ui-hardening .guest-auth-card .text-gray-600,
+            body.worklog-ui-hardening .guest-auth-card .text-gray-500,
+            body.worklog-ui-hardening .guest-auth-card .text-gray-400 {
+                color: #dbe4ff !important;
+                opacity: 1 !important;
+            }
+
+            body.worklog-ui-hardening .guest-auth-card label,
+            body.worklog-ui-hardening .guest-auth-card .text-sm,
+            body.worklog-ui-hardening .guest-auth-card .text-xs {
+                color: #e5e7eb;
+            }
+
+            body.worklog-ui-hardening .guest-auth-card input,
+            body.worklog-ui-hardening .guest-auth-card select,
+            body.worklog-ui-hardening .guest-auth-card textarea {
+                background: rgba(2, 6, 23, 0.58) !important;
+                border: 1px solid rgba(148, 163, 184, 0.28) !important;
+                color: #f8fafc !important;
+            }
+
+            body.worklog-ui-hardening .guest-auth-card input::placeholder,
+            body.worklog-ui-hardening .guest-auth-card textarea::placeholder {
+                color: #cbd5e1 !important;
+                opacity: 1 !important;
+            }
+
+            body.worklog-ui-hardening .guest-auth-card a {
+                color: #c7d2fe;
+            }
+
+            body.worklog-ui-hardening .guest-auth-card a:hover {
+                color: #ffffff !important;
+            }
+
+            body.worklog-ui-hardening .guest-auth-card .text-red-300,
+            body.worklog-ui-hardening .guest-auth-card .text-rose-600 {
+                color: #fda4af !important;
+            }
+
+            body.worklog-ui-hardening .guest-auth-card .text-emerald-300,
+            body.worklog-ui-hardening .guest-auth-card .text-emerald-600,
+            body.worklog-ui-hardening .guest-auth-card .text-green-600,
+            body.worklog-ui-hardening .guest-auth-card .text-green-400 {
+                color: #86efac !important;
+            }
+        </style>
+
     </head>
     <body class="worklog-ui-hardening font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-gray-100">
         <div class="min-h-screen flex flex-col items-center justify-center px-4">

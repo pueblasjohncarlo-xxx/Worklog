@@ -182,7 +182,7 @@ class ProfileController extends Controller
             ]);
         }
 
-        $users = User::whereIn('id', $userIds)->get(['id', 'name', 'profile_photo_path', 'updated_at']);
+        $users = User::whereIn('id', $userIds)->get(['id', 'name', 'email', 'profile_photo_path', 'updated_at']);
 
         $avatars = $users->mapWithKeys(function (User $user) {
             return [

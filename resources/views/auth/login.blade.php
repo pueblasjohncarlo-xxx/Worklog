@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="rounded-3xl bg-white border border-gray-100 shadow-2xl backdrop-blur-md px-8 py-10 space-y-8">
+    <div class="guest-auth-card rounded-3xl px-8 py-10 space-y-8">
         <div class="text-center space-y-2">
             <x-wl-brand-logo class="mx-auto" />
         </div>
@@ -48,7 +48,7 @@
                         required
                         autocomplete="current-password"
                         class="mt-1 block w-full rounded-xl border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all px-3 py-2 text-base pr-10"
-                        placeholder="••••••••"
+                        placeholder="Enter your password"
                     >
                     <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none">
                         <svg x-show="!show" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>

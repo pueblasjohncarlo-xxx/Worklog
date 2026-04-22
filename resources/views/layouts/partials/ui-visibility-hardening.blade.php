@@ -92,10 +92,13 @@
 
         body.worklog-ui-hardening .bg-white .text-gray-600,
         body.worklog-ui-hardening .bg-white .text-gray-500,
+        body.worklog-ui-hardening .bg-white .text-gray-400,
         body.worklog-ui-hardening .bg-gray-50 .text-gray-600,
         body.worklog-ui-hardening .bg-gray-50 .text-gray-500,
+        body.worklog-ui-hardening .bg-gray-50 .text-gray-400,
         body.worklog-ui-hardening .bg-gray-100 .text-gray-600,
-        body.worklog-ui-hardening .bg-gray-100 .text-gray-500 {
+        body.worklog-ui-hardening .bg-gray-100 .text-gray-500,
+        body.worklog-ui-hardening .bg-gray-100 .text-gray-400 {
             color: #334155 !important;
         }
     }
@@ -378,6 +381,31 @@
     body.worklog-ui-hardening .inline-flex.rounded-full.text-\[10px\],
     body.worklog-ui-hardening .inline-flex.rounded-full.text-\[11px\] {
         font-weight: 700 !important;
+    }
+
+    body.worklog-ui-hardening .text-\[10px\].text-gray-500,
+    body.worklog-ui-hardening .text-\[10px\].text-gray-400,
+    body.worklog-ui-hardening .text-\[11px\].text-gray-500,
+    body.worklog-ui-hardening .text-\[11px\].text-gray-400,
+    body.worklog-ui-hardening .text-xs.text-gray-500,
+    body.worklog-ui-hardening .text-xs.text-gray-400 {
+        color: #64748b !important;
+        opacity: 1 !important;
+    }
+
+    body.worklog-ui-hardening [class*="bg-black/"] .text-\[10px\].text-gray-500,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-\[10px\].text-gray-400,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-\[11px\].text-gray-500,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-\[11px\].text-gray-400,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-xs.text-gray-500,
+    body.worklog-ui-hardening [class*="bg-black/"] .text-xs.text-gray-400 {
+        color: #e2e8f0 !important;
+    }
+
+    body.worklog-ui-hardening .truncate[title],
+    body.worklog-ui-hardening .line-clamp-2[title],
+    body.worklog-ui-hardening .line-clamp-3[title] {
+        cursor: help;
     }
 
     /* Select2 surfaces used by coordinator/admin flows */
