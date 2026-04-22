@@ -38,7 +38,7 @@ class LeaveStatusUpdatedNotification extends Notification
         }
 
         return $message
-            ->action('View Details', route('student.leaves.index'))
+            ->action('View Dashboard', route('student.dashboard'))
             ->line('Please log in to your account to view more details.')
             ->salutation('Best regards,\nWorkLog System');
     }
@@ -52,7 +52,7 @@ class LeaveStatusUpdatedNotification extends Notification
             'status' => $this->leave->status,
             'leave_type' => $this->leave->type,
             'remarks' => $this->leave->reviewer_remarks,
-            'url' => route('student.leaves.index'),
+            'url' => route('student.dashboard'),
         ];
     }
 }

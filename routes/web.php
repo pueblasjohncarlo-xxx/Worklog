@@ -16,7 +16,6 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\JournalController;
 use App\Http\Controllers\Student\TaskController as StudentTaskController;
-use App\Http\Controllers\Student\LeaveController as StudentLeaveController;
 use App\Http\Controllers\Student\MappingController as StudentMappingController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\Supervisor\SupervisorReportController;
@@ -159,13 +158,24 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
     Route::post('/student/worklogs/{workLog}/submit', [WorkLogController::class, 'submit'])->name('student.worklogs.submit');
     Route::patch('/student/worklogs/{workLog}/manual-clock-out', [StudentController::class, 'manualClockOut'])->name('student.worklogs.manual-clock-out');
 
-    Route::get('/student/leaves', [StudentLeaveController::class, 'index'])->name('student.leaves.index');
-    Route::post('/student/leaves', [StudentLeaveController::class, 'store'])->name('student.leaves.store');
-    Route::get('/student/leaves/{leave}/edit', [StudentLeaveController::class, 'edit'])->name('student.leaves.edit');
-    Route::put('/student/leaves/{leave}', [StudentLeaveController::class, 'update'])->name('student.leaves.update');
-    Route::delete('/student/leaves/{leave}', [StudentLeaveController::class, 'destroy'])->name('student.leaves.destroy');
-    Route::post('/student/leaves/{leave}/cancel', [StudentLeaveController::class, 'cancel'])->name('student.leaves.cancel');
-    Route::get('/student/leaves/{leave}/print', [LeaveController::class, 'print'])->name('student.leaves.print');
+    Route::get('/student/leaves', function () {
+        return redirect()->route('student.dashboard');
+    })->name('student.leaves.index');
+    Route::post('/student/leaves', function () {
+        return redirect()->route('student.dashboard');
+    })->name('student.leaves.store');
+    Route::get('/student/leaves/{leave}/edit', function () {
+        return redirect()->route('student.dashboard');
+    })->whereNumber('leave')->name('student.leaves.edit');
+    Route::put('/student/leaves/{leave}', function () {
+        return redirect()->route('student.dashboard');
+    })->whereNumber('leave')->name('student.leaves.update');
+    Route::delete('/student/leaves/{leave}', function () {
+        return redirect()->route('student.dashboard');
+    })->whereNumber('leave')->name('student.leaves.destroy');
+    Route::post('/student/leaves/{leave}/cancel', function () {
+        return redirect()->route('student.dashboard');
+    })->whereNumber('leave')->name('student.leaves.cancel');
 
     // Student Announcements
     Route::get('/student/announcements', [StudentAnnouncementController::class, 'index'])->name('student.announcements.index');
@@ -173,6 +183,10 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
     // Student Reports
     Route::get('/student/reports', [StudentReportController::class, 'index'])->name('student.reports.index');
     Route::get('/student/reports/export', [StudentReportController::class, 'export'])->name('student.reports.export');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/student/leaves/{leave}/print', [LeaveController::class, 'print'])->name('student.leaves.print');
 });
 
 use App\Http\Controllers\Supervisor\SupervisorEvaluationController;
