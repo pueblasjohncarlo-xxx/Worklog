@@ -288,7 +288,7 @@
         <table class="info-table">
             <tr>
                 <td style="width: 55%;">
-                    <span class="info-label">Student's Name:</span> <span class="info-value">{{ $student->lastname }}, {{ $student->firstname }} {{ $student->middlename }}</span>
+                    <span class="info-label">Student's Name:</span> <span class="info-value">{{ $student->display_name_last_first }}</span>
                 </td>
                 <td style="width: 45%;">
                     <span class="info-label">Course & Major:</span> <span class="info-value">{{ $student->section ?? 'N/A' }} - {{ $student->department ?? 'N/A' }}</span>
@@ -361,7 +361,7 @@
                     <td>
                         <div class="sig-label-top">Prepared by:</div>
                         <div class="sig-line-container">
-                            <span class="sig-line">{{ $student->lastname }}, {{ $student->firstname }} {{ $student->middlename }}</span>
+                            <span class="sig-line">{{ $student->display_name_last_first }}</span>
                             <span class="sig-label-bottom">OJTee's Signature over Printed Name</span>
                         </div>
                     </td>

@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -257,6 +258,54 @@ class User extends Authenticatable
         }
 
         return self::inferStudentDepartmentFromSection($this->normalizedStudentSection());
+    }
+
+    public function getNameAttribute($value): string
+    {
+        $structuredName = $this->buildStructuredFullName();
+
+        return $structuredName !== '' ? $structuredName : (string) $value;
+    }
+
+    public function getDisplayNameLastFirstAttribute(): string
+    {
+        $last = trim((string) ($this->attributes['lastname'] ?? ''));
+        $first = trim((string) ($this->attributes['firstname'] ?? ''));
+        $middle = trim((string) ($this->attributes['middlename'] ?? ''));
+
+        if ($last !== '' || $first !== '' || $middle !== '') {
+            $primary = trim(implode(', ', array_filter([$last, $first])));
+
+            return trim($primary.($middle !== '' ? ' '.$middle : ''), ' ,');
+        }
+
+        return (string) ($this->attributes['name'] ?? '');
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $segments = array_filter([
+            trim((string) ($this->attributes['firstname'] ?? '')),
+            trim((string) ($this->attributes['lastname'] ?? '')),
+        ]);
+
+        if (empty($segments)) {
+            $segments = preg_split('/\s+/', trim((string) ($this->attributes['name'] ?? ''))) ?: [];
+        }
+
+        return strtoupper(collect($segments)
+            ->take(2)
+            ->map(fn ($segment) => Str::substr($segment, 0, 1))
+            ->implode(''));
+    }
+
+    protected function buildStructuredFullName(): string
+    {
+        return trim(implode(' ', array_filter([
+            trim((string) ($this->attributes['firstname'] ?? '')),
+            trim((string) ($this->attributes['middlename'] ?? '')),
+            trim((string) ($this->attributes['lastname'] ?? '')),
+        ])));
     }
 
     public function getProfilePhotoUrlAttribute(): string

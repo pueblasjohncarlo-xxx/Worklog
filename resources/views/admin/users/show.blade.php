@@ -165,7 +165,7 @@
                                     </div>
                                 @elseif($user->role === 'student' && !$user->has_requested_account)
                                     <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-700">
-                                        <div class="font-mono text-sm text-gray-800 dark:text-gray-200">{{ strtolower($user->lastname) . '123' }}</div>
+                                        <div class="font-mono text-sm text-gray-800 dark:text-gray-200">{{ strtolower($user->lastname ?: $user->name) . '123' }}</div>
                                         <div class="text-xs text-gray-400 mt-1">Default Password</div>
                                     </div>
                                 @else

@@ -64,7 +64,9 @@ class RegisteredUserController extends Controller
         ]);
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'lastname' => ['required', 'string', 'max:255'],
+            'firstname' => ['required', 'string', 'max:255'],
+            'middlename' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'string', Rule::in([User::ROLE_STUDENT, User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER])],
@@ -90,9 +92,18 @@ class RegisteredUserController extends Controller
             return back()->withErrors(['email' => 'This email is already registered.']);
         }
 
+        $fullName = trim(implode(' ', array_filter([
+            trim((string) ($validated['firstname'] ?? '')),
+            trim((string) ($validated['middlename'] ?? '')),
+            trim((string) ($validated['lastname'] ?? '')),
+        ])));
+
         // Build user data with all required fields
         $userData = [
-            'name' => $request->name,
+            'name' => $fullName,
+            'lastname' => $validated['lastname'],
+            'firstname' => $validated['firstname'],
+            'middlename' => $validated['middlename'] ?? null,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'encrypted_password' => Crypt::encryptString($request->password),

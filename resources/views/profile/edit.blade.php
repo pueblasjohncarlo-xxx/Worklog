@@ -20,10 +20,10 @@
                     </div>
 
                     <!-- Full Name -->
-                    @if($user->firstname || $user->lastname)
+                    @if($user->name)
                         <div class="border-l-4 border-indigo-400 pl-4">
                             <p class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase">Full Name</p>
-                            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $user->firstname }} {{ $user->lastname }}</p>
+                            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $user->name }}</p>
                         </div>
                     @endif
 

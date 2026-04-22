@@ -68,10 +68,15 @@ class ProfileController extends Controller
         ]);
 
         $validated = $request->validated();
+        $structuredName = trim(implode(' ', array_filter([
+            trim((string) ($validated['firstname'] ?? '')),
+            trim((string) ($validated['middlename'] ?? '')),
+            trim((string) ($validated['lastname'] ?? '')),
+        ])));
 
-        DB::transaction(function () use ($request, $user, $validated) {
+        DB::transaction(function () use ($request, $user, $validated, $structuredName) {
             $user->fill([
-                'name' => $validated['name'],
+                'name' => $structuredName !== '' ? $structuredName : $validated['name'],
                 'firstname' => $validated['firstname'] ?? null,
                 'middlename' => $validated['middlename'] ?? null,
                 'lastname' => $validated['lastname'] ?? null,

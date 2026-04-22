@@ -207,7 +207,7 @@
                                     <optgroup label="{{ $group }}">
                                         @foreach ($students as $student)
                                             <option value="{{ $student->id }}" data-email="{{ $student->email }}">
-                                                {{ $student->lastname }}, {{ $student->firstname }}
+                                                {{ $student->display_name_last_first }}
                                             </option>
                                         @endforeach
                                     </optgroup>

@@ -44,21 +44,52 @@
                 <input type="hidden" name="invite_token" value="{{ $inviteToken }}">
             @endif
 
-            <div class="space-y-1">
-                <label for="name" class="block text-sm font-medium text-purple-100">
-                    Name
-                </label>
-                <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value="{{ old('name') }}"
-                    required
-                    autofocus
-                    autocomplete="name"
-                    class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
-                    placeholder="Your full name"
-                >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label for="lastname" class="block text-sm font-medium text-purple-100">
+                        Last Name
+                    </label>
+                    <input
+                        id="lastname"
+                        name="lastname"
+                        type="text"
+                        value="{{ old('lastname') }}"
+                        required
+                        autofocus
+                        autocomplete="family-name"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                        placeholder="Your last name"
+                    >
+                </div>
+                <div class="space-y-1">
+                    <label for="firstname" class="block text-sm font-medium text-purple-100">
+                        First Name
+                    </label>
+                    <input
+                        id="firstname"
+                        name="firstname"
+                        type="text"
+                        value="{{ old('firstname') }}"
+                        required
+                        autocomplete="given-name"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                        placeholder="Your first name"
+                    >
+                </div>
+                <div class="space-y-1 md:col-span-2">
+                    <label for="middlename" class="block text-sm font-medium text-purple-100">
+                        Middle Name
+                    </label>
+                    <input
+                        id="middlename"
+                        name="middlename"
+                        type="text"
+                        value="{{ old('middlename') }}"
+                        autocomplete="additional-name"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                        placeholder="Your middle name (optional)"
+                    >
+                </div>
             </div>
 
             <div class="space-y-1">
