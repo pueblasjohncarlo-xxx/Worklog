@@ -5,10 +5,10 @@
 
     <div class="space-y-6">
         <div class="flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Latest News</h2>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Latest News</h2>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+        <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md border border-gray-200 dark:border-gray-700">
             <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse ($announcements as $announcement)
                     <li>
@@ -16,19 +16,19 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     @if($announcement->user->role === 'coordinator')
-                                        <span class="flex-shrink-0 inline-block h-8 w-8 rounded-full overflow-hidden bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs border border-purple-200">
+                                        <span class="flex-shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full overflow-hidden bg-purple-100 text-sm font-black text-purple-800 border border-purple-200">
                                             CO
                                         </span>
                                     @else
-                                        <span class="flex-shrink-0 inline-block h-8 w-8 rounded-full overflow-hidden bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs border border-indigo-200">
+                                        <span class="flex-shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full overflow-hidden bg-indigo-100 text-sm font-black text-indigo-800 border border-indigo-200">
                                             {{ substr($announcement->user->name, 0, 2) }}
                                         </span>
                                     @endif
                                     <div>
-                                        <p class="text-sm font-medium text-indigo-600 truncate">
+                                        <p class="text-sm font-bold text-indigo-700 dark:text-indigo-300 truncate">
                                             {{ $announcement->title }}
                                         </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        <p class="text-xs font-medium text-gray-700 dark:text-gray-300">
                                             By {{ $announcement->user->name }} ({{ ucfirst($announcement->user->role) }})
                                         </p>
                                     </div>
@@ -40,13 +40,13 @@
                                 </div>
                             </div>
                             <div class="mt-4">
-                                <div class="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
+                                <div class="text-sm leading-6 text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
                                     {{ $announcement->content }}
                                 </div>
                             </div>
                             <div class="mt-4 flex justify-between items-center border-t border-gray-100 dark:border-gray-700 pt-3">
-                                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                    <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                    <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                     </svg>
                                     <p>
@@ -56,8 +56,8 @@
                                 
                                 @if($announcement->attachment)
                                     <div>
-                                        <a href="{{ Storage::url($announcement->attachment) }}" target="_blank" class="inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">
-                                            <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <a href="{{ Storage::url($announcement->attachment) }}" target="_blank" class="inline-flex items-center text-sm font-semibold text-indigo-700 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-200">
+                                            <svg class="mr-1.5 h-4 w-4 text-indigo-600 dark:text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                             </svg>
                                             Download Attachment
@@ -68,7 +68,7 @@
                         </div>
                     </li>
                 @empty
-                    <li class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                    <li class="px-4 py-8 text-center text-gray-600 dark:text-gray-300 font-medium">
                         No announcements available at this time.
                     </li>
                 @endforelse

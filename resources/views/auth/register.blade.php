@@ -13,13 +13,13 @@
             <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 shadow-lg">
                 <span class="text-lg font-extrabold text-white">W</span>
             </div>
-            <div class="guest-auth-title text-xl font-semibold tracking-tight">
+            <div class="guest-auth-title text-xl font-semibold tracking-tight text-white">
                 Create WorkLog account
             </div>
         </div>
 
         @if ($errors->any())
-            <div class="mb-4 text-sm text-red-300">
+            <div class="mb-4 rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm font-medium text-rose-100">
                 {{ $errors->first() }}
             </div>
         @endif
@@ -46,7 +46,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-1">
-                    <label for="lastname" class="block text-sm font-medium text-purple-100">
+                    <label for="lastname" class="block text-sm font-semibold text-purple-50">
                         Last Name
                     </label>
                     <input
@@ -57,12 +57,12 @@
                         required
                         autofocus
                         autocomplete="family-name"
-                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 placeholder-purple-200/80 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm"
                         placeholder="Your last name"
                     >
                 </div>
                 <div class="space-y-1">
-                    <label for="firstname" class="block text-sm font-medium text-purple-100">
+                    <label for="firstname" class="block text-sm font-semibold text-purple-50">
                         First Name
                     </label>
                     <input
@@ -72,12 +72,12 @@
                         value="{{ old('firstname') }}"
                         required
                         autocomplete="given-name"
-                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 placeholder-purple-200/80 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm"
                         placeholder="Your first name"
                     >
                 </div>
                 <div class="space-y-1 md:col-span-2">
-                    <label for="middlename" class="block text-sm font-medium text-purple-100">
+                    <label for="middlename" class="block text-sm font-semibold text-purple-50">
                         Middle Name
                     </label>
                     <input
@@ -86,14 +86,14 @@
                         type="text"
                         value="{{ old('middlename') }}"
                         autocomplete="additional-name"
-                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 placeholder-purple-200/80 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm"
                         placeholder="Your middle name (optional)"
                     >
                 </div>
             </div>
 
             <div class="space-y-1">
-                <label for="role" class="block text-sm font-medium text-purple-100">
+                <label for="role" class="block text-sm font-semibold text-purple-50">
                     Role
                 </label>
                 <select
@@ -101,7 +101,7 @@
                     name="role"
                     x-model="role"
                     @disabled($invitationData)
-                    class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                    class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm"
                 >
                     <option value="student">
                         Student
@@ -118,17 +118,23 @@
                 @endif
             </div>
 
+            @if ($invitationData)
+                <div class="rounded-xl border border-cyan-400/40 bg-cyan-500/15 px-4 py-3 text-sm text-cyan-50">
+                    Invitation details are prefilled and locked to match the invitation link.
+                </div>
+            @endif
+
             <!-- Student Specific Fields -->
             <div class="grid grid-cols-2 gap-4" x-show="role === 'student'" x-transition>
                 <div class="space-y-1">
-                    <label for="section" class="block text-sm font-medium text-purple-100">
+                    <label for="section" class="block text-sm font-semibold text-purple-50">
                         Course/Section
                     </label>
                     <select
                         id="section"
                         name="section"
                         :required="role === 'student'"
-                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 placeholder-purple-200/80 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm"
                     >
                         <option value="" class="text-gray-400">Select Course/Section</option>
                         @foreach ($studentSectionOptions as $sectionOption)
@@ -139,14 +145,14 @@
                     </select>
                 </div>
                 <div class="space-y-1">
-                    <label for="department" class="block text-sm font-medium text-purple-100">
+                    <label for="department" class="block text-sm font-semibold text-purple-50">
                         Major
                     </label>
                     <select
                         id="department"
                         name="department"
                         :required="role === 'student'"
-                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 placeholder-purple-200/80 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm"
                     >
                         <option value="" class="text-gray-400">Select Major</option>
                         @foreach ($studentMajorOptions as $majorOption)
@@ -160,7 +166,7 @@
 
             <!-- Supervisor Specific Field -->
             <div class="space-y-1" x-show="role === 'supervisor'" x-transition>
-                <label for="company_id" class="block text-sm font-medium text-purple-100">
+                <label for="company_id" class="block text-sm font-semibold text-purple-50">
                     Company
                 </label>
                 <select
@@ -168,7 +174,7 @@
                     name="company_id"
                     :required="role === 'supervisor'"
                     @disabled($invitationData && $invitedRole === \App\Models\User::ROLE_SUPERVISOR && !empty($invitedCompanyId))
-                    class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                    class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm"
                 >
                     <option value="">Select company</option>
                     @foreach ($companyOptions as $companyOption)
@@ -181,14 +187,14 @@
                     <input type="hidden" name="company_id" value="{{ $invitedCompanyId }}">
                 @endif
                 @if ($companyOptions->isEmpty())
-                    <p class="text-xs text-amber-300">
+                    <p class="text-xs font-medium text-amber-200">
                         No companies are available right now. Please contact the coordinator to create your supervisor account.
                     </p>
                 @endif
             </div>
 
             <div class="space-y-1">
-                <label for="email" class="block text-sm font-medium text-purple-100">
+                <label for="email" class="block text-sm font-semibold text-purple-50">
                     Email
                 </label>
                 <input
@@ -199,13 +205,13 @@
                     required
                     @readonly($invitationData)
                     autocomplete="username"
-                    class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm"
+                    class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 placeholder-purple-200/80 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm"
                     placeholder="email@example.com"
                 >
             </div>
 
             <div class="space-y-1" x-data="{ show: false }">
-                <label for="password" class="block text-sm font-medium text-purple-100">
+                <label for="password" class="block text-sm font-semibold text-purple-50">
                     Password
                 </label>
                 <div class="relative">
@@ -215,10 +221,10 @@
                         :type="show ? 'text' : 'password'"
                         required
                         autocomplete="new-password"
-                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm pr-10"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 placeholder-purple-200/80 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm pr-10"
                         placeholder="Choose a password"
                     >
-                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-purple-300 hover:text-purple-100 cursor-pointer focus:outline-none">
+                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex cursor-pointer items-center pr-3 text-purple-200 hover:text-white focus:outline-none">
                         <svg x-show="!show" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         <svg x-show="show" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.577-2.977M7.618 7.618A5.96 5.96 0 0112 6c4.478 0 8.268 2.943 9.542 7a10.05 10.05 0 01-1.577 2.977M8 11a4 4 0 014-4m4 4a4 4 0 01-4 4m0 0l-4 4m4-4l4 4" /></svg>
                     </button>
@@ -226,7 +232,7 @@
             </div>
 
             <div class="space-y-1" x-data="{ show: false }">
-                <label for="password_confirmation" class="block text-sm font-medium text-purple-100">
+                <label for="password_confirmation" class="block text-sm font-semibold text-purple-50">
                     Confirm Password
                 </label>
                 <div class="relative">
@@ -236,10 +242,10 @@
                         :type="show ? 'text' : 'password'"
                         required
                         autocomplete="new-password"
-                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/70 text-purple-50 placeholder-purple-300/70 shadow-inner focus:ring-2 focus:ring-purple-400 focus:outline-none px-3 py-2 text-sm pr-10"
+                        class="mt-1 block w-full rounded-xl border-0 bg-purple-950/80 text-purple-50 placeholder-purple-200/80 shadow-inner focus:ring-2 focus:ring-purple-300 focus:outline-none px-3 py-2 text-sm pr-10"
                         placeholder="Re-enter password"
                     >
-                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-purple-300 hover:text-purple-100 cursor-pointer focus:outline-none">
+                    <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex cursor-pointer items-center pr-3 text-purple-200 hover:text-white focus:outline-none">
                         <svg x-show="!show" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         <svg x-show="show" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.577-2.977M7.618 7.618A5.96 5.96 0 0112 6c4.478 0 8.268 2.943 9.542 7a10.05 10.05 0 01-1.577 2.977M8 11a4 4 0 014-4m4 4a4 4 0 01-4 4m0 0l-4 4m4-4l4 4" /></svg>
                     </button>
@@ -249,14 +255,14 @@
             <div class="flex items-center justify-between pt-2">
                 <a
                     href="{{ route('login') }}"
-                    class="text-xs text-purple-200 hover:text-white underline underline-offset-2"
+                    class="text-xs font-semibold text-purple-100 underline underline-offset-2 hover:text-white"
                 >
                     Already registered?
                 </a>
 
                 <button
                     type="submit"
-                    class="inline-flex justify-center items-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-400 to-indigo-500 text-xs font-semibold text-white tracking-wide shadow-lg hover:from-purple-300 hover:to-indigo-400 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-offset-2 focus:ring-offset-purple-900"
+                    class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-400 to-indigo-500 px-5 py-2.5 text-xs font-semibold tracking-wide text-white shadow-lg hover:from-purple-300 hover:to-indigo-400 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-offset-2 focus:ring-offset-purple-900"
                 >
                     Register
                 </button>

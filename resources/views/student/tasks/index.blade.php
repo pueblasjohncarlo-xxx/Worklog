@@ -36,10 +36,10 @@
                             <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="ml-2 font-bold text-indigo-700 hover:text-indigo-800 hover:underline">Clear</a>
                         </p>
                     @endif
-                    <div class="mt-2 flex flex-wrap gap-1 sm:gap-2 text-xs">
-                        <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-800 sm:px-2.5 sm:text-xs">1. Review</span>
-                        <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-800 sm:px-2.5 sm:text-xs">2. Complete</span>
-                        <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-800 sm:px-2.5 sm:text-xs">3. Update</span>
+                    <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                        <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-black text-slate-800 shadow-sm sm:text-xs">1. Review</span>
+                        <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-black text-slate-800 shadow-sm sm:text-xs">2. Complete</span>
+                        <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-black text-slate-800 shadow-sm sm:text-xs">3. Update</span>
                     </div>
                 </div>
                 <div class="grid grid-cols-4 gap-1 sm:gap-2 md:gap-3 w-full lg:w-auto">
@@ -108,7 +108,7 @@
                                         $uiClass = $uiStatus === 'Done' ? 'bg-emerald-100 text-emerald-700' : ($uiStatus === 'Rejected' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700');
                                     @endphp
                                     <span class="mb-2 inline-block rounded px-2 py-1 text-xs font-bold {{ $uiClass }}">{{ $uiStatus }}</span>
-                                    <a href="{{ route('student.tasks.show', $task['id']) }}" class="mt-2 block rounded bg-indigo-600 px-3 py-2 text-center text-xs font-bold text-white shadow-sm hover:bg-indigo-700">View</a>
+                                    <a href="{{ route('student.tasks.show', $task['id']) }}" class="mt-2 block rounded bg-indigo-700 px-3 py-2 text-center text-xs font-bold text-white shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">View</a>
                                 </div>
                             @endforeach
                             @foreach($sem2_tasks as $task)
@@ -121,7 +121,7 @@
                                         $uiClass = $uiStatus === 'Done' ? 'bg-emerald-100 text-emerald-700' : ($uiStatus === 'Rejected' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700');
                                     @endphp
                                     <span class="mb-2 inline-block rounded px-2 py-1 text-xs font-bold {{ $uiClass }}">{{ $uiStatus }}</span>
-                                    <a href="{{ route('student.tasks.show', $task['id']) }}" class="mt-2 block rounded bg-indigo-600 px-3 py-2 text-center text-xs font-bold text-white shadow-sm hover:bg-indigo-700">View</a>
+                                    <a href="{{ route('student.tasks.show', $task['id']) }}" class="mt-2 block rounded bg-indigo-700 px-3 py-2 text-center text-xs font-bold text-white shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">View</a>
                                 </div>
                             @endforeach
                         </div>
