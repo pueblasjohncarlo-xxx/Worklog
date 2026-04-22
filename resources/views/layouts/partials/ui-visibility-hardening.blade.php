@@ -154,10 +154,14 @@
         color: #e2e8f0 !important;
     }
 
-    body.worklog-ui-hardening .text-gray-500,
-    body.worklog-ui-hardening .text-gray-400,
-    body.worklog-ui-hardening .text-slate-500,
-    body.worklog-ui-hardening .text-slate-400 {
+    body.worklog-ui-hardening .app-sidebar .text-gray-500,
+    body.worklog-ui-hardening .app-sidebar .text-gray-400,
+    body.worklog-ui-hardening .app-sidebar .text-slate-500,
+    body.worklog-ui-hardening .app-sidebar .text-slate-400,
+    body.worklog-ui-hardening nav[class*="bg-black"] .text-gray-500,
+    body.worklog-ui-hardening nav[class*="bg-black"] .text-gray-400,
+    body.worklog-ui-hardening nav[class*="bg-black"] .text-slate-500,
+    body.worklog-ui-hardening nav[class*="bg-black"] .text-slate-400 {
         color: #cbd5e1;
     }
 
@@ -224,87 +228,88 @@
         color: inherit;
     }
 
-    body.worklog-ui-hardening .bg-white table,
-    body.worklog-ui-hardening .bg-gray-50 table,
-    body.worklog-ui-hardening .bg-white thead,
-    body.worklog-ui-hardening .bg-gray-50 thead,
-    body.worklog-ui-hardening .bg-white tbody,
-    body.worklog-ui-hardening .bg-gray-50 tbody {
+    /* Legacy content hardening disabled by default so page-level utility classes remain authoritative. */
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white table,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 table,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white thead,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 thead,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white tbody,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 tbody {
         color: #0f172a !important;
     }
 
-    body.worklog-ui-hardening .bg-white th,
-    body.worklog-ui-hardening .bg-gray-50 th {
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white th,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 th {
         color: #334155 !important;
         font-weight: 800 !important;
         letter-spacing: 0.04em;
     }
 
-    body.worklog-ui-hardening .bg-white td,
-    body.worklog-ui-hardening .bg-gray-50 td,
-    body.worklog-ui-hardening .bg-white label,
-    body.worklog-ui-hardening .bg-gray-50 label,
-    body.worklog-ui-hardening .bg-white p,
-    body.worklog-ui-hardening .bg-gray-50 p,
-    body.worklog-ui-hardening .bg-white span,
-    body.worklog-ui-hardening .bg-gray-50 span {
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white td,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 td,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white label,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 label,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white p,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 p,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white span,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 span {
         color: inherit;
     }
 
-    body.worklog-ui-hardening .bg-white .text-white,
-    body.worklog-ui-hardening .bg-gray-50 .text-white {
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white .text-white,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 .text-white {
         color: #ffffff !important;
     }
 
-    body.worklog-ui-hardening .bg-white [class*="bg-indigo-"],
-    body.worklog-ui-hardening .bg-white [class*="bg-blue-"],
-    body.worklog-ui-hardening .bg-white [class*="bg-green-"],
-    body.worklog-ui-hardening .bg-white [class*="bg-red-"],
-    body.worklog-ui-hardening .bg-white [class*="bg-amber-"],
-    body.worklog-ui-hardening .bg-gray-50 [class*="bg-indigo-"],
-    body.worklog-ui-hardening .bg-gray-50 [class*="bg-blue-"],
-    body.worklog-ui-hardening .bg-gray-50 [class*="bg-green-"],
-    body.worklog-ui-hardening .bg-gray-50 [class*="bg-red-"],
-    body.worklog-ui-hardening .bg-gray-50 [class*="bg-amber-"] {
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white [class*="bg-indigo-"],
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white [class*="bg-blue-"],
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white [class*="bg-green-"],
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white [class*="bg-red-"],
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white [class*="bg-amber-"],
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 [class*="bg-indigo-"],
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 [class*="bg-blue-"],
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 [class*="bg-green-"],
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 [class*="bg-red-"],
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 [class*="bg-amber-"] {
         color: #ffffff;
     }
 
-    body.worklog-ui-hardening .bg-white input::placeholder,
-    body.worklog-ui-hardening .bg-white textarea::placeholder,
-    body.worklog-ui-hardening .bg-gray-50 input::placeholder,
-    body.worklog-ui-hardening .bg-gray-50 textarea::placeholder {
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white input::placeholder,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white textarea::placeholder,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 input::placeholder,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 textarea::placeholder {
         color: #64748b !important;
         opacity: 1 !important;
     }
 
-    body.worklog-ui-hardening input,
-    body.worklog-ui-hardening select,
-    body.worklog-ui-hardening textarea {
+    body.worklog-ui-hardening.legacy-content-hardening input,
+    body.worklog-ui-hardening.legacy-content-hardening select,
+    body.worklog-ui-hardening.legacy-content-hardening textarea {
         color: inherit;
     }
 
-    body.worklog-ui-hardening .bg-white input,
-    body.worklog-ui-hardening .bg-white select,
-    body.worklog-ui-hardening .bg-white textarea,
-    body.worklog-ui-hardening .bg-gray-50 input,
-    body.worklog-ui-hardening .bg-gray-50 select,
-    body.worklog-ui-hardening .bg-gray-50 textarea {
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white input,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white select,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-white textarea,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 input,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 select,
+    body.worklog-ui-hardening.legacy-content-hardening .bg-gray-50 textarea {
         color: #0f172a !important;
         border-color: #cbd5e1 !important;
         background-color: #ffffff !important;
     }
 
-    body.worklog-ui-hardening [class*="bg-black/"] input,
-    body.worklog-ui-hardening [class*="bg-black/"] select,
-    body.worklog-ui-hardening [class*="bg-black/"] textarea,
-    body.worklog-ui-hardening [class*="dark:bg-gray-"] input,
-    body.worklog-ui-hardening [class*="dark:bg-gray-"] select,
-    body.worklog-ui-hardening [class*="dark:bg-gray-"] textarea {
+    body.worklog-ui-hardening.legacy-content-hardening [class*="bg-black/"] input,
+    body.worklog-ui-hardening.legacy-content-hardening [class*="bg-black/"] select,
+    body.worklog-ui-hardening.legacy-content-hardening [class*="bg-black/"] textarea,
+    body.worklog-ui-hardening.legacy-content-hardening [class*="dark:bg-gray-"] input,
+    body.worklog-ui-hardening.legacy-content-hardening [class*="dark:bg-gray-"] select,
+    body.worklog-ui-hardening.legacy-content-hardening [class*="dark:bg-gray-"] textarea {
         color: #f8fafc !important;
         border-color: rgba(99, 102, 241, 0.25) !important;
     }
 
-    body.worklog-ui-hardening option {
+    body.worklog-ui-hardening.legacy-content-hardening option {
         color: #0f172a;
         background: #ffffff;
     }
