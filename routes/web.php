@@ -201,10 +201,18 @@ Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
     Route::get('/supervisor/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('supervisor.worklogs.print');
     Route::get('/supervisor/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('supervisor.worklogs.attachment');
 
-    Route::get('/supervisor/leaves', [SupervisorController::class, 'leavesIndex'])->name('supervisor.leaves.index');
-    Route::post('/supervisor/leaves/{leave}/approve', [SupervisorController::class, 'approveLeave'])->name('supervisor.leaves.approve');
-    Route::post('/supervisor/leaves/{leave}/reject', [SupervisorController::class, 'rejectLeave'])->name('supervisor.leaves.reject');
-    Route::get('/supervisor/leaves/{leave}/print', [LeaveController::class, 'print'])->name('supervisor.leaves.print');
+    Route::get('/supervisor/leaves', function () {
+        return redirect()->route('supervisor.dashboard');
+    })->name('supervisor.leaves.index');
+    Route::post('/supervisor/leaves/{leave}/approve', function () {
+        return redirect()->route('supervisor.dashboard');
+    })->whereNumber('leave')->name('supervisor.leaves.approve');
+    Route::post('/supervisor/leaves/{leave}/reject', function () {
+        return redirect()->route('supervisor.dashboard');
+    })->whereNumber('leave')->name('supervisor.leaves.reject');
+    Route::get('/supervisor/leaves/{leave}/print', function () {
+        return redirect()->route('supervisor.dashboard');
+    })->whereNumber('leave')->name('supervisor.leaves.print');
 
     // Task Assignment
     Route::get('/supervisor/tasks', [SupervisorTaskController::class, 'index'])->name('supervisor.tasks.index');
@@ -329,10 +337,18 @@ Route::middleware(['auth', 'verified', 'role:ojt_adviser'])->group(function () {
     Route::get('/ojt-adviser/mopping/{assignment}', function (Request $request, Assignment $assignment) {
         return redirect()->route('ojt_adviser.mapping.show', ['assignment' => $assignment->id] + $request->query());
     })->name('ojt_adviser.mopping.show');
-    Route::get('/ojt-adviser/leaves/{leave}/print', [LeaveController::class, 'print'])->name('ojt_adviser.leaves.print');
-    Route::get('/ojt-adviser/leaves', [OjtAdviserController::class, 'leavesIndex'])->name('ojt_adviser.leaves.index');
-    Route::post('/ojt-adviser/leaves/{leave}/approve', [OjtAdviserController::class, 'approveLeave'])->name('ojt_adviser.leaves.approve');
-    Route::post('/ojt-adviser/leaves/{leave}/reject', [OjtAdviserController::class, 'rejectLeave'])->name('ojt_adviser.leaves.reject');
+    Route::get('/ojt-adviser/leaves/{leave}/print', function () {
+        return redirect()->route('ojt_adviser.dashboard');
+    })->whereNumber('leave')->name('ojt_adviser.leaves.print');
+    Route::get('/ojt-adviser/leaves', function () {
+        return redirect()->route('ojt_adviser.dashboard');
+    })->name('ojt_adviser.leaves.index');
+    Route::post('/ojt-adviser/leaves/{leave}/approve', function () {
+        return redirect()->route('ojt_adviser.dashboard');
+    })->whereNumber('leave')->name('ojt_adviser.leaves.approve');
+    Route::post('/ojt-adviser/leaves/{leave}/reject', function () {
+        return redirect()->route('ojt_adviser.dashboard');
+    })->whereNumber('leave')->name('ojt_adviser.leaves.reject');
     Route::get('/ojt-adviser/evaluations', [OjtAdviserController::class, 'evaluations'])->name('ojt_adviser.evaluations');
     Route::get('/ojt-adviser/evaluations/student/{student}', [OjtAdviserController::class, 'evaluationStudent'])->name('ojt_adviser.evaluations.student');
     Route::get('/ojt-adviser/evaluations/{evaluation}/export', [OjtAdviserController::class, 'exportEvaluation'])->name('ojt_adviser.evaluations.export');

@@ -30,7 +30,7 @@ class LeaveNeedsAdviserReviewNotification extends Notification
             'student_name' => $studentName,
             'leave_type' => $this->leave->type,
             'status' => $this->leave->status,
-            'url' => route('ojt_adviser.leaves.index'),
+            'url' => route('ojt_adviser.dashboard'),
         ];
     }
 }

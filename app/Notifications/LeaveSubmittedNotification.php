@@ -36,8 +36,8 @@ class LeaveSubmittedNotification extends Notification
             ->when($this->leave->reason, function ($mail) {
                 return $mail->line("**Reason:** {$this->leave->reason}");
             })
-            ->action('Review Leave Request', route('supervisor.leaves.index'))
-            ->line('Please log in to your account to approve or reject the request.')
+            ->action('Open Dashboard', route('supervisor.dashboard'))
+            ->line('Please log in to your account for updated review workflows.')
             ->salutation('Best regards,\nWorkLog System');
     }
 
@@ -45,7 +45,7 @@ class LeaveSubmittedNotification extends Notification
     {
         $url = method_exists($notifiable, 'getAttribute') && $notifiable->role === 'admin'
             ? route('admin.dashboard')
-            : route('supervisor.leaves.index');
+            : route('supervisor.dashboard');
 
         return [
             'type' => 'leave_submitted',
