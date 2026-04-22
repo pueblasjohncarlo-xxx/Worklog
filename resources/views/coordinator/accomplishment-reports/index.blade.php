@@ -25,7 +25,7 @@
                                     student.company.toLowerCase().includes(query)
                                 );
                             },
-                            allStudents: {{ json_encode($departmentLogs->groupBy(function($log) { return $log->assignment?->student?->id ?? 'unknown'; })->map(function($studentLogs) { $student = $studentLogs->first()->assignment?->student; $assignment = $studentLogs->first()->assignment; $studentName = $student?->name ?? 'N/A'; $companyName = $studentLogs->first()->assignment?->company?->name ?? 'N/A'; $course = $student?->section ?? 'N/A'; $department = $student?->department ?? 'N/A'; $hours = $assignment ? ($assignment->totalApprovedHours() ?? 0) : 0; $status = $assignment?->status === 'active' ? 'Active' : ($assignment?->status === 'completed' ? 'Completed' : 'Inactive'); return ['id' => $student?->id, 'name' => $studentName, 'company' => $companyName, 'course' => $course, 'department' => $department, 'hours' => $hours, 'status' => $status, 'reportCount' => $studentLogs->count(), 'logs' => $studentLogs->map(fn($log) => ['id' => $log->id, 'type' => $log->type, 'date' => $log->work_date?->format('M d, Y'), 'status' => ucfirst($log->status === 'rejected' ? 'declined' : $log->status), 'attachmentUrl' => $log->attachment_path ? route('coordinator.worklogs.attachment', $log->id) : null])->values()->all()]; })->values()) }}
+                            allStudents: {{ json_encode($departmentLogs->groupBy(function($log) { return $log->assignment?->student?->id ?? 'unknown'; })->map(function($studentLogs) { $student = $studentLogs->first()->assignment?->student; $assignment = $studentLogs->first()->assignment; $studentName = $student?->name ?? 'N/A'; $companyName = $studentLogs->first()->assignment?->company?->name ?? 'N/A'; $course = $student?->section ?? 'N/A'; $department = $student?->department ?? 'N/A'; $hours = $assignment ? ($assignment->totalApprovedHours() ?? 0) : 0; $status = $assignment?->status === 'active' ? 'Active' : ($assignment?->status === 'completed' ? 'Completed' : 'Inactive'); return ['id' => $student?->id, 'name' => $studentName, 'company' => $companyName, 'course' => $course, 'department' => $department, 'hours' => $hours, 'status' => $status, 'reportCount' => $studentLogs->count(), 'logs' => $studentLogs->map(fn($log) => ['id' => $log->id, 'type' => $log->type, 'date' => $log->work_date?->format('M d, Y'), 'status' => ucfirst($log->status === 'rejected' ? 'declined' : $log->status), 'updatedAt' => optional($log->updated_at)->timestamp, 'attachmentUrl' => $log->attachment_path ? route('coordinator.worklogs.attachment', $log->id) : null, 'printUrl' => route('coordinator.worklogs.print', $log->id)])->values()->all()]; })->values()) }}
                         }" class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 transition-shadow hover:shadow-md">
                             <!-- Header -->
                             <button @click="showModal = true" class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
@@ -263,16 +263,16 @@
                                                     <div class="flex gap-2 ml-4">
                                                         <template x-if="report.attachmentUrl">
                                                             <div class="flex gap-2">
-                                                                <a :href="report.attachmentUrl + '?inline=1'" target="_blank" class="px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700">
+                                                                <a :href="report.attachmentUrl + '?inline=1&v=' + (report.updatedAt || report.id)" target="_blank" class="px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700">
                                                                     View File
                                                                 </a>
-                                                                <a :href="report.attachmentUrl" class="px-3 py-2 bg-emerald-600 text-white text-xs font-bold rounded hover:bg-emerald-700">
+                                                                <a :href="report.attachmentUrl + '?v=' + (report.updatedAt || report.id)" class="px-3 py-2 bg-emerald-600 text-white text-xs font-bold rounded hover:bg-emerald-700">
                                                                     Download
                                                                 </a>
                                                             </div>
                                                         </template>
                                                         <template x-if="!report.attachmentUrl">
-                                                            <a :href="'/coordinator/worklogs/' + report.id + '/print'" target="_blank" class="px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700">
+                                                            <a :href="report.printUrl" target="_blank" class="px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700">
                                                                 Print
                                                             </a>
                                                         </template>

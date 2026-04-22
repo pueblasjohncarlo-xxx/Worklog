@@ -98,7 +98,7 @@
     <div class="p-4 border-t border-indigo-900 text-gray-300 bg-black/40">
         <div class="px-4 py-3 mb-2">
             <p class="text-[12px] uppercase tracking-[0.2em] text-gray-500 font-black">Signed in as</p>
-            <p class="text-base font-black text-indigo-400 truncate mt-1">{{ Auth::user()->name }}</p>
+            <p class="text-base font-black text-indigo-400 truncate mt-1" data-user-name-id="{{ Auth::id() }}">{{ Auth::user()->name }}</p>
         </div>
         <a href="{{ route('profile.edit') }}" 
            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('profile.edit') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900' }}">

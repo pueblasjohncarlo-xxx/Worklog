@@ -191,6 +191,70 @@
         @apply bg-indigo-900/40 backdrop-blur-md border border-indigo-500/30 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] rounded-xl;
     }
 
+    .student-dark-card {
+        @apply rounded-2xl border border-white/10 bg-black/35 backdrop-blur-md shadow-[0_12px_30px_rgba(0,0,0,0.35)] text-white;
+    }
+
+    .student-light-card {
+        @apply rounded-2xl border border-slate-200/80 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.12)] text-slate-900;
+    }
+
+    .student-card-title {
+        @apply text-xs font-black uppercase tracking-[0.18em] text-slate-500;
+    }
+
+    .student-card-value {
+        @apply text-4xl font-black tracking-tight text-slate-900;
+    }
+
+    .student-card-muted {
+        @apply text-sm font-medium text-slate-600;
+    }
+
+    .student-tab {
+        @apply inline-flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-3 text-sm font-black tracking-wide transition-all duration-150;
+    }
+
+    .student-tab-active {
+        @apply border-indigo-400 text-white bg-white/8 shadow-[inset_0_-1px_0_rgba(129,140,248,0.2)];
+    }
+
+    .student-tab-inactive {
+        @apply border-transparent text-slate-300 hover:text-white hover:border-slate-400/60;
+    }
+
+    .student-task-card {
+        @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.10)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(15,23,42,0.16)];
+    }
+
+    .student-task-title {
+        @apply text-lg font-black tracking-tight text-slate-900;
+    }
+
+    .student-task-meta-label {
+        @apply text-[11px] font-black uppercase tracking-[0.16em] text-slate-500;
+    }
+
+    .student-task-meta-value {
+        @apply text-sm font-semibold text-slate-700;
+    }
+
+    .student-task-body {
+        @apply text-sm leading-6 text-slate-700;
+    }
+
+    .student-section-shell {
+        @apply rounded-2xl border border-white/10 bg-black/20 p-4 sm:p-5 lg:p-6 shadow-[0_12px_28px_rgba(0,0,0,0.24)];
+    }
+
+    .student-dark-heading {
+        @apply text-lg sm:text-xl font-black tracking-tight text-white;
+    }
+
+    .student-dark-subtle {
+        @apply text-sm font-medium text-slate-200;
+    }
+    
     /* Glowing Edge Effect */
     .glow-border-right {
         box-shadow: 5px 0 15px -3px rgba(129, 140, 248, 0.3);

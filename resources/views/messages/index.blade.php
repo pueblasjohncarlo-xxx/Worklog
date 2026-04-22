@@ -66,7 +66,7 @@
                             <!-- Content -->
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between mb-1">
-                                    <h3 class="font-semibold text-white truncate"><span x-text="conversation.name"></span></h3>
+                                    <h3 class="font-semibold text-white truncate"><span :data-user-name-id="conversation.id" x-text="conversation.name"></span></h3>
                                     <template x-if="conversation.unread_count > 0">
                                         <span class="bg-indigo-600 text-white text-xs rounded-full px-2 py-0.5 font-bold" 
                                             x-text="conversation.unread_count"></span>
@@ -110,7 +110,7 @@
                             <span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border border-black" :class="isUserOnline(activeConversation.id) ? 'bg-emerald-400' : 'bg-gray-500'"></span>
                         </div>
                         <div>
-                            <h2 class="font-bold text-white" x-text="activeConversation.name"></h2>
+                            <h2 class="font-bold text-white" :data-user-name-id="activeConversation.id" x-text="activeConversation.name"></h2>
                             <p class="text-xs text-indigo-400 capitalize" x-text="isUserTyping(activeConversation.id) ? 'typing...' : (isUserOnline(activeConversation.id) ? 'online' : 'offline')"></p>
                         </div>
                     </div>
@@ -269,8 +269,8 @@
                             
                             <!-- User Info -->
                             <div class="flex-1 min-w-0 ml-3">
-                                <h4 class="font-semibold text-white truncate" x-text="user.name"></h4>
-                                <p class="text-xs text-gray-400 truncate" x-text="user.email"></p>
+                                <h4 class="font-semibold text-white truncate" :data-user-name-id="user.id" x-text="user.name"></h4>
+                                <p class="text-xs text-gray-400 truncate" :data-user-email-id="user.id" x-text="user.email"></p>
                                 <span class="text-xs text-indigo-400 capitalize" x-text="user.role"></span>
                             </div>
                         </div>
@@ -329,14 +329,6 @@ function chatApp() {
         selectedAttachmentName: '',
 
         async init() {
-            console.log('=== CHATAPP INITIALIZED ===');
-            console.log('Component state:', {
-                conversations: this.conversations.length,
-                availableUsers: this.availableUsers.length,
-                filteredAvailableUsers: this.filteredAvailableUsers.length,
-                showStartConversationModal: this.showStartConversationModal,
-                activeConversation: this.activeConversation,
-            });
             await this.loadConversations();
 
             // Deep-link support: /messages?open={userId}
@@ -369,7 +361,6 @@ function chatApp() {
             this.relativeTimeInterval = setInterval(() => {
                 this.relativeTimeTick += 1;
             }, 30000);
-            console.log('=== INITIALIZATION COMPLETE ===');
         },
 
         async performRealtimeSync() {
@@ -385,7 +376,12 @@ function chatApp() {
 
         async loadConversations() {
             try {
-                const response = await fetch('/api/messages/conversations');
+                const response = await fetch('/api/messages/conversations?include_contacts=1', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    cache: 'no-store',
+                });
                 const data = await response.json();
                 if (data.success) {
                     this.conversations = data.conversations;
@@ -408,7 +404,12 @@ function chatApp() {
                 const params = new URLSearchParams();
                 params.set('ids', ids.join(','));
 
-                const response = await fetch(`/api/messages/presence?${params.toString()}`);
+                const response = await fetch(`/api/messages/presence?${params.toString()}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    cache: 'no-store',
+                });
                 const data = await response.json();
                 if (data.success && data.presence) {
                     this.onlineState = {
@@ -428,7 +429,9 @@ function chatApp() {
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
+                    cache: 'no-store',
                     body: JSON.stringify({
                         active_conversation_id: this.activeConversation ? this.activeConversation.id : null,
                     }),
@@ -448,7 +451,12 @@ function chatApp() {
                 const params = new URLSearchParams();
                 params.set('ids', ids.join(','));
 
-                const response = await fetch(`/api/messages/typing?${params.toString()}`);
+                const response = await fetch(`/api/messages/typing?${params.toString()}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    cache: 'no-store',
+                });
                 const data = await response.json();
 
                 if (data.success && data.typing) {
@@ -507,14 +515,24 @@ function chatApp() {
                     url.searchParams.set('after_id', String(lastId));
                 }
 
-                const response = await fetch(url.toString());
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    cache: 'no-store',
+                });
                 const data = await response.json();
                 if (data.success) {
                     const newMessages = data.messages || [];
 
                     if (lastId && String(lastId).startsWith('temp-')) {
                         // If we have optimistic messages, do a full reload once to reconcile.
-                        const fullResponse = await fetch(`/api/messages/conversation/${this.activeConversation.id}`);
+                        const fullResponse = await fetch(`/api/messages/conversation/${this.activeConversation.id}`, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            cache: 'no-store',
+                        });
                         const fullData = await fullResponse.json();
                         if (fullData.success) {
                             this.messages = fullData.messages || [];
@@ -530,7 +548,22 @@ function chatApp() {
                     if (data.user && this.activeConversation) {
                         this.activeConversation.avatar = data.user.avatar;
                         this.activeConversation.name = data.user.name;
+                        this.activeConversation.email = data.user.email;
                         this.activeConversation.role = data.user.role;
+                        this.conversations = this.conversations.map((conversation) => {
+                            if (conversation.id !== data.user.id) {
+                                return conversation;
+                            }
+
+                            return {
+                                ...conversation,
+                                avatar: data.user.avatar,
+                                name: data.user.name,
+                                email: data.user.email,
+                                role: data.user.role,
+                            };
+                        });
+                        this.filterConversations();
                     }
                     
                     if (newMessages.length > 0) {
@@ -589,7 +622,9 @@ function chatApp() {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
+                    cache: 'no-store',
                     body: formData,
                 });
 
@@ -746,7 +781,12 @@ function chatApp() {
 
         async loadTypingStatus(userId) {
             try {
-                const response = await fetch(`/api/messages/typing/${userId}`);
+                const response = await fetch(`/api/messages/typing/${userId}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    cache: 'no-store',
+                });
                 const data = await response.json();
 
                 if (data.success) {
@@ -771,7 +811,9 @@ function chatApp() {
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
+                    cache: 'no-store',
                     body: JSON.stringify({
                         receiver_id: this.activeConversation.id,
                         typing: !!typing,
@@ -809,21 +851,11 @@ function chatApp() {
         },
 
         async openStartConversation() {
-            console.log('=== OPENING START CONVERSATION MODAL ===');
             this.showStartConversationModal = true;
             this.startConversationSearch = '';
             this.availableUsers = [];
             this.filteredAvailableUsers = [];
-            console.log('Modal state:', {
-                showing: this.showStartConversationModal,
-                search: this.startConversationSearch,
-                users: this.availableUsers,
-                filtered: this.filteredAvailableUsers,
-            });
-            console.log('Calling loadAvailableUsers()...');
-            // Load users immediately when modal opens
             await this.loadAvailableUsers();
-            console.log('=== MODAL OPEN COMPLETE ===');
         },
 
         closeStartConversation() {
@@ -834,25 +866,16 @@ function chatApp() {
 
         async loadAvailableUsers() {
             try {
-                console.log('=== LOADING AVAILABLE USERS ===');
-                console.log('Search term:', this.startConversationSearch);
-                
-                // Build query string with search param if provided
                 const url = new URL('/api/messages/available-users', window.location.origin);
                 if (this.startConversationSearch && this.startConversationSearch.trim()) {
                     url.searchParams.append('search', this.startConversationSearch.trim());
-                    console.log('Added search param to URL');
                 }
-                
-                console.log('Fetching from:', url.toString());
-                const response = await fetch(url.toString());
-                
-                console.log('Response received:', {
-                    status: response.status,
-                    statusText: response.statusText,
+
+                const response = await fetch(url.toString(), {
                     headers: {
-                        contentType: response.headers.get('content-type'),
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
+                    cache: 'no-store',
                 });
                 
                 if (!response.ok) {
@@ -860,8 +883,6 @@ function chatApp() {
                 }
                 
                 const data = await response.json();
-                
-                console.log('Response data:', data);
                 
                 if (data.success === false) {
                     throw new Error(data.error || 'API returned success:false');
@@ -874,13 +895,7 @@ function chatApp() {
                 this.availableUsers = data.users || [];
                 this.filteredAvailableUsers = this.availableUsers;
                 
-                console.log('Data assigned:', {
-                    availableUsersCount: this.availableUsers.length,
-                    filteredAvailableUsersCount: this.filteredAvailableUsers.length,
-                });
                 
-                console.log(`✓ Successfully loaded ${this.availableUsers.length} users`);
-                console.log('=== LOADING COMPLETE ===');
             } catch (error) {
                 console.error('✗ Error loading available users:', error);
                 console.error('Error details:', {
@@ -893,29 +908,19 @@ function chatApp() {
         },
 
         filterAvailableUsers() {
-            console.log('filterAvailableUsers called with search:', this.startConversationSearch);
-            // Debounce search to avoid excessive API calls
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => {
-                console.log('Search debounce complete, calling loadAvailableUsers()');
                 this.loadAvailableUsers();
-            }, 300); // Wait 300ms after user stops typing
+            }, 300);
         },
 
         async startConversationWithUser(user) {
             try {
-                console.log('Starting conversation with user:', user);
-                
-                // Check if we already have a conversation with this user
                 const existingConversation = this.conversations.find(c => c.id === user.id);
-                
+
                 if (existingConversation) {
-                    console.log('Opening existing conversation');
-                    // Open existing conversation
-                    this.selectConversation(existingConversation);
+                    await this.selectConversation(existingConversation);
                 } else {
-                    console.log('Creating new conversation');
-                    // Start new conversation by selecting the user
                     this.activeConversation = {
                         id: user.id,
                         name: user.name,
@@ -931,11 +936,10 @@ function chatApp() {
                     await this.loadMessages();
                     this.scrollToBottom();
                 }
-                
+
                 this.closeStartConversation();
             } catch (error) {
                 console.error('Error starting conversation:', error);
-                alert('Unable to start conversation. Please try again.');
             }
         },
 

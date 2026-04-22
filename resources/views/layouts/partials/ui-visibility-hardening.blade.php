@@ -154,6 +154,55 @@
         outline-offset: 2px;
     }
 
+    body.worklog-ui-hardening .bg-white button,
+    body.worklog-ui-hardening .bg-white a,
+    body.worklog-ui-hardening .bg-gray-50 button,
+    body.worklog-ui-hardening .bg-gray-50 a {
+        color: inherit;
+    }
+
+    body.worklog-ui-hardening .bg-white table,
+    body.worklog-ui-hardening .bg-gray-50 table,
+    body.worklog-ui-hardening .bg-white thead,
+    body.worklog-ui-hardening .bg-gray-50 thead,
+    body.worklog-ui-hardening .bg-white tbody,
+    body.worklog-ui-hardening .bg-gray-50 tbody {
+        color: #0f172a !important;
+    }
+
+    body.worklog-ui-hardening .bg-white th,
+    body.worklog-ui-hardening .bg-gray-50 th {
+        color: #334155 !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.04em;
+    }
+
+    body.worklog-ui-hardening .bg-white .text-white,
+    body.worklog-ui-hardening .bg-gray-50 .text-white {
+        color: #ffffff !important;
+    }
+
+    body.worklog-ui-hardening .bg-white [class*="bg-indigo-"],
+    body.worklog-ui-hardening .bg-white [class*="bg-blue-"],
+    body.worklog-ui-hardening .bg-white [class*="bg-green-"],
+    body.worklog-ui-hardening .bg-white [class*="bg-red-"],
+    body.worklog-ui-hardening .bg-white [class*="bg-amber-"],
+    body.worklog-ui-hardening .bg-gray-50 [class*="bg-indigo-"],
+    body.worklog-ui-hardening .bg-gray-50 [class*="bg-blue-"],
+    body.worklog-ui-hardening .bg-gray-50 [class*="bg-green-"],
+    body.worklog-ui-hardening .bg-gray-50 [class*="bg-red-"],
+    body.worklog-ui-hardening .bg-gray-50 [class*="bg-amber-"] {
+        color: #ffffff;
+    }
+
+    body.worklog-ui-hardening .bg-white input::placeholder,
+    body.worklog-ui-hardening .bg-white textarea::placeholder,
+    body.worklog-ui-hardening .bg-gray-50 input::placeholder,
+    body.worklog-ui-hardening .bg-gray-50 textarea::placeholder {
+        color: #64748b !important;
+        opacity: 1 !important;
+    }
+
     /* Disabled controls should not become invisible */
     body.worklog-ui-hardening button:disabled,
     body.worklog-ui-hardening input:disabled,

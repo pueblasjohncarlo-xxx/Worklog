@@ -26,7 +26,7 @@
                                     <div class="flex items-center gap-3">
                                         <img src="{{ $recipient->profile_photo_url }}" data-avatar-user-id="{{ $recipient->id }}" alt="{{ $recipient->name }}" class="h-10 w-10 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-500/50">
                                         <div class="min-w-0 flex-1">
-                                            <p class="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                                            <p class="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors" data-user-name-id="{{ $recipient->id }}">
                                                 {{ $recipient->name }}
                                             </p>
                                             <p class="text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider">
@@ -46,7 +46,7 @@
                 <div class="lg:col-span-3">
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                         <div class="p-8 space-y-6">
-                            <form action="{{ route('messages.store') }}" method="POST" x-data="{ selectedUser: null }">
+                            <form action="{{ route('messages.store') }}" method="POST" enctype="multipart/form-data" x-data="{ selectedUser: null }">
                                 @csrf
                                 
                                 <!-- Recipient Selection -->
@@ -76,6 +76,12 @@
                                             <span id="charCount">0</span> / 5000
                                         </div>
                                     </div>
+                                </div>
+
+                                <div>
+                                    <label for="attachment" class="block text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Attachment</label>
+                                    <input id="attachment" name="attachment" type="file" accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar" class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-indigo-700">
+                                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">You can attach images, videos, and documents up to 10 MB.</p>
                                 </div>
 
                                 <!-- Action Buttons -->

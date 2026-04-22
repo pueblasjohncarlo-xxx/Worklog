@@ -36,7 +36,7 @@
                                 <img src="{{ Auth::user()->profile_photo_url }}" data-avatar-user-id="{{ Auth::id() }}" alt="{{ Auth::user()->name }}" class="h-8 w-8 rounded-full object-cover border-2 border-indigo-400">
                             </div>
                             
-                            <div>{{ Auth::user()->name }}</div>
+                            <div data-user-name-id="{{ Auth::id() }}">{{ Auth::user()->name }}</div>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -88,8 +88,8 @@
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-indigo-500/30">
             <div class="px-4">
-                <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-indigo-300">{{ Auth::user()->email }}</div>
+                <div class="font-medium text-base text-white" data-user-name-id="{{ Auth::id() }}">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-sm text-indigo-300" data-user-email-id="{{ Auth::id() }}">{{ Auth::user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">

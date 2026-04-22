@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -57,24 +58,101 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request): RedirectResponse|JsonResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user()->loadMissing([
+            'studentProfile',
+            'supervisorProfile',
+            'coordinatorProfile',
+            'ojtAdviserProfile',
+        ]);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
+        $validated = $request->validated();
 
-        if ($request->hasFile('photo')) {
-            $request->validate([
-                'photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        DB::transaction(function () use ($request, $user, $validated) {
+            $user->fill([
+                'name' => $validated['name'],
+                'firstname' => $validated['firstname'] ?? null,
+                'middlename' => $validated['middlename'] ?? null,
+                'lastname' => $validated['lastname'] ?? null,
+                'age' => $validated['age'] ?? null,
+                'gender' => $validated['gender'] ?? null,
+                'email' => $validated['email'],
+                'section' => $validated['section'] ?? null,
+                'department' => $validated['department'] ?? null,
             ]);
 
-            $path = $request->file('photo')->store('profile-photos', 'public');
-            $request->user()->profile_photo_path = $path;
-        }
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+            }
 
-        $request->user()->save();
+            if ($request->hasFile('photo')) {
+                $path = $request->file('photo')->store('profile-photos', 'public');
+                $user->profile_photo_path = $path;
+            }
+
+            $user->save();
+
+            if ($user->role === User::ROLE_STUDENT) {
+                $user->studentProfile()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'student_number' => $validated['student_number'] ?? null,
+                        'program' => $validated['program'] ?? null,
+                        'year_level' => $validated['year_level'] ?? null,
+                        'phone' => $validated['student_phone'] ?? null,
+                        'date_of_birth' => $validated['date_of_birth'] ?? null,
+                    ]
+                );
+            }
+
+            if ($user->role === User::ROLE_SUPERVISOR) {
+                $user->supervisorProfile()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'phone' => $validated['supervisor_phone'] ?? null,
+                        'position_title' => $validated['position_title'] ?? null,
+                        'department' => $validated['supervisor_department'] ?? null,
+                    ]
+                );
+            }
+
+            if ($user->role === User::ROLE_COORDINATOR) {
+                $user->coordinatorProfile()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'phone' => $validated['coordinator_phone'] ?? null,
+                        'department' => $validated['coordinator_department'] ?? null,
+                    ]
+                );
+            }
+
+            if ($user->role === User::ROLE_OJT_ADVISER) {
+                $user->ojtAdviserProfile()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'phone' => $validated['ojt_adviser_phone'] ?? null,
+                        'department' => $validated['ojt_adviser_department'] ?? null,
+                        'address' => $validated['ojt_adviser_address'] ?? null,
+                    ]
+                );
+            }
+        });
+
+        $user->refresh()->loadMissing([
+            'studentProfile',
+            'supervisorProfile',
+            'coordinatorProfile',
+            'ojtAdviserProfile',
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'status' => 'profile-updated',
+                'profile' => $this->buildProfileSyncPayload($user),
+            ]);
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -110,6 +188,8 @@ class ProfileController extends Controller
             return [
                 (string) $user->id => [
                     'url' => $user->profile_photo_url,
+                    'name' => $user->name,
+                    'email' => $user->email,
                     'updated_at' => optional($user->updated_at)->toIso8601String(),
                 ],
             ];
@@ -140,5 +220,16 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    private function buildProfileSyncPayload(User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar_url' => $user->profile_photo_url,
+            'updated_at' => optional($user->updated_at)->toIso8601String(),
+        ];
     }
 }

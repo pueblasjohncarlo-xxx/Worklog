@@ -23,9 +23,9 @@
             href="{{ $card['href'] ?? '#' }}"
             class="block backdrop-blur-md border rounded-lg shadow-lg overflow-hidden cursor-pointer hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 transition-all {{ $toneSet['card'] }}"
         >
-            <div class="p-4">
+            <div class="p-4 min-h-[5.25rem] flex flex-col items-center justify-center text-center">
                 <div class="text-xs font-bold uppercase tracking-widest {{ $toneSet['label'] }}">{{ $card['label'] ?? 'Metric' }}</div>
-                <div class="mt-2 text-3xl font-black text-white">{{ $card['value'] ?? 0 }}</div>
+                <div class="mt-2 text-3xl font-black text-white leading-none">{{ $card['value'] ?? 0 }}</div>
             </div>
         </a>
     @endforeach

@@ -369,7 +369,16 @@
 @if (session('status') === 'profile-updated')
 <script>
     window.addEventListener('DOMContentLoaded', function () {
-        if (window.WorkLogAvatarSync && typeof window.WorkLogAvatarSync.broadcast === 'function') {
+        if (window.WorkLogProfileSync && typeof window.WorkLogProfileSync.broadcast === 'function') {
+            window.WorkLogProfileSync.broadcast({
+                id: {{ (int) $user->id }},
+                name: @json($user->name),
+                email: @json($user->email),
+                avatar_url: @json($user->profile_photo_url),
+                updated_at: @json(optional($user->updated_at)->toIso8601String()),
+            });
+            window.WorkLogProfileSync.refresh();
+        } else if (window.WorkLogAvatarSync && typeof window.WorkLogAvatarSync.broadcast === 'function') {
             window.WorkLogAvatarSync.broadcast();
             window.WorkLogAvatarSync.refresh();
         }

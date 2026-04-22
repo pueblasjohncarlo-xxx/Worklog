@@ -7,7 +7,7 @@
     <div class="space-y-8">
         <!-- Quick Action Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <a href="{{ route('student.tasks.index') }}" class="glass-panel p-8 flex flex-col items-center justify-center group hover:scale-[1.02] transition-transform">
+            <a href="{{ route('student.tasks.index') }}" class="student-dark-card p-8 flex flex-col items-center justify-center group hover:scale-[1.02] transition-transform">
                 <div class="p-4 bg-indigo-500/20 rounded-2xl mb-4 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                     <svg class="h-12 w-12 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />

@@ -25,21 +25,21 @@
             </div>
         @endif
 
-        <div class="max-w-7xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-3 sm:p-4 md:p-5">
+        <div class="max-w-7xl mx-auto student-light-card p-3 sm:p-4 md:p-5">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
                 <div>
-                    <h3 class="text-sm sm:text-base md:text-lg font-bold text-gray-900 dark:text-white">Task Workflow</h3>
-                    <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300 mt-1">Review each task, complete required outputs, then open the task details page to submit progress on time.</p>
+                    <h3 class="text-sm sm:text-base md:text-lg font-bold text-slate-900">Task Workflow</h3>
+                    <p class="text-xs md:text-sm text-slate-700 mt-1">Review each task, complete required outputs, then open the task details page to submit progress on time.</p>
                     @if ($activeFilter && $activeFilter !== 'all')
-                        <p class="mt-2 text-xs font-semibold text-gray-500 dark:text-gray-300">
+                        <p class="mt-2 text-xs font-semibold text-slate-600">
                             Showing: {{ ucfirst($activeFilter) }}
-                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="ml-2 text-indigo-600 dark:text-indigo-300 hover:underline">Clear</a>
+                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="ml-2 text-indigo-700 hover:underline">Clear</a>
                         </p>
                     @endif
                     <div class="mt-2 flex flex-wrap gap-1 sm:gap-2 text-xs">
-                        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-[11px] sm:text-xs">1. Review</span>
-                        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-[11px] sm:text-xs">2. Complete</span>
-                        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-[11px] sm:text-xs">3. Update</span>
+                        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold text-[11px] sm:text-xs">1. Review</span>
+                        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold text-[11px] sm:text-xs">2. Complete</span>
+                        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold text-[11px] sm:text-xs">3. Update</span>
                     </div>
                 </div>
                 <div class="grid grid-cols-4 gap-1 sm:gap-2 md:gap-3 w-full lg:w-auto">
@@ -74,21 +74,21 @@
             @else
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
-                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="bg-slate-50 p-3 rounded block">
-                            <p class="text-xs font-bold">Tasks</p>
-                            <p class="text-2xl font-bold">{{ $totalCount }}</p>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="student-light-card p-3 rounded block">
+                            <p class="student-card-title">Tasks</p>
+                            <p class="text-2xl font-black text-slate-900">{{ $totalCount }}</p>
                         </a>
-                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'done']) }}" class="bg-emerald-50 p-3 rounded block">
-                            <p class="text-xs font-bold">Done</p>
-                            <p class="text-2xl font-bold">{{ $doneCount }}</p>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'done']) }}" class="student-light-card bg-emerald-50 border-emerald-200 p-3 rounded block">
+                            <p class="student-card-title text-emerald-700">Done</p>
+                            <p class="text-2xl font-black text-emerald-700">{{ $doneCount }}</p>
                         </a>
-                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'pending']) }}" class="bg-amber-50 p-3 rounded block">
-                            <p class="text-xs font-bold">Pending</p>
-                            <p class="text-2xl font-bold">{{ $pendingCount }}</p>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'pending']) }}" class="student-light-card bg-amber-50 border-amber-200 p-3 rounded block">
+                            <p class="student-card-title text-amber-700">Pending</p>
+                            <p class="text-2xl font-black text-amber-700">{{ $pendingCount }}</p>
                         </a>
-                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'rejected']) }}" class="bg-rose-50 p-3 rounded block">
-                            <p class="text-xs font-bold">Rejected</p>
-                            <p class="text-2xl font-bold">{{ $rejectedCount }}</p>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'rejected']) }}" class="student-light-card bg-rose-50 border-rose-200 p-3 rounded block">
+                            <p class="student-card-title text-rose-700">Rejected</p>
+                            <p class="text-2xl font-black text-rose-700">{{ $rejectedCount }}</p>
                         </a>
                     </div>
 
@@ -99,9 +99,9 @@
                     @else
                         <div class="space-y-3">
                             @foreach($sem1_tasks as $task)
-                                <div class="bg-white border rounded p-3">
-                                    <h4 class="font-bold text-sm mb-1">{{ Str::limit($task['title'], 35) }}</h4>
-                                    <p class="text-xs text-gray-600 mb-2">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
+                                <div class="student-task-card p-3">
+                                    <h4 class="font-bold text-sm text-slate-900 mb-1">{{ Str::limit($task['title'], 35) }}</h4>
+                                    <p class="text-xs text-slate-600 mb-2">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
                                     @php
                                         $rawStatus = strtolower($task['status'] ?? 'pending');
                                         $uiStatus = in_array($rawStatus, ['approved', 'completed'], true) ? 'Done' : ($rawStatus === 'rejected' ? 'Rejected' : 'Pending');
@@ -112,9 +112,9 @@
                                 </div>
                             @endforeach
                             @foreach($sem2_tasks as $task)
-                                <div class="bg-white border rounded p-3">
-                                    <h4 class="font-bold text-sm mb-1">{{ Str::limit($task['title'], 35) }}</h4>
-                                    <p class="text-xs text-gray-600 mb-2">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
+                                <div class="student-task-card p-3">
+                                    <h4 class="font-bold text-sm text-slate-900 mb-1">{{ Str::limit($task['title'], 35) }}</h4>
+                                    <p class="text-xs text-slate-600 mb-2">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
                                     @php
                                         $rawStatus = strtolower($task['status'] ?? 'pending');
                                         $uiStatus = in_array($rawStatus, ['approved', 'completed'], true) ? 'Done' : ($rawStatus === 'rejected' ? 'Rejected' : 'Pending');
@@ -142,21 +142,21 @@
                     </div>
                 @else
                     <div class="mb-8 grid grid-cols-4 gap-6">
-                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="bg-slate-50 border border-slate-200 rounded-lg p-6 block hover:ring-2 hover:ring-slate-200 transition">
-                            <p class="text-xs font-bold text-blue-700 uppercase">Total Tasks</p>
-                            <p class="text-4xl font-bold text-slate-700 mt-2">{{ $totalCount }}</p>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'all']) }}" class="student-light-card p-6 block hover:ring-2 hover:ring-slate-200 transition">
+                            <p class="student-card-title text-blue-700">Total Tasks</p>
+                            <p class="text-4xl font-black text-slate-800 mt-2">{{ $totalCount }}</p>
                         </a>
-                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'done']) }}" class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 block hover:ring-2 hover:ring-emerald-200 transition">
-                            <p class="text-xs font-bold text-green-700 uppercase">Completed</p>
-                            <p class="text-4xl font-bold text-emerald-700 mt-2">{{ $doneCount }}</p>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'done']) }}" class="student-light-card bg-emerald-50 border-emerald-200 p-6 block hover:ring-2 hover:ring-emerald-200 transition">
+                            <p class="student-card-title text-green-700">Completed</p>
+                            <p class="text-4xl font-black text-emerald-700 mt-2">{{ $doneCount }}</p>
                         </a>
-                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'pending']) }}" class="bg-amber-50 border border-amber-200 rounded-lg p-6 block hover:ring-2 hover:ring-amber-200 transition">
-                            <p class="text-xs font-bold text-yellow-700 uppercase">Pending</p>
-                            <p class="text-4xl font-bold text-amber-700 mt-2">{{ $pendingCount }}</p>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'pending']) }}" class="student-light-card bg-amber-50 border-amber-200 p-6 block hover:ring-2 hover:ring-amber-200 transition">
+                            <p class="student-card-title text-yellow-700">Pending</p>
+                            <p class="text-4xl font-black text-amber-700 mt-2">{{ $pendingCount }}</p>
                         </a>
-                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'rejected']) }}" class="bg-rose-50 border border-rose-200 rounded-lg p-6 block hover:ring-2 hover:ring-rose-200 transition">
-                            <p class="text-xs font-bold text-red-700 uppercase">Rejected</p>
-                            <p class="text-4xl font-bold text-rose-700 mt-2">{{ $rejectedCount }}</p>
+                        <a href="{{ request()->fullUrlWithQuery(['filter' => 'rejected']) }}" class="student-light-card bg-rose-50 border-rose-200 p-6 block hover:ring-2 hover:ring-rose-200 transition">
+                            <p class="student-card-title text-red-700">Rejected</p>
+                            <p class="text-4xl font-black text-rose-700 mt-2">{{ $rejectedCount }}</p>
                         </a>
                     </div>
 
@@ -166,29 +166,32 @@
                             <p class="text-gray-600">Your supervisor will assign tasks soon</p>
                         </div>
                     @else
-                        <div class="mb-6 border-b border-gray-300">
+                        <div class="mb-6 border-b border-white/20">
                             <div class="flex gap-8">
-                                <button onclick="showTab('sem1')"  id="tab-sem1" class="px-4 py-3 font-bold border-b-2 border-indigo-600 text-indigo-600">Semester 1 ({{ count($sem1_tasks) }})</button>
-                                <button onclick="showTab('sem2')"  id="tab-sem2" class="px-4 py-3 font-bold text-gray-600 border-b-2 border-transparent">Semester 2 ({{ count($sem2_tasks) }})</button>
+                                <button onclick="showTab('sem1')"  id="tab-sem1" class="student-tab student-tab-active">Semester 1 ({{ count($sem1_tasks) }})</button>
+                                <button onclick="showTab('sem2')"  id="tab-sem2" class="student-tab student-tab-inactive">Semester 2 ({{ count($sem2_tasks) }})</button>
                             </div>
                         </div>
 
                         <div id="tab-sem1-content" class="grid grid-cols-3 gap-6">
                             @foreach($sem1_tasks as $task)
-                                <div class="bg-white border rounded-lg shadow p-6 hover:shadow-lg">
-                                    <h3 class="font-bold text-lg mb-2">{{ $task['title'] }}</h3>
-                                    <p class="text-sm text-gray-600 mb-3">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
+                                <div class="student-task-card">
+                                    <h3 class="student-task-title mb-4">{{ $task['title'] }}</h3>
+                                    <div class="space-y-1 mb-4">
+                                        <p class="student-task-meta-label">Supervisor</p>
+                                        <p class="student-task-meta-value">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
+                                    </div>
                                     @php
                                         $rawStatus = strtolower($task['status'] ?? 'pending');
                                         $uiStatus = in_array($rawStatus, ['approved', 'completed'], true) ? 'Done' : ($rawStatus === 'rejected' ? 'Rejected' : 'Pending');
                                         $uiClass = $uiStatus === 'Done' ? 'text-emerald-700' : ($uiStatus === 'Rejected' ? 'text-rose-700' : 'text-amber-700');
                                     @endphp
-                                    <p class="text-xs font-semibold mb-3">Status: <span class="{{ $uiClass }}">{{ $uiStatus }}</span></p>
+                                    <p class="text-xs font-bold text-slate-600 mb-3">Status: <span class="{{ $uiClass }} font-black">{{ $uiStatus }}</span></p>
                                     @if(!empty($task['description']))
-                                        <p class="text-sm text-gray-700 mb-4">{{ Str::limit($task['description'], 100) }}</p>
+                                        <p class="student-task-body mb-4">{{ Str::limit($task['description'], 100) }}</p>
                                     @endif
                                     @if(isset($task['due_date']))
-                                        <p class="text-xs text-gray-500 mb-4">Due: {{ \Carbon\Carbon::parse($task['due_date'])->format('M d, Y') }}</p>
+                                        <p class="text-xs font-semibold text-slate-600 mb-4">Due: <span class="text-slate-800">{{ \Carbon\Carbon::parse($task['due_date'])->format('M d, Y') }}</span></p>
                                     @endif
                                     <a href="{{ route('student.tasks.show', $task['id']) }}" class="block w-full px-4 py-2 bg-indigo-600 text-white text-center font-semibold rounded">View Details</a>
                                 </div>
@@ -197,20 +200,23 @@
 
                         <div id="tab-sem2-content" class="hidden grid grid-cols-3 gap-6">
                             @foreach($sem2_tasks as $task)
-                                <div class="bg-white border rounded-lg shadow p-6 hover:shadow-lg">
-                                    <h3 class="font-bold text-lg mb-2">{{ $task['title'] }}</h3>
-                                    <p class="text-sm text-gray-600 mb-3">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
+                                <div class="student-task-card">
+                                    <h3 class="student-task-title mb-4">{{ $task['title'] }}</h3>
+                                    <div class="space-y-1 mb-4">
+                                        <p class="student-task-meta-label">Supervisor</p>
+                                        <p class="student-task-meta-value">{{ $task['assigned_by'] ?? 'Supervisor' }}</p>
+                                    </div>
                                     @php
                                         $rawStatus = strtolower($task['status'] ?? 'pending');
                                         $uiStatus = in_array($rawStatus, ['approved', 'completed'], true) ? 'Done' : ($rawStatus === 'rejected' ? 'Rejected' : 'Pending');
                                         $uiClass = $uiStatus === 'Done' ? 'text-emerald-700' : ($uiStatus === 'Rejected' ? 'text-rose-700' : 'text-amber-700');
                                     @endphp
-                                    <p class="text-xs font-semibold mb-3">Status: <span class="{{ $uiClass }}">{{ $uiStatus }}</span></p>
+                                    <p class="text-xs font-bold text-slate-600 mb-3">Status: <span class="{{ $uiClass }} font-black">{{ $uiStatus }}</span></p>
                                     @if(!empty($task['description']))
-                                        <p class="text-sm text-gray-700 mb-4">{{ Str::limit($task['description'], 100) }}</p>
+                                        <p class="student-task-body mb-4">{{ Str::limit($task['description'], 100) }}</p>
                                     @endif
                                     @if(isset($task['due_date']))
-                                        <p class="text-xs text-gray-500 mb-4">Due: {{ \Carbon\Carbon::parse($task['due_date'])->format('M d, Y') }}</p>
+                                        <p class="text-xs font-semibold text-slate-600 mb-4">Due: <span class="text-slate-800">{{ \Carbon\Carbon::parse($task['due_date'])->format('M d, Y') }}</span></p>
                                     @endif
                                     <a href="{{ route('student.tasks.show', $task['id']) }}" class="block w-full px-4 py-2 bg-indigo-600 text-white text-center font-semibold rounded">View Details</a>
                                 </div>
@@ -226,19 +232,19 @@
         function showTab(tab) {
             document.getElementById('tab-sem1-content').classList.add('hidden');
             document.getElementById('tab-sem2-content').classList.add('hidden');
-            document.getElementById('tab-sem1').classList.remove('border-indigo-600', 'text-indigo-600');
-            document.getElementById('tab-sem2').classList.remove('border-indigo-600', 'text-indigo-600');
-            document.getElementById('tab-sem1').classList.add('text-gray-600', 'border-transparent');
-            document.getElementById('tab-sem2').classList.add('text-gray-600', 'border-transparent');
+            document.getElementById('tab-sem1').classList.remove('student-tab-active');
+            document.getElementById('tab-sem2').classList.remove('student-tab-active');
+            document.getElementById('tab-sem1').classList.add('student-tab-inactive');
+            document.getElementById('tab-sem2').classList.add('student-tab-inactive');
 
             if (tab === 'sem1') {
                 document.getElementById('tab-sem1-content').classList.remove('hidden');
-                document.getElementById('tab-sem1').classList.add('border-indigo-600', 'text-indigo-600');
-                document.getElementById('tab-sem1').classList.remove('text-gray-600', 'border-transparent');
+                document.getElementById('tab-sem1').classList.add('student-tab-active');
+                document.getElementById('tab-sem1').classList.remove('student-tab-inactive');
             } else {
                 document.getElementById('tab-sem2-content').classList.remove('hidden');
-                document.getElementById('tab-sem2').classList.add('border-indigo-600', 'text-indigo-600');
-                document.getElementById('tab-sem2').classList.remove('text-gray-600', 'border-transparent');
+                document.getElementById('tab-sem2').classList.add('student-tab-active');
+                document.getElementById('tab-sem2').classList.remove('student-tab-inactive');
             }
         }
     </script>

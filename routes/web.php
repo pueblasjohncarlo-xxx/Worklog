@@ -273,6 +273,7 @@ Route::middleware(['auth', 'verified', 'role:coordinator'])->group(function () {
     // Performance Evaluation (Coordinator view)
     Route::get('/coordinator/evaluations', [CoordinatorEvaluationController::class, 'index'])->name('coordinator.evaluations.index');
     Route::get('/coordinator/evaluations/supervisor/{supervisor}', [CoordinatorEvaluationController::class, 'show'])->name('coordinator.evaluations.supervisor');
+    Route::get('/coordinator/evaluations/{evaluation}/print', [CoordinatorEvaluationController::class, 'print'])->name('coordinator.evaluations.print');
     Route::get('/coordinator/evaluations/{evaluation}/export', [CoordinatorEvaluationController::class, 'export'])->name('coordinator.evaluations.export');
 });
 

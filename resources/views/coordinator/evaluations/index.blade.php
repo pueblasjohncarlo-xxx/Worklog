@@ -142,9 +142,14 @@
                                                                 </span>
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                                <a href="{{ route('coordinator.evaluations.supervisor', $supervisor) }}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors">
-                                                                    View Details
-                                                                </a>
+                                                                <div class="inline-flex items-center gap-2">
+                                                                    <a href="{{ route('coordinator.evaluations.supervisor', $supervisor) }}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm">
+                                                                        View Details
+                                                                    </a>
+                                                                    <a href="{{ route('coordinator.evaluations.supervisor', ['supervisor' => $supervisor, 'print' => 1]) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-black transition-colors shadow-sm">
+                                                                        Print
+                                                                    </a>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     @endforeach

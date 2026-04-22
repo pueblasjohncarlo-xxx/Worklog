@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\View\View;
 
 class CoordinatorEvaluationController extends Controller
@@ -174,5 +175,24 @@ class CoordinatorEvaluationController extends Controller
         };
 
         return response()->download($full, $name, ['Content-Type' => $contentType]);
+    }
+
+    public function print(PerformanceEvaluation $evaluation): Response
+    {
+        abort_unless(Auth::user()?->role === User::ROLE_COORDINATOR, 403);
+        abort_unless($evaluation->submitted_at !== null, 403);
+
+        $evaluation->loadMissing(['student', 'supervisor']);
+
+        $assignment = Assignment::where('student_id', $evaluation->student_id)
+            ->where('supervisor_id', $evaluation->supervisor_id)
+            ->with('company')
+            ->latest('start_date')
+            ->first();
+
+        return response()->view('coordinator.evaluations.print', [
+            'evaluation' => $evaluation,
+            'assignment' => $assignment,
+        ]);
     }
 }

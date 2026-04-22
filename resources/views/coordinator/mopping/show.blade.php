@@ -13,6 +13,14 @@
         }
     </style>
 
+    @if(request()->boolean('print'))
+        <script>
+            window.addEventListener('load', function () {
+                window.print();
+            });
+        </script>
+    @endif
+
     <div class="space-y-6">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 dark:text-gray-100 space-y-4">
@@ -49,7 +57,7 @@
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                         <h3 class="text-lg font-semibold">{{ $assignment->student?->name ?? 'Student' }}</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $assignment->company?->name ?? 'Company' }} • {{ $monthStart->format('F Y') }}</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300">{{ $assignment->company?->name ?? 'Company' }} | {{ $monthStart->format('F Y') }}</p>
                     </div>
 
                     <form method="GET" class="flex items-center gap-2">
@@ -110,9 +118,9 @@
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     @forelse($attendanceLogs as $log)
                                         <tr>
-                                            <td class="px-4 py-3 text-sm">{{ $log->work_date?->format('M d, Y') ?? '—' }}</td>
-                                            <td class="px-4 py-3 text-sm">{{ $log->time_in ? $log->time_in->format('H:i') : '—' }}</td>
-                                            <td class="px-4 py-3 text-sm">{{ $log->time_out ? $log->time_out->format('H:i') : '—' }}</td>
+                                            <td class="px-4 py-3 text-sm">{{ $log->work_date?->format('M d, Y') ?? '-' }}</td>
+                                            <td class="px-4 py-3 text-sm">{{ $log->time_in ? $log->time_in->format('H:i') : '-' }}</td>
+                                            <td class="px-4 py-3 text-sm">{{ $log->time_out ? $log->time_out->format('H:i') : '-' }}</td>
                                             <td class="px-4 py-3 text-sm text-right">{{ number_format((float)$log->hours, 2) }}</td>
                                         </tr>
                                     @empty
@@ -143,12 +151,16 @@
                                     @forelse($arLogs as $log)
                                         <tr>
                                             <td class="px-4 py-3 text-sm">{{ ucfirst($log->type ?? 'AR') }}</td>
-                                            <td class="px-4 py-3 text-sm">{{ $log->work_date?->format('M d, Y') ?? '—' }}</td>
+                                            <td class="px-4 py-3 text-sm">{{ $log->work_date?->format('M d, Y') ?? '-' }}</td>
                                             <td class="px-4 py-3 text-sm">{{ ucfirst($log->status === 'rejected' ? 'declined' : ($log->status ?? 'unknown')) }}</td>
                                             <td class="px-4 py-3 text-sm text-right space-x-2">
-                                                <a href="{{ route('coordinator.worklogs.print', $log->id) }}" class="text-indigo-700 dark:text-indigo-300 font-semibold hover:underline">View</a>
                                                 @if($log->attachment_path)
-                                                    <a href="{{ route('coordinator.worklogs.attachment', $log->id) }}" class="text-gray-700 dark:text-gray-300 font-semibold hover:underline">Download</a>
+                                                    <a href="{{ route('coordinator.worklogs.attachment', ['workLog' => $log->id, 'inline' => 1, 'v' => optional($log->updated_at)->timestamp ?? $log->id]) }}" target="_blank" class="text-indigo-700 dark:text-indigo-300 font-semibold hover:underline">View</a>
+                                                @else
+                                                    <a href="{{ route('coordinator.worklogs.print', $log->id) }}" target="_blank" class="text-indigo-700 dark:text-indigo-300 font-semibold hover:underline">View</a>
+                                                @endif
+                                                @if($log->attachment_path)
+                                                    <a href="{{ route('coordinator.worklogs.attachment', ['workLog' => $log->id, 'v' => optional($log->updated_at)->timestamp ?? $log->id]) }}" class="text-gray-700 dark:text-gray-300 font-semibold hover:underline">Download</a>
                                                 @endif
                                             </td>
                                         </tr>

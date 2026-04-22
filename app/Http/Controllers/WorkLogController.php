@@ -416,6 +416,9 @@ class WorkLogController extends Controller
         return Storage::disk($disk)->response($path, $downloadName, [
             'Content-Disposition' => $disposition.'; filename="'.$downloadName.'"',
             'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
         ]);
     }
 
@@ -475,6 +478,9 @@ class WorkLogController extends Controller
             return Storage::disk($disk)->response($path, $downloadName, [
                 'Content-Disposition' => 'inline; filename="'.$downloadName.'"',
                 'X-Content-Type-Options' => 'nosniff',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
             ]);
         }
 

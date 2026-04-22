@@ -13,7 +13,22 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Viewing OJT students assigned to this supervisor</p>
             </div>
         </div>
-    </x-slot>
+</x-slot>
+
+    @if(request()->boolean('print'))
+        <style>
+            @media print {
+                .app-sidebar, header, nav { display: none !important; }
+                main { padding: 0 !important; }
+                body { background: #fff !important; }
+            }
+        </style>
+        <script>
+            window.addEventListener('load', function () {
+                window.print();
+            });
+        </script>
+    @endif
 
     <div class="space-y-6">
         <!-- Filters -->
@@ -72,7 +87,7 @@
         <!-- Student List (Grouped Display) -->
         <div class="space-y-4">
             @forelse($students as $student)
-                <div x-data="{ open: false }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div x-data="{ open: {{ request()->boolean('print') ? 'true' : 'false' }} }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <!-- Student Header -->
                     <button @click="open = !open" class="w-full px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
                         <div class="flex items-center gap-4 text-left">
@@ -81,7 +96,7 @@
                             </div>
                             <div>
                                 <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $student->name }}</h4>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $student->assignment->company->name }} • {{ $student->department ?? 'N/A' }}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">{{ $student->assignment->company->name }} | {{ $student->department ?? 'N/A' }}</p>
                             </div>
                         </div>
                         
@@ -123,15 +138,23 @@
                                                     </div>
                                                 @endif
                                             </div>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4 italic">
+                                            <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-4 italic">
                                                 "{{ $e->remarks ?? 'No remarks provided.' }}"
                                             </p>
-                                            <a href="{{ route('coordinator.evaluations.export', $e) }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                </svg>
-                                                Download Report
-                                            </a>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                <a href="{{ route('coordinator.evaluations.print', $e) }}" target="_blank" class="inline-flex justify-center items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-bold transition-colors">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V2h12v7M6 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-1M6 14h12v8H6z" />
+                                                    </svg>
+                                                    Print
+                                                </a>
+                                                <a href="{{ route('coordinator.evaluations.export', $e) }}" class="inline-flex justify-center items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                    </svg>
+                                                    Download Report
+                                                </a>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
