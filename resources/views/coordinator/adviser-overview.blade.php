@@ -79,7 +79,7 @@
                     </div>
                 </div>
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Adviser Selected</h3>
-                <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+                <p class="text-gray-700 dark:text-gray-200 max-w-sm mx-auto">
                     Select an OJT Adviser from the dropdown above to view their student roster, performance metrics, and monitoring information.
                 </p>
             </div>
@@ -191,7 +191,7 @@
                             <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                             </svg>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm">No OJT students match the selected filters</p>
+                                <p class="text-gray-700 dark:text-gray-200 text-sm">No OJT students match the selected filters</p>
                         </div>
                     </template>
 
@@ -220,7 +220,7 @@
                                                     </div>
                                                     <div class="ml-3">
                                                         <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="student.name"></p>
-                                                        <p class="text-xs text-gray-500 dark:text-gray-400" x-text="student.email"></p>
+                                                        <p class="text-xs text-gray-700 dark:text-gray-200" x-text="student.email"></p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -236,7 +236,7 @@
                                                     </div>
                                                     <span class="text-xs font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap" x-text="`${student.hours_percentage}%`"></span>
                                                 </div>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" x-text="`${student.completed_hours}/${student.required_hours} hrs`"></p>
+                                                <p class="text-xs text-gray-700 dark:text-gray-200 mt-1" x-text="`${student.completed_hours}/${student.required_hours} hrs`"></p>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="text-sm font-medium text-gray-900 dark:text-white" x-text="`${student.submitted_tasks}/${student.total_tasks}`"></span>
@@ -253,7 +253,7 @@
                                                     </span>
                                                 </template>
                                                 <template x-if="student.status !== 'active' && student.status !== 'completed'">
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200" x-text="student.status"></span>
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100" x-text="student.status"></span>
                                                 </template>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -275,7 +275,7 @@
                         <template x-if="selectedAdviser().students.length > 0">
                             <div>
                                 <p class="text-3xl font-bold text-indigo-600 dark:text-indigo-400" x-text="`${Math.round(selectedAdviser().students.reduce((sum, s) => sum + s.hours_percentage, 0) / selectedAdviser().students.length)}%`"></p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Across all OJT students</p>
+                                <p class="text-xs text-gray-700 dark:text-gray-200 mt-2">Across all OJT students</p>
                             </div>
                         </template>
                     </div>
@@ -284,14 +284,14 @@
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                         <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-4">Incomplete Requirements</h4>
                         <p class="text-3xl font-bold text-red-600 dark:text-red-400" x-text="selectedAdviser().students.filter(s => s.hours_percentage < 100 || s.tasks_percentage < 100).length"></p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">OJT students needing follow-up</p>
+                        <p class="text-xs text-gray-700 dark:text-gray-200 mt-2">OJT students needing follow-up</p>
                     </div>
 
                     <!-- Evaluation Follow-up -->
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                         <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-4">Evaluation Follow-up</h4>
                         <p class="text-3xl font-bold text-yellow-600 dark:text-yellow-400" x-text="selectedAdviser().pending_evaluations"></p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Pending evaluations</p>
+                        <p class="text-xs text-gray-700 dark:text-gray-200 mt-2">Pending evaluations</p>
                     </div>
                 </div>
             </div>

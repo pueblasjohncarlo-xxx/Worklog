@@ -45,7 +45,7 @@
                                     <span class="px-3 py-1.5 rounded-lg text-sm font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 uppercase tracking-wide group-hover:scale-105 transition-transform">
                                         {{ $groupName }}
                                     </span>
-                                    <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                    <span class="text-sm text-gray-700 dark:text-gray-200 font-medium">
                                         {{ $supervisors->count() }} Supervisors
                                     </span>
                                 </div>
@@ -89,11 +89,11 @@
                                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                                 <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900/90 backdrop-blur-sm shadow-sm">
                                                     <tr>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Supervisor Name</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Department</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned OJT Students</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Evaluations</th>
-                                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Supervisor Name</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Department</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Assigned OJT Students</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Evaluations</th>
+                                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -112,7 +112,7 @@
                                                                         <div class="text-sm font-bold text-gray-900 dark:text-gray-100">
                                                                             {{ $supervisor->name }}
                                                                         </div>
-                                                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                                        <div class="text-xs text-gray-700 dark:text-gray-200">
                                                                             {{ $supervisor->email }}
                                                                         </div>
                                                                     </div>
@@ -134,7 +134,7 @@
                                                                         </div>
                                                                     @endif
                                                                 </div>
-                                                                <span class="text-xs text-gray-500 mt-1 block">{{ $assignments->count() }} OJT Students Assigned</span>
+                                                                <span class="text-xs text-gray-700 dark:text-gray-200 mt-1 block">{{ $assignments->count() }} OJT Students Assigned</span>
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap">
                                                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -157,7 +157,7 @@
                                             </table>
                                             
                                             <!-- No Results Message -->
-                                            <div class="p-8 text-center text-gray-500 dark:text-gray-400" x-show="$el.previousElementSibling.querySelectorAll('tr[x-show]').length === 0 && search !== ''" style="display: none;">
+                                            <div class="p-8 text-center text-gray-700 dark:text-gray-200" x-show="$el.previousElementSibling.querySelectorAll('tr[x-show]').length === 0 && search !== ''" style="display: none;">
                                                 No supervisors found matching "<span x-text="search" class="font-bold"></span>"
                                             </div>
                                         </div>
@@ -178,7 +178,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                             <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No supervisors found</h3>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters.</p>
+                            <p class="mt-1 text-sm text-gray-700 dark:text-gray-200">Try adjusting your filters.</p>
                         </div>
                     @endforelse
                 </div>

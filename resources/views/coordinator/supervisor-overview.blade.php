@@ -96,7 +96,7 @@
                 <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'supervisors']) }}#roster" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Supervisors</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Total Supervisors</p>
                         <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $totalSupervisors }}</p>
                     </div>
                     <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
@@ -111,9 +111,9 @@
                 <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'supervisors', 'status' => 'Active']) }}#roster" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Supervisors</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Active Supervisors</p>
                         <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{{ $activeSupervisors }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ $totalSupervisors > 0 ? round(($activeSupervisors / $totalSupervisors) * 100, 0) : 0 }}%</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ $totalSupervisors > 0 ? round(($activeSupervisors / $totalSupervisors) * 100, 0) : 0 }}%</p>
                     </div>
                     <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
                         <svg class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,7 +127,7 @@
                 <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'companies']) }}#companies" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Companies</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Total Companies</p>
                         <p class="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">{{ $totalCompanies }}</p>
                     </div>
                     <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
@@ -142,7 +142,7 @@
                 <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'students']) }}#students" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">OJT Students Supervised</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200">OJT Students Supervised</p>
                         <p class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-2">{{ $totalStudents }}</p>
                     </div>
                     <div class="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-full">
@@ -160,7 +160,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Companies Connected to Supervisors</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Showing companies that currently appear under supervisor assignments.</p>
+                            <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">Showing companies that currently appear under supervisor assignments.</p>
                         </div>
                         <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'supervisors']) }}#roster" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Back to roster</a>
                     </div>
@@ -190,7 +190,7 @@
                                 </template>
                                 <template x-if="getConnectedCompanies().length === 0">
                                     <tr>
-                                        <td colspan="3" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No companies found for supervisor assignments.</td>
+                                        <td colspan="3" class="px-6 py-10 text-center text-sm text-gray-700 dark:text-gray-200">No companies found for supervisor assignments.</td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -204,7 +204,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">OJT Students Supervised</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Unique OJT students currently associated with supervisors (status shown per assignment).</p>
+                            <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">Unique OJT students currently associated with supervisors (status shown per assignment).</p>
                         </div>
                         <a href="{{ route('coordinator.supervisor-overview', ['panel' => 'supervisors']) }}#roster" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Back to roster</a>
                     </div>
@@ -225,7 +225,7 @@
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                         <td class="px-6 py-4">
                                             <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="student.name"></p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="student.email"></p>
+                                            <p class="text-xs text-gray-700 dark:text-gray-200" x-text="student.email"></p>
                                         </td>
                                         <td class="px-6 py-4">
                                             <p class="text-sm text-gray-700 dark:text-gray-200" x-text="student.program"></p>
@@ -241,14 +241,14 @@
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">Active</span>
                                             </template>
                                             <template x-if="String(student.status).toLowerCase() !== 'active'">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200" x-text="student.status"></span>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100" x-text="student.status"></span>
                                             </template>
                                         </td>
                                     </tr>
                                 </template>
                                 <template x-if="getStudentsSupervised().length === 0">
                                     <tr>
-                                        <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No OJT students found under supervisors.</td>
+                                        <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-700 dark:text-gray-200">No OJT students found under supervisors.</td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -298,7 +298,7 @@
                 </div>
 
                 <div class="flex items-end">
-                    <p class="text-sm text-gray-600 dark:text-gray-400"><span x-text="getFilteredSupervisors().length"></span> supervisor(s) found</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-200"><span x-text="getFilteredSupervisors().length"></span> supervisor(s) found</p>
                 </div>
             </div>
         </div>
@@ -314,7 +314,7 @@
                     </div>
                 </div>
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Supervisors Found</h3>
-                <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6">
+                <p class="text-gray-700 dark:text-gray-200 max-w-sm mx-auto mb-6">
                     There are currently no supervisors in the system. Add one to get started.
                 </p>
                 <a href="{{ route('coordinator.supervisors.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 transition ease-in-out duration-150">
@@ -331,7 +331,7 @@
                         <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                         </svg>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">No supervisors match your filters</p>
+                        <p class="text-gray-700 dark:text-gray-200 text-sm">No supervisors match your filters</p>
                     </div>
                 </template>
 
@@ -359,7 +359,7 @@
                                                 </div>
                                                 <div class="ml-3">
                                                     <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="supervisor.name"></p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="supervisor.email"></p>
+                                                    <p class="text-xs text-gray-700 dark:text-gray-200" x-text="supervisor.email"></p>
                                                 </div>
                                             </div>
                                         </td>
@@ -369,14 +369,14 @@
                                                     <p class="text-sm text-gray-600 dark:text-gray-300" x-text="company.name"></p>
                                                 </template>
                                                 <template x-if="supervisor.companies.length === 0">
-                                                    <p class="text-xs text-gray-400 italic">No company assigned</p>
+                                                    <p class="text-xs text-gray-600 dark:text-gray-300 italic">No company assigned</p>
                                                 </template>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center space-x-2">
                                                 <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="supervisor.total_students"></span>
-                                                <span class="text-xs text-gray-500 dark:text-gray-400" x-text="`(${supervisor.active_students} active)`"></span>
+                                                <span class="text-xs text-gray-700 dark:text-gray-200" x-text="`(${supervisor.active_students} active)`"></span>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -403,7 +403,7 @@
                                                 </span>
                                             </template>
                                             <template x-if="supervisor.status !== 'Active'">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                                                     Inactive
                                                 </span>
                                             </template>
@@ -429,7 +429,7 @@
             <template x-if="selectedSupervisor">
                 <div x-show="showDetailsModal" x-transition class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-6 space-y-6">
                     <!-- Close Button -->
-                    <button @click="closeDetails()" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    <button @click="closeDetails()" class="absolute top-4 right-4 text-gray-700 dark:text-gray-200 hover:text-gray-700 dark:hover:text-gray-300">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -443,7 +443,7 @@
                             </div>
                             <div>
                                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white" x-text="selectedSupervisor.name"></h2>
-                                <p class="text-gray-600 dark:text-gray-400" x-text="selectedSupervisor.position_title"></p>
+                                <p class="text-gray-700 dark:text-gray-200" x-text="selectedSupervisor.position_title"></p>
                             </div>
                         </div>
                     </div>
@@ -468,7 +468,7 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">Active</span>
                             </template>
                             <template x-if="selectedSupervisor.status !== 'Active'">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200">Inactive</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100">Inactive</span>
                             </template>
                         </div>
                     </div>
@@ -484,7 +484,7 @@
                             </div>
                         </template>
                         <template x-if="selectedSupervisor.companies.length === 0">
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">No company assigned</p>
+                            <p class="text-gray-700 dark:text-gray-200 text-sm">No company assigned</p>
                         </template>
                     </div>
 
@@ -492,15 +492,15 @@
                     <div class="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                         <div class="text-center">
                             <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400" x-text="selectedSupervisor.total_students"></p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Total OJT Students</p>
+                            <p class="text-xs text-gray-700 dark:text-gray-200 mt-1">Total OJT Students</p>
                         </div>
                         <div class="text-center">
                             <p class="text-2xl font-bold text-green-600 dark:text-green-400" x-text="selectedSupervisor.completed_evaluations"></p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Completed Evaluations</p>
+                            <p class="text-xs text-gray-700 dark:text-gray-200 mt-1">Completed Evaluations</p>
                         </div>
                         <div class="text-center">
                             <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400" x-text="selectedSupervisor.pending_evaluations"></p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Pending Evaluations</p>
+                            <p class="text-xs text-gray-700 dark:text-gray-200 mt-1">Pending Evaluations</p>
                         </div>
                     </div>
 
@@ -513,20 +513,20 @@
                                     <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded">
                                         <div>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="student.name"></p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="student.program"></p>
+                                            <p class="text-xs text-gray-700 dark:text-gray-200" x-text="student.program"></p>
                                         </div>
                                         <template x-if="student.status === 'active'">
                                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">Active</span>
                                         </template>
                                         <template x-if="student.status !== 'active'">
-                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200" x-text="student.status"></span>
+                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100" x-text="student.status"></span>
                                         </template>
                                     </div>
                                 </template>
                             </div>
                         </template>
                         <template x-if="selectedSupervisor.students.length === 0">
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">No OJT students assigned</p>
+                            <p class="text-gray-700 dark:text-gray-200 text-sm">No OJT students assigned</p>
                         </template>
                     </div>
 

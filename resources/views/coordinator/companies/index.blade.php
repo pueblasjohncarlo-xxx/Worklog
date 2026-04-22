@@ -36,19 +36,19 @@
     <div class="space-y-6" x-data='phAddress(@json($companyFormInitial))'>
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <a href="{{ route('coordinator.companies.index', ['focus' => 'all']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Companies</p>
+                <p class="text-xs uppercase tracking-wider text-gray-700 dark:text-gray-200">Total Companies</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $totalCompanies }}</p>
             </a>
             <a href="{{ route('coordinator.companies.index', ['focus' => 'active']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Active Partners</p>
+                <p class="text-xs uppercase tracking-wider text-gray-700 dark:text-gray-200">Active Partners</p>
                 <p class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">{{ $activeCompanies }}</p>
             </a>
             <a href="{{ route('coordinator.companies.index', ['focus' => 'with-students']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">With Assigned OJT Students</p>
+                <p class="text-xs uppercase tracking-wider text-gray-700 dark:text-gray-200">With Assigned OJT Students</p>
                 <p class="mt-2 text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ $companiesWithStudents }}</p>
             </a>
             <a href="{{ route('coordinator.companies.index', ['focus' => 'incomplete']) }}#partnerDirectory" class="block bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/70 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Incomplete Profiles</p>
+                <p class="text-xs uppercase tracking-wider text-gray-700 dark:text-gray-200">Incomplete Profiles</p>
                 <p class="mt-2 text-3xl font-bold text-amber-600 dark:text-amber-400">{{ $incompleteCompanies }}</p>
             </a>
         </div>
@@ -58,7 +58,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <h3 class="text-lg font-semibold">Register New Partner Company</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Create complete, searchable company records for supervisor assignment and deployment automation.</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">Create complete, searchable company records for supervisor assignment and deployment automation.</p>
                     </div>
                 </div>
 
@@ -120,7 +120,7 @@
                             <label for="contact_phone" class="block text-sm font-medium">Contact Phone</label>
                             <div class="relative rounded-md shadow-sm mt-1">
                                 <div class="absolute inset-y-0 left-0 flex items-center">
-                                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 sm:text-sm h-full" x-text="dialCode || '+--'"></span>
+                                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 sm:text-sm h-full" x-text="dialCode || '+--'"></span>
                                 </div>
                                 <input id="contact_phone" name="contact_phone" type="text" x-model="phoneNumber" maxlength="50" pattern="[0-9\s\-\+\(\)]{7,50}" placeholder="912 345 6789" class="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-16">
                             </div>
@@ -154,7 +154,7 @@
                                     <template x-for="a in filteredAddresses" :key="a.display_name">
                                         <div @click="selectAddress(a)" class="px-4 py-2 cursor-pointer hover:bg-indigo-100 dark:hover:bg-gray-600 text-sm border-b border-gray-100 dark:border-gray-600 last:border-0">
                                             <div class="font-medium text-gray-800 dark:text-gray-200" x-text="a.name"></div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400" x-text="a.display_name"></div>
+                                            <div class="text-xs text-gray-700 dark:text-gray-200" x-text="a.display_name"></div>
                                         </div>
                                     </template>
                                 </div>
@@ -229,12 +229,12 @@
             <div class="p-6 lg:p-8 text-gray-900 dark:text-gray-100 space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <h3 class="font-semibold text-lg">Partner Company Directory</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400"><span id="visibleCompaniesCount">0</span> companies shown</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-200"><span id="visibleCompaniesCount">0</span> companies shown</p>
                 </div>
 
                 @if ($companies->isEmpty())
                     <div class="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">No companies yet. Add your first partner company using the form above.</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-200">No companies yet. Add your first partner company using the form above.</p>
                     </div>
                 @else
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
@@ -262,13 +262,13 @@
                         <table class="min-w-full text-left text-sm divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Industry</th>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">OJT Students</th>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Company</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Industry</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Status</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">OJT Students</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Location</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Contact</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="companiesTableBody" class="divide-y divide-gray-100 dark:divide-gray-800">
@@ -336,7 +336,7 @@
                                             </template>
                                         </td>
 
-                                        <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-700 dark:text-gray-200">
                                             <template x-if="!editing">
                                                 <span>{{ $company->industry ?: 'Unspecified' }}</span>
                                             </template>
@@ -363,7 +363,7 @@
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">{{ $studentCount }} OJT students</span>
                                         </td>
 
-                                        <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-700 dark:text-gray-200">
                                             <template x-if="!editing">
                                                 <span>{{ $company->city ?: '-' }}, {{ $company->country ?: '-' }}</span>
                                             </template>
@@ -375,11 +375,11 @@
                                             </template>
                                         </td>
 
-                                        <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-700 dark:text-gray-200">
                                             <template x-if="!editing">
                                                 <div>
                                                     <div class="text-xs">{{ $company->contact_person ?: '-' }}</div>
-                                                    <div class="text-[10px] text-gray-400">{{ $company->contact_email ?: 'No email' }}</div>
+                                                    <div class="text-[10px] text-gray-600 dark:text-gray-300">{{ $company->contact_email ?: 'No email' }}</div>
                                                 </div>
                                             </template>
                                             <template x-if="editing">
@@ -416,21 +416,21 @@
                                         <td colspan="7" class="px-4 py-4">
                                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm">
                                                 <div>
-                                                    <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Full Location</p>
+                                                    <p class="text-xs uppercase tracking-wider text-gray-700 dark:text-gray-200">Full Location</p>
                                                     <p class="mt-1 text-gray-700 dark:text-gray-200">{{ $company->address ?: 'No address recorded' }}</p>
-                                                    <p class="text-gray-500 dark:text-gray-400">{{ $company->city ?: '-' }}, {{ $company->state ?: '-' }}, {{ $company->postal_code ?: '-' }}, {{ $company->country ?: '-' }}</p>
+                                                    <p class="text-gray-700 dark:text-gray-200">{{ $company->city ?: '-' }}, {{ $company->state ?: '-' }}, {{ $company->postal_code ?: '-' }}, {{ $company->country ?: '-' }}</p>
                                                 </div>
                                                 <div>
-                                                    <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Contact Details</p>
+                                                    <p class="text-xs uppercase tracking-wider text-gray-700 dark:text-gray-200">Contact Details</p>
                                                     <p class="mt-1 text-gray-700 dark:text-gray-200">Person: {{ $company->contact_person ?: 'Not set' }}</p>
-                                                    <p class="text-gray-500 dark:text-gray-400">Email: {{ $company->contact_email ?: 'Not set' }}</p>
-                                                    <p class="text-gray-500 dark:text-gray-400">Phone: {{ $company->contact_phone ?: 'Not set' }}</p>
+                                                    <p class="text-gray-700 dark:text-gray-200">Email: {{ $company->contact_email ?: 'Not set' }}</p>
+                                                    <p class="text-gray-700 dark:text-gray-200">Phone: {{ $company->contact_phone ?: 'Not set' }}</p>
                                                 </div>
                                                 <div>
-                                                    <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Assignments</p>
+                                                    <p class="text-xs uppercase tracking-wider text-gray-700 dark:text-gray-200">Assignments</p>
                                                     <p class="mt-1 text-gray-700 dark:text-gray-200">Supervisors: {{ $assignedSupervisors->isNotEmpty() ? $assignedSupervisors->implode(', ') : 'None' }}</p>
-                                                    <p class="text-gray-500 dark:text-gray-400">Advisers: {{ $assignedAdvisers->isNotEmpty() ? $assignedAdvisers->implode(', ') : 'None' }}</p>
-                                                    <p class="text-gray-500 dark:text-gray-400">OJT Students: {{ $activeStudents->pluck('student.name')->filter()->unique()->values()->implode(', ') ?: 'None' }}</p>
+                                                    <p class="text-gray-700 dark:text-gray-200">Advisers: {{ $assignedAdvisers->isNotEmpty() ? $assignedAdvisers->implode(', ') : 'None' }}</p>
+                                                    <p class="text-gray-700 dark:text-gray-200">OJT Students: {{ $activeStudents->pluck('student.name')->filter()->unique()->values()->implode(', ') ?: 'None' }}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -449,9 +449,9 @@
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 z-10">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Company</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Update missing fields and keep company records complete and deployment-ready.</p>
+                        <p class="text-xs text-gray-700 dark:text-gray-200">Update missing fields and keep company records complete and deployment-ready.</p>
                     </div>
-                    <button type="button" onclick="closeCompanyEditModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Close</button>
+                    <button type="button" onclick="closeCompanyEditModal()" class="text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100">Close</button>
                 </div>
 
                 <form id="companyEditForm" method="POST" class="p-6 space-y-5">

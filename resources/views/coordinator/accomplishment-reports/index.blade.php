@@ -33,7 +33,7 @@
                                     <span class="px-3 py-1.5 rounded-lg text-sm font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 uppercase tracking-wide group-hover:scale-105 transition-transform">
                                         {{ $groupName }}
                                     </span>
-                                    <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                    <span class="text-sm text-gray-700 dark:text-gray-200 font-medium">
                                         {{ $departmentLogs->groupBy(fn($log) => $log->assignment?->student?->id)->count() }} OJT Student{{ $departmentLogs->groupBy(fn($log) => $log->assignment?->student?->id)->count() !== 1 ? 's' : '' }}
                                     </span>
                                 </div>
@@ -74,7 +74,7 @@
                                         <div class="bg-white dark:bg-gray-800 max-h-[65vh] overflow-y-auto">
                                             <!-- Table Header -->
                                             <div class="sticky top-0 bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-900/50 dark:to-gray-900/30 border-b border-gray-200 dark:border-gray-700">
-                                                <div class="grid grid-cols-12 gap-4 px-6 py-3 text-xs font-bold uppercase text-gray-600 dark:text-gray-400 tracking-wider">
+                                                <div class="grid grid-cols-12 gap-4 px-6 py-3 text-xs font-bold uppercase text-gray-700 dark:text-gray-200 tracking-wider">
                                                     <div class="col-span-3">OJT Student Name</div>
                                                     <div class="col-span-2">Course</div>
                                                     <div class="col-span-3">Company</div>
@@ -97,7 +97,7 @@
                                                                 </div>
                                                                 <div class="flex-1 min-w-0">
                                                                     <p class="font-bold text-gray-900 dark:text-gray-100 truncate" x-text="student.name"></p>
-                                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" x-text="student.name.toLowerCase().replace(/\s+/g, '').substring(0, 8) + '@cksc.edu.ph'"></p>
+                                                                    <p class="text-xs text-gray-700 dark:text-gray-200 mt-0.5" x-text="student.name.toLowerCase().replace(/\s+/g, '').substring(0, 8) + '@cksc.edu.ph'"></p>
                                                                 </div>
                                                             </div>
 
@@ -120,7 +120,7 @@
                                                             <div class="col-span-2">
                                                                 <span :class="{
                                                                     'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400': student.status === 'Active',
-                                                                    'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400': student.status !== 'Active'
+                                                                    'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100': student.status !== 'Active'
                                                                 }" class="px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1" x-text="student.status">
                                                                 </span>
                                                             </div>
@@ -157,8 +157,8 @@
                                                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                                         </svg>
-                                                        <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mt-2">No OJT students found</p>
-                                                        <p class="text-gray-400 dark:text-gray-500 text-xs mt-1" x-text="`Try searching for "${searchQuery}"`"></p>
+                                                        <p class="text-gray-700 dark:text-gray-200 text-sm font-medium mt-2">No OJT students found</p>
+                                                        <p class="text-gray-600 dark:text-gray-300 text-xs mt-1" x-text="`Try searching for "${searchQuery}"`"></p>
                                                     </div>
                                                 </template>
                                             </div>
@@ -166,7 +166,7 @@
 
                                         <!-- Footer -->
                                         <div class="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                                            <span class="text-sm text-gray-600 dark:text-gray-400" x-text="`${filteredStudents.length} of ${allStudents.length} OJT students`"></span>
+                                            <span class="text-sm text-gray-700 dark:text-gray-200" x-text="`${filteredStudents.length} of ${allStudents.length} OJT students`"></span>
                                             <button @click="showModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">
                                                 Close
                                             </button>
@@ -177,7 +177,7 @@
                         </div>
                     @empty
                         <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
-                            <p class="text-gray-500 dark:text-gray-400">No accomplishment reports found.</p>
+                            <p class="text-gray-700 dark:text-gray-200">No accomplishment reports found.</p>
                         </div>
                     @endforelse
                 </div>
@@ -213,7 +213,7 @@
                                     <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                                         <span x-text="student?.studentName || 'OJT Student'"></span> - Accomplishment Reports
                                     </h2>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 flex-wrap">
+                                    <p class="text-sm text-gray-700 dark:text-gray-200 flex items-center gap-2 flex-wrap">
                                         <span class="px-2 py-1 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-bold text-xs" x-text="student?.department || 'Department'"></span>
                                         <span class="mx-1">•</span>
                                         <span x-text="student?.companyName || 'Company'"></span>
@@ -283,7 +283,7 @@
                                     </template>
                                     <template x-if="reports.filter(r => selectedType === 'all' || r.type === selectedType).length === 0">
                                         <div class="text-center py-12">
-                                            <p class="text-gray-500 dark:text-gray-400">No reports found in this category</p>
+                                            <p class="text-gray-700 dark:text-gray-200">No reports found in this category</p>
                                         </div>
                                     </template>
                                 </div>

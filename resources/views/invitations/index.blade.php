@@ -125,10 +125,10 @@
                             @php
                                 $status = $invitation->status;
                                 $statusClasses = match ($status) {
-                                    'accepted' => 'bg-emerald-100 text-emerald-700',
-                                    'revoked' => 'bg-rose-100 text-rose-700',
-                                    'expired' => 'bg-amber-100 text-amber-700',
-                                    default => 'bg-indigo-100 text-indigo-700',
+                                    'accepted' => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200',
+                                    'revoked' => 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200',
+                                    'expired' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+                                    default => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200',
                                 };
                             @endphp
                             <tr>
@@ -149,7 +149,7 @@
                                             <button type="submit" class="text-xs font-bold uppercase tracking-wide text-rose-700 hover:text-rose-900 dark:text-rose-300 dark:hover:text-rose-200">Revoke</button>
                                         </form>
                                     @else
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">-</span>
+                                        <span class="text-xs text-gray-700 dark:text-gray-200">-</span>
                                     @endif
                                 </td>
                             </tr>

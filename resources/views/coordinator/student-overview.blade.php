@@ -49,7 +49,7 @@
                                     <span class="px-3 py-1.5 rounded-lg text-sm font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 uppercase tracking-wide group-hover:scale-105 transition-transform">
                                         {{ $groupName }}
                                     </span>
-                                    <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                    <span class="text-sm text-gray-700 dark:text-gray-200 font-medium">
                                         {{ $students->count() }} OJT Students
                                     </span>
                                 </div>
@@ -93,13 +93,13 @@
                                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                                 <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900/90 backdrop-blur-sm shadow-sm">
                                                     <tr>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student Name</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Course</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned Company</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Hours Rendered</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Login</th>
-                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Student Name</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Course</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Assigned Company</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Hours Rendered</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Status</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Last Login</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -121,7 +121,7 @@
                                                                         <div class="text-sm font-bold text-gray-900 dark:text-gray-100">
                                                                             {{ $student->name }}
                                                                         </div>
-                                                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                                        <div class="text-xs text-gray-700 dark:text-gray-200">
                                                                             {{ $student->email }}
                                                                         </div>
                                                                     </div>
@@ -160,12 +160,12 @@
                                                                         Active
                                                                     </span>
                                                                 @else
-                                                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-200 text-gray-900 dark:bg-gray-600 dark:text-gray-100">
                                                                         Inactive
                                                                     </span>
                                                                 @endif
                                                             </td>
-                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-200">
                                                                 {{ $student->last_login_at ? $student->last_login_at->diffForHumans() : 'Never' }}
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -187,7 +187,7 @@
                                             </table>
                                             
                                             <!-- No Results Message -->
-                                            <div class="p-8 text-center text-gray-500 dark:text-gray-400" x-show="$el.previousElementSibling.querySelectorAll('tr[x-show]').length === 0 && search !== ''" style="display: none;">
+                                            <div class="p-8 text-center text-gray-700 dark:text-gray-200" x-show="$el.previousElementSibling.querySelectorAll('tr[x-show]').length === 0 && search !== ''" style="display: none;">
                                                 No OJT students found matching "<span x-text="search" class="font-bold"></span>"
                                             </div>
                                         </div>
@@ -208,7 +208,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                             <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No OJT students found</h3>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters or import new OJT students.</p>
+                            <p class="mt-1 text-sm text-gray-700 dark:text-gray-200">Try adjusting your filters or import new OJT students.</p>
                         </div>
                     @endforelse
                 </div>
@@ -246,19 +246,19 @@
                         </h4>
                         <div class="grid grid-cols-2 gap-6 bg-gray-50 dark:bg-gray-900/30 p-4 rounded-lg">
                             <div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Email</p>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-1">Email</p>
                                 <p id="modalDetailEmail" class="text-gray-900 dark:text-gray-100 font-semibold">N/A</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Department</p>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-1">Department</p>
                                 <p id="modalDetailDept" class="text-gray-900 dark:text-gray-100 font-semibold">N/A</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Section</p>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-1">Section</p>
                                 <p id="modalDetailSection" class="text-gray-900 dark:text-gray-100 font-semibold">N/A</p>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Joined</p>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-1">Joined</p>
                                 <p id="modalDetailJoined" class="text-gray-900 dark:text-gray-100 font-semibold">N/A</p>
                             </div>
                         </div>
@@ -275,24 +275,24 @@
                         <div class="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-6 space-y-4">
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Company</p>
+                                    <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-1">Company</p>
                                     <p id="modalCompanyName" class="text-gray-900 dark:text-gray-100 font-semibold text-lg">N/A</p>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Industry</p>
+                                    <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-1">Industry</p>
                                     <p id="modalIndustry" class="text-gray-900 dark:text-gray-100 font-semibold text-lg">N/A</p>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Required Hours</p>
+                                    <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-1">Required Hours</p>
                                     <p id="modalRequiredHours" class="text-gray-900 dark:text-gray-100 font-semibold text-lg">0 hrs</p>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Completed Hours</p>
+                                    <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-1">Completed Hours</p>
                                     <p id="modalCompletedHours" class="text-gray-900 dark:text-gray-100 font-semibold text-lg">0 hrs</p>
                                 </div>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-3">Progress</p>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-3">Progress</p>
                                 <div class="flex items-center gap-4">
                                     <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
                                         <div id="modalProgressBar" class="bg-gradient-to-r from-emerald-500 to-green-500 h-4 rounded-full transition-all" style="width: 0%"></div>
@@ -324,11 +324,11 @@
                         </h4>
                         <div class="grid grid-cols-2 gap-6 bg-gray-50 dark:bg-gray-900/30 p-4 rounded-lg">
                             <div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-2">Status</p>
-                                <span id="modalStatusBadge" class="px-3 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">Inactive</span>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-2">Status</p>
+                                <span id="modalStatusBadge" class="px-3 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full bg-gray-200 text-gray-900 dark:bg-gray-600 dark:text-gray-100">Inactive</span>
                             </div>
                             <div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mb-2">Last Login</p>
+                                <p class="text-sm text-gray-700 dark:text-gray-200 font-medium mb-2">Last Login</p>
                                 <p id="modalLastLogin" class="text-gray-900 dark:text-gray-100 font-semibold">Never</p>
                             </div>
                         </div>
@@ -408,7 +408,7 @@
                 lastLogin.textContent = window.formatRelativeDate(student.last_login_at) || 'Never';
             } else {
                 statusBadge.textContent = 'Inactive';
-                statusBadge.className = 'px-3 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                statusBadge.className = 'px-3 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full bg-gray-200 text-gray-900 dark:bg-gray-600 dark:text-gray-100';
                 lastLogin.textContent = 'Never';
             }
             
