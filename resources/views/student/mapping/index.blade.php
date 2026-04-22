@@ -13,22 +13,22 @@
     </style>
 
     <div class="space-y-6">
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 print-reset">
+        <div class="student-light-card p-6 print-reset">
             <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-black text-gray-900 dark:text-gray-100">Mapping of OJT Hours</h2>
-                    <p class="text-sm text-gray-600 dark:text-gray-300">Attendance-based monthly summary (validation partner of your Accomplishment Reports).</p>
+                    <h2 class="text-xl font-black text-slate-900">Mapping of OJT Hours</h2>
+                    <p class="text-sm font-medium text-slate-600">Attendance-based monthly summary paired with your accomplishment reports.</p>
                 </div>
 
                 <div class="no-print flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
                     <form method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
                         <div>
-                            <label for="from" class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">From</label>
-                            <input id="from" name="from" type="month" value="{{ $fromKey }}" class="mt-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" />
+                            <label for="from" class="block text-xs font-bold text-slate-600 uppercase tracking-wider">From</label>
+                            <input id="from" name="from" type="month" value="{{ $fromKey }}" class="mt-1 rounded-md border-slate-300 bg-white text-slate-900" />
                         </div>
                         <div>
-                            <label for="to" class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">To</label>
-                            <input id="to" name="to" type="month" value="{{ $toKey }}" class="mt-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" />
+                            <label for="to" class="block text-xs font-bold text-slate-600 uppercase tracking-wider">To</label>
+                            <input id="to" name="to" type="month" value="{{ $toKey }}" class="mt-1 rounded-md border-slate-300 bg-white text-slate-900" />
                         </div>
                         <button type="submit" class="h-[42px] px-4 rounded-md bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700">Apply</button>
                     </form>

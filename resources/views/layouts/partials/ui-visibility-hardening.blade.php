@@ -203,6 +203,65 @@
         opacity: 1 !important;
     }
 
+    /* Student cards and tabs should remain readable even before CSS assets are rebuilt. */
+    body.worklog-ui-hardening .student-light-card {
+        background: #ffffff !important;
+        border-color: rgba(203, 213, 225, 0.95) !important;
+        color: #0f172a !important;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12) !important;
+    }
+
+    body.worklog-ui-hardening .student-light-card .student-card-title,
+    body.worklog-ui-hardening .student-light-card .text-slate-500,
+    body.worklog-ui-hardening .student-light-card .text-gray-500,
+    body.worklog-ui-hardening .student-light-card .text-gray-400,
+    body.worklog-ui-hardening .student-task-card .text-slate-500,
+    body.worklog-ui-hardening .student-task-card .text-gray-500,
+    body.worklog-ui-hardening .student-task-card .text-gray-400 {
+        color: #475569 !important;
+    }
+
+    body.worklog-ui-hardening .student-task-card {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        color: #0f172a !important;
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12) !important;
+    }
+
+    body.worklog-ui-hardening .student-section-shell .text-gray-500,
+    body.worklog-ui-hardening .student-section-shell .text-gray-400 {
+        color: #e2e8f0 !important;
+    }
+
+    body.worklog-ui-hardening .student-tab-inactive {
+        color: #cbd5e1 !important;
+    }
+
+    body.worklog-ui-hardening .student-tab-active {
+        color: #ffffff !important;
+    }
+
+    /* Student messages layout */
+    body.worklog-ui-hardening [x-data="chatApp()"] .text-gray-500,
+    body.worklog-ui-hardening [x-data="chatApp()"] .text-gray-400 {
+        color: #cbd5e1 !important;
+        opacity: 1 !important;
+    }
+
+    body.worklog-ui-hardening [x-data="chatApp()"] .bg-gray-800 {
+        color: #f8fafc !important;
+    }
+
+    body.worklog-ui-hardening [x-data="chatApp()"] input::placeholder {
+        color: #94a3b8 !important;
+        opacity: 1 !important;
+    }
+
+    /* Table readability across reports and mapping surfaces */
+    body.worklog-ui-hardening table.divide-y tbody tr {
+        border-color: #e2e8f0 !important;
+    }
+
     /* Disabled controls should not become invisible */
     body.worklog-ui-hardening button:disabled,
     body.worklog-ui-hardening input:disabled,

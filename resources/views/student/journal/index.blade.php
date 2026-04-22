@@ -23,7 +23,7 @@
                             </svg>
                         </div>
                         <p class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Daily Report</p>
-                        <p class="text-[10px] text-gray-500 mt-1">Summary of your day</p>
+                        <p class="text-xs text-slate-600 mt-1 font-medium">Summary of your day</p>
                     </a>
                     <a href="{{ route('student.worklogs.create', ['type' => 'weekly']) }}" class="flex flex-col items-center p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all group">
                         <div class="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm mb-3 group-hover:scale-110 transition-transform">
@@ -32,7 +32,7 @@
                             </svg>
                         </div>
                         <p class="text-sm font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Weekly Report</p>
-                        <p class="text-[10px] text-gray-500 mt-1">Review of the week</p>
+                        <p class="text-xs text-slate-600 mt-1 font-medium">Review of the week</p>
                     </a>
                     <a href="{{ route('student.worklogs.create', ['type' => 'monthly']) }}" class="flex flex-col items-center p-6 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all group">
                         <div class="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm mb-3 group-hover:scale-110 transition-transform">
@@ -41,7 +41,7 @@
                             </svg>
                         </div>
                         <p class="text-sm font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Monthly Report</p>
-                        <p class="text-[10px] text-gray-500 mt-1">Monthly performance</p>
+                        <p class="text-xs text-slate-600 mt-1 font-medium">Monthly performance</p>
                     </a>
                 </div>
             </div>
@@ -75,7 +75,7 @@
             <div class="p-4">
                 <div class="grid grid-cols-7 mb-2">
                     @foreach(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $day)
-                        <div class="text-center text-xs font-black uppercase tracking-widest text-gray-400 py-2">{{ $day }}</div>
+                        <div class="text-center text-xs font-black uppercase tracking-widest text-slate-500 py-2">{{ $day }}</div>
                     @endforeach
                 </div>
 
@@ -141,19 +141,19 @@
                 <div class="mt-6 flex flex-wrap gap-6 text-xs font-bold uppercase tracking-wider">
                     <div class="flex items-center gap-2">
                         <span class="h-3 w-3 rounded-full bg-emerald-500"></span>
-                        <span class="text-gray-500">Approved</span>
+                        <span class="text-slate-600">Approved</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="h-3 w-3 rounded-full bg-yellow-500"></span>
-                        <span class="text-gray-500">Pending Approval</span>
+                        <span class="text-slate-600">Pending Approval</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-rose-500">X</span>
-                        <span class="text-gray-500">Absent/Rejected</span>
+                        <span class="text-slate-600">Absent/Rejected</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="h-3 w-3 rounded bg-indigo-600"></span>
-                        <span class="text-gray-500">Journal Entry</span>
+                        <span class="text-slate-600">Journal Entry</span>
                     </div>
                 </div>
             </div>
@@ -204,9 +204,9 @@
 
                     <div x-data="{ tab: 'daily' }" class="space-y-4">
                         <div class="flex border-b border-gray-100 dark:border-gray-700">
-                            <button @click="tab = 'daily'" :class="tab === 'daily' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="px-4 py-2 text-xs font-black uppercase tracking-widest border-b-2 transition-all">Daily</button>
-                            <button @click="tab = 'weekly'" :class="tab === 'weekly' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="px-4 py-2 text-xs font-black uppercase tracking-widest border-b-2 transition-all">Weekly</button>
-                            <button @click="tab = 'monthly'" :class="tab === 'monthly' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="px-4 py-2 text-xs font-black uppercase tracking-widest border-b-2 transition-all">Monthly</button>
+                            <button @click="tab = 'daily'" :class="tab === 'daily' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-2 text-xs font-black uppercase tracking-widest border-b-2 transition-all">Daily</button>
+                            <button @click="tab = 'weekly'" :class="tab === 'weekly' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-2 text-xs font-black uppercase tracking-widest border-b-2 transition-all">Weekly</button>
+                            <button @click="tab = 'monthly'" :class="tab === 'monthly' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-2 text-xs font-black uppercase tracking-widest border-b-2 transition-all">Monthly</button>
                         </div>
 
                         <template x-if="tab === 'daily'">
@@ -214,7 +214,7 @@
                                 @forelse($recentReports->get('daily', []) as $report)
                                     <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700">
                                         <div class="flex justify-between items-start mb-2">
-                                            <span class="text-[10px] text-gray-400 font-bold uppercase">{{ $report->work_date->format('M d, Y') }}</span>
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">{{ $report->work_date->format('M d, Y') }}</span>
                                             <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest
                                                 {{ $report->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : '' }}
                                                 {{ $report->status === 'submitted' ? 'bg-blue-100 text-blue-700' : '' }}
@@ -249,7 +249,7 @@
                                         </div>
                                     </div>
                                 @empty
-                                    <p class="text-sm text-gray-400 italic text-center py-8">No daily reports found.</p>
+                                    <p class="text-sm text-slate-500 italic text-center py-8">No daily reports found.</p>
                                 @endforelse
                             </div>
                         </template>
@@ -259,7 +259,7 @@
                                 @forelse($recentReports->get('weekly', []) as $report)
                                     <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700">
                                         <div class="flex justify-between items-start mb-2">
-                                            <span class="text-[10px] text-gray-400 font-bold uppercase">{{ $report->work_date->format('M d, Y') }}</span>
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">{{ $report->work_date->format('M d, Y') }}</span>
                                             <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest
                                                 {{ $report->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : '' }}
                                                 {{ $report->status === 'submitted' ? 'bg-blue-100 text-blue-700' : '' }}
@@ -301,7 +301,7 @@
                                 @forelse($recentReports->get('monthly', []) as $report)
                                     <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700">
                                         <div class="flex justify-between items-start mb-2">
-                                            <span class="text-[10px] text-gray-400 font-bold uppercase">{{ $report->work_date->format('M d, Y') }}</span>
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">{{ $report->work_date->format('M d, Y') }}</span>
                                             <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest
                                                 {{ $report->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : '' }}
                                                 {{ $report->status === 'submitted' ? 'bg-blue-100 text-blue-700' : '' }}

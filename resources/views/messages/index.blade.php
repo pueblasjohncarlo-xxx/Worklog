@@ -166,7 +166,7 @@
                                     <template x-if="msg.attachment_path && msg.attachment_type === 'file'">
                                         <a :href="messageAttachmentUrl(msg)" target="_blank" rel="noopener noreferrer"
                                             class="mt-2 text-xs underline inline-block hover:opacity-80">
-                                            📎 <span x-text="msg.attachment_name || 'Attachment'"></span>
+                                            Attachment: <span x-text="msg.attachment_name || 'Attachment'"></span>
                                         </a>
                                     </template>
 
@@ -897,7 +897,7 @@ function chatApp() {
                 
                 
             } catch (error) {
-                console.error('✗ Error loading available users:', error);
+                console.error('Error loading available users:', error);
                 console.error('Error details:', {
                     message: error.message,
                     stack: error.stack,

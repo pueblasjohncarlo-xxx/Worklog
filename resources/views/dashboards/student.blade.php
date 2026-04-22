@@ -98,20 +98,20 @@
                 </div>
                 <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs sm:text-sm">
                     <a href="{{ request()->fullUrlWithQuery(['attendance_filter' => 'approved']) }}" class="bg-emerald-500/20 p-2 sm:p-3 rounded border border-emerald-500/30 hover:border-emerald-400/60 hover:ring-2 hover:ring-emerald-400/20 transition block">
-                        <div class="text-emerald-300 font-bold text-sm sm:text-base">{{ number_format($monthlyApprovedHours ?? 0, 2) }}h</div>
-                        <div class="text-gray-400 text-[10px] sm:text-xs">Approved</div>
+                        <div class="text-emerald-200 font-black text-sm sm:text-base">{{ number_format($monthlyApprovedHours ?? 0, 2) }}h</div>
+                        <div class="text-slate-100 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Approved</div>
                     </a>
                     <a href="{{ request()->fullUrlWithQuery(['attendance_filter' => 'pending']) }}" class="bg-blue-500/20 p-2 sm:p-3 rounded border border-blue-500/30 hover:border-blue-400/60 hover:ring-2 hover:ring-blue-400/20 transition block">
-                        <div class="text-blue-300 font-bold text-sm sm:text-base">{{ number_format($monthlyPendingHours ?? 0, 2) }}h</div>
-                        <div class="text-gray-400 text-[10px] sm:text-xs">Pending</div>
+                        <div class="text-blue-200 font-black text-sm sm:text-base">{{ number_format($monthlyPendingHours ?? 0, 2) }}h</div>
+                        <div class="text-slate-100 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Pending</div>
                     </a>
                     <a href="{{ request()->fullUrlWithQuery(['attendance_filter' => 'rejected']) }}" class="bg-rose-500/20 p-2 sm:p-3 rounded border border-rose-500/30 hover:border-rose-400/60 hover:ring-2 hover:ring-rose-400/20 transition block">
-                        <div class="text-rose-300 font-bold text-sm sm:text-base">{{ number_format($monthlyRejectedHours ?? 0, 2) }}h</div>
-                        <div class="text-gray-400 text-[10px] sm:text-xs">Rejected</div>
+                        <div class="text-rose-200 font-black text-sm sm:text-base">{{ number_format($monthlyRejectedHours ?? 0, 2) }}h</div>
+                        <div class="text-slate-100 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Rejected</div>
                     </a>
                     <a href="{{ request()->fullUrlWithQuery(['attendance_filter' => 'remaining']) }}" class="bg-slate-500/20 p-2 sm:p-3 rounded border border-slate-500/30 hover:border-slate-400/60 hover:ring-2 hover:ring-slate-400/20 transition block">
-                        <div class="text-slate-300 font-bold text-sm sm:text-base">{{ number_format($monthlyRemainingHours ?? 0, 2) }}h</div>
-                        <div class="text-gray-400 text-[10px] sm:text-xs">Remaining</div>
+                        <div class="text-slate-100 font-black text-sm sm:text-base">{{ number_format($monthlyRemainingHours ?? 0, 2) }}h</div>
+                        <div class="text-slate-100 text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Remaining</div>
                     </a>
                 </div>
 
@@ -155,11 +155,11 @@
                         @elseif (($attendanceFilter ?? '') === 'remaining')
                             <div class="mt-3 grid grid-cols-2 gap-3 text-xs sm:text-sm">
                                 <div class="rounded-lg bg-gray-900/40 border border-white/10 p-3">
-                                    <div class="text-gray-400">Approved this month</div>
+                                    <div class="text-slate-200 font-semibold uppercase tracking-wide text-[11px]">Approved this month</div>
                                     <div class="text-white font-black">{{ number_format($monthlyApprovedHours ?? 0, 2) }}h</div>
                                 </div>
                                 <div class="rounded-lg bg-gray-900/40 border border-white/10 p-3">
-                                    <div class="text-gray-400">Remaining this month</div>
+                                    <div class="text-slate-200 font-semibold uppercase tracking-wide text-[11px]">Remaining this month</div>
                                     <div class="text-white font-black">{{ number_format($monthlyRemainingHours ?? 0, 2) }}h</div>
                                 </div>
                             </div>
@@ -172,7 +172,7 @@
                                         <div class="rounded-lg bg-gray-900/40 border border-white/10 p-3 flex items-center justify-between gap-3">
                                             <div>
                                                 <div class="text-sm font-bold text-white">{{ $log->work_date?->format('M d, Y') ?? 'Date' }}</div>
-                                                <div class="text-xs text-gray-400">{{ strtoupper($log->type ?? 'log') }} • {{ ucfirst($log->status ?? 'n/a') }}</div>
+                                                <div class="text-xs text-slate-200">{{ strtoupper($log->type ?? 'log') }} | {{ ucfirst($log->status ?? 'n/a') }}</div>
                                             </div>
                                             <div class="text-xs font-bold text-gray-200">{{ number_format((float) ($log->hours ?? 0), 2) }}h</div>
                                         </div>
