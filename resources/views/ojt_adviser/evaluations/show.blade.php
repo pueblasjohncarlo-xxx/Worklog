@@ -21,9 +21,15 @@
 
                 @if ($latestEval)
                     <div class="flex items-center gap-3 flex-shrink-0">
-                        <span class="px-3 py-1.5 rounded-xl bg-indigo-500/20 text-indigo-300 font-black text-sm">
-                            {{ number_format((float) ($latestEval->final_rating ?? 0), 1) }}
-                        </span>
+                        @if((float) ($latestEval->final_rating ?? 0) > 0)
+                            <span class="px-3 py-1.5 rounded-xl bg-indigo-500/20 text-indigo-300 font-black text-sm">
+                                {{ number_format((float) ($latestEval->final_rating ?? 0), 1) }}
+                            </span>
+                        @else
+                            <span class="px-3 py-1.5 rounded-xl bg-blue-500/20 text-blue-300 font-black text-[11px] uppercase tracking-wide">
+                                Template File
+                            </span>
+                        @endif
                         <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
                             {{ $latestEval->semester ?? '—' }}
                         </span>
@@ -78,7 +84,13 @@
                                     <tr class="hover:bg-white/5 transition-colors">
                                         <td class="px-6 py-4 text-gray-200">{{ optional($ev->evaluation_date)->format('M d, Y') ?? '—' }}</td>
                                         <td class="px-6 py-4 text-gray-400">{{ $ev->semester ?? '—' }}</td>
-                                        <td class="px-6 py-4 text-indigo-300 font-bold">{{ number_format((float) ($ev->final_rating ?? 0), 1) }}</td>
+                                        <td class="px-6 py-4 text-indigo-300 font-bold">
+                                            @if((float) ($ev->final_rating ?? 0) > 0)
+                                                {{ number_format((float) ($ev->final_rating ?? 0), 1) }}
+                                            @else
+                                                <span class="text-blue-300 text-xs uppercase tracking-wide">Template File</span>
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4 text-right">
                                             @if ($ev->submitted_at)
                                                 <a href="{{ route('ojt_adviser.evaluations.export', $ev) }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-600/20 text-indigo-300 text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">

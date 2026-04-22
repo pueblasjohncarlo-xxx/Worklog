@@ -113,9 +113,15 @@
                                                         Sent: {{ $e->submitted_at ? $e->submitted_at->format('M d, Y h:i A') : 'N/A' }}
                                                     </div>
                                                 </div>
-                                                <div class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/50 rounded text-emerald-700 dark:text-emerald-300 font-black text-sm">
-                                                    {{ number_format($e->final_rating, 1) }}
-                                                </div>
+                                                @if((float) $e->final_rating > 0)
+                                                    <div class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/50 rounded text-emerald-700 dark:text-emerald-300 font-black text-sm">
+                                                        {{ number_format($e->final_rating, 1) }}
+                                                    </div>
+                                                @else
+                                                    <div class="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 rounded text-blue-700 dark:text-blue-300 font-black text-[11px] uppercase tracking-wide">
+                                                        Template File
+                                                    </div>
+                                                @endif
                                             </div>
                                             <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4 italic">
                                                 "{{ $e->remarks ?? 'No remarks provided.' }}"

@@ -382,8 +382,14 @@ class OjtAdviserController extends Controller
         }
 
         $full = Storage::disk('public')->path($path);
+        $contentType = match (strtolower((string) pathinfo($name, PATHINFO_EXTENSION))) {
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'pdf' => 'application/pdf',
+            'odt' => 'application/vnd.oasis.opendocument.text',
+            default => 'application/msword',
+        };
 
-        return response()->download($full, $name, ['Content-Type' => 'application/msword']);
+        return response()->download($full, $name, ['Content-Type' => $contentType]);
     }
 
     public function evaluationStudent(User $student): View

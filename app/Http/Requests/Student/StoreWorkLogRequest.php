@@ -22,7 +22,7 @@ class StoreWorkLogRequest extends FormRequest
             'hours' => ['required', 'numeric', 'min:0', 'max:24'],
 
             // Template-based workflow: students upload a completed document instead of typing the report in the form.
-            'attachment' => ['required', 'file', 'mimes:doc,docx,odt,pdf', 'max:10240'], // 10MB max
+            'attachment' => ['required', 'file', 'mimes:doc,docx,odt,pdf', 'max:51200'], // 50MB max
 
             // Keep backward compatibility with existing DB structure.
             'description' => ['nullable', 'string'],

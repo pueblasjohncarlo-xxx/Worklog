@@ -204,7 +204,7 @@
                                 class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-xs file:font-black file:uppercase file:tracking-wider file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 dark:file:bg-indigo-900 dark:file:text-indigo-200 transition-all cursor-pointer bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-2"
                             >
                             @error('attachment') <p class="text-rose-500 text-[10px] font-bold uppercase mt-1">{{ $message }}</p> @enderror
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400">Accepted: DOC, DOCX, ODT, PDF (max 10MB).</p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400">Accepted: DOC, DOCX, ODT, PDF (max 50MB).</p>
                         </div>
 
                         <script>

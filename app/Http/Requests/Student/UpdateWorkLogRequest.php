@@ -34,7 +34,7 @@ class UpdateWorkLogRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'skills_applied' => ['nullable', 'string'],
             'reflection' => ['nullable', 'string'],
-            'attachment' => [Rule::requiredIf($needsAttachment), 'nullable', 'file', 'mimes:doc,docx,odt,pdf', 'max:10240'],
+            'attachment' => [Rule::requiredIf($needsAttachment), 'nullable', 'file', 'mimes:doc,docx,odt,pdf', 'max:51200'],
         ];
     }
 }

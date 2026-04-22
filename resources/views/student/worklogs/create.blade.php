@@ -145,7 +145,7 @@
                             class="mt-1 block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-extrabold file:uppercase file:tracking-widest file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 dark:file:bg-indigo-900 dark:file:text-indigo-200"
                         >
                         <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-                            Accepted: DOC, DOCX, ODT, PDF (max 10MB).
+                            Accepted: DOC, DOCX, ODT, PDF (max 50MB).
                         </p>
                     </div>
 

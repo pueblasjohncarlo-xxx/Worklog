@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="space-y-6 max-w-6xl mx-auto" x-data="{ q: @js($q ?? ''), submit(){ const url = new URL(window.location.href); if(this.q){ url.searchParams.set('q', this.q);} else { url.searchParams.delete('q'); } window.location = url.toString(); } }">
-        <div class="bg-black/30 rounded-xl p-4">
+        <div class="bg-white/95 dark:bg-gray-800 rounded-xl p-5 border border-white/20 dark:border-gray-700 shadow-lg">
             @php
                 $selectedPeriod = '';
                 $selectedFreq = '';
@@ -24,7 +24,7 @@
                 freq: @js($selectedFreq)
             }">
                 <div class="md:col-span-3">
-                    <label class="text-xs uppercase text-white font-bold">Semester</label>
+                    <label class="text-xs uppercase text-gray-700 dark:text-gray-200 font-extrabold tracking-wider">Semester</label>
                     <select x-model="period"
                             class="mt-1 w-full rounded-md border-gray-300 bg-white text-gray-900 font-semibold focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">All Periods</option>
@@ -34,7 +34,7 @@
                     </select>
                 </div>
                 <div class="md:col-span-3" x-show="period" x-transition>
-                    <label class="text-xs uppercase text-white font-bold">Type</label>
+                    <label class="text-xs uppercase text-gray-700 dark:text-gray-200 font-extrabold tracking-wider">Type</label>
                     <select x-model="freq" @change="$nextTick(() => $el.form.submit())"
                             class="mt-1 w-full rounded-md border-gray-300 bg-white text-gray-900 font-semibold focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">All Types</option>
@@ -45,7 +45,7 @@
                 </div>
                 <input type="hidden" name="semester" :value="!period ? '' : (!freq ? period : (freq === 'Final' ? period : (period + ' (' + freq + ')')))">
                 <div :class="period ? 'md:col-span-4' : 'md:col-span-7'">
-                    <label class="text-xs uppercase text-white font-bold">Search</label>
+                    <label class="text-xs uppercase text-gray-700 dark:text-gray-200 font-extrabold tracking-wider">Search</label>
                     <input x-model="q" @input.debounce.150ms="submit()" list="students-list"
                            class="mt-1 w-full rounded-md border-gray-300 bg-white text-gray-900 font-semibold placeholder-gray-500 focus:ring-indigo-500 focus:border-indigo-500"
                            name="q" placeholder="Type an OJT student name..." />
@@ -56,12 +56,15 @@
                     </datalist>
                 </div>
                 <div class="md:col-span-2 flex items-center gap-3">
-                    <button class="w-full h-[42px] mt-6 px-5 py-2 rounded bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700">Apply</button>
-                    <a href="{{ route('supervisor.evaluations.create') }}" class="w-full h-[42px] mt-6 inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
+                    <button class="w-full h-[42px] mt-6 px-5 py-2 rounded bg-indigo-600 text-white text-xs font-extrabold uppercase tracking-wider hover:bg-indigo-700">Apply</button>
+                    <a href="{{ route('supervisor.evaluations.create') }}" class="w-full h-[42px] mt-6 inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-extrabold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
                         + New
                     </a>
                 </div>
             </form>
+            <p class="mt-3 text-xs text-gray-600 dark:text-gray-300 font-medium">
+                Template workflow: click <strong>+ New</strong>, download the official evaluation template, fill it externally, upload, review, and submit.
+            </p>
         </div>
 
         @if (session('status'))
@@ -100,11 +103,17 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($s->latest_evaluation)
-                                <span class="px-2 py-0.5 text-xs rounded-full {{ $s->latest_evaluation->final_rating >= 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ number_format($s->latest_evaluation->final_rating,2) }}/5
-                                </span>
+                                    @if((float) $s->latest_evaluation->final_rating > 0)
+                                        <span class="px-2 py-0.5 text-xs rounded-full {{ $s->latest_evaluation->final_rating >= 3 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ number_format($s->latest_evaluation->final_rating,2) }}/5
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-bold">
+                                            Template File
+                                        </span>
+                                    @endif
                                 @else
-                                <span class="text-xs text-gray-400">—</span>
+                                    <span class="text-xs text-gray-400">—</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">

@@ -45,6 +45,11 @@
                 <div class="ml-auto">
                     <button class="px-4 py-2 rounded bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700">Apply</button>
                 </div>
+                <div>
+                    <a href="{{ route('supervisor.evaluations.create', ['student_id' => $student->id]) }}" class="inline-flex items-center px-4 py-2 rounded bg-indigo-600 text-white text-sm font-extrabold uppercase tracking-wider hover:bg-indigo-700">
+                        + New Evaluation
+                    </a>
+                </div>
             </form>
         </div>
 
@@ -57,21 +62,30 @@
                             <div class="text-sm text-gray-500">Evaluation Date</div>
                             <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $e->evaluation_date->format('M d, Y') }}</div>
                             <div class="text-xs text-gray-500 mt-1">{{ $e->semester ?? '—' }}</div>
+                            <div class="text-[11px] text-gray-500 mt-1">Submitted: {{ $e->submitted_at ? $e->submitted_at->format('M d, Y h:i A') : 'No' }}</div>
                         </div>
                         <div>
-                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full {{ $e->final_rating >= 4.0 ? 'bg-green-100 text-green-800' : ($e->final_rating >= 3.0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
-                                {{ number_format($e->final_rating,2) }} / 5.0
-                            </span>
+                            @if((float) $e->final_rating > 0)
+                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full {{ $e->final_rating >= 4.0 ? 'bg-green-100 text-green-800' : ($e->final_rating >= 3.0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                    {{ number_format($e->final_rating,2) }} / 5.0
+                                </span>
+                            @else
+                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    Template File
+                                </span>
+                            @endif
                         </div>
                     </div>
-                    <div class="mt-4 grid grid-cols-2 gap-4 text-xs text-gray-600 dark:text-gray-300 sm:grid-cols-3">
-                        <div><span class="font-bold">Attendance:</span> {{ $e->attendance_punctuality }}/5</div>
-                        <div><span class="font-bold">Quality:</span> {{ $e->quality_of_work }}/5</div>
-                        <div><span class="font-bold">Initiative:</span> {{ $e->initiative }}/5</div>
-                        <div><span class="font-bold">Cooperation:</span> {{ $e->cooperation }}/5</div>
-                        <div><span class="font-bold">Dependability:</span> {{ $e->dependability }}/5</div>
-                        <div><span class="font-bold">Communication:</span> {{ $e->communication_skills }}/5</div>
-                    </div>
+                    @if((float) $e->final_rating > 0)
+                        <div class="mt-4 grid grid-cols-2 gap-4 text-xs text-gray-600 dark:text-gray-300 sm:grid-cols-3">
+                            <div><span class="font-bold">Attendance:</span> {{ $e->attendance_punctuality }}/5</div>
+                            <div><span class="font-bold">Quality:</span> {{ $e->quality_of_work }}/5</div>
+                            <div><span class="font-bold">Initiative:</span> {{ $e->initiative }}/5</div>
+                            <div><span class="font-bold">Cooperation:</span> {{ $e->cooperation }}/5</div>
+                            <div><span class="font-bold">Dependability:</span> {{ $e->dependability }}/5</div>
+                            <div><span class="font-bold">Communication:</span> {{ $e->communication_skills }}/5</div>
+                        </div>
+                    @endif
                     @if($e->remarks)
                         <div class="mt-3 text-sm text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/40 p-3 rounded">
                             "{{ $e->remarks }}"
@@ -80,7 +94,7 @@
                     <div class="mt-4">
                         <a href="{{ route('supervisor.evaluations.export', $e) }}"
                            class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700">
-                            Export Word
+                            Download Submitted File
                         </a>
                     </div>
                 </li>

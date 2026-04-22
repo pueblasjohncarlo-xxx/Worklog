@@ -237,6 +237,7 @@ Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
     // Student Performance Evaluation (New)
     Route::get('/supervisor/evaluations', [SupervisorEvaluationController::class, 'index'])->name('supervisor.evaluations.index');
     Route::get('/supervisor/evaluations/create', [SupervisorEvaluationController::class, 'create'])->name('supervisor.evaluations.create');
+    Route::get('/supervisor/evaluations/template', [SupervisorEvaluationController::class, 'template'])->name('supervisor.evaluations.template');
     Route::post('/supervisor/evaluations', [SupervisorEvaluationController::class, 'store'])->name('supervisor.evaluations.store');
     Route::get('/supervisor/evaluations/{evaluation}/export', [SupervisorEvaluationController::class, 'export'])->name('supervisor.evaluations.export');
     Route::post('/supervisor/evaluations/{evaluation}/unsubmit', [SupervisorEvaluationController::class, 'unsubmit'])->name('supervisor.evaluations.unsubmit');
