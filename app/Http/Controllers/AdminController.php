@@ -125,6 +125,26 @@ class AdminController extends Controller
         ]);
     }
 
+    public function assignmentsIndex(Request $request): View
+    {
+        $assignments = Assignment::with(['student', 'company', 'supervisor', 'ojtAdviser'])
+            ->orderByDesc('updated_at')
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('admin.assignments.index', compact('assignments'));
+    }
+
+    public function auditLogs(Request $request): View
+    {
+        $auditLogs = AuditLog::with('user:id,name,email')
+            ->latest()
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('admin.audit.index', compact('auditLogs'));
+    }
+
     public function pendingWorkLogs(Request $request): View
     {
         $workLogs = WorkLog::with([

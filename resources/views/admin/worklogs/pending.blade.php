@@ -61,8 +61,21 @@
                                     {{ is_numeric($log->hours) ? number_format((float) $log->hours, 2) : '-' }}
                                 </td>
                                 <td class="px-3 py-2 text-gray-900 dark:text-gray-100">
-                                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
-                                        {{ ucfirst((string) ($log->submitted_to ?? '')) ?: '—' }}
+                                    @php
+                                        $submittedTo = (string) ($log->submitted_to ?? '');
+                                        $submittedLabel = match ($submittedTo) {
+                                            'coordinator' => 'Coordinator',
+                                            'supervisor' => 'Supervisor',
+                                            default => $submittedTo !== '' ? ucfirst($submittedTo) : '—',
+                                        };
+                                        $submittedClasses = match ($submittedTo) {
+                                            'coordinator' => 'bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-100 border-emerald-200 dark:border-emerald-700',
+                                            'supervisor' => 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100 border-slate-200 dark:border-slate-600',
+                                            default => 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100 border-slate-200 dark:border-slate-600',
+                                        };
+                                    @endphp
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase border {{ $submittedClasses }}">
+                                        {{ $submittedLabel }}
                                     </span>
                                 </td>
                                 <td class="px-3 py-2 text-gray-900 dark:text-gray-100">

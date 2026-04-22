@@ -42,11 +42,41 @@ class AdminUserController extends Controller
         });
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::orderBy('name')->get();
+        $query = User::query()->orderBy('name');
+
+        if ($request->filled('role')) {
+            $role = (string) $request->string('role');
+            $allowedRoles = [
+                User::ROLE_ADMIN,
+                User::ROLE_STAFF,
+                User::ROLE_COORDINATOR,
+                User::ROLE_SUPERVISOR,
+                User::ROLE_OJT_ADVISER,
+                User::ROLE_STUDENT,
+            ];
+
+            if (in_array($role, $allowedRoles, true)) {
+                $query->where('role', $role);
+            }
+        }
+
+        if ($request->filled('status')) {
+            $status = (string) $request->string('status');
+
+            if ($status === 'active') {
+                $query->where('last_login_at', '>=', now()->subDays(7));
+            } elseif ($status === 'pending') {
+                $query->where('is_approved', false);
+            } elseif ($status === 'approved') {
+                $query->where('is_approved', true);
+            }
+        }
+
+        $users = $query->get();
         $companies = Company::orderBy('name')->get();
 
         // Group students by section (or 'No Section' if null)

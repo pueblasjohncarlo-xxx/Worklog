@@ -322,6 +322,8 @@ Route::middleware(['auth', 'verified', 'role:admin,staff'])->group(function () {
     Route::post('/admin/users/bulk-action', [AdminUserController::class, 'bulkAction'])->name('admin.users.bulk-action');
     Route::post('/admin/users/{user}/approve', [AdminUserController::class, 'approve'])->name('admin.users.approve');
     Route::post('/admin/users/{user}/reject', [AdminUserController::class, 'reject'])->name('admin.users.reject');
+    Route::get('/admin/assignments', [AdminController::class, 'assignmentsIndex'])->name('admin.assignments.index');
+    Route::get('/admin/audit-logs', [AdminController::class, 'auditLogs'])->name('admin.audit.index');
 
     Route::get('/admin/companies', function () {
         return redirect()->route('admin.dashboard')
