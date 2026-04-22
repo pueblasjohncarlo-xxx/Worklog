@@ -173,7 +173,7 @@ class SupervisorEvaluationController extends Controller
 
         $templateBaseDir = storage_path('app/templates/performance-evaluation');
         $candidateTemplates = [
-            $templateBaseDir.DIRECTORY_SEPARATOR.'official-template.doc',
+            $templateBaseDir.DIRECTORY_SEPARATOR.'official-template.docx',
         ];
 
         foreach ($candidateTemplates as $path) {
