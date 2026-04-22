@@ -169,20 +169,6 @@
                 </div>
             </div>
 
-            <!-- Leave Request Approvals (Cyan Header) -->
-            <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div class="bg-cyan-500 px-6 py-4">
-                    <h3 class="font-bold text-white text-lg">Leave Request Approvals</h3>
-                </div>
-                <div class="p-6 bg-white">
-                    @if($pendingLeaves->isEmpty())
-                        <p class="text-gray-500 font-medium">No pending leave requests.</p>
-                    @else
-                        <p class="text-gray-500">Pending leaves list...</p>
-                    @endif
-                </div>
-            </div>
-
             <!-- Attendance Approvals (Amber Header) -->
             <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
                 <div class="bg-amber-400 px-6 py-4">

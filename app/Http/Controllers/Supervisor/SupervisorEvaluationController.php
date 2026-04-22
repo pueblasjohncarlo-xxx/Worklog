@@ -171,10 +171,11 @@ class SupervisorEvaluationController extends Controller
                 ->first();
         }
 
+        $templateBaseDir = storage_path('app/templates/performance-evaluation');
         $candidateTemplates = [
-            storage_path('app/templates/performance-evaluation/OJT-PERFORMANCE-EVALUATION (2).docx'),
-            storage_path('app/templates/performance-evaluation/official-template.docx'),
-            storage_path('app/templates/performance-evaluation/template.docx'),
+            $templateBaseDir.DIRECTORY_SEPARATOR.'official-template.docx',
+            $templateBaseDir.DIRECTORY_SEPARATOR.'OJT-PERFORMANCE-EVALUATION (2).docx',
+            $templateBaseDir.DIRECTORY_SEPARATOR.'template.docx',
         ];
 
         foreach ($candidateTemplates as $path) {

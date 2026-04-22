@@ -46,10 +46,6 @@
             <span class="font-medium sm:hidden text-xs">Invites</span>
         </a>
 
-        @if(auth()->user()->role === \App\Models\User::ROLE_ADMIN)
-            <!-- Pending approvals, company, and leave processing are intentionally hidden from Admin navigation. -->
-        @endif
-
         <!-- Messages -->
         <a href="{{ route('messages.index') }}" 
            class="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base {{ request()->routeIs('messages.*') ? 'bg-indigo-900 text-white' : 'hover:bg-gray-900 text-gray-300' }}">

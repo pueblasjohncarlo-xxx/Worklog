@@ -9,7 +9,6 @@ use App\Http\Controllers\Coordinator\StudentImportController;
 use App\Http\Controllers\Coordinator\MoppingController as CoordinatorMoppingController;
 use App\Http\Controllers\Coordinator\DashboardController;
 use App\Http\Controllers\CoordinatorController;
-use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
@@ -158,35 +157,12 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
     Route::post('/student/worklogs/{workLog}/submit', [WorkLogController::class, 'submit'])->name('student.worklogs.submit');
     Route::patch('/student/worklogs/{workLog}/manual-clock-out', [StudentController::class, 'manualClockOut'])->name('student.worklogs.manual-clock-out');
 
-    Route::get('/student/leaves', function () {
-        return redirect()->route('student.dashboard');
-    })->name('student.leaves.index');
-    Route::post('/student/leaves', function () {
-        return redirect()->route('student.dashboard');
-    })->name('student.leaves.store');
-    Route::get('/student/leaves/{leave}/edit', function () {
-        return redirect()->route('student.dashboard');
-    })->whereNumber('leave')->name('student.leaves.edit');
-    Route::put('/student/leaves/{leave}', function () {
-        return redirect()->route('student.dashboard');
-    })->whereNumber('leave')->name('student.leaves.update');
-    Route::delete('/student/leaves/{leave}', function () {
-        return redirect()->route('student.dashboard');
-    })->whereNumber('leave')->name('student.leaves.destroy');
-    Route::post('/student/leaves/{leave}/cancel', function () {
-        return redirect()->route('student.dashboard');
-    })->whereNumber('leave')->name('student.leaves.cancel');
-
     // Student Announcements
     Route::get('/student/announcements', [StudentAnnouncementController::class, 'index'])->name('student.announcements.index');
 
     // Student Reports
     Route::get('/student/reports', [StudentReportController::class, 'index'])->name('student.reports.index');
     Route::get('/student/reports/export', [StudentReportController::class, 'export'])->name('student.reports.export');
-});
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/student/leaves/{leave}/print', [LeaveController::class, 'print'])->name('student.leaves.print');
 });
 
 use App\Http\Controllers\Supervisor\SupervisorEvaluationController;
@@ -200,19 +176,6 @@ Route::middleware(['auth', 'verified', 'role:supervisor'])->group(function () {
     Route::get('/supervisor/accomplishment-reports', [SupervisorController::class, 'accomplishmentReports'])->name('supervisor.accomplishment-reports');
     Route::get('/supervisor/worklogs/{workLog}/print', [WorkLogController::class, 'print'])->name('supervisor.worklogs.print');
     Route::get('/supervisor/worklogs/{workLog}/attachment', [WorkLogController::class, 'downloadAttachment'])->name('supervisor.worklogs.attachment');
-
-    Route::get('/supervisor/leaves', function () {
-        return redirect()->route('supervisor.dashboard');
-    })->name('supervisor.leaves.index');
-    Route::post('/supervisor/leaves/{leave}/approve', function () {
-        return redirect()->route('supervisor.dashboard');
-    })->whereNumber('leave')->name('supervisor.leaves.approve');
-    Route::post('/supervisor/leaves/{leave}/reject', function () {
-        return redirect()->route('supervisor.dashboard');
-    })->whereNumber('leave')->name('supervisor.leaves.reject');
-    Route::get('/supervisor/leaves/{leave}/print', function () {
-        return redirect()->route('supervisor.dashboard');
-    })->whereNumber('leave')->name('supervisor.leaves.print');
 
     // Task Assignment
     Route::get('/supervisor/tasks', [SupervisorTaskController::class, 'index'])->name('supervisor.tasks.index');
@@ -282,7 +245,6 @@ Route::middleware(['auth', 'verified', 'role:coordinator'])->group(function () {
     Route::get('/coordinator/mopping/{assignment}', function (Request $request, Assignment $assignment) {
         return redirect()->route('coordinator.mapping.show', ['assignment' => $assignment->id] + $request->query());
     })->name('coordinator.mopping.show');
-    Route::get('/coordinator/leaves/{leave}/print', [LeaveController::class, 'print'])->name('coordinator.leaves.print');
     Route::get('/coordinator/compliance-overview', [CoordinatorController::class, 'complianceOverview'])->name('coordinator.compliance-overview');
 
     Route::get('/coordinator/companies', [CoordinatorController::class, 'companiesIndex'])->name('coordinator.companies.index');
@@ -338,18 +300,6 @@ Route::middleware(['auth', 'verified', 'role:ojt_adviser'])->group(function () {
     Route::get('/ojt-adviser/mopping/{assignment}', function (Request $request, Assignment $assignment) {
         return redirect()->route('ojt_adviser.mapping.show', ['assignment' => $assignment->id] + $request->query());
     })->name('ojt_adviser.mopping.show');
-    Route::get('/ojt-adviser/leaves/{leave}/print', function () {
-        return redirect()->route('ojt_adviser.dashboard');
-    })->whereNumber('leave')->name('ojt_adviser.leaves.print');
-    Route::get('/ojt-adviser/leaves', function () {
-        return redirect()->route('ojt_adviser.dashboard');
-    })->name('ojt_adviser.leaves.index');
-    Route::post('/ojt-adviser/leaves/{leave}/approve', function () {
-        return redirect()->route('ojt_adviser.dashboard');
-    })->whereNumber('leave')->name('ojt_adviser.leaves.approve');
-    Route::post('/ojt-adviser/leaves/{leave}/reject', function () {
-        return redirect()->route('ojt_adviser.dashboard');
-    })->whereNumber('leave')->name('ojt_adviser.leaves.reject');
     Route::get('/ojt-adviser/evaluations', [OjtAdviserController::class, 'evaluations'])->name('ojt_adviser.evaluations');
     Route::get('/ojt-adviser/evaluations/student/{student}', [OjtAdviserController::class, 'evaluationStudent'])->name('ojt_adviser.evaluations.student');
     Route::get('/ojt-adviser/evaluations/{evaluation}/export', [OjtAdviserController::class, 'exportEvaluation'])->name('ojt_adviser.evaluations.export');
@@ -384,19 +334,6 @@ Route::middleware(['auth', 'verified', 'role:admin,staff'])->group(function () {
         return redirect()->route('admin.dashboard')
             ->with('status', 'Company deletion moved to Coordinator.');
     })->name('admin.companies.destroy');
-
-    Route::get('/admin/leaves', function () {
-        return redirect()->route('admin.dashboard')
-            ->with('status', 'Leave request review is handled by Supervisors and OJT Advisers.');
-    })->name('admin.leaves.index');
-    Route::post('/admin/leaves/{leave}/approve', function () {
-        return redirect()->route('admin.dashboard')
-            ->with('status', 'Admin leave approval is disabled.');
-    })->name('admin.leaves.approve');
-    Route::post('/admin/leaves/{leave}/reject', function () {
-        return redirect()->route('admin.dashboard')
-            ->with('status', 'Admin leave rejection is disabled.');
-    })->name('admin.leaves.reject');
 
     // Export student login list (name, email, status, default password hint)
     Route::get('/admin/users/export/students', [AdminUserController::class, 'exportStudents'])->name('admin.users.export.students');

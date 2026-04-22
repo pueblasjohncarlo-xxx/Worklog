@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assignment;
-use App\Models\Leave;
 use App\Models\Task;
 use App\Models\WorkLog;
 use App\Notifications\WorkLogSubmittedNotification;
