@@ -128,18 +128,12 @@
                                                             <!-- Actions -->
                                                             <div class="col-span-1 text-center">
                                                                 <button @click.stop="
-                                                                    const logs = student.logs.map(log => ({
-                                                                        id: log.id,
-                                                                        type: log.type,
-                                                                        date: log.date,
-                                                                        status: log.status
-                                                                    }));
                                                                     $dispatch('open-reports-modal', {
                                                                         studentId: student.id,
                                                                         studentName: student.name,
                                                                         companyName: student.company,
                                                                         department: student.department,
-                                                                        logs: logs
+                                                                        logs: student.logs
                                                                     });
                                                                     showModal = false;
                                                                 " class="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-md">
@@ -261,6 +255,9 @@
                                                         }" class="px-3 py-1 rounded text-xs font-bold" x-text="report.status"></span>
                                                     </div>
                                                     <div class="flex gap-2 ml-4">
+                                                        <a :href="report.printUrl" target="_blank" class="px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700">
+                                                            Print
+                                                        </a>
                                                         <template x-if="report.attachmentUrl">
                                                             <div class="flex gap-2">
                                                                 <a :href="report.attachmentUrl + '?inline=1&v=' + (report.updatedAt || report.id)" target="_blank" class="px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700">
@@ -270,11 +267,6 @@
                                                                     Download
                                                                 </a>
                                                             </div>
-                                                        </template>
-                                                        <template x-if="!report.attachmentUrl">
-                                                            <a :href="report.printUrl" target="_blank" class="px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded hover:bg-indigo-700">
-                                                                Print
-                                                            </a>
                                                         </template>
                                                     </div>
                                                 </div>

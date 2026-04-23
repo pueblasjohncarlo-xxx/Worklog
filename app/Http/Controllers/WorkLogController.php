@@ -449,8 +449,8 @@ class WorkLogController extends Controller
             abort(403);
         }
 
-        // If an uploaded attachment exists, it is the source of truth for viewing/printing.
-        // Serve it inline so the browser can preview/print when supported.
+        // If an uploaded attachment exists, use it as the source of truth and let the browser
+        // preview/print it when the file type supports inline rendering.
         if (! empty($workLog->attachment_path)) {
             $path = $workLog->attachment_path;
             $disk = $workLog->attachment_disk ?: 'public';
@@ -484,9 +484,14 @@ class WorkLogController extends Controller
             ]);
         }
 
-        return response()->view('worklogs.attachment-missing', [
+        return response()->view('worklogs.print-report', [
             'workLog' => $workLog,
-            'missingFile' => false,
+            'assignment' => $workLog->assignment,
+            'student' => $workLog->assignment->student,
+            'company' => $workLog->assignment->company,
+            'supervisor' => $workLog->assignment->supervisor,
+            'coordinator' => $workLog->assignment->coordinator,
+            'ojtAdviser' => $workLog->assignment->ojtAdviser,
         ]);
     }
 }
