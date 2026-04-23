@@ -137,12 +137,26 @@ class AdminController extends Controller
 
     public function auditLogs(Request $request): View
     {
+        $search = trim((string) $request->string('search'));
+
         $auditLogs = AuditLog::with('user:id,name,email')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($auditQuery) use ($search) {
+                    $auditQuery->where('action', 'like', "%{$search}%")
+                        ->orWhere('auditable_type', 'like', "%{$search}%")
+                        ->orWhere('auditable_id', 'like', "%{$search}%")
+                        ->orWhere('ip_address', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->latest()
             ->paginate(25)
             ->withQueryString();
 
-        return view('admin.audit.index', compact('auditLogs'));
+        return view('admin.audit.index', compact('auditLogs', 'search'));
     }
 
     public function pendingWorkLogs(Request $request): View

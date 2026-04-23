@@ -275,7 +275,11 @@
                                         </thead>
                                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                             @foreach ($students as $user)
-                                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" x-show="!search || $el.innerText.toLowerCase().includes(search.toLowerCase())">
+                                                <tr
+                                                    class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                                    x-show="!search || $el.innerText.toLowerCase().includes(search.toLowerCase())"
+                                                    x-transition
+                                                >
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
                                                     </td>
@@ -317,7 +321,11 @@
                                     </table>
                                     
                                     <!-- No Results Message -->
-                                    <div class="p-8 text-center text-gray-600 dark:text-gray-300" x-show="$el.previousElementSibling.querySelectorAll('tr[x-show]').length === 0 && search !== ''" style="display: none;">
+                                    <div
+                                        class="p-8 text-center text-gray-600 dark:text-gray-300"
+                                        x-show="search && !$el.previousElementSibling.querySelector('tbody tr[x-show]:not([style*=&quot;display: none&quot;])')"
+                                        style="display: none;"
+                                    >
                                         No OJT students found matching "<span x-text="search" class="font-bold"></span>"
                                     </div>
                                 </div>

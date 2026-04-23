@@ -19,19 +19,35 @@ class InvitationController extends Controller
     public function index(Request $request): View
     {
         $viewer = $request->user();
+        $search = trim((string) $request->string('search'));
 
         $invitations = RegistrationInvitation::query()
             ->with(['invitedBy', 'company', 'revokedBy'])
             ->when($viewer->role !== User::ROLE_ADMIN, function ($query) use ($viewer) {
                 $query->where('invited_by_user_id', $viewer->id);
             })
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($invitationQuery) use ($search) {
+                    $invitationQuery->where('email', 'like', "%{$search}%")
+                        ->orWhere('role', 'like', "%{$search}%")
+                        ->orWhereHas('company', function ($companyQuery) use ($search) {
+                            $companyQuery->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('invitedBy', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->latest()
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return view('invitations.index', [
             'layoutComponent' => $viewer->role === User::ROLE_ADMIN ? 'admin-layout' : 'coordinator-layout',
             'companies' => Company::orderBy('name')->get(),
             'invitations' => $invitations,
+            'search' => $search,
         ]);
     }
 

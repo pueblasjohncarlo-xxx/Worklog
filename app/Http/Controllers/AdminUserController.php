@@ -79,10 +79,18 @@ class AdminUserController extends Controller
         $users = $query->get();
         $companies = Company::orderBy('name')->get();
 
-        // Group students by section (or 'No Section' if null)
-        $students = $users->where('role', 'student')->groupBy(function ($user) {
-            return $user->section ? $user->section : 'No Section';
-        })->sortKeys();
+        $students = $users
+            ->where('role', User::ROLE_STUDENT)
+            ->map(function (User $user) {
+                $user->display_section = $user->normalizedStudentSection();
+
+                return $user;
+            })
+            ->filter(fn (User $user) => in_array($user->display_section, User::STUDENT_SECTIONS, true))
+            ->groupBy('display_section')
+            ->sortBy(function ($students, $section) {
+                return array_search($section, User::STUDENT_SECTIONS, true);
+            });
 
         // Group other roles
         $admins = $users->where('role', 'admin');
@@ -415,4 +423,3 @@ class AdminUserController extends Controller
         }
     }
 }
-
