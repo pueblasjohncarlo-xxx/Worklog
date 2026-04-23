@@ -22,7 +22,7 @@
                 <div class="mb-2" x-data="{ role: '{{ old('role', 'student') }}' }">
                     <div class="mb-3 space-y-1">
                         <h3 id="create-user" class="text-lg font-bold text-gray-900 dark:text-gray-100">Create New User</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">Create staff, adviser, supervisor, or student accounts from one form.</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Create admin, adviser, supervisor, coordinator, or student accounts from one form.</p>
                     </div>
                     <form method="POST" action="{{ route('admin.users.store') }}" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
                         @csrf
@@ -54,7 +54,6 @@
                             required
                         >
                             <option value="admin">Admin</option>
-                            <option value="staff">Staff</option>
                             <option value="coordinator">Coordinator</option>
                             <option value="supervisor">Supervisor</option>
                             <option value="ojt_adviser">OJT Adviser</option>
@@ -104,9 +103,9 @@
             </div>
         </div>
 
-        <!-- Staff Sections (Admins, Coordinators, Supervisors) -->
+        <!-- Administrative Sections -->
         <div class="space-y-4">
-            <h3 class="px-1 text-xl font-bold text-gray-900 dark:text-gray-100">Staff Members</h3>
+            <h3 class="px-1 text-xl font-bold text-gray-900 dark:text-gray-100">Administrative Roles</h3>
             
             <!-- Admins -->
             <div x-data="{ open: true }" class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -125,26 +124,6 @@
                 </button>
                 <div x-show="open" class="overflow-x-auto">
                     <x-user-table :users="$admins" />
-                </div>
-            </div>
-
-            <!-- Staff -->
-            <div x-data="{ open: true }" class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <button @click="open = !open" class="flex w-full items-center justify-between bg-gray-50 px-6 py-4 transition-colors hover:bg-gray-100 dark:bg-gray-900/50 dark:hover:bg-gray-800">
-                    <div class="flex items-center gap-3">
-                        <span class="rounded-full bg-fuchsia-100 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-200">
-                            Staff
-                        </span>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ $staff->count() }} Users
-                        </span>
-                    </div>
-                    <svg class="h-5 w-5 text-gray-500 transition-transform duration-200 dark:text-gray-300" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="open" class="overflow-x-auto">
-                    <x-user-table :users="$staff" />
                 </div>
             </div>
 

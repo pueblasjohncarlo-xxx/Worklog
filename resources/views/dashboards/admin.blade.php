@@ -67,10 +67,6 @@
                     <p class="text-[9px] text-emerald-200 font-bold uppercase tracking-wider">Students</p>
                     <p class="text-sm font-black text-white leading-none mt-1 group-hover:text-emerald-50">{{ $students }}</p>
                 </a>
-                <a href="{{ route('admin.users.index', ['role' => 'staff']) }}" class="group block bg-slate-950/30 border border-white/10 rounded p-1.5 text-center cursor-pointer transition-all hover:bg-violet-500/10 hover:border-violet-400/50 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400">
-                    <p class="text-[9px] text-violet-200 font-bold uppercase tracking-wider">Staff</p>
-                    <p class="text-sm font-black text-white leading-none mt-1 group-hover:text-violet-50">{{ $staff }}</p>
-                </a>
                 <a href="{{ route('admin.audit.index') }}" class="group block bg-slate-950/30 border border-white/10 rounded p-1.5 text-center cursor-pointer transition-all hover:bg-amber-500/10 hover:border-amber-400/50 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
                     <p class="text-[9px] text-amber-200 font-bold uppercase tracking-wider">Audit</p>
                     <p class="text-sm font-black text-white leading-none mt-1 group-hover:text-amber-50">{{ $recentAuditLogs->count() }}</p>
@@ -143,7 +139,6 @@
                             data: userDistributionData,
                             backgroundColor: [
                                     '#f59e0b', // amber - Admins
-                                    '#0891b2', // cyan - Staff
                                     '#059669', // emerald - Coordinators
                                     '#2563eb', // blue - Supervisors
                                     '#f43f5e', // rose - Students

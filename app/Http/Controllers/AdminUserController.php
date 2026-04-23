@@ -28,7 +28,7 @@ class AdminUserController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            // Verify user is authenticated and has admin/staff role
+            // Allow legacy staff accounts to keep read access, but new management actions exclude staff.
             $allowedRoles = [User::ROLE_ADMIN, User::ROLE_STAFF];
             if (!Auth::check() || !in_array((string) Auth::user()->role, $allowedRoles, true)) {
                 Log::warning('Unauthorized access attempt to admin user management', [
@@ -52,14 +52,15 @@ class AdminUserController extends Controller
             $role = (string) $request->string('role');
             $allowedRoles = [
                 User::ROLE_ADMIN,
-                User::ROLE_STAFF,
                 User::ROLE_COORDINATOR,
                 User::ROLE_SUPERVISOR,
                 User::ROLE_OJT_ADVISER,
                 User::ROLE_STUDENT,
             ];
 
-            if (in_array($role, $allowedRoles, true)) {
+            if ($role === User::ROLE_ADMIN) {
+                $query->whereIn('role', [User::ROLE_ADMIN, User::ROLE_STAFF]);
+            } elseif (in_array($role, $allowedRoles, true)) {
                 $query->where('role', $role);
             }
         }
@@ -92,9 +93,8 @@ class AdminUserController extends Controller
                 return array_search($section, User::STUDENT_SECTIONS, true);
             });
 
-        // Group other roles
-        $admins = $users->where('role', 'admin');
-        $staff = $users->where('role', 'staff');
+        // Group other roles, folding legacy staff records into the admin bucket.
+        $admins = $users->whereIn('role', [User::ROLE_ADMIN, User::ROLE_STAFF]);
         $coordinators = $users->where('role', 'coordinator');
         $supervisors = $users->where('role', 'supervisor');
         $ojtAdvisers = $users->where('role', 'ojt_adviser');
@@ -102,7 +102,6 @@ class AdminUserController extends Controller
         return view('admin.users.index', [
             'studentsBySection' => $students,
             'admins' => $admins,
-            'staff' => $staff,
             'coordinators' => $coordinators,
             'supervisors' => $supervisors,
             'ojtAdvisers' => $ojtAdvisers,

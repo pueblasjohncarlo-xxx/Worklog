@@ -19,12 +19,11 @@ class AdminController extends Controller
         // ===== User Metrics =====
         $totalUsers = User::count();
         $totalApprovedUsers = User::where('is_approved', true)->count();
-        $admins = User::where('role', User::ROLE_ADMIN)->count();
+        $admins = User::whereIn('role', [User::ROLE_ADMIN, User::ROLE_STAFF])->count();
         $coordinators = User::where('role', User::ROLE_COORDINATOR)->count();
         $supervisors = User::where('role', User::ROLE_SUPERVISOR)->count();
         $students = User::where('role', User::ROLE_STUDENT)->count();
         $advisers = User::where('role', User::ROLE_OJT_ADVISER)->count();
-        $staff = User::where('role', User::ROLE_STAFF)->count();
         $activeUsers = User::where('last_login_at', '>=', Carbon::now()->subDays(7))->count();
 
         // ===== Assignment Metrics =====
@@ -47,7 +46,6 @@ class AdminController extends Controller
         // ===== User Role Distribution for Chart =====
         $userDistribution = [
             'Admins' => $admins,
-            'Staff' => $staff,
             'Coordinators' => $coordinators,
             'Supervisors' => $supervisors,
             'Students' => $students,
@@ -105,7 +103,6 @@ class AdminController extends Controller
             'supervisors' => $supervisors,
             'students' => $students,
             'advisers' => $advisers,
-            'staff' => $staff,
             'activeUsers' => $activeUsers,
 
             // Other Metrics
