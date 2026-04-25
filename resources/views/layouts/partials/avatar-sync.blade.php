@@ -3,7 +3,7 @@
 (function () {
     const endpoint = "{{ route('profile.avatar-versions') }}";
     const storageKey = 'worklog:profile-updated';
-    const refreshIntervalMs = 2000;
+    const refreshIntervalMs = 8000;
 
     let refreshTimer = null;
     let inFlight = false;
@@ -44,8 +44,21 @@
             }
 
             const nextUrl = avatarMap[userId].url;
-            if (img.src !== nextUrl) {
-                img.src = nextUrl;
+            const currentUrl = normalizeUrl(img.src);
+            const normalizedNextUrl = normalizeUrl(nextUrl);
+
+            if (currentUrl !== normalizedNextUrl && normalizedNextUrl) {
+                preloadAvatar(normalizedNextUrl)
+                    .then(() => {
+                        if (normalizeUrl(img.src) !== normalizedNextUrl) {
+                            img.src = normalizedNextUrl;
+                        }
+                    })
+                    .catch(() => {
+                        if (normalizeUrl(img.src) !== normalizedNextUrl) {
+                            img.src = normalizedNextUrl;
+                        }
+                    });
             }
 
             if (avatarMap[userId].name) {
@@ -70,6 +83,27 @@
             }
 
             node.textContent = avatarMap[userId].email;
+        });
+    }
+
+    function normalizeUrl(url) {
+        if (!url) {
+            return '';
+        }
+
+        try {
+            return new URL(url, window.location.origin).toString();
+        } catch (error) {
+            return String(url);
+        }
+    }
+
+    function preloadAvatar(url) {
+        return new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = resolve;
+            image.onerror = reject;
+            image.src = url;
         });
     }
 
@@ -150,10 +184,10 @@
         if (event.key === storageKey) {
             try {
                 const payload = event.newValue ? JSON.parse(event.newValue) : null;
-                if (payload && payload.profile && payload.profile.id) {
-                    applyProfileMap({
-                        [String(payload.profile.id)]: {
-                            url: payload.profile.avatar_url,
+        if (payload && payload.profile && payload.profile.id) {
+            applyProfileMap({
+                [String(payload.profile.id)]: {
+                    url: payload.profile.avatar_url,
                             name: payload.profile.name,
                             email: payload.profile.email,
                             updated_at: payload.profile.updated_at,
@@ -164,7 +198,7 @@
                 // Ignore malformed localStorage payloads.
             }
 
-            refreshProfiles();
+            setTimeout(refreshProfiles, 150);
         }
     });
 
@@ -181,7 +215,7 @@
             });
         }
 
-        refreshProfiles();
+        setTimeout(refreshProfiles, 150);
     });
 
     document.addEventListener('visibilitychange', function () {

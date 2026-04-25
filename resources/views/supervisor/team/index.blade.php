@@ -49,7 +49,7 @@
                             <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider">Company</th>
                             <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider">Progress</th>
                             <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider">Last Log</th>
-                            <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                            <th class="px-6 py-3 font-bold text-gray-700 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="team-members-body" class="divide-y divide-gray-200 bg-white">
@@ -95,7 +95,12 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('supervisor.team.show', $member['assignment_id']) }}" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs uppercase">View Profile</a>
+                                    <a
+                                        href="{{ route('supervisor.team.show', $member['assignment_id']) }}"
+                                        class="inline-flex items-center rounded-lg bg-indigo-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    >
+                                        View Profile
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach

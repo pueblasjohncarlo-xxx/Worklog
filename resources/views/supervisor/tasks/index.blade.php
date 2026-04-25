@@ -27,8 +27,8 @@
                             <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider">Due</th>
                             <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider">Submission</th>
-                            <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider text-right">Files</th>
-                            <th class="px-6 py-3 font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                            <th class="px-6 py-3 font-bold text-gray-700 uppercase tracking-wider text-right">Files</th>
+                            <th class="px-6 py-3 font-bold text-gray-700 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
@@ -99,34 +99,34 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right text-xs">
-                                    <div class="space-x-3">
+                                    <div class="flex flex-wrap items-center justify-end gap-2">
                                         @if ($taskFilePath)
-                                            <a href="{{ Storage::url($taskFilePath) }}" target="_blank" class="font-bold text-indigo-700 hover:text-indigo-900">
+                                            <a href="{{ Storage::url($taskFilePath) }}" target="_blank" class="inline-flex items-center rounded-lg bg-indigo-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-800">
                                                 Task File
                                             </a>
                                         @endif
 
                                         @if ($hasSubmission)
-                                            <a href="{{ route('supervisor.tasks.submission.view', $task) }}" target="_blank" class="font-bold text-sky-700 hover:text-sky-900">Submission</a>
-                                            <a href="{{ route('supervisor.tasks.submission.download', $task) }}" class="font-bold text-sky-700 hover:text-sky-900">Download</a>
+                                            <a href="{{ route('supervisor.tasks.submission.view', $task) }}" target="_blank" class="inline-flex items-center rounded-lg bg-sky-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-sky-800">Submission</a>
+                                            <a href="{{ route('supervisor.tasks.submission.download', $task) }}" class="inline-flex items-center rounded-lg bg-cyan-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-cyan-800">Download</a>
                                         @endif
 
                                         @if ($task->status === 'rejected' && $task->supervisor_attachment_path)
-                                            <a href="{{ Storage::url($task->supervisor_attachment_path) }}" target="_blank" class="font-bold text-rose-700 hover:text-rose-900">Feedback</a>
+                                            <a href="{{ Storage::url($task->supervisor_attachment_path) }}" target="_blank" class="inline-flex items-center rounded-lg bg-rose-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-800">Feedback</a>
                                         @endif
                                     </div>
                                 </td>
 
                                 <td class="px-6 py-4 text-right text-xs">
-                                    <div class="flex items-center justify-end gap-3">
+                                    <div class="flex flex-wrap items-center justify-end gap-2">
                                         @if ($canEdit)
-                                            <a href="{{ route('supervisor.tasks.edit', $task) }}" class="font-bold text-indigo-700 hover:text-indigo-900">Edit</a>
+                                            <a href="{{ route('supervisor.tasks.edit', $task) }}" class="inline-flex items-center rounded-lg bg-slate-800 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-900">Edit</a>
                                         @endif
 
                                         @if ($canComplete)
                                             <form method="POST" action="{{ route('supervisor.tasks.complete', $task) }}" class="inline">
                                                 @csrf
-                                                <button type="submit" class="font-bold text-emerald-700 hover:text-emerald-900">Mark Done</button>
+                                                <button type="submit" class="inline-flex items-center rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-800">Mark Done</button>
                                             </form>
                                         @endif
 
@@ -134,7 +134,7 @@
                                             <form method="POST" action="{{ route('supervisor.tasks.destroy', $task) }}" class="inline" onsubmit="return confirm('Delete this task? This will hide it from the student.');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="font-bold text-rose-700 hover:text-rose-900">Delete</button>
+                                                <button type="submit" class="inline-flex items-center rounded-lg bg-rose-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-800">Delete</button>
                                             </form>
                                         @endif
                                     </div>

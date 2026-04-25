@@ -74,24 +74,16 @@
             <span class="font-medium">Reports</span>
         </a>
 
-        <!-- Messages -->
-        <a href="{{ route('messages.index') }}" 
-           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('messages.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <span class="font-medium">Messages</span>
-        </a>
     </nav>
 
     <!-- Footer -->
     <div class="p-4 border-t border-indigo-500/30">
-          <a href="{{ route('profile.edit') }}" 
+          <a href="{{ route('settings.index') }}" 
               class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-900 text-gray-200 mb-1">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span class="font-medium">My Profile</span>
+            <span class="font-medium">Settings</span>
         </a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf

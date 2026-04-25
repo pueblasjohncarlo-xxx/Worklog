@@ -10,7 +10,6 @@ use App\Http\Controllers\Coordinator\MoppingController as CoordinatorMoppingCont
 use App\Http\Controllers\Coordinator\DashboardController;
 use App\Http\Controllers\CoordinatorController;
 use App\Http\Controllers\InvitationController;
-use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\JournalController;
@@ -70,6 +69,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/settings', [ProfileController::class, 'edit'])->name('settings.index');
+    Route::patch('/settings', [ProfileController::class, 'updateSettings'])->name('settings.update');
     Route::get('/api/profile/avatar-versions', [ProfileController::class, 'avatarVersions'])->name('profile.avatar-versions');
 
     // Notifications
@@ -77,29 +78,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     Route::get('/api/notifications/summary', [NotificationController::class, 'apiSummary'])->name('api.notifications.summary');
-
-    // Messages (Available to all authenticated users)
-    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
-    Route::get('/messages/create', [MessageController::class, 'create'])->name('messages.create');
-    Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
-    Route::get('/messages/{user}', [MessageController::class, 'show'])->name('messages.show');
-    Route::patch('/messages/{message}', [MessageController::class, 'update'])->name('messages.update');
-    Route::delete('/messages/{message}', [MessageController::class, 'delete'])->name('messages.delete');
-    Route::post('/messages/{message}/mark-as-read', [MessageController::class, 'markAsRead'])->name('messages.mark-as-read');
-    
-    // Messages API (for real-time updates via polling)
-    Route::get('/api/messages/conversations', [MessageController::class, 'apiConversations'])->name('api.messages.conversations');
-    Route::get('/api/messages/conversation/{user}', [MessageController::class, 'apiConversation'])->name('api.messages.conversation');
-    Route::post('/api/messages/send', [MessageController::class, 'apiSend'])->name('api.messages.send');
-    Route::post('/api/messages/{message}/read', [MessageController::class, 'apiMarkAsRead'])->name('api.messages.read');
-    Route::get('/api/messages/unread-count', [MessageController::class, 'apiUnreadCount'])->name('api.messages.unread-count');
-    Route::get('/api/messages/realtime-summary', [MessageController::class, 'apiRealtimeSummary'])->name('api.messages.realtime-summary');
-    Route::get('/api/messages/available-users', [MessageController::class, 'apiAvailableUsers'])->name('api.messages.available-users');
-    Route::post('/api/messages/presence/heartbeat', [MessageController::class, 'apiPresenceHeartbeat'])->name('api.messages.presence.heartbeat');
-    Route::get('/api/messages/presence', [MessageController::class, 'apiPresence'])->name('api.messages.presence');
-    Route::post('/api/messages/typing', [MessageController::class, 'apiTypingUpdate'])->name('api.messages.typing.update');
-    Route::get('/api/messages/typing', [MessageController::class, 'apiTypingStatuses'])->name('api.messages.typing.statuses');
-    Route::get('/api/messages/typing/{user}', [MessageController::class, 'apiTypingStatus'])->name('api.messages.typing.status');
 });
 
 use App\Http\Controllers\Student\StudentAnnouncementController;
@@ -136,6 +114,7 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
     Route::post('/student/clock-in', [StudentController::class, 'clockIn'])->name('student.clock-in');
     Route::post('/student/clock-out', [StudentController::class, 'clockOut'])->name('student.clock-out');
     Route::get('/student/mapping', [StudentMappingController::class, 'index'])->name('student.mapping.index');
+    Route::get('/student/mapping/export', [StudentMappingController::class, 'export'])->name('student.mapping.export');
     // Hours log is now part of Reports
     Route::get('/student/hours-log', function () {
         return redirect()->route('student.reports.index');

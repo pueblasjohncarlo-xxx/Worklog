@@ -84,7 +84,7 @@
                                 <span class="text-xs text-indigo-300 uppercase font-bold tracking-wider">OJT Adviser</span>
                                 <span class="text-sm font-semibold text-white" data-user-name-id="{{ Auth::id() }}">{{ Auth::user()->name }}</span>
                             </div>
-                            <a href="{{ route('profile.edit') }}" class="relative flex-shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400" title="Open profile">
+                            <a href="{{ route('settings.index') }}" class="relative flex-shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400" title="Open settings">
                                 <img src="{{ Auth::user()->profile_photo_url }}" data-avatar-user-id="{{ Auth::id() }}" alt="{{ Auth::user()->name }}" class="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover border-2 border-indigo-500 shadow-md">
                             </a>
                         </div>

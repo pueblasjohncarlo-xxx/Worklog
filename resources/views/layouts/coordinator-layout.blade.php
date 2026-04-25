@@ -130,7 +130,7 @@
                                 <span class="text-xs text-indigo-300 uppercase font-bold tracking-wider">Coordinator</span>
                                 <span class="text-sm font-semibold text-white" data-user-name-id="{{ Auth::id() }}">{{ Auth::user()->name }}</span>
                             </div>
-                            <a href="{{ route('profile.edit') }}" class="relative flex-shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400" title="Open profile">
+                            <a href="{{ route('settings.index') }}" class="relative flex-shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400" title="Open settings">
                                 <img src="{{ Auth::user()->profile_photo_url }}" data-avatar-user-id="{{ Auth::id() }}" alt="{{ Auth::user()->name }}" class="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover border-2 border-indigo-500 shadow-md">
                                 <div class="absolute bottom-0 right-0 h-2 sm:h-3 w-2 sm:w-3 rounded-full bg-green-500 border-2 border-black"></div>
                             </a>

@@ -44,7 +44,7 @@ class NewMessageNotification extends Notification
             'sender_name' => $this->message->sender->name,
             'subject' => 'New Message from '.$this->message->sender->name,
             'content' => \Illuminate\Support\Str::limit((string) $this->message->body, 50),
-            'url' => route('messages.index', ['open' => $this->message->sender_id]),
+            'url' => route('notifications.index'),
         ];
     }
 }

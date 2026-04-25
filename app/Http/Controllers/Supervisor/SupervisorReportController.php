@@ -3,58 +3,29 @@
 namespace App\Http\Controllers\Supervisor;
 
 use App\Http\Controllers\Controller;
-use App\Models\Assignment;
-use App\Models\WorkLog;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View; // Assuming dompdf is installed, or just a view for now
 
 class SupervisorReportController extends Controller
 {
     public function index(): RedirectResponse
     {
-        // Reports are generated on-demand (not persisted yet).
-        // Keep one canonical entry point: the generator form.
         return redirect()
-            ->route('supervisor.reports.create')
-            ->with('status', 'Reports are generated on demand. Use the form below to generate a performance report.');
+            ->route('supervisor.evaluations.index')
+            ->with('status', 'Performance Report has been retired. Please use Performance Evaluation instead.');
     }
 
-    public function create(): View
+    public function create(): RedirectResponse
     {
-        $supervisorId = Auth::id();
-        $assignments = Assignment::with('student')
-            ->where('supervisor_id', $supervisorId)
-            ->where('status', 'active')
-            ->get();
-
-        return view('supervisor.reports.create', compact('assignments'));
+        return redirect()
+            ->route('supervisor.evaluations.index')
+            ->with('status', 'Performance Report has been retired. Please use Performance Evaluation instead.');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'assignment_id' => 'required|exists:assignments,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-        ]);
-
-        $assignment = Assignment::findOrFail($request->assignment_id);
-        if ($assignment->supervisor_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $workLogs = WorkLog::where('assignment_id', $assignment->id)
-            ->whereBetween('work_date', [$request->start_date, $request->end_date])
-            ->orderBy('work_date')
-            ->get();
-
-        $totalHours = $workLogs->where('status', 'approved')->sum('hours');
-
-        // For simplicity, we'll return a view that acts as the "report"
-        // In a full implementation, we'd stream a PDF download.
-        return view('supervisor.reports.show', compact('assignment', 'workLogs', 'totalHours', 'request'));
+        return redirect()
+            ->route('supervisor.evaluations.index')
+            ->with('status', 'Performance Report has been retired. Please use Performance Evaluation instead.');
     }
 }

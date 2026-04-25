@@ -47,8 +47,8 @@
                     </x-slot>
                     
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')" class="text-white hover:bg-indigo-800">
-                            {{ __('Profile') }}
+                        <x-dropdown-link :href="route('settings.index')" class="text-white hover:bg-indigo-800">
+                            {{ __('Settings') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -93,8 +93,8 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')" class="text-white hover:text-indigo-200 hover:bg-indigo-900/30 border-l-4 border-transparent hover:border-indigo-400">
-                    {{ __('Profile') }}
+                <x-responsive-nav-link :href="route('settings.index')" class="text-white hover:text-indigo-200 hover:bg-indigo-900/30 border-l-4 border-transparent hover:border-indigo-400">
+                    {{ __('Settings') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->

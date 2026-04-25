@@ -46,36 +46,17 @@
             <span class="font-medium sm:hidden text-xs">Invites</span>
         </a>
 
-        <!-- Messages -->
-        <a href="{{ route('messages.index') }}" 
-           class="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base {{ request()->routeIs('messages.*') ? 'bg-indigo-900 text-white' : 'hover:bg-gray-900 text-gray-200' }}">
-            <div class="relative flex-shrink-0">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-                @php
-                    $unreadMessages = Auth::user()->unreadNotifications->where('type', 'App\Notifications\NewMessageNotification')->count();
-                @endphp
-                @if($unreadMessages > 0)
-                    <span class="absolute -top-2 -right-2 flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-[10px] font-bold text-white bg-red-600 rounded-full border-2 border-black">
-                        {{ $unreadMessages > 99 ? '99+' : $unreadMessages }}
-                    </span>
-                @endif
-            </div>
-            <span class="font-medium hidden sm:inline">Messages</span>
-            <span class="font-medium sm:hidden text-xs">Messages</span>
-        </a>
     </nav>
 
     <!-- Footer / Profile -->
     <div class="p-3 sm:p-4 border-t border-indigo-900 text-gray-200 flex-shrink-0">
-        <a href="{{ route('profile.edit') }}" 
+        <a href="{{ route('settings.index') }}" 
            class="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg hover:bg-gray-900 transition-colors text-sm sm:text-base text-gray-200">
             <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span class="font-medium hidden sm:inline">My Profile</span>
-            <span class="font-medium sm:hidden text-xs">Profile</span>
+            <span class="font-medium hidden sm:inline">Settings</span>
+            <span class="font-medium sm:hidden text-xs">Settings</span>
         </a>
         <a href="{{ route('logout.get') }}" class="mt-2 w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg hover:bg-red-900/20 text-red-300 transition-colors text-sm sm:text-base">
             <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

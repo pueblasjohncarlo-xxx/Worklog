@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
@@ -44,7 +45,15 @@ class NotificationController extends Controller
 
             // Redirect to the URL in the notification data
             if (isset($notification->data['url'])) {
-                return redirect($notification->data['url']);
+                $target = (string) $notification->data['url'];
+
+                if ($this->isLegacyMessagingUrl($target)) {
+                    return redirect()
+                        ->route('notifications.index')
+                        ->with('status', 'Messaging has been removed from WorkLog.');
+                }
+
+                return redirect($target);
             }
         }
 
@@ -106,5 +115,12 @@ class NotificationController extends Controller
             'latest_unread' => $latestUnread,
             'items' => $items,
         ]);
+    }
+
+    private function isLegacyMessagingUrl(string $url): bool
+    {
+        $path = (string) parse_url($url, PHP_URL_PATH);
+
+        return $path !== '' && Str::startsWith($path, '/messages');
     }
 }

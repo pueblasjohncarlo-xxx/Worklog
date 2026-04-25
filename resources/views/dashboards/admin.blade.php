@@ -15,7 +15,7 @@
         <!-- ===== ROW 1: CORE METRICS & QUICKS STATS (NOW TOP) ===== -->
         <div class="flex flex-col xl:flex-row gap-4">
             <!-- Summary Grid -->
-            <div class="xl:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="xl:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Total Users -->
                 <a href="{{ route('admin.users.index') }}" class="group block bg-gradient-to-br from-indigo-600/20 to-indigo-600/10 border border-indigo-500/30 rounded-lg p-3 cursor-pointer hover:border-indigo-500/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 transition-all">
                     <div class="flex items-center justify-between">
@@ -54,18 +54,14 @@
             </div>
 
             <!-- Mini Fast-Access Stats (Side Info) -->
-            <div class="flex-1 grid grid-cols-4 xl:grid-cols-2 gap-2">
+            <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <a href="{{ route('admin.worklogs.pending') }}" class="group block bg-slate-950/30 border border-white/10 rounded p-1.5 text-center cursor-pointer transition-all hover:bg-red-500/10 hover:border-red-400/50 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400">
                     <p class="text-[9px] text-red-200 font-bold uppercase tracking-wider">Log Subm.</p>
                     <p class="text-sm font-black text-white leading-none mt-1 group-hover:text-red-50">{{ $workLogs }}</p>
                 </a>
-                <a href="{{ route('admin.assignments.index') }}" class="group block bg-slate-950/30 border border-white/10 rounded p-1.5 text-center cursor-pointer transition-all hover:bg-cyan-500/10 hover:border-cyan-400/50 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400">
-                    <p class="text-[9px] text-cyan-200 font-bold uppercase tracking-wider">Assigned</p>
-                    <p class="text-sm font-black text-white leading-none mt-1 group-hover:text-cyan-50">{{ $assignments }}</p>
-                </a>
-                <a href="{{ route('admin.users.index', ['role' => 'student']) }}" class="group block bg-slate-950/30 border border-white/10 rounded p-1.5 text-center cursor-pointer transition-all hover:bg-emerald-500/10 hover:border-emerald-400/50 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-                    <p class="text-[9px] text-emerald-200 font-bold uppercase tracking-wider">Students</p>
-                    <p class="text-sm font-black text-white leading-none mt-1 group-hover:text-emerald-50">{{ $students }}</p>
+                <a href="{{ route('admin.users.index') }}" class="group block bg-slate-950/30 border border-white/10 rounded p-1.5 text-center cursor-pointer transition-all hover:bg-emerald-500/10 hover:border-emerald-400/50 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+                    <p class="text-[9px] text-emerald-200 font-bold uppercase tracking-wider">Roles</p>
+                    <p class="text-sm font-black text-white leading-none mt-1 group-hover:text-emerald-50">{{ count($userDistribution) }}</p>
                 </a>
                 <a href="{{ route('admin.audit.index') }}" class="group block bg-slate-950/30 border border-white/10 rounded p-1.5 text-center cursor-pointer transition-all hover:bg-amber-500/10 hover:border-amber-400/50 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
                     <p class="text-[9px] text-amber-200 font-bold uppercase tracking-wider">Audit</p>

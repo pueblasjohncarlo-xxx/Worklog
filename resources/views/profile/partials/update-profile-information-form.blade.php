@@ -237,6 +237,7 @@
             let saveTimer = null;
             let saving = false;
             let queued = false;
+            let previewObjectUrl = null;
 
             const setStatus = (text, tone) => {
                 if (!statusEl) {
@@ -262,10 +263,8 @@
 
                 if (window.WorkLogProfileSync && typeof window.WorkLogProfileSync.broadcast === 'function') {
                     window.WorkLogProfileSync.broadcast(profile);
-                    window.WorkLogProfileSync.refresh();
                 } else if (window.WorkLogAvatarSync && typeof window.WorkLogAvatarSync.broadcast === 'function') {
                     window.WorkLogAvatarSync.broadcast();
-                    window.WorkLogAvatarSync.refresh();
                 }
             };
 
@@ -334,7 +333,12 @@
                 photoInput.addEventListener('change', function (event) {
                     const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
                     if (file && photoPreview && file.type.startsWith('image/')) {
-                        photoPreview.src = URL.createObjectURL(file);
+                        if (previewObjectUrl) {
+                            URL.revokeObjectURL(previewObjectUrl);
+                        }
+
+                        previewObjectUrl = URL.createObjectURL(file);
+                        photoPreview.src = previewObjectUrl;
                     }
 
                     queueSave();

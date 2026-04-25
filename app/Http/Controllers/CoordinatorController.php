@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Coordinator\StoreCompanyRequest;
 use App\Models\Assignment;
 use App\Models\Company;
-use App\Models\Message;
 use App\Models\PerformanceEvaluation;
 use App\Models\User;
 use App\Models\WorkLog;
@@ -420,25 +419,6 @@ class CoordinatorController extends Controller
             ];
         });
 
-        // Get messages for current coordinator
-        $userId = auth()->id();
-        $sentTo = Message::where('sender_id', $userId)->pluck('receiver_id');
-        $receivedFrom = Message::where('receiver_id', $userId)->pluck('sender_id');
-        $contactIds = $sentTo->merge($receivedFrom)->unique();
-
-        $contacts = User::whereIn('id', $contactIds)->get()->map(function ($contact) use ($userId) {
-            $lastMessage = Message::where(function ($q) use ($userId, $contact) {
-                $q->where('sender_id', $userId)->where('receiver_id', $contact->id);
-            })->orWhere(function ($q) use ($userId, $contact) {
-                $q->where('sender_id', $contact->id)->where('receiver_id', $userId);
-            })->latest()->first();
-
-            $contact->last_message = $lastMessage;
-            $contact->is_unread = $lastMessage && $lastMessage->receiver_id === $userId && is_null($lastMessage->read_at);
-
-            return $contact;
-        })->sortByDesc('last_message.created_at')->take(8); // Get top 8 contacts
-
         return view('dashboards.coordinator', [
             'totalStudents' => $students,
             'supervisorsCount' => $supervisors,
@@ -458,7 +438,6 @@ class CoordinatorController extends Controller
             'arMetrics' => $arMetrics,
             'trackingBoxes' => $trackingBoxes,
             'journalsTrend' => $journalsTrend,
-            'messageContacts' => $contacts,
         ]);
     }
 
@@ -739,25 +718,153 @@ class CoordinatorController extends Controller
 
     public function accomplishmentReports(): View
     {
-        $workLogs = WorkLog::with(['assignment.student', 'assignment.company', 'reviewer'])
-            ->whereNull('time_in')
-            ->orderByDesc('work_date')
-            ->get();
+        $reportTypes = ['daily', 'weekly', 'monthly'];
+        $submittedStatuses = ['submitted', 'approved', 'graded'];
+        $reportWindows = [
+            'daily' => Carbon::now()->subDays(7)->startOfDay(),
+            'weekly' => Carbon::now()->subDays(30)->startOfDay(),
+            'monthly' => Carbon::now()->subDays(90)->startOfDay(),
+        ];
 
-        // Group by Section/Department like student overview
-        $groupedReports = $workLogs->groupBy(function ($log) {
-            $student = $log->assignment?->student;
-            if (! $student) {
-                return sprintf('%s (%s)', User::STUDENT_SECTION_BSIT_4A, User::STUDENT_MAJOR_COMPUTER_TECHNOLOGY);
-            }
+        $approvedStudentIds = $this->applyApprovedStudentScope(
+            User::query()->where('role', User::ROLE_STUDENT)
+        )->pluck('id');
 
+        $assignments = Assignment::query()
+            ->with([
+                'student',
+                'company',
+                'workLogs' => function ($query) use ($reportTypes) {
+                    $query->whereNull('time_in')
+                        ->whereIn('type', $reportTypes)
+                        ->orderByDesc('work_date')
+                        ->orderByDesc('updated_at');
+                },
+            ])
+            ->where('status', 'active')
+            ->when($approvedStudentIds->isNotEmpty(), function ($query) use ($approvedStudentIds) {
+                $query->whereIn('student_id', $approvedStudentIds->all());
+            })
+            ->when($approvedStudentIds->isEmpty(), function ($query) {
+                $query->whereRaw('1 = 0');
+            })
+            ->get()
+            ->filter(fn (Assignment $assignment) => $assignment->student !== null)
+            ->values();
+
+        $studentReports = $assignments->map(function (Assignment $assignment) use ($reportTypes, $reportWindows, $submittedStatuses) {
+            $student = $assignment->student;
             $section = $student->normalizedStudentSection() ?? User::STUDENT_SECTION_BSIT_4A;
             $department = $student->normalizedStudentDepartment() ?? User::STUDENT_MAJOR_COMPUTER_TECHNOLOGY;
+            $companyName = $assignment->company?->name ?? 'No company assigned';
+            $reports = collect($assignment->workLogs ?? [])
+                ->filter(fn (WorkLog $log) => in_array($log->type, $reportTypes, true))
+                ->values();
 
-            return sprintf('%s (%s)', $section, $department);
-        })->sortKeys();
+            $typeStatuses = [];
 
-        return view('coordinator.accomplishment-reports.index', compact('groupedReports', 'workLogs'));
+            foreach ($reportTypes as $type) {
+                $recentReports = $reports
+                    ->filter(function (WorkLog $log) use ($type, $reportWindows) {
+                        return $log->type === $type
+                            && $log->work_date !== null
+                            && $log->work_date->greaterThanOrEqualTo($reportWindows[$type]);
+                    })
+                    ->values();
+
+                $latestReport = $recentReports->first();
+                $statusLabel = 'Not Submitted';
+
+                if ($latestReport) {
+                    if (in_array((string) $latestReport->status, $submittedStatuses, true)) {
+                        $statusLabel = 'Submitted';
+                    } elseif ($latestReport->status === 'draft') {
+                        $statusLabel = 'Pending';
+                    } else {
+                        $statusLabel = 'Incomplete';
+                    }
+                }
+
+                $typeStatuses[$type] = [
+                    'label' => $statusLabel,
+                    'last_date' => $latestReport?->work_date?->format('M d, Y'),
+                    'report_count' => $recentReports->count(),
+                ];
+            }
+
+            $overallStatus = 'Not Submitted';
+            $statusLabels = collect($typeStatuses)->pluck('label');
+
+            if ($statusLabels->every(fn ($label) => $label === 'Submitted')) {
+                $overallStatus = 'Submitted';
+            } elseif ($statusLabels->contains('Pending')) {
+                $overallStatus = 'Pending';
+            } elseif ($statusLabels->contains('Incomplete') || $statusLabels->contains('Submitted')) {
+                $overallStatus = 'Incomplete';
+            }
+
+            return [
+                'assignment_id' => $assignment->id,
+                'student_id' => $student->id,
+                'student_name' => $student->name,
+                'student_email' => $student->email,
+                'section' => $section,
+                'department' => $department,
+                'section_label' => sprintf('%s (%s)', $section, $department),
+                'company' => $companyName,
+                'approved_hours' => round((float) $assignment->totalApprovedHours(), 1),
+                'overall_status' => $overallStatus,
+                'type_statuses' => $typeStatuses,
+                'report_count' => $reports->count(),
+                'reports' => $reports->map(function (WorkLog $log) use ($submittedStatuses) {
+                    $statusLabel = 'Incomplete';
+
+                    if (in_array((string) $log->status, $submittedStatuses, true)) {
+                        $statusLabel = 'Submitted';
+                    } elseif ($log->status === 'draft') {
+                        $statusLabel = 'Pending';
+                    }
+
+                    return [
+                        'id' => $log->id,
+                        'type' => $log->type,
+                        'date' => $log->work_date?->format('M d, Y') ?? 'No date',
+                        'status' => $statusLabel,
+                        'attachment_url' => $log->attachment_path ? route('coordinator.worklogs.attachment', $log->id) : null,
+                        'print_url' => route('coordinator.worklogs.print', $log->id),
+                    ];
+                })->values()->all(),
+            ];
+        })->sortBy([
+            ['section', 'asc'],
+            ['student_name', 'asc'],
+        ])->values();
+
+        $summary = [
+            'total_students' => $studentReports->count(),
+            'submitted' => $studentReports->where('overall_status', 'Submitted')->count(),
+            'pending' => $studentReports->where('overall_status', 'Pending')->count(),
+            'incomplete' => $studentReports->where('overall_status', 'Incomplete')->count(),
+            'not_submitted' => $studentReports->where('overall_status', 'Not Submitted')->count(),
+        ];
+
+        $sectionSummary = $studentReports
+            ->groupBy('section_label')
+            ->map(function ($rows, $sectionLabel) {
+                return [
+                    'section' => $sectionLabel,
+                    'total_students' => $rows->count(),
+                    'submitted' => $rows->where('overall_status', 'Submitted')->count(),
+                    'pending' => $rows->where('overall_status', 'Pending')->count(),
+                    'needs_follow_up' => $rows->filter(function ($row) {
+                        return in_array($row['overall_status'], ['Incomplete', 'Not Submitted'], true);
+                    })->count(),
+                ];
+            })
+            ->sortKeys()
+            ->values();
+
+        return view('coordinator.accomplishment-reports.index', compact('studentReports', 'summary', 'sectionSummary'));
     }
 
     public function complianceOverview(): View
@@ -914,7 +1021,12 @@ class CoordinatorController extends Controller
     {
         $topSummary = $this->buildCoordinatorTopSummary();
 
-        $assignments = Assignment::with(['student.studentProfile', 'supervisor', 'company', 'ojtAdviser'])
+        $assignments = Assignment::query()
+            ->with(['student.studentProfile', 'supervisor', 'company', 'ojtAdviser'])
+            ->whereHas('student', function ($query) {
+                $query->where('role', User::ROLE_STUDENT);
+            })
+            ->orderByDesc('updated_at')
             ->orderByDesc('created_at')
             ->get();
 
@@ -946,12 +1058,16 @@ class CoordinatorController extends Controller
 
         // Prepare detailed deployment data
         $deploymentData = $assignments->map(function ($assignment) {
+            $student = $assignment->student;
+            $supervisorAssigned = !empty($assignment->supervisor_id);
+            $adviserAssigned = !empty($assignment->ojt_adviser_id);
+
             return [
                 'id' => $assignment->id,
-                'student_id' => $assignment->student->id,
-                'student_name' => $assignment->student->name,
-                'student_email' => $assignment->student->email,
-                'student_program' => $assignment->student->studentProfile?->program ?? 'N/A',
+                'student_id' => $student?->id,
+                'student_name' => $student?->name ?? 'Unknown Student',
+                'student_email' => $student?->email ?? '',
+                'student_program' => $student?->studentProfile?->program ?? ($student?->department ?? 'N/A'),
                 'supervisor_id' => $assignment->supervisor_id,
                 'supervisor_name' => $assignment->supervisor?->name ?? 'Not Assigned',
                 'adviser_id' => $assignment->ojt_adviser_id,
@@ -960,14 +1076,14 @@ class CoordinatorController extends Controller
                 'company_name' => $assignment->company?->name ?? 'N/A',
                 'start_date' => $assignment->start_date?->format('Y-m-d'),
                 'end_date' => $assignment->end_date?->format('Y-m-d'),
-                'status' => $assignment->status,
-                'required_hours' => $assignment->required_hours,
-                'is_fully_assigned' => $assignment->supervisor_id && $assignment->ojt_adviser_id,
-                'is_partially_assigned' => ($assignment->supervisor_id || $assignment->ojt_adviser_id) && !($assignment->supervisor_id && $assignment->ojt_adviser_id),
-                'is_unassigned' => !$assignment->supervisor_id && !$assignment->ojt_adviser_id,
-                'deployment_status' => $assignment->supervisor_id && $assignment->ojt_adviser_id ? 'complete' : ($assignment->supervisor_id || $assignment->ojt_adviser_id ? 'incomplete' : 'unassigned'),
+                'status' => (string) ($assignment->status ?? 'unknown'),
+                'required_hours' => (int) ($assignment->required_hours ?? 0),
+                'is_fully_assigned' => $supervisorAssigned && $adviserAssigned,
+                'is_partially_assigned' => ($supervisorAssigned || $adviserAssigned) && !($supervisorAssigned && $adviserAssigned),
+                'is_unassigned' => !$supervisorAssigned && !$adviserAssigned,
+                'deployment_status' => $supervisorAssigned && $adviserAssigned ? 'complete' : (($supervisorAssigned || $adviserAssigned) ? 'incomplete' : 'unassigned'),
             ];
-        });
+        })->values();
 
         return view('coordinator.deployment.index', [
             'topSummary' => $topSummary,

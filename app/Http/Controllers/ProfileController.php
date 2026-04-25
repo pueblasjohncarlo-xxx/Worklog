@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\User;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\JsonResponse;
@@ -20,6 +21,7 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         $user = $request->user()->load(['studentProfile', 'supervisorProfile', 'coordinatorProfile', 'ojtAdviserProfile']);
+        $settings = $this->resolveSettings($request);
         
         $profileData = [
             'user' => $user,
@@ -28,6 +30,14 @@ class ProfileController extends Controller
             'requiredHours' => 0,
             'supervisorAssignments' => [],
             'coordinatorAssignments' => [],
+            'settings' => $settings,
+            'recentNotifications' => $user->notifications()->latest()->take(6)->get(),
+            'unreadNotificationsCount' => $user->unreadNotifications()->count(),
+            'activityLogs' => AuditLog::query()
+                ->where('user_id', $user->id)
+                ->latest()
+                ->take(10)
+                ->get(),
         ];
 
         // Load role-specific data for students
@@ -159,7 +169,66 @@ class ProfileController extends Controller
             ]);
         }
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('settings.index')->with('status', 'profile-updated');
+    }
+
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $section = (string) $request->input('section', 'preferences');
+
+        abort_unless(in_array($section, ['privacy', 'notifications', 'preferences', 'blocking'], true), 404);
+
+        $validated = $request->validate([
+            'section' => ['required', 'string'],
+            'privacy.profile_visibility' => ['nullable', 'string', 'in:role_only,organization,public'],
+            'privacy.show_email' => ['nullable', 'boolean'],
+            'privacy.show_activity_status' => ['nullable', 'boolean'],
+            'privacy.allow_profile_indexing' => ['nullable', 'boolean'],
+            'notifications.email_updates' => ['nullable', 'boolean'],
+            'notifications.browser_alerts' => ['nullable', 'boolean'],
+            'notifications.deadline_alerts' => ['nullable', 'boolean'],
+            'notifications.approval_alerts' => ['nullable', 'boolean'],
+            'notifications.digest_frequency' => ['nullable', 'string', 'in:instant,daily,weekly'],
+            'preferences.language' => ['nullable', 'string', 'max:10'],
+            'preferences.theme' => ['nullable', 'string', 'in:system,light,dark'],
+            'preferences.compact_mode' => ['nullable', 'boolean'],
+            'preferences.start_page' => ['nullable', 'string', 'max:100'],
+            'blocking.muted_keywords' => ['nullable', 'string', 'max:1000'],
+            'blocking.hidden_people' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $settings = $this->resolveSettings($request);
+        $payload = $settings[$section] ?? [];
+
+        foreach (($validated[$section] ?? []) as $key => $value) {
+            $payload[$key] = $value;
+        }
+
+        if ($section === 'privacy') {
+            foreach (['show_email', 'show_activity_status', 'allow_profile_indexing'] as $key) {
+                $payload[$key] = $request->boolean("privacy.{$key}");
+            }
+        }
+
+        if ($section === 'notifications') {
+            foreach (['email_updates', 'browser_alerts', 'deadline_alerts', 'approval_alerts'] as $key) {
+                $payload[$key] = $request->boolean("notifications.{$key}");
+            }
+        }
+
+        if ($section === 'preferences') {
+            $payload['compact_mode'] = $request->boolean('preferences.compact_mode');
+            if (! empty($payload['language'])) {
+                session(['locale' => $payload['language']]);
+            }
+        }
+
+        $settings[$section] = $payload;
+        $request->session()->put($this->settingsSessionKey($user->id), $settings);
+
+        return Redirect::route('settings.index')
+            ->with('settings-status', ucfirst($section).' settings updated.');
     }
 
     public function avatarVersions(Request $request): JsonResponse
@@ -236,5 +305,61 @@ class ProfileController extends Controller
             'avatar_url' => $user->profile_photo_url,
             'updated_at' => optional($user->updated_at)->toIso8601String(),
         ];
+    }
+
+    private function resolveSettings(Request $request): array
+    {
+        $user = $request->user();
+
+        return array_replace_recursive(
+            $this->defaultSettings($user),
+            (array) $request->session()->get($this->settingsSessionKey($user->id), [])
+        );
+    }
+
+    private function defaultSettings(User $user): array
+    {
+        return [
+            'privacy' => [
+                'profile_visibility' => 'role_only',
+                'show_email' => true,
+                'show_activity_status' => true,
+                'allow_profile_indexing' => false,
+            ],
+            'notifications' => [
+                'email_updates' => true,
+                'browser_alerts' => true,
+                'deadline_alerts' => true,
+                'approval_alerts' => $user->role !== User::ROLE_STUDENT,
+                'digest_frequency' => 'instant',
+            ],
+            'preferences' => [
+                'language' => session('locale', app()->getLocale()),
+                'theme' => 'system',
+                'compact_mode' => false,
+                'start_page' => $this->defaultStartPageForRole($user),
+            ],
+            'blocking' => [
+                'muted_keywords' => '',
+                'hidden_people' => '',
+            ],
+        ];
+    }
+
+    private function defaultStartPageForRole(User $user): string
+    {
+        return match ($user->role) {
+            User::ROLE_ADMIN, User::ROLE_STAFF => route('admin.dashboard'),
+            User::ROLE_COORDINATOR => route('coordinator.dashboard'),
+            User::ROLE_SUPERVISOR => route('supervisor.dashboard'),
+            User::ROLE_STUDENT => route('student.dashboard'),
+            User::ROLE_OJT_ADVISER => route('ojt_adviser.dashboard'),
+            default => route('dashboard'),
+        };
+    }
+
+    private function settingsSessionKey(int $userId): string
+    {
+        return "worklog.settings.user.{$userId}";
     }
 }

@@ -31,7 +31,7 @@
     @endphp
 
     <div class="space-y-6" x-data='{
-        deployments: @json($deploymentData),
+        deployments: @js($deploymentData->values()),
         supervisors: @json($supervisorsForJs),
         advisers: @json($advisersForJs),
         companies: @json($companiesForJs),
@@ -62,8 +62,22 @@
             return (this.deployments || []).filter(a => {
                 const studentName = String((a && a.student_name) || "").toLowerCase();
                 const studentEmail = String((a && a.student_email) || "").toLowerCase();
+                const supervisorName = String((a && a.supervisor_name) || "").toLowerCase();
+                const adviserName = String((a && a.adviser_name) || "").toLowerCase();
+                const companyName = String((a && a.company_name) || "").toLowerCase();
+                const studentProgram = String((a && a.student_program) || "").toLowerCase();
+                const statusLabel = String((a && a.status) || "").toLowerCase();
+                const deploymentStatus = String((a && a.deployment_status) || "").toLowerCase();
 
-                const matchesSearch = studentName.includes(search) || studentEmail.includes(search);
+                const matchesSearch =
+                    studentName.includes(search) ||
+                    studentEmail.includes(search) ||
+                    supervisorName.includes(search) ||
+                    adviserName.includes(search) ||
+                    companyName.includes(search) ||
+                    studentProgram.includes(search) ||
+                    statusLabel.includes(search) ||
+                    deploymentStatus.includes(search);
                 const matchesCompany = this.selectedCompany === "" || this.normalizeId(a && a.company_id) === this.normalizeId(this.selectedCompany);
                 const matchesStatus = this.selectedStatus === "" || String((a && a.status) || "") === String(this.selectedStatus);
                 const matchesDeployStatus = this.selectedDeploymentStatus === "" || String((a && a.deployment_status) || "") === String(this.selectedDeploymentStatus);
@@ -491,7 +505,7 @@
 
         <!-- Deployments Table -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-            @if(count($deploymentData) === 0)
+            @if($deploymentData->isEmpty())
                 <div class="p-12 text-center">
                     <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

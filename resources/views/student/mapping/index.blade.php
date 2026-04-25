@@ -32,6 +32,14 @@
                         </div>
                         <button type="submit" class="h-[42px] px-4 rounded-md bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700">Apply</button>
                     </form>
+                    @if($assignment && $mapping)
+                        <a href="{{ route('student.mapping.export', ['from' => $fromKey, 'to' => $toKey, 'format' => 'pdf']) }}" class="h-[42px] inline-flex items-center justify-center px-4 rounded-md bg-rose-600 text-white text-sm font-bold hover:bg-rose-700">
+                            Export PDF
+                        </a>
+                        <a href="{{ route('student.mapping.export', ['from' => $fromKey, 'to' => $toKey, 'format' => 'doc']) }}" class="h-[42px] inline-flex items-center justify-center px-4 rounded-md bg-sky-600 text-white text-sm font-bold hover:bg-sky-700">
+                            Export Word
+                        </a>
+                    @endif
                     <button type="button" onclick="window.print()" class="h-[42px] px-4 rounded-md bg-gray-900 text-white text-sm font-bold hover:bg-black">Print</button>
                 </div>
             </div>

@@ -56,15 +56,6 @@
                         </template>
                     </select>
                 </div>
-                
-                <div class="flex items-end gap-2">
-                    <a x-show="selectedAdviserId" x-transition :href="`/messages/${selectedAdviserId}`" class="inline-flex items-center px-4 py-2 bg-gray-900/90 dark:bg-white/10 border border-gray-900/10 dark:border-white/10 rounded-md font-semibold text-xs text-white dark:text-gray-100 uppercase tracking-widest hover:bg-gray-900 dark:hover:bg-white/20 transition ease-in-out duration-150">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Message
-                    </a>
-                </div>
             </div>
         </div>
 

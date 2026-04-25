@@ -26,14 +26,14 @@
                 <span class="text-lg font-bold text-white">Assign New Task</span>
             </a>
 
-            <!-- Performance Report Card -->
-            <a href="{{ route('supervisor.reports.create') }}" class="bg-white rounded-3xl shadow-lg p-6 flex flex-col items-center justify-center group hover:shadow-xl transition-all duration-300">
+            <!-- Performance Evaluation Card -->
+            <a href="{{ route('supervisor.evaluations.index') }}" class="bg-white rounded-3xl shadow-lg p-6 flex flex-col items-center justify-center group hover:shadow-xl transition-all duration-300">
                 <div class="mb-3 p-3 rounded-full bg-gray-50 group-hover:bg-gray-100 transition-colors">
                     <svg class="h-8 w-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                 </div>
-                <span class="text-lg font-bold text-gray-800">Performance Report</span>
+                <span class="text-lg font-bold text-gray-800">Performance Evaluation</span>
             </a>
         </div>
 
@@ -153,11 +153,11 @@
                                             <td class="py-4 text-right space-x-2">
                                                 <form action="{{ route('supervisor.worklogs.approve', $log) }}" method="POST" class="inline">
                                                     @csrf
-                                                    <button type="submit" class="px-3 py-1 bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold hover:bg-emerald-200 transition-colors">Approve</button>
+                                                    <button type="submit" class="inline-flex items-center rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Approve</button>
                                                 </form>
                                                 <form action="{{ route('supervisor.worklogs.reject', $log) }}" method="POST" class="inline">
                                                     @csrf
-                                                    <button type="submit" class="px-3 py-1 bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold hover:bg-rose-200 transition-colors">Reject</button>
+                                                    <button type="submit" class="inline-flex items-center rounded-lg bg-rose-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">Reject</button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -203,11 +203,11 @@
                                             <td class="py-4 text-right space-x-2">
                                                 <form action="{{ route('supervisor.worklogs.approve', $log) }}" method="POST" class="inline">
                                                     @csrf
-                                                    <button type="submit" class="px-3 py-1 bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold hover:bg-emerald-200 transition-colors">Approve</button>
+                                                    <button type="submit" class="inline-flex items-center rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Approve</button>
                                                 </form>
                                                 <form action="{{ route('supervisor.worklogs.reject', $log) }}" method="POST" class="inline">
                                                     @csrf
-                                                    <button type="submit" class="px-3 py-1 bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold hover:bg-rose-200 transition-colors">Reject</button>
+                                                    <button type="submit" class="inline-flex items-center rounded-lg bg-rose-700 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">Reject</button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -280,7 +280,7 @@
                                                     </form>
                                                     
                                                     <!-- Feedback Button (Yellow/Orange) -->
-                                                    <button @click="showFeedbackModal = true" type="button" class="px-3 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded text-xs font-bold hover:bg-amber-200 transition-colors">
+                                                    <button @click="showFeedbackModal = true" type="button" class="px-3 py-2 bg-amber-600 text-white border border-amber-600 rounded text-xs font-bold hover:bg-amber-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
                                                         Notes
                                                     </button>
 
@@ -397,7 +397,7 @@
                                                 @if($task->status === 'approved')
                                                     <form action="{{ route('supervisor.tasks.unapprove', $task) }}" method="POST" class="inline">
                                                         @csrf
-                                                        <button type="submit" class="text-xs text-red-600 hover:text-red-800 font-bold uppercase underline" onclick="return confirm('Are you sure you want to cancel the approval for this task?');">
+                                                        <button type="submit" class="inline-flex items-center rounded-lg bg-rose-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2" onclick="return confirm('Are you sure you want to cancel the approval for this task?');">
                                                             Cancel Approval
                                                         </button>
                                                     </form>
