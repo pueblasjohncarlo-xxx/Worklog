@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -311,16 +312,13 @@ class User extends Authenticatable
     public function getProfilePhotoUrlAttribute(): string
     {
         $version = $this->updated_at?->timestamp ?? now()->timestamp;
+        $fallbackPath = '/profile/photo/'.$this->getKey();
 
-        if ($this->profile_photo_path) {
-            return Storage::url($this->profile_photo_path).'?v='.$version;
+        if (Route::has('profile.photo')) {
+            return route('profile.photo', ['user' => $this->getKey(), 'v' => $version]);
         }
 
-        return sprintf(
-            'https://ui-avatars.com/api/?name=%s&background=4f46e5&color=ffffff&format=png&v=%s',
-            urlencode((string) $this->name),
-            $version
-        );
+        return $fallbackPath.'?v='.$version;
     }
 
     public function scopeEligibleForAccess(Builder $query): Builder

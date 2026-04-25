@@ -6,11 +6,14 @@ use App\Models\AuditLog;
 use App\Models\User;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -102,8 +105,13 @@ class ProfileController extends Controller
             }
 
             if ($request->hasFile('photo')) {
+                $oldPhotoPath = $user->getRawOriginal('profile_photo_path');
                 $path = $request->file('photo')->store('profile-photos', 'public');
                 $user->profile_photo_path = $path;
+
+                if ($oldPhotoPath && $oldPhotoPath !== $path) {
+                    Storage::disk('public')->delete($oldPhotoPath);
+                }
             }
 
             $user->save();
@@ -275,6 +283,31 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function photo(User $user): BinaryFileResponse|Response
+    {
+        $disk = Storage::disk('public');
+        $path = trim((string) $user->profile_photo_path);
+
+        if ($path !== '' && $disk->exists($path)) {
+            $absolutePath = $disk->path($path);
+            $mimeType = $disk->mimeType($path) ?: 'application/octet-stream';
+
+            return response()->file($absolutePath, [
+                'Content-Type' => $mimeType,
+                'Cache-Control' => 'public, max-age=86400',
+            ]);
+        }
+
+        $name = trim((string) $user->name) !== '' ? (string) $user->name : 'WorkLog User';
+        $initials = strtoupper((string) ($user->initials ?: 'WU'));
+        $svg = $this->buildDefaultAvatarSvg($name, $initials);
+
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
     /**
      * Delete the user's account.
      */
@@ -361,5 +394,26 @@ class ProfileController extends Controller
     private function settingsSessionKey(int $userId): string
     {
         return "worklog.settings.user.{$userId}";
+    }
+
+    private function buildDefaultAvatarSvg(string $name, string $initials): string
+    {
+        $safeName = e($name);
+        $safeInitials = e($initials);
+
+        return <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="{$safeName}">
+  <defs>
+    <linearGradient id="worklogAvatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="48" fill="url(#worklogAvatarGradient)" />
+  <circle cx="128" cy="104" r="46" fill="rgba(255,255,255,0.18)" />
+  <path d="M58 216c14-36 42-54 70-54s56 18 70 54" fill="rgba(255,255,255,0.18)" />
+  <text x="128" y="148" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700" fill="#ffffff">{$safeInitials}</text>
+</svg>
+SVG;
     }
 }
