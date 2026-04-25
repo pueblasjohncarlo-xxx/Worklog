@@ -30,130 +30,12 @@
         })->values();
     @endphp
 
-    <div class="space-y-6" x-data='{
-        deployments: @js($deploymentData->values()),
-        supervisors: @json($supervisorsForJs),
-        advisers: @json($advisersForJs),
-        companies: @json($companiesForJs),
-        searchTerm: "",
-        selectedCompany: "",
-        selectedStatus: "",
-        selectedDeploymentStatus: "",
-        selectedSupervisor: "",
-        selectedAdviser: "",
-        editingDeployment: null,
-        editFormAction: "",
-        editSupervisorId: "",
-        editAdviserId: "",
+    <script id="deployment-data" type="application/json">@json($deploymentData->values())</script>
+    <script id="deployment-supervisors" type="application/json">@json($supervisorsForJs)</script>
+    <script id="deployment-advisers" type="application/json">@json($advisersForJs)</script>
+    <script id="deployment-companies" type="application/json">@json($companiesForJs)</script>
 
-        normalizeId(value) {
-            if (value === null || value === undefined || value === "") return "";
-            return String(value);
-        },
-
-        isDeploymentVisible(id) {
-            const targetId = this.normalizeId(id);
-            return this.getFilteredDeployments().some(a => this.normalizeId(a && a.id) === targetId);
-        },
-        
-        getFilteredDeployments() {
-            const search = String(this.searchTerm || "").toLowerCase();
-
-            return (this.deployments || []).filter(a => {
-                const studentName = String((a && a.student_name) || "").toLowerCase();
-                const studentEmail = String((a && a.student_email) || "").toLowerCase();
-                const supervisorName = String((a && a.supervisor_name) || "").toLowerCase();
-                const adviserName = String((a && a.adviser_name) || "").toLowerCase();
-                const companyName = String((a && a.company_name) || "").toLowerCase();
-                const studentProgram = String((a && a.student_program) || "").toLowerCase();
-                const statusLabel = String((a && a.status) || "").toLowerCase();
-                const deploymentStatus = String((a && a.deployment_status) || "").toLowerCase();
-
-                const matchesSearch =
-                    studentName.includes(search) ||
-                    studentEmail.includes(search) ||
-                    supervisorName.includes(search) ||
-                    adviserName.includes(search) ||
-                    companyName.includes(search) ||
-                    studentProgram.includes(search) ||
-                    statusLabel.includes(search) ||
-                    deploymentStatus.includes(search);
-                const matchesCompany = this.selectedCompany === "" || this.normalizeId(a && a.company_id) === this.normalizeId(this.selectedCompany);
-                const matchesStatus = this.selectedStatus === "" || String((a && a.status) || "") === String(this.selectedStatus);
-                const matchesDeployStatus = this.selectedDeploymentStatus === "" || String((a && a.deployment_status) || "") === String(this.selectedDeploymentStatus);
-                const matchesSupervisor = this.selectedSupervisor === "" || this.normalizeId(a && a.supervisor_id) === this.normalizeId(this.selectedSupervisor);
-                const matchesAdviser = this.selectedAdviser === "" || this.normalizeId(a && a.adviser_id) === this.normalizeId(this.selectedAdviser);
-
-                return matchesSearch && matchesCompany && matchesStatus && matchesDeployStatus && matchesSupervisor && matchesAdviser;
-            });
-        },
-        
-        clearFilters() {
-            this.searchTerm = "";
-            this.selectedCompany = "";
-            this.selectedStatus = "";
-            this.selectedDeploymentStatus = "";
-            this.selectedSupervisor = "";
-            this.selectedAdviser = "";
-        },
-        
-        openEditModal(deployment) {
-            this.editingDeployment = { ...deployment };
-            this.editFormAction = `/coordinator/deployment-management/${deployment.id}`;
-            this.editSupervisorId = deployment.supervisor_id || "";
-            this.editAdviserId = deployment.adviser_id || "";
-            document.getElementById("editDeploymentModal").classList.remove("hidden");
-        },
-        
-        closeEditModal() {
-            this.editingDeployment = null;
-            this.editFormAction = "";
-            this.editSupervisorId = "";
-            this.editAdviserId = "";
-            document.getElementById("editDeploymentModal").classList.add("hidden");
-        },
-        
-        saveDeployment() {
-            if (!this.editingDeployment) return;
-            
-            const formData = new FormData();
-            formData.append("supervisor_id", this.editSupervisorId);
-            formData.append("ojt_adviser_id", this.editAdviserId);
-            formData.append("_method", "PATCH");
-            formData.append("_token", document.querySelector("meta[name=csrf-token]").getAttribute("content"));
-            
-            fetch(`/coordinator/deployment-management/${this.editingDeployment.id}`, {
-                method: "POST",
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Update the deployment in the array
-                    const index = this.deployments.findIndex(d => this.normalizeId(d && d.id) === this.normalizeId(this.editingDeployment && this.editingDeployment.id));
-                    if (index !== -1) {
-                        const selectedSupervisor = this.supervisors.find(s => String(s.id) === String(this.editSupervisorId));
-                        this.deployments[index].supervisor_id = this.editSupervisorId;
-                        this.deployments[index].adviser_id = this.editAdviserId;
-                        this.deployments[index].supervisor_name = this.supervisors.find(s => s.id == this.editSupervisorId)?.name || "Not Assigned";
-                        this.deployments[index].adviser_name = this.advisers.find(a => a.id == this.editAdviserId)?.name || "Not Assigned";
-                        if (selectedSupervisor?.company_id) {
-                            this.deployments[index].company_id = selectedSupervisor.company_id;
-                            this.deployments[index].company_name = selectedSupervisor.company_name || this.deployments[index].company_name;
-                        }
-                        this.deployments[index].deployment_status = (this.editSupervisorId && this.editAdviserId) ? "complete" : ((this.editSupervisorId || this.editAdviserId) ? "incomplete" : "unassigned");
-                    }
-                    this.closeEditModal();
-                    // Show success message
-                    const successMsg = document.createElement("div");
-                    successMsg.className = "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4";
-                    successMsg.innerHTML = `<div class="flex items-start"><svg class="h-5 w-5 text-green-400 dark:text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div class="ml-3"><h3 class="text-sm font-medium text-green-800 dark:text-green-300">Success</h3><p class="text-sm text-green-700 dark:text-green-400 mt-1">Deployment updated successfully.</p></div></div>`;
-                    document.querySelector(".space-y-6").prepend(successMsg);
-                    setTimeout(() => successMsg.remove(), 5000);
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-    }'>
+    <div class="space-y-6" x-data="coordinatorDeploymentManager()">
         <!-- Status Messages -->
         @if ($errors->any())
             <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
@@ -625,6 +507,146 @@
 
     @push('scripts')
     <script>
+        function readDeploymentJson(id, fallback = []) {
+            const element = document.getElementById(id);
+
+            if (!element) {
+                return fallback;
+            }
+
+            try {
+                return JSON.parse(element.textContent || 'null') ?? fallback;
+            } catch (error) {
+                console.error(`Unable to parse deployment payload for ${id}`, error);
+                return fallback;
+            }
+        }
+
+        function coordinatorDeploymentManager() {
+            return {
+                deployments: readDeploymentJson('deployment-data', []),
+                supervisors: readDeploymentJson('deployment-supervisors', []),
+                advisers: readDeploymentJson('deployment-advisers', []),
+                companies: readDeploymentJson('deployment-companies', []),
+                searchTerm: "",
+                selectedCompany: "",
+                selectedStatus: "",
+                selectedDeploymentStatus: "",
+                selectedSupervisor: "",
+                selectedAdviser: "",
+                editingDeployment: null,
+                editFormAction: "",
+                editSupervisorId: "",
+                editAdviserId: "",
+
+                normalizeId(value) {
+                    if (value === null || value === undefined || value === "") return "";
+                    return String(value);
+                },
+
+                isDeploymentVisible(id) {
+                    const targetId = this.normalizeId(id);
+                    return this.getFilteredDeployments().some(a => this.normalizeId(a && a.id) === targetId);
+                },
+
+                getFilteredDeployments() {
+                    const search = String(this.searchTerm || "").toLowerCase();
+
+                    return (this.deployments || []).filter(a => {
+                        const studentName = String((a && a.student_name) || "").toLowerCase();
+                        const studentEmail = String((a && a.student_email) || "").toLowerCase();
+                        const supervisorName = String((a && a.supervisor_name) || "").toLowerCase();
+                        const adviserName = String((a && a.adviser_name) || "").toLowerCase();
+                        const companyName = String((a && a.company_name) || "").toLowerCase();
+                        const studentProgram = String((a && a.student_program) || "").toLowerCase();
+                        const statusLabel = String((a && a.status) || "").toLowerCase();
+                        const deploymentStatus = String((a && a.deployment_status) || "").toLowerCase();
+
+                        const matchesSearch =
+                            studentName.includes(search) ||
+                            studentEmail.includes(search) ||
+                            supervisorName.includes(search) ||
+                            adviserName.includes(search) ||
+                            companyName.includes(search) ||
+                            studentProgram.includes(search) ||
+                            statusLabel.includes(search) ||
+                            deploymentStatus.includes(search);
+                        const matchesCompany = this.selectedCompany === "" || this.normalizeId(a && a.company_id) === this.normalizeId(this.selectedCompany);
+                        const matchesStatus = this.selectedStatus === "" || String((a && a.status) || "") === String(this.selectedStatus);
+                        const matchesDeployStatus = this.selectedDeploymentStatus === "" || String((a && a.deployment_status) || "") === String(this.selectedDeploymentStatus);
+                        const matchesSupervisor = this.selectedSupervisor === "" || this.normalizeId(a && a.supervisor_id) === this.normalizeId(this.selectedSupervisor);
+                        const matchesAdviser = this.selectedAdviser === "" || this.normalizeId(a && a.adviser_id) === this.normalizeId(this.selectedAdviser);
+
+                        return matchesSearch && matchesCompany && matchesStatus && matchesDeployStatus && matchesSupervisor && matchesAdviser;
+                    });
+                },
+
+                clearFilters() {
+                    this.searchTerm = "";
+                    this.selectedCompany = "";
+                    this.selectedStatus = "";
+                    this.selectedDeploymentStatus = "";
+                    this.selectedSupervisor = "";
+                    this.selectedAdviser = "";
+                },
+
+                openEditModal(deployment) {
+                    this.editingDeployment = { ...deployment };
+                    this.editFormAction = `/coordinator/deployment-management/${deployment.id}`;
+                    this.editSupervisorId = deployment.supervisor_id || "";
+                    this.editAdviserId = deployment.adviser_id || "";
+                    document.getElementById("editDeploymentModal").classList.remove("hidden");
+                },
+
+                closeEditModal() {
+                    this.editingDeployment = null;
+                    this.editFormAction = "";
+                    this.editSupervisorId = "";
+                    this.editAdviserId = "";
+                    document.getElementById("editDeploymentModal").classList.add("hidden");
+                },
+
+                saveDeployment() {
+                    if (!this.editingDeployment) return;
+
+                    const formData = new FormData();
+                    formData.append("supervisor_id", this.editSupervisorId);
+                    formData.append("ojt_adviser_id", this.editAdviserId);
+                    formData.append("_method", "PATCH");
+                    formData.append("_token", document.querySelector("meta[name=csrf-token]").getAttribute("content"));
+
+                    fetch(`/coordinator/deployment-management/${this.editingDeployment.id}`, {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            const index = this.deployments.findIndex(d => this.normalizeId(d && d.id) === this.normalizeId(this.editingDeployment && this.editingDeployment.id));
+                            if (index !== -1) {
+                                const selectedSupervisor = this.supervisors.find(s => String(s.id) === String(this.editSupervisorId));
+                                this.deployments[index].supervisor_id = this.editSupervisorId;
+                                this.deployments[index].adviser_id = this.editAdviserId;
+                                this.deployments[index].supervisor_name = this.supervisors.find(s => s.id == this.editSupervisorId)?.name || "Not Assigned";
+                                this.deployments[index].adviser_name = this.advisers.find(a => a.id == this.editAdviserId)?.name || "Not Assigned";
+                                if (selectedSupervisor?.company_id) {
+                                    this.deployments[index].company_id = selectedSupervisor.company_id;
+                                    this.deployments[index].company_name = selectedSupervisor.company_name || this.deployments[index].company_name;
+                                }
+                                this.deployments[index].deployment_status = (this.editSupervisorId && this.editAdviserId) ? "complete" : ((this.editSupervisorId || this.editAdviserId) ? "incomplete" : "unassigned");
+                            }
+                            this.closeEditModal();
+                            const successMsg = document.createElement("div");
+                            successMsg.className = "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4";
+                            successMsg.innerHTML = `<div class="flex items-start"><svg class="h-5 w-5 text-green-400 dark:text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div class="ml-3"><h3 class="text-sm font-medium text-green-800 dark:text-green-300">Success</h3><p class="text-sm text-green-700 dark:text-green-400 mt-1">Deployment updated successfully.</p></div></div>`;
+                            document.querySelector(".space-y-6").prepend(successMsg);
+                            setTimeout(() => successMsg.remove(), 5000);
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                }
+            };
+        }
+
         $(document).ready(function() {
             if ($('#student_ids').length) {
                 $('#student_ids').select2({
