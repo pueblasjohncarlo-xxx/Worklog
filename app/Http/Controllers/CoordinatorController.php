@@ -1386,15 +1386,18 @@ class CoordinatorController extends Controller
         $request->validate([
             'supervisor_id' => 'nullable|exists:users,id',
             'ojt_adviser_id' => 'nullable|exists:users,id',
+            'company_id' => 'nullable|exists:companies,id',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'required_hours' => 'nullable|integer|min:1|max:5000',
             'status' => 'nullable|string|in:active,inactive,completed',
         ]);
 
+        $requestedCompanyId = $request->input('company_id') ?: null;
         $payload = [
             'supervisor_id' => $request->input('supervisor_id') ?: null,
             'ojt_adviser_id' => $request->input('ojt_adviser_id') ?: null,
+            'company_id' => $requestedCompanyId,
             'start_date' => $request->input('start_date') ?: null,
             'end_date' => $request->input('end_date') ?: null,
             'status' => $request->input('status') ?: ($assignment->status ?: 'active'),
@@ -1428,7 +1431,18 @@ class CoordinatorController extends Controller
                 ], 422);
             }
 
-            $payload['company_id'] = $supervisor->supervisorProfile->company_id;
+            $supervisorCompanyId = (int) $supervisor->supervisorProfile->company_id;
+
+            if (! empty($requestedCompanyId) && (int) $requestedCompanyId !== $supervisorCompanyId) {
+                return response()->json([
+                    'message' => 'Selected company must match the chosen supervisor.',
+                    'errors' => [
+                        'company_id' => ['Selected company must match the chosen supervisor.'],
+                    ],
+                ], 422);
+            }
+
+            $payload['company_id'] = $supervisorCompanyId;
         }
 
         if (! empty($payload['ojt_adviser_id'])) {

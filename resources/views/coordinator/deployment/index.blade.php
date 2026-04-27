@@ -258,7 +258,7 @@
         <div id="editDeploymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 z-0 bg-black bg-opacity-50 transition-opacity pointer-events-none"></div>
-                <form x-show="editingDeployment" @submit.prevent="submitEditForm()" method="POST" :action="editFormAction" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                <form x-show="editingDeployment" @submit.prevent="submitEditForm()" method="POST" :action="editFormAction" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                     @csrf
                     @method('PATCH')
                     <div class="bg-white dark:bg-gray-800 px-6 pt-5 pb-4 sm:p-6">
@@ -294,6 +294,16 @@
                                         </template>
                                     </select>
                                 </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
+                                    <select name="company_id" x-model="editCompanyId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <option value="">Select company</option>
+                                        <template x-for="company in companies" :key="company.id">
+                                            <option :value="company.id" x-text="company.name"></option>
+                                        </template>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Changing the supervisor will auto-fill the matching company.</p>
+                                </div>
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
@@ -320,7 +330,7 @@
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/60">
                                     <div class="font-semibold text-slate-800 dark:text-slate-100">Resolved Company</div>
-                                    <div class="mt-1 text-slate-600 dark:text-slate-300" x-text="editCompanyName || 'No company mapped from selected supervisor'"></div>
+                                    <div class="mt-1 text-slate-600 dark:text-slate-300" x-text="editCompanyName || 'No company selected yet'"></div>
                                 </div>
                                 <div x-show="editError" class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300" x-text="editError"></div>
                                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
@@ -569,6 +579,7 @@
                 editFormAction: "",
                 editSupervisorId: "",
                 editAdviserId: "",
+                editCompanyId: "",
                 editStartDate: "",
                 editEndDate: "",
                 editRequiredHours: "",
@@ -646,6 +657,7 @@
                     this.editFormAction = `/coordinator/deployment-management/${deployment.id}`;
                     this.editSupervisorId = deployment.supervisor_id || "";
                     this.editAdviserId = deployment.adviser_id || "";
+                    this.editCompanyId = deployment.company_id || "";
                     this.editStartDate = deployment.start_date || "";
                     this.editEndDate = deployment.end_date || "";
                     this.editRequiredHours = deployment.required_hours || "";
@@ -662,6 +674,7 @@
                     this.editFormAction = "";
                     this.editSupervisorId = "";
                     this.editAdviserId = "";
+                    this.editCompanyId = "";
                     this.editStartDate = "";
                     this.editEndDate = "";
                     this.editRequiredHours = "";
@@ -680,7 +693,12 @@
 
                 syncEditCompany() {
                     const selectedSupervisor = this.supervisors.find(s => this.normalizeId(s.id) === this.normalizeId(this.editSupervisorId));
-                    this.editCompanyName = selectedSupervisor?.company_name || (this.editSupervisorId ? "No company mapped from selected supervisor" : "");
+                    if (selectedSupervisor?.company_id) {
+                        this.editCompanyId = this.normalizeId(selectedSupervisor.company_id);
+                    }
+
+                    const selectedCompany = this.companies.find(company => this.normalizeId(company.id) === this.normalizeId(this.editCompanyId));
+                    this.editCompanyName = selectedCompany?.name || selectedSupervisor?.company_name || (this.editSupervisorId ? "No company mapped from selected supervisor" : "");
                 },
 
                 async submitEditForm() {
@@ -691,6 +709,7 @@
                     const formData = new FormData();
                     formData.append("supervisor_id", this.editSupervisorId);
                     formData.append("ojt_adviser_id", this.editAdviserId);
+                    formData.append("company_id", this.editCompanyId);
                     formData.append("start_date", this.editStartDate);
                     formData.append("end_date", this.editEndDate);
                     formData.append("required_hours", this.editRequiredHours);
