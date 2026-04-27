@@ -5,6 +5,40 @@
 @import 'responsive.css';
 
 @layer base {
+    :root {
+        --wl-text-strong: #0f172a;
+        --wl-text-muted: #475569;
+        --wl-border-strong: #94a3b8;
+        --wl-focus-ring: #4338ca;
+        --wl-status-approved-bg: #dcfce7;
+        --wl-status-approved-text: #14532d;
+        --wl-status-approved-border: #15803d;
+        --wl-status-pending-bg: #fef3c7;
+        --wl-status-pending-text: #92400e;
+        --wl-status-pending-border: #d97706;
+        --wl-status-submitted-bg: #dbeafe;
+        --wl-status-submitted-text: #1e3a8a;
+        --wl-status-submitted-border: #2563eb;
+        --wl-status-rejected-bg: #fee2e2;
+        --wl-status-rejected-text: #991b1b;
+        --wl-status-rejected-border: #dc2626;
+        --wl-status-draft-bg: #e2e8f0;
+        --wl-status-draft-text: #334155;
+        --wl-status-draft-border: #64748b;
+        --wl-status-missing-bg: #ffedd5;
+        --wl-status-missing-text: #9a3412;
+        --wl-status-missing-border: #ea580c;
+        --wl-status-active-bg: #dcfce7;
+        --wl-status-active-text: #166534;
+        --wl-status-active-border: #16a34a;
+        --wl-status-inactive-bg: #e5e7eb;
+        --wl-status-inactive-text: #374151;
+        --wl-status-inactive-border: #6b7280;
+        --wl-status-info-bg: #ede9fe;
+        --wl-status-info-text: #4c1d95;
+        --wl-status-info-border: #7c3aed;
+    }
+
     html {
         font-size: 14px;
         transition: font-size 0.3s ease;
@@ -151,7 +185,7 @@
 
     /* Accessibility: High Contrast Focus Indicators */
     :focus-visible {
-        outline: 3px solid #6366f1;
+        outline: 3px solid var(--wl-focus-ring);
         outline-offset: 3px;
         border-radius: 2px;
     }
@@ -181,6 +215,120 @@
 }
 
 @layer components {
+    .wl-status-badge {
+        @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em];
+        line-height: 1.2;
+    }
+
+    .wl-status-badge-icon {
+        @apply inline-flex h-4 w-4 items-center justify-center rounded-full border border-current text-[10px] font-black;
+    }
+
+    .wl-status-approved {
+        color: var(--wl-status-approved-text);
+        background-color: var(--wl-status-approved-bg);
+        border-color: color-mix(in srgb, var(--wl-status-approved-border) 65%, white);
+    }
+
+    .wl-status-pending {
+        color: var(--wl-status-pending-text);
+        background-color: var(--wl-status-pending-bg);
+        border-color: color-mix(in srgb, var(--wl-status-pending-border) 65%, white);
+    }
+
+    .wl-status-submitted {
+        color: var(--wl-status-submitted-text);
+        background-color: var(--wl-status-submitted-bg);
+        border-color: color-mix(in srgb, var(--wl-status-submitted-border) 65%, white);
+    }
+
+    .wl-status-rejected {
+        color: var(--wl-status-rejected-text);
+        background-color: var(--wl-status-rejected-bg);
+        border-color: color-mix(in srgb, var(--wl-status-rejected-border) 65%, white);
+    }
+
+    .wl-status-draft,
+    .wl-status-read,
+    .wl-status-unassigned {
+        color: var(--wl-status-draft-text);
+        background-color: var(--wl-status-draft-bg);
+        border-color: color-mix(in srgb, var(--wl-status-draft-border) 65%, white);
+    }
+
+    .wl-status-missing,
+    .wl-status-incomplete,
+    .wl-status-warning {
+        color: var(--wl-status-missing-text);
+        background-color: var(--wl-status-missing-bg);
+        border-color: color-mix(in srgb, var(--wl-status-missing-border) 65%, white);
+    }
+
+    .wl-status-active,
+    .wl-status-approved-soft,
+    .wl-status-complete,
+    .wl-status-completed,
+    .wl-status-success,
+    .wl-status-on_track {
+        color: var(--wl-status-active-text);
+        background-color: var(--wl-status-active-bg);
+        border-color: color-mix(in srgb, var(--wl-status-active-border) 65%, white);
+    }
+
+    .wl-status-inactive {
+        color: var(--wl-status-inactive-text);
+        background-color: var(--wl-status-inactive-bg);
+        border-color: color-mix(in srgb, var(--wl-status-inactive-border) 65%, white);
+    }
+
+    .wl-status-info,
+    .wl-status-review,
+    .wl-status-assigned,
+    .wl-status-role {
+        color: var(--wl-status-info-text);
+        background-color: var(--wl-status-info-bg);
+        border-color: color-mix(in srgb, var(--wl-status-info-border) 65%, white);
+    }
+
+    .wl-card-surface {
+        @apply rounded-2xl border border-slate-200 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.10)];
+        color: var(--wl-text-strong);
+    }
+
+    .wl-muted-note {
+        @apply text-sm font-medium;
+        color: var(--wl-text-muted);
+    }
+
+    .wl-table-head {
+        @apply text-xs font-black uppercase tracking-[0.16em];
+        color: #334155;
+    }
+
+    .wl-action-link {
+        @apply font-semibold underline-offset-2 transition-colors;
+        color: #1d4ed8;
+    }
+
+    .wl-action-link:hover,
+    .wl-action-link:focus-visible {
+        color: #1e3a8a;
+        text-decoration: underline;
+    }
+
+    .wl-button-neutral {
+        @apply inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-bold transition-colors;
+        background-color: #ffffff;
+        color: #0f172a;
+        border-color: #94a3b8;
+    }
+
+    .wl-button-neutral:hover,
+    .wl-button-neutral:focus-visible {
+        background-color: #f8fafc;
+        border-color: #475569;
+    }
+
     /* Accessibility Toggle Button */
     .a11y-toggle {
         @apply fixed bottom-6 right-6 z-50 p-4 bg-indigo-900/90 text-white rounded-full shadow-[0_0_20px_rgba(99,102,241,0.6)] border-2 border-indigo-400 hover:scale-110 transition-transform focus:outline-none focus:ring-4 focus:ring-indigo-500 backdrop-blur-md;

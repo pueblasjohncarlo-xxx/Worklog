@@ -462,6 +462,40 @@
 </style>
 
 <script>
+    window.worklogChartPalette = {
+        approved: '#15803d',
+        pending: '#b45309',
+        submitted: '#1d4ed8',
+        in_progress: '#2563eb',
+        rejected: '#b91c1c',
+        draft: '#475569',
+        missing: '#c2410c',
+        remaining: '#334155',
+        active: '#15803d',
+        inactive: '#6b7280',
+        complete: '#166534',
+        completed: '#166534',
+        incomplete: '#c2410c',
+        unassigned: '#64748b',
+        info: '#6d28d9',
+        admin: '#b45309',
+        coordinator: '#15803d',
+        supervisor: '#1d4ed8',
+        student: '#7c3aed',
+        ojt_adviser: '#be185d'
+    };
+
+    window.getWorklogChartColor = function(label, fallback = '#6366f1') {
+        const normalized = String(label || '')
+            .toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/[^\w]/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_|_$/g, '');
+
+        return window.worklogChartPalette[normalized] || fallback;
+    };
+
     // Chart.js global defaults: keep labels readable on dark shells.
     (function () {
         if (!window.Chart || !window.Chart.defaults) return;
@@ -475,6 +509,8 @@
             window.Chart.defaults.plugins.legend = window.Chart.defaults.plugins.legend || {};
             window.Chart.defaults.plugins.legend.labels = window.Chart.defaults.plugins.legend.labels || {};
             window.Chart.defaults.plugins.legend.labels.color = text;
+            window.Chart.defaults.plugins.legend.labels.usePointStyle = true;
+            window.Chart.defaults.plugins.legend.labels.boxWidth = 10;
 
             if (window.Chart.defaults.scales) {
                 for (const scaleKey of Object.keys(window.Chart.defaults.scales)) {

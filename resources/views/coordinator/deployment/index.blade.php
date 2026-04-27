@@ -424,11 +424,11 @@
                                 >
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($deployment['deployment_status'] === 'complete')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">✓ Complete</span>
+                                            <x-status-badge status="complete" label="Complete" size="sm" />
                                         @elseif($deployment['deployment_status'] === 'incomplete')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200">⚠ Incomplete</span>
+                                            <x-status-badge status="incomplete" label="Incomplete" size="sm" />
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200">✕ Unassigned</span>
+                                            <x-status-badge status="unassigned" label="Unassigned" size="sm" />
                                         @endif
 
                                         <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
@@ -450,17 +450,17 @@
 
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($deployment['supervisor_name'] !== 'Not Assigned')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">{{ $deployment['supervisor_name'] }}</span>
+                                            <span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">{{ $deployment['supervisor_name'] }}</span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400">Not Assigned</span>
+                                            <x-status-badge status="unassigned" label="Not Assigned" size="sm" />
                                         @endif
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($deployment['adviser_name'] !== 'Not Assigned')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200">{{ $deployment['adviser_name'] }}</span>
+                                            <span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">{{ $deployment['adviser_name'] }}</span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400">Not Assigned</span>
+                                            <x-status-badge status="unassigned" label="Not Assigned" size="sm" />
                                         @endif
                                     </td>
 
@@ -475,7 +475,7 @@
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200">{{ $deployment['required_hours'] }} hrs</span>
+                                        <span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">{{ $deployment['required_hours'] }} hrs</span>
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">

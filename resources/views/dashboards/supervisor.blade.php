@@ -256,9 +256,7 @@
                                                 @endif
                                             </td>
                                             <td class="py-4">
-                                                <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200 uppercase">
-                                                    {{ $task->status }}
-                                                </span>
+                                                <x-status-badge :status="$task->status" size="sm" />
                                             </td>
                                             <td class="py-4 text-right space-x-2">
                                                 <div class="flex items-center justify-end gap-2" x-data="{ showRejectModal: false, showFeedbackModal: false }">
@@ -381,17 +379,7 @@
                                             </td>
                                             <td class="py-4 text-black font-medium">{{ $task->due_date ? $task->due_date->format('M d, Y') : '-' }}</td>
                                             <td class="py-4">
-                                                 <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase
-                                                    {{ $task->status === 'approved' ? 'bg-green-100 text-green-800 border border-green-300' : '' }}
-                                                    {{ $task->status === 'completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : '' }}
-                                                    {{ $task->status === 'in_progress' ? 'bg-blue-100 text-blue-800 border border-blue-300' : '' }}
-                                                    {{ $task->status === 'submitted' ? 'bg-indigo-100 text-indigo-900 border border-indigo-300' : '' }}
-                                                    {{ $task->status === 'pending' ? 'bg-gray-100 text-gray-800 border border-gray-300' : '' }}
-                                                    {{ $task->status === 'rejected' ? 'bg-red-100 text-red-800 border border-red-300' : '' }}
-                                                    {{ $task->status === 'missing' ? 'bg-orange-100 text-orange-800 border border-orange-300' : '' }}
-                                                ">
-                                                    {{ str_replace('_', ' ', $task->status) }}
-                                                </span>
+                                                 <x-status-badge :status="$task->status" :label="ucwords(str_replace('_', ' ', $task->status))" size="sm" />
                                             </td>
                                             <td class="py-4 text-right">
                                                 @if($task->status === 'approved')
@@ -428,12 +416,7 @@
                     labels: taskLabels,
                     datasets: [{
                         data: taskData,
-                        backgroundColor: [
-                            '#10b981', // emerald (Completed)
-                            '#6366f1', // indigo (In Progress)
-                            '#9ca3af', // gray (Pending)
-                            '#3b82f6', // blue (Submitted)
-                        ],
+                        backgroundColor: taskLabels.map(label => window.getWorklogChartColor(label, '#6366f1')),
                         borderWidth: 0,
                         hoverOffset: 10
                     }]

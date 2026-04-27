@@ -20,14 +20,14 @@
 @endphp
 
 <div x-data="notificationBell({ initialUnreadCount: {{ $initialUnreadCount }}, initialItems: @js($initialItems), userId: {{ auth()->id() }} })" x-init="init()" class="relative mr-4">
-    <button @click="open = !open" class="relative p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+    <button @click="open = !open" :aria-expanded="open.toString()" aria-haspopup="menu" class="relative rounded-full border border-white/15 bg-white/5 p-2 text-gray-200 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
         <span class="sr-only">View notifications</span>
         <div class="relative">
             <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             <template x-if="unreadCount > 0">
-                <span class="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-[10px] font-bold text-white bg-red-600 rounded-full border-2 border-black">
+                <span class="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[1.4rem] h-5 px-1 text-[10px] font-black text-white bg-red-700 rounded-full border-2 border-black">
                     <span x-text="unreadCount > 99 ? '99+' : unreadCount"></span>
                 </span>
             </template>
@@ -36,31 +36,34 @@
 
     <div x-show="open" 
          @click.away="open = false"
-         class="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+         class="origin-top-right absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-900/10 focus:outline-none z-50"
          role="menu" 
          aria-orientation="vertical" 
          aria-labelledby="user-menu-button" 
          tabindex="-1"
          style="display: none;">
         
-        <div class="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
-            <span class="text-sm font-semibold text-gray-700">Notifications</span>
+        <div class="px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+            <span class="text-sm font-bold text-slate-900">Notifications</span>
             <form x-show="unreadCount > 0" action="{{ route('notifications.mark-all-read') }}" method="POST" @if($initialUnreadCount === 0) style="display: none;" @endif>
                 @csrf
-                <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-800">Mark all read</button>
+                <button type="submit" class="text-xs font-bold text-indigo-700 hover:text-indigo-900">Mark all read</button>
             </form>
         </div>
 
         <div class="max-h-64 overflow-y-auto">
             <div x-show="!jsReady">
                 @forelse($initialItems as $item)
-                    <a href="{{ $item['read_url'] }}" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0">
-                        <p class="text-sm font-medium text-gray-900">{{ $item['title'] ?? 'Notification' }}</p>
-                        <p class="text-xs text-gray-500 mt-1 truncate">{{ $item['content'] ?? '' }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ $item['created_at_human'] ?? '' }}</p>
+                    <a href="{{ $item['read_url'] }}" class="block px-4 py-3 hover:bg-slate-50 border-b border-slate-100 last:border-0">
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="text-sm font-semibold text-slate-900">{{ $item['title'] ?? 'Notification' }}</p>
+                            <x-status-badge status="unread" size="sm" />
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1 truncate">{{ $item['content'] ?? '' }}</p>
+                        <p class="text-xs text-slate-500 mt-2">{{ $item['created_at_human'] ?? '' }}</p>
                     </a>
                 @empty
-                    <div class="px-4 py-3 text-center text-sm text-gray-500">
+                    <div class="px-4 py-4 text-center text-sm font-medium text-slate-600">
                         No new notifications
                     </div>
                 @endforelse
@@ -70,24 +73,30 @@
                 <template x-if="items && items.length">
                     <div>
                         <template x-for="item in items" :key="item.id">
-                            <a :href="item.read_url" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0">
-                                <p class="text-sm font-medium text-gray-900" x-text="item.title || 'Notification'"></p>
-                                <p class="text-xs text-gray-500 mt-1 truncate" x-text="item.content || ''"></p>
-                                <p class="text-xs text-gray-400 mt-1" x-text="item.created_at_human || ''"></p>
+                            <a :href="item.read_url" class="block px-4 py-3 hover:bg-slate-50 border-b border-slate-100 last:border-0">
+                                <div class="flex items-center justify-between gap-3">
+                                    <p class="text-sm font-semibold text-slate-900" x-text="item.title || 'Notification'"></p>
+                                    <span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px]">
+                                        <span class="wl-status-badge-icon" aria-hidden="true">!</span>
+                                        <span>Unread</span>
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-600 mt-1 truncate" x-text="item.content || ''"></p>
+                                <p class="text-xs text-slate-500 mt-2" x-text="item.created_at_human || ''"></p>
                             </a>
                         </template>
                     </div>
                 </template>
                 <template x-if="!items || !items.length">
-                    <div class="px-4 py-3 text-center text-sm text-gray-500">
+                    <div class="px-4 py-4 text-center text-sm font-medium text-slate-600">
                         No new notifications
                     </div>
                 </template>
             </div>
         </div>
 
-        <div class="px-4 py-2 border-t border-gray-100">
-            <a href="{{ route('notifications.index') }}" class="block text-center text-xs font-semibold text-indigo-700 hover:text-indigo-900">
+        <div class="px-4 py-3 border-t border-slate-200">
+            <a href="{{ route('notifications.index') }}" class="block text-center text-xs font-bold text-indigo-700 hover:text-indigo-900">
                 View all notifications
             </a>
         </div>

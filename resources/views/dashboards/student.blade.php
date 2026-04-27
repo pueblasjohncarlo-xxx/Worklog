@@ -350,14 +350,7 @@
                                             <td class="py-4 text-gray-300">{{ $log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('h:i A') : '-' }}</td>
                                             <td class="py-4 text-gray-300">{{ $log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('h:i A') : '-' }}</td>
                                             <td class="py-4">
-                                                <span class="px-3 py-1 rounded text-[11px] font-black uppercase tracking-wider
-                                                    {{ $log->status === 'approved' ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]' : '' }}
-                                                    {{ $log->status === 'submitted' ? 'bg-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.4)]' : '' }}
-                                                    {{ $log->status === 'draft' ? 'bg-gray-500 text-white' : '' }}
-                                                    {{ $log->status === 'rejected' ? 'bg-rose-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.4)]' : '' }}
-                                                ">
-                                                    {{ $log->status }}
-                                                </span>
+                                                <x-status-badge :status="$log->status" size="sm" />
                                             </td>
                                         </tr>
                                     @empty
@@ -482,13 +475,7 @@
                         datasets: [{
                             label: 'Hours',
                             data: completionData,
-                            backgroundColor: completionLabels.map(label => {
-                                if (label.toLowerCase() === 'completed') return '#10b981';
-                                if (label.toLowerCase() === 'pending') return '#3b82f6';
-                                if (label.toLowerCase() === 'rejected') return '#ef4444';
-                                if (label.toLowerCase() === 'remaining') return '#64748b';
-                                return '#9ca3af';
-                            }),
+                            backgroundColor: completionLabels.map(label => window.getWorklogChartColor(label, '#6366f1')),
                         }]
                     },
                     options: {

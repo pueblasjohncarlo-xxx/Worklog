@@ -133,13 +133,7 @@
                         labels: userDistributionLabels,
                         datasets: [{
                             data: userDistributionData,
-                            backgroundColor: [
-                                    '#f59e0b', // amber - Admins
-                                    '#059669', // emerald - Coordinators
-                                    '#2563eb', // blue - Supervisors
-                                    '#f43f5e', // rose - Students
-                                    '#db2777', // pink - OJT Advisers
-                                ],
+                            backgroundColor: userDistributionLabels.map(label => window.getWorklogChartColor(label, '#6366f1')),
                             borderWidth: 0,
                             hoverOffset: 15
                         }]
@@ -216,7 +210,7 @@
                         datasets: [{
                             label: 'Work Logs',
                             data: workLogData,
-                            borderColor: '#a855f7',
+                            borderColor: '#7c3aed',
                             backgroundColor: workLogGradient,
                             fill: true,
                             tension: 0.4,

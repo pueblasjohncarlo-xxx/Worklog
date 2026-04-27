@@ -61,14 +61,7 @@
                                         </p>
                                         <p class="text-sm text-slate-700">
                                             Status: 
-                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider
-                                                {{ $report->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                                {{ $report->status === 'submitted' ? 'bg-blue-100 text-blue-700' : '' }}
-                                                {{ $report->status === 'draft' ? 'bg-gray-100 text-gray-700' : '' }}
-                                                {{ $report->status === 'rejected' ? 'bg-rose-100 text-rose-700' : '' }}
-                                            ">
-                                                {{ $report->status }}
-                                            </span>
+                                            <x-status-badge :status="$report->status" size="sm" />
                                         </p>
                                     </div>
                                     <a
@@ -208,14 +201,7 @@
                                             <td class="px-6 py-4 text-slate-700">{{ $log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('h:i A') : '-' }}</td>
                                             <td class="px-6 py-4 font-mono font-bold text-indigo-600">{{ number_format($log->hours, 2) }}</td>
                                             <td class="px-6 py-4">
-                                                <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap
-                                                    {{ $log->status === 'approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : '' }}
-                                                    {{ $log->status === 'submitted' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : '' }}
-                                                    {{ $log->status === 'draft' ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' : '' }}
-                                                    {{ $log->status === 'rejected' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' : '' }}
-                                                ">
-                                                    {{ ucfirst($log->status) }}
-                                                </span>
+                                                <x-status-badge :status="$log->status" :label="ucfirst($log->status)" size="sm" />
                                             </td>
                                             <td class="px-6 py-4 text-slate-700 max-w-xs truncate" title="{{ $log->description }}">
                                                 {{ $log->description ?? '-' }}

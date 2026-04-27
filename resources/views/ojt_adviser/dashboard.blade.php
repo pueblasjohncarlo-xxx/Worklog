@@ -248,15 +248,9 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($assignment->progressPercentage() >= 100)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 whitespace-nowrap">
-                                            <svg class="h-3 w-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                                            Completed
-                                        </span>
+                                        <x-status-badge status="completed" label="Completed" size="sm" />
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30 whitespace-nowrap">
-                                            <svg class="h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                                            Active
-                                        </span>
+                                        <x-status-badge status="active" label="Active" size="sm" />
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -336,7 +330,7 @@
                             datasets: [{
                                 label: 'Completion %',
                                 data: progressData && progressData.length > 0 ? progressData : [0],
-                                backgroundColor: '#6366f1',
+                                backgroundColor: window.getWorklogChartColor('submitted', '#6366f1'),
                                 borderRadius: 6,
                                 barThickness: 12,
                             }]
@@ -389,7 +383,7 @@
                                 label: 'Average Score (0-5)',
                                 data: evaluationData && evaluationData.length > 0 ? evaluationData : [0],
                                 backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                                borderColor: '#10b981',
+                                borderColor: window.getWorklogChartColor('approved', '#10b981'),
                                 pointBackgroundColor: '#10b981',
                                 pointBorderColor: '#10b981',
                                 pointHoverBackgroundColor: '#059669',

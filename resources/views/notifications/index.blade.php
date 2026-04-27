@@ -73,9 +73,7 @@
                                 </div>
 
                                 <div class="mt-3 flex flex-wrap items-center gap-3 text-sm">
-                                    <span class="rounded-full px-3 py-1 font-semibold {{ $isUnread ? 'bg-sky-400/15 text-sky-200' : 'bg-slate-800 text-slate-300' }}">
-                                        {{ $isUnread ? 'Unread' : 'Read' }}
-                                    </span>
+                                    <x-status-badge :status="$isUnread ? 'unread' : 'read'" />
                                     <span class="text-slate-400">{{ $notification->created_at?->diffForHumans() }}</span>
                                     <span class="font-semibold text-sky-200">Open notification</span>
                                 </div>

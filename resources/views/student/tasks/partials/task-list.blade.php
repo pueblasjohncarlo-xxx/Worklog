@@ -32,14 +32,6 @@
                             $status = 'missing';
                         }
                         
-                        $statusClasses = match($status) {
-                            'approved' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-                            'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-                            'missing' => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-                            'submitted' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-                            default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', // Pending
-                        };
-
                         $statusLabel = match($status) {
                             'missing' => 'Missing / Overdue',
                             default => ucfirst($status),
@@ -132,9 +124,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClasses }}">
-                                {{ $statusLabel }}
-                            </span>
+                            <x-status-badge :status="$status" :label="$statusLabel" size="sm" />
                             @if($task->grade)
                                 <div class="text-xs font-bold text-gray-600 dark:text-gray-400 mt-1">
                                     Grade: {{ $task->grade }}
@@ -142,7 +132,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <a href="{{ route('student.tasks.show', $task->id) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">View Details</a>
+                            <a href="{{ route('student.tasks.show', $task->id) }}" class="wl-action-link">View Details</a>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             @if($status === 'pending' || $status === 'in_progress' || $status === 'missing' || $status === 'rejected')
@@ -152,7 +142,7 @@
                                         <div class="relative">
                                             <input type="file" name="attachment" id="file-{{ $task->id }}" class="hidden" required 
                                                 @change="fileName = $event.target.files.length > 0 ? $event.target.files[0].name : ''">
-                                            <label for="file-{{ $task->id }}" class="cursor-pointer inline-flex items-center px-3 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-xs transition-colors">
+                                            <label for="file-{{ $task->id }}" class="cursor-pointer inline-flex items-center rounded-lg border border-slate-400 bg-slate-100 px-3 py-2 text-xs font-bold text-slate-800 transition-colors hover:bg-slate-200 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
                                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                                                 </svg>
@@ -160,7 +150,7 @@
                                             </label>
                                             <span x-text="fileName" class="text-[10px] text-gray-500 dark:text-gray-400 ml-2 truncate max-w-[100px] inline-block align-middle"></span>
                                         </div>
-                                        <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 transition-colors w-fit">
+                                        <button type="submit" class="w-fit rounded-lg bg-indigo-700 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-400">
                                             Submit Task
                                         </button>
                                     </div>
@@ -179,7 +169,7 @@
                                     @endif
                                     <form action="{{ route('student.tasks.unsubmit', $task) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-gray-600 dark:hover:bg-gray-700 focus:outline-none dark:focus:ring-gray-800 transition-colors">
+                                        <button type="submit" class="rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400">
                                             Unsubmit
                                         </button>
                                     </form>
