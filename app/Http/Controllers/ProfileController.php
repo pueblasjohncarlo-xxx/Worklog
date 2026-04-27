@@ -197,7 +197,6 @@ class ProfileController extends Controller
             'notifications.deadline_alerts' => ['nullable', 'boolean'],
             'notifications.approval_alerts' => ['nullable', 'boolean'],
             'notifications.digest_frequency' => ['nullable', 'string', 'in:instant,daily,weekly'],
-            'preferences.language' => ['nullable', 'string', 'max:10'],
             'preferences.theme' => ['nullable', 'string', 'in:system,light,dark'],
             'preferences.compact_mode' => ['nullable', 'boolean'],
             'preferences.start_page' => ['nullable', 'string', 'max:100'],
@@ -226,9 +225,7 @@ class ProfileController extends Controller
 
         if ($section === 'preferences') {
             $payload['compact_mode'] = $request->boolean('preferences.compact_mode');
-            if (! empty($payload['language'])) {
-                session(['locale' => $payload['language']]);
-            }
+            unset($payload['language']);
         }
 
         $settings[$section] = $payload;
@@ -366,7 +363,6 @@ class ProfileController extends Controller
                 'digest_frequency' => 'instant',
             ],
             'preferences' => [
-                'language' => session('locale', app()->getLocale()),
                 'theme' => 'system',
                 'compact_mode' => false,
                 'start_page' => $this->defaultStartPageForRole($user),

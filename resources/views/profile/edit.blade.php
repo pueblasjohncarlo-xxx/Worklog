@@ -63,8 +63,8 @@
 
                         <div class="rounded-2xl border border-indigo-400/20 bg-indigo-500/10 p-4">
                             <div class="text-xs font-bold uppercase tracking-[0.25em] text-indigo-200/80">Preferences</div>
-                            <div class="mt-2 text-lg font-bold text-white">{{ strtoupper($settings['preferences']['language']) }}</div>
-                            <div class="mt-1 text-sm text-indigo-100/80">Theme: {{ ucfirst($settings['preferences']['theme']) }}</div>
+                            <div class="mt-2 text-lg font-bold text-white">{{ ucfirst($settings['preferences']['theme']) }}</div>
+                            <div class="mt-1 text-sm text-indigo-100/80">{{ $settings['preferences']['compact_mode'] ? 'Compact mode enabled' : 'Standard spacing' }}</div>
                         </div>
 
                         <div class="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-4">

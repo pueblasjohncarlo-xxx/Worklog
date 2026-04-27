@@ -28,7 +28,6 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6 gap-3">
-                @include('layouts.partials.language-switcher-compact')
                 <x-dropdown align="right" width="48" contentClasses="py-1 bg-indigo-900 border border-indigo-500/30 text-white">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-transparent hover:text-indigo-200 focus:outline-none transition ease-in-out duration-150 gap-2">

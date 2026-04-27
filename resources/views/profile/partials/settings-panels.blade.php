@@ -155,22 +155,13 @@
 <section class="rounded-2xl border border-white/10 bg-white/5 p-5">
     <div class="mb-4">
         <h2 class="text-lg font-bold text-white">Preferences</h2>
-        <p class="mt-1 text-sm text-slate-300">Language, theme, density, and landing behavior for your WorkLog workspace.</p>
+        <p class="mt-1 text-sm text-slate-300">Theme, density, and landing behavior for your WorkLog workspace.</p>
     </div>
 
     <form method="POST" action="{{ route('settings.update') }}" class="space-y-4">
         @csrf
         @method('PATCH')
         <input type="hidden" name="section" value="preferences">
-
-        <div>
-            <label for="preferences_language" class="text-xs font-bold uppercase tracking-[0.22em] text-slate-300">Language</label>
-            <select id="preferences_language" name="preferences[language]" class="mt-2 block w-full rounded-xl border border-white/10 bg-slate-950/80 px-4 py-3 text-sm text-white focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/30">
-                @foreach ($languageOptions as $code => $label)
-                    <option value="{{ $code }}" @selected($settings['preferences']['language'] === $code)>{{ $label }}</option>
-                @endforeach
-            </select>
-        </div>
 
         <div class="grid gap-4 sm:grid-cols-2">
             <div>

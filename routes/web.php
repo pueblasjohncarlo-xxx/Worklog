@@ -24,7 +24,6 @@ use App\Http\Controllers\WorkLogController;
 
 use App\Models\Assignment;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -84,22 +83,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 use App\Http\Controllers\Student\StudentAnnouncementController;
 use App\Http\Controllers\Student\StudentReportController;
 use App\Http\Controllers\Supervisor\SupervisorAnnouncementController;
-
-// Locale switcher (global)
-Route::post('/locale', function (Request $request) {
-    $supported = [
-        'en', 'es', 'fr', 'de', 'it', 'pt', 'pt_BR', 'nl', 'pl', 'ru',
-        'ja', 'ko', 'zh_CN', 'zh_TW',
-        'ar', 'hi', 'id', 'ms', 'th', 'tr', 'vi',
-    ];
-    $locale = $request->input('locale', 'en');
-    if (! in_array($locale, $supported, true)) {
-        $locale = 'en';
-    }
-    session(['locale' => $locale]);
-
-    return back();
-})->name('locale.set');
 
 Route::get('/invitations/accept/{token}', [InvitationController::class, 'accept'])
     ->name('invitations.accept');
