@@ -258,7 +258,7 @@
         <div id="editDeploymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 z-0 bg-black bg-opacity-50 transition-opacity pointer-events-none"></div>
-                <form x-show="editingDeployment" x-ref="editForm" method="POST" :action="editFormAction" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <form x-show="editingDeployment" x-ref="editForm" method="POST" :action="editFormAction" onsubmit="return window.submitDeploymentEditForm(event)" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                     @csrf
                     @method('PATCH')
                     <div class="bg-white dark:bg-gray-800 px-6 pt-5 pb-4 sm:p-6">
@@ -270,58 +270,57 @@
                             </div>
                             <h3 class="ml-4 text-lg font-semibold text-gray-900 dark:text-white">Edit Deployment</h3>
                         </div>
-                        <template x-if="editingDeployment">
-                            <div class="space-y-4">
+                        <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Student</label>
-                                    <p class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm" x-text="editingDeployment.student_name"></p>
+                                    <p class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm" data-edit-student-name></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supervisor *</label>
-                                    <select name="supervisor_id" x-model="editSupervisorId" @change="syncEditCompany()" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    <select name="supervisor_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select supervisor</option>
-                                        <template x-for="supervisor in supervisors" :key="supervisor.id">
-                                            <option :value="supervisor.id" x-text="supervisor.name"></option>
-                                        </template>
+                                        @foreach($supervisors as $supervisor)
+                                            <option value="{{ $supervisor->id }}">{{ $supervisor->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Adviser</label>
-                                    <select name="ojt_adviser_id" x-model="editAdviserId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    <select name="ojt_adviser_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select adviser</option>
-                                        <template x-for="adviser in advisers" :key="adviser.id">
-                                            <option :value="adviser.id" x-text="adviser.name"></option>
-                                        </template>
+                                        @foreach($ojtAdvisers as $adviser)
+                                            <option value="{{ $adviser->id }}">{{ $adviser->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
-                                    <select name="company_id" x-model="editCompanyId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    <select name="company_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select company</option>
-                                        <template x-for="company in companies" :key="company.id">
-                                            <option :value="company.id" x-text="company.name"></option>
-                                        </template>
+                                        @foreach($companies as $company)
+                                            <option value="{{ $company->id }}">{{ $company->name }}</option>
+                                        @endforeach
                                     </select>
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Changing the supervisor will auto-fill the matching company.</p>
                                 </div>
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
-                                        <input type="date" name="start_date" x-model="editStartDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <input type="date" name="start_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-                                        <input type="date" name="end_date" x-model="editEndDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <input type="date" name="end_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Required Hours</label>
-                                        <input type="number" min="1" max="5000" name="required_hours" x-model="editRequiredHours" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <input type="number" min="1" max="5000" name="required_hours" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Status</label>
-                                        <select name="status" x-model="editStatus" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <select name="status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
                                             <option value="completed">Completed</option>
@@ -330,19 +329,18 @@
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/60">
                                     <div class="font-semibold text-slate-800 dark:text-slate-100">Resolved Company</div>
-                                    <div class="mt-1 text-slate-600 dark:text-slate-300" x-text="editCompanyName || 'No company selected yet'"></div>
+                                    <div class="mt-1 text-slate-600 dark:text-slate-300" data-edit-company-label>No company selected yet</div>
                                 </div>
-                                <div x-show="editError" class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300" x-text="editError"></div>
+                                <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300 hidden" data-edit-error></div>
                                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
                                     <p class="text-xs text-blue-800 dark:text-blue-200">
-                                        <strong>Completion Status:</strong> This deployment will be marked as <span x-text="(editSupervisorId && editAdviserId) ? '✓ Complete' : ((editSupervisorId || editAdviserId) ? '⚠ Incomplete' : 'Unassigned')" class="font-bold"></span>
+                                        <strong>Completion Status:</strong> This deployment will be marked as <span data-edit-completion-label class="font-bold">Unassigned</span>
                                     </p>
                                 </div>
-                            </div>
-                        </template>
+                        </div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700 px-6 py-3 flex gap-2 justify-end">
-                        <button type="button" @click="closeEditModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
+                        <button type="button" onclick="window.closeDeploymentEditModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
                             Cancel
                         </button>
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
@@ -459,6 +457,7 @@
                                             : 'bg-red-50/50 dark:bg-red-900/10');
                                 @endphp
                                 <tr
+                                    data-deployment-id="{{ $deployment['id'] }}"
                                     class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ $rowClass }}"
                                     x-bind:class="deployments.length > 0 && !isDeploymentVisible({{ $deployment['id'] }}) ? 'hidden' : ''"
                                 >
@@ -524,7 +523,7 @@
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <button type="button" @click.prevent="openEditModal(@js($deployment))" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors">
+                                        <button type="button" data-deployment='@json($deployment)' onclick="window.openDeploymentEditModal(this.dataset.deployment)" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors">
                                             <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
@@ -710,6 +709,187 @@
                 }
             };
         }
+
+        window.openDeploymentEditModal = function(deployment) {
+            if (typeof deployment === 'string') {
+                try {
+                    deployment = JSON.parse(deployment);
+                } catch (error) {
+                    console.error('Unable to parse deployment payload.', error);
+                    return;
+                }
+            }
+
+            const modal = document.getElementById('editDeploymentModal');
+            const form = modal?.querySelector('form');
+
+            if (!modal || !form) {
+                console.error('Unable to open deployment edit modal.');
+                return;
+            }
+
+            const supervisorSelect = form.querySelector('select[name="supervisor_id"]');
+            const adviserSelect = form.querySelector('select[name="ojt_adviser_id"]');
+            const companySelect = form.querySelector('select[name="company_id"]');
+            const startDateInput = form.querySelector('input[name="start_date"]');
+            const endDateInput = form.querySelector('input[name="end_date"]');
+            const requiredHoursInput = form.querySelector('input[name="required_hours"]');
+            const statusSelect = form.querySelector('select[name="status"]');
+            const studentLabel = form.querySelector('[data-edit-student-name]');
+            const companyLabel = form.querySelector('[data-edit-company-label]');
+            const completionLabel = form.querySelector('[data-edit-completion-label]');
+            const errorLabel = form.querySelector('[data-edit-error]');
+
+            form.action = `/coordinator/deployment-management/${deployment.id}`;
+
+            if (supervisorSelect) supervisorSelect.value = deployment.supervisor_id || '';
+            if (adviserSelect) adviserSelect.value = deployment.adviser_id || '';
+            if (companySelect) companySelect.value = deployment.company_id || '';
+            if (startDateInput) startDateInput.value = deployment.start_date || '';
+            if (endDateInput) endDateInput.value = deployment.end_date || '';
+            if (requiredHoursInput) requiredHoursInput.value = deployment.required_hours || '';
+            if (statusSelect) statusSelect.value = deployment.status || 'active';
+            if (studentLabel) studentLabel.textContent = deployment.student_name || 'Unknown Student';
+            if (companyLabel) companyLabel.textContent = deployment.company_name || 'No company selected yet';
+            if (completionLabel) {
+                completionLabel.textContent = (deployment.supervisor_id && deployment.adviser_id)
+                    ? 'Complete'
+                    : ((deployment.supervisor_id || deployment.adviser_id) ? 'Incomplete' : 'Unassigned');
+            }
+            if (errorLabel) {
+                errorLabel.textContent = '';
+                errorLabel.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.submitDeploymentEditForm = async function(event) {
+            event.preventDefault();
+
+            const form = event.currentTarget;
+            const modal = document.getElementById('editDeploymentModal');
+            const errorLabel = form.querySelector('[data-edit-error]');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const deploymentId = form.action.split('/').filter(Boolean).pop();
+
+            if (!form || !deploymentId) {
+                return false;
+            }
+
+            if (errorLabel) {
+                errorLabel.textContent = '';
+                errorLabel.classList.add('hidden');
+            }
+
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.dataset.originalText = submitButton.textContent || 'Save Changes';
+                submitButton.textContent = 'Saving...';
+            }
+
+            try {
+                const formData = new FormData(form);
+                formData.set('_method', 'PATCH');
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                    credentials: 'same-origin',
+                    body: formData,
+                });
+
+                const payload = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    const message = payload?.message || Object.values(payload?.errors || {}).flat()[0] || 'Unable to update deployment.';
+                    if (errorLabel) {
+                        errorLabel.textContent = message;
+                        errorLabel.classList.remove('hidden');
+                    }
+                    return false;
+                }
+
+                const updatedDeployment = payload?.deployment;
+                if (updatedDeployment) {
+                    const row = document.querySelector(`tr[data-deployment-id="${updatedDeployment.id}"]`);
+                    if (row) {
+                        const cells = row.querySelectorAll('td');
+                        if (cells[0]) {
+                            cells[0].innerHTML = updatedDeployment.deployment_status === 'complete'
+                                ? '<div class="generic">C Complete</div><div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">OJT: ' + (updatedDeployment.status ? updatedDeployment.status.charAt(0).toUpperCase() + updatedDeployment.status.slice(1) : '') + '</div>'
+                                : (updatedDeployment.deployment_status === 'incomplete'
+                                    ? '<div class="generic">! Incomplete</div><div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">OJT: ' + (updatedDeployment.status ? updatedDeployment.status.charAt(0).toUpperCase() + updatedDeployment.status.slice(1) : '') + '</div>'
+                                    : '<div class="generic">N Unassigned</div><div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">OJT: ' + (updatedDeployment.status ? updatedDeployment.status.charAt(0).toUpperCase() + updatedDeployment.status.slice(1) : '') + '</div>');
+                        }
+                        if (cells[2]) {
+                            cells[2].innerHTML = updatedDeployment.supervisor_name !== 'Not Assigned'
+                                ? `<span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">${updatedDeployment.supervisor_name}</span>`
+                                : '<span class="wl-status-badge wl-status-unassigned px-2.5 py-1 text-[11px] normal-case tracking-normal">Not Assigned</span>';
+                        }
+                        if (cells[3]) {
+                            cells[3].innerHTML = updatedDeployment.adviser_name !== 'Not Assigned'
+                                ? `<span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">${updatedDeployment.adviser_name}</span>`
+                                : '<span class="wl-status-badge wl-status-unassigned px-2.5 py-1 text-[11px] normal-case tracking-normal">Not Assigned</span>';
+                        }
+                        if (cells[4]) {
+                            cells[4].textContent = updatedDeployment.company_name || '';
+                        }
+                        if (cells[5]) {
+                            cells[5].textContent = updatedDeployment.duration_label || '';
+                        }
+                        if (cells[6]) {
+                            cells[6].innerHTML = `<div class="space-y-1"><div class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">${Number(updatedDeployment.rendered_hours || 0).toFixed(2)} rendered</div><div class="text-[11px] font-medium text-gray-600 dark:text-gray-300">Required: ${Number(updatedDeployment.required_hours || 0).toLocaleString()} hrs</div></div>`;
+                        }
+                    }
+                }
+
+                window.closeDeploymentEditModal();
+                return false;
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = submitButton.dataset.originalText || 'Save Changes';
+                }
+            }
+        };
+
+        window.closeDeploymentEditModal = function() {
+            const modal = document.getElementById('editDeploymentModal');
+
+            if (!modal) {
+                return;
+            }
+
+            const form = modal.querySelector('form');
+            if (form) {
+                form.action = '';
+                form.reset();
+                const studentLabel = form.querySelector('[data-edit-student-name]');
+                const companyLabel = form.querySelector('[data-edit-company-label]');
+                const completionLabel = form.querySelector('[data-edit-completion-label]');
+                const errorLabel = form.querySelector('[data-edit-error]');
+                if (studentLabel) {
+                    studentLabel.textContent = '';
+                }
+                if (companyLabel) {
+                    companyLabel.textContent = 'No company selected yet';
+                }
+                if (completionLabel) {
+                    completionLabel.textContent = 'Unassigned';
+                }
+                if (errorLabel) {
+                    errorLabel.textContent = '';
+                    errorLabel.classList.add('hidden');
+                }
+            }
+
+            modal.classList.add('hidden');
+        };
 
         $(document).ready(function() {
             if ($('#student_ids').length) {

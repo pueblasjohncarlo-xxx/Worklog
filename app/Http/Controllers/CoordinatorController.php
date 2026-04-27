@@ -1397,7 +1397,7 @@ class CoordinatorController extends Controller
         $payload = [
             'supervisor_id' => $request->input('supervisor_id') ?: null,
             'ojt_adviser_id' => $request->input('ojt_adviser_id') ?: null,
-            'company_id' => $requestedCompanyId,
+            'company_id' => $requestedCompanyId ?: $assignment->company_id,
             'start_date' => $request->input('start_date') ?: null,
             'end_date' => $request->input('end_date') ?: null,
             'status' => $request->input('status') ?: ($assignment->status ?: 'active'),
@@ -1422,27 +1422,20 @@ class CoordinatorController extends Controller
                 ], 422);
             }
 
-            if (! $supervisor->supervisorProfile?->company_id) {
-                return response()->json([
-                    'message' => 'Selected supervisor has no assigned company.',
-                    'errors' => [
-                        'supervisor_id' => ['Selected supervisor has no assigned company.'],
-                    ],
-                ], 422);
+            $supervisorCompanyId = $supervisor->supervisorProfile?->company_id;
+
+            if ($supervisorCompanyId) {
+                if (! empty($requestedCompanyId) && (int) $requestedCompanyId !== (int) $supervisorCompanyId) {
+                    return response()->json([
+                        'message' => 'Selected company must match the chosen supervisor.',
+                        'errors' => [
+                            'company_id' => ['Selected company must match the chosen supervisor.'],
+                        ],
+                    ], 422);
+                }
+
+                $payload['company_id'] = (int) $supervisorCompanyId;
             }
-
-            $supervisorCompanyId = (int) $supervisor->supervisorProfile->company_id;
-
-            if (! empty($requestedCompanyId) && (int) $requestedCompanyId !== $supervisorCompanyId) {
-                return response()->json([
-                    'message' => 'Selected company must match the chosen supervisor.',
-                    'errors' => [
-                        'company_id' => ['Selected company must match the chosen supervisor.'],
-                    ],
-                ], 422);
-            }
-
-            $payload['company_id'] = $supervisorCompanyId;
         }
 
         if (! empty($payload['ojt_adviser_id'])) {
