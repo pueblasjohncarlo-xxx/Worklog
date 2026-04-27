@@ -1021,25 +1021,12 @@ class CoordinatorController extends Controller
     {
         $topSummary = $this->buildCoordinatorTopSummary();
 
-        $assignments = Assignment::query()
-            ->with([
-                'student.studentProfile',
-                'supervisor.supervisorProfile.company',
-                'company',
-                'ojtAdviser',
-            ])
-            ->active()
-            ->whereHas('student', function ($query) {
-                $query->eligibleStudentForRoster();
-            })
-            ->orderByDesc('updated_at')
-            ->orderByDesc('created_at')
-            ->get();
-
-        // Guard the table against duplicate active deployments for the same student.
-        $assignments = $assignments
-            ->unique('student_id')
-            ->values();
+        $assignments = Assignment::rosterForCoordinator([
+            'student.studentProfile',
+            'supervisor.supervisorProfile.company',
+            'company',
+            'ojtAdviser',
+        ]);
 
         // Get only deployable students and group by section for Select2
         $students = User::eligibleStudentForDeployment()
@@ -1068,13 +1055,15 @@ class CoordinatorController extends Controller
         $active = $assignments->filter(fn ($a) => $a->status === 'active')->count();
 
         // Prepare detailed deployment data
-        $deploymentData = $assignments->map(function ($assignment) {
+        $deploymentData = $assignments->map(function (Assignment $assignment) {
             $student = $assignment->student;
             $supervisorAssigned = !empty($assignment->supervisor_id);
             $adviserAssigned = !empty($assignment->ojt_adviser_id);
-            $company = $assignment->company ?? $assignment->supervisor?->supervisorProfile?->company;
-            $companyId = $assignment->company_id ?? $assignment->supervisor?->supervisorProfile?->company_id;
+            $company = $assignment->resolvedCompany();
+            $companyId = $assignment->resolvedCompanyId();
             $status = strtolower(trim((string) ($assignment->status ?? 'unknown')));
+            $renderedHours = round($assignment->approvedHoursTotal(), 2);
+            $requiredHours = (int) ($assignment->required_hours ?? 0);
 
             return [
                 'id' => $assignment->id,
@@ -1082,6 +1071,7 @@ class CoordinatorController extends Controller
                 'student_name' => $student?->name ?? 'Unknown Student',
                 'student_email' => $student?->email ?? '',
                 'student_program' => $student?->studentProfile?->program ?? ($student?->department ?? 'N/A'),
+                'student_section' => $student?->normalizedStudentSection() ?? ($student?->section ?? ''),
                 'supervisor_id' => $assignment->supervisor_id,
                 'supervisor_name' => $assignment->supervisor?->name ?? 'Not Assigned',
                 'adviser_id' => $assignment->ojt_adviser_id,
@@ -1090,8 +1080,12 @@ class CoordinatorController extends Controller
                 'company_name' => $company?->name ?? 'N/A',
                 'start_date' => $assignment->start_date?->format('Y-m-d'),
                 'end_date' => $assignment->end_date?->format('Y-m-d'),
+                'duration_label' => $assignment->start_date && $assignment->end_date
+                    ? $assignment->start_date->format('M d, Y').' to '.$assignment->end_date->format('M d, Y')
+                    : 'Not specified',
                 'status' => $status,
-                'required_hours' => (int) ($assignment->required_hours ?? 0),
+                'required_hours' => $requiredHours,
+                'rendered_hours' => $renderedHours,
                 'is_fully_assigned' => $supervisorAssigned && $adviserAssigned,
                 'is_partially_assigned' => ($supervisorAssigned || $adviserAssigned) && !($supervisorAssigned && $adviserAssigned),
                 'is_unassigned' => !$supervisorAssigned && !$adviserAssigned,
@@ -1424,6 +1418,21 @@ class CoordinatorController extends Controller
             }
 
             $payload['company_id'] = $supervisor->supervisorProfile->company_id;
+        }
+
+        if (! empty($payload['ojt_adviser_id'])) {
+            $adviser = User::where('id', $payload['ojt_adviser_id'])
+                ->where('role', User::ROLE_OJT_ADVISER)
+                ->first();
+
+            if (! $adviser) {
+                return response()->json([
+                    'message' => 'Invalid adviser selected.',
+                    'errors' => [
+                        'ojt_adviser_id' => ['Invalid adviser selected.'],
+                    ],
+                ], 422);
+            }
         }
 
         $assignment->update($payload);

@@ -433,7 +433,7 @@
                                         @endif
 
                                         <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                                            {{ ucfirst((string) ($deployment['status'] ?? '')) }}
+                                            OJT: {{ ucfirst((string) ($deployment['status'] ?? '')) }}
                                         </div>
                                     </td>
 
@@ -444,7 +444,9 @@
                                             </div>
                                             <div class="ml-3">
                                                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $deployment['student_name'] }}</p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $deployment['student_program'] }}</p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                    {{ $deployment['student_section'] ?: 'No section' }} · {{ $deployment['student_program'] }}
+                                                </p>
                                             </div>
                                         </div>
                                     </td>
@@ -468,15 +470,18 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ $deployment['company_name'] }}</td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                                        @if($deployment['start_date'] && $deployment['end_date'])
-                                            {{ $deployment['start_date'] }} to {{ $deployment['end_date'] }}
-                                        @else
-                                            <span class="text-gray-400 italic">Not specified</span>
-                                        @endif
+                                        {{ $deployment['duration_label'] }}
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">{{ $deployment['required_hours'] }} hrs</span>
+                                        <div class="space-y-1">
+                                            <div class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">
+                                                {{ number_format((float) $deployment['rendered_hours'], 2) }} rendered
+                                            </div>
+                                            <div class="text-[11px] font-medium text-gray-600 dark:text-gray-300">
+                                                Required: {{ number_format((int) $deployment['required_hours']) }} hrs
+                                            </div>
+                                        </div>
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -564,8 +569,12 @@
                         const adviserName = this.normalizeText(a && a.adviser_name);
                         const companyName = this.normalizeText(a && a.company_name);
                         const studentProgram = this.normalizeText(a && a.student_program);
+                        const studentSection = this.normalizeText(a && a.student_section);
                         const statusLabel = this.normalizeText(a && a.status);
                         const deploymentStatus = this.normalizeText(a && a.deployment_status);
+                        const durationLabel = this.normalizeText(a && a.duration_label);
+                        const renderedHours = this.normalizeText(a && a.rendered_hours);
+                        const requiredHours = this.normalizeText(a && a.required_hours);
 
                         const matchesSearch =
                             search === "" ||
@@ -575,8 +584,12 @@
                             adviserName.includes(search) ||
                             companyName.includes(search) ||
                             studentProgram.includes(search) ||
+                            studentSection.includes(search) ||
                             statusLabel.includes(search) ||
-                            deploymentStatus.includes(search);
+                            deploymentStatus.includes(search) ||
+                            durationLabel.includes(search) ||
+                            renderedHours.includes(search) ||
+                            requiredHours.includes(search);
                         const matchesCompany = this.selectedCompany === "" || this.normalizeId(a && a.company_id) === this.normalizeId(this.selectedCompany);
                         const matchesStatus = this.selectedStatus === "" || statusLabel === this.normalizeText(this.selectedStatus);
                         const matchesDeployStatus = this.selectedDeploymentStatus === "" || deploymentStatus === this.normalizeText(this.selectedDeploymentStatus);

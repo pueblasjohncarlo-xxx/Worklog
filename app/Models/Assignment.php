@@ -105,6 +105,21 @@ class Assignment extends Model
             ->values();
     }
 
+    public static function rosterForCoordinator(array $with = []): Collection
+    {
+        return self::query()
+            ->with($with)
+            ->withSum([
+                'workLogs as approved_hours_total' => fn (Builder $query) => $query->where('status', 'approved'),
+            ], 'hours')
+            ->active()
+            ->whereHas('student', fn (Builder $query) => $query->eligibleStudentForRoster())
+            ->latestRelevant()
+            ->get()
+            ->unique('student_id')
+            ->values();
+    }
+
     protected $fillable = [
         'student_id',
         'supervisor_id',
@@ -163,6 +178,33 @@ class Assignment extends Model
         return (float) $this->workLogs()
             ->where('status', 'approved')
             ->sum('hours');
+    }
+
+    public function approvedHoursTotal(): float
+    {
+        if (array_key_exists('approved_hours_total', $this->attributes)) {
+            return (float) ($this->attributes['approved_hours_total'] ?? 0);
+        }
+
+        return $this->totalApprovedHours();
+    }
+
+    public function resolvedCompany(): ?Company
+    {
+        return $this->company ?? $this->supervisor?->supervisorProfile?->company;
+    }
+
+    public function resolvedCompanyId(): ?int
+    {
+        if (! empty($this->company_id)) {
+            return (int) $this->company_id;
+        }
+
+        if (! empty($this->supervisor?->supervisorProfile?->company_id)) {
+            return (int) $this->supervisor->supervisorProfile->company_id;
+        }
+
+        return null;
     }
 
     public function progressPercentage(): float
