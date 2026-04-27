@@ -258,7 +258,7 @@
         <div id="editDeploymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 z-0 bg-black bg-opacity-50 transition-opacity pointer-events-none"></div>
-                <form x-show="editingDeployment" method="POST" :action="editFormAction" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                <form x-show="editingDeployment" @submit.prevent="submitEditForm()" method="POST" :action="editFormAction" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
                     @csrf
                     @method('PATCH')
                     <div class="bg-white dark:bg-gray-800 px-6 pt-5 pb-4 sm:p-6">
@@ -278,7 +278,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supervisor *</label>
-                                    <select name="supervisor_id" x-model="editSupervisorId" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    <select name="supervisor_id" x-model="editSupervisorId" @change="syncEditCompany()" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select supervisor</option>
                                         <template x-for="supervisor in supervisors" :key="supervisor.id">
                                             <option :value="supervisor.id" x-text="supervisor.name"></option>
@@ -294,6 +294,11 @@
                                         </template>
                                     </select>
                                 </div>
+                                <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/60">
+                                    <div class="font-semibold text-slate-800 dark:text-slate-100">Resolved Company</div>
+                                    <div class="mt-1 text-slate-600 dark:text-slate-300" x-text="editCompanyName || 'No company mapped from selected supervisor'"></div>
+                                </div>
+                                <div x-show="editError" class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300" x-text="editError"></div>
                                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
                                     <p class="text-xs text-blue-800 dark:text-blue-200">
                                         <strong>Completion Status:</strong> This deployment will be marked as <span x-text="(editSupervisorId && editAdviserId) ? '✓ Complete' : ((editSupervisorId || editAdviserId) ? '⚠ Incomplete' : 'Unassigned')" class="font-bold"></span>
@@ -306,8 +311,8 @@
                         <button type="button" @click="closeEditModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
-                            Save Changes
+                        <button type="submit" :disabled="editSaving" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:cursor-not-allowed disabled:opacity-70">
+                            <span x-text="editSaving ? 'Saving...' : 'Save Changes'"></span>
                         </button>
                     </div>
                 </form>
@@ -485,16 +490,12 @@
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        @if($deployment['deployment_status'] !== 'complete')
-                                            <button @click="openEditModal(@js($deployment))" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors">
-                                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                                Edit
-                                            </button>
-                                        @else
-                                            <span class="text-gray-400 text-xs">Completed</span>
-                                        @endif
+                                        <button @click="openEditModal(@js($deployment))" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors">
+                                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            Edit
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -544,6 +545,9 @@
                 editFormAction: "",
                 editSupervisorId: "",
                 editAdviserId: "",
+                editCompanyName: "",
+                editError: "",
+                editSaving: false,
 
                 normalizeId(value) {
                     if (value === null || value === undefined || value === "") return "";
@@ -614,6 +618,9 @@
                     this.editFormAction = `/coordinator/deployment-management/${deployment.id}`;
                     this.editSupervisorId = deployment.supervisor_id || "";
                     this.editAdviserId = deployment.adviser_id || "";
+                    this.editCompanyName = deployment.company_name || "";
+                    this.editError = "";
+                    this.editSaving = false;
                     document.getElementById("editDeploymentModal").classList.remove("hidden");
                 },
 
@@ -622,11 +629,27 @@
                     this.editFormAction = "";
                     this.editSupervisorId = "";
                     this.editAdviserId = "";
+                    this.editCompanyName = "";
+                    this.editError = "";
+                    this.editSaving = false;
                     document.getElementById("editDeploymentModal").classList.add("hidden");
                 },
 
-                saveDeployment() {
-                    if (!this.editingDeployment) return;
+                editCompletionLabel() {
+                    if (this.editSupervisorId && this.editAdviserId) return "Complete";
+                    if (this.editSupervisorId || this.editAdviserId) return "Incomplete";
+                    return "Unassigned";
+                },
+
+                syncEditCompany() {
+                    const selectedSupervisor = this.supervisors.find(s => this.normalizeId(s.id) === this.normalizeId(this.editSupervisorId));
+                    this.editCompanyName = selectedSupervisor?.company_name || (this.editSupervisorId ? "No company mapped from selected supervisor" : "");
+                },
+
+                async submitEditForm() {
+                    if (!this.editingDeployment || this.editSaving) return;
+                    this.editSaving = true;
+                    this.editError = "";
 
                     const formData = new FormData();
                     formData.append("supervisor_id", this.editSupervisorId);
@@ -634,34 +657,42 @@
                     formData.append("_method", "PATCH");
                     formData.append("_token", document.querySelector("meta[name=csrf-token]").getAttribute("content"));
 
-                    fetch(`/coordinator/deployment-management/${this.editingDeployment.id}`, {
-                        method: "POST",
-                        body: formData
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            const index = this.deployments.findIndex(d => this.normalizeId(d && d.id) === this.normalizeId(this.editingDeployment && this.editingDeployment.id));
-                            if (index !== -1) {
-                                const selectedSupervisor = this.supervisors.find(s => String(s.id) === String(this.editSupervisorId));
-                                this.deployments[index].supervisor_id = this.editSupervisorId;
-                                this.deployments[index].adviser_id = this.editAdviserId;
-                                this.deployments[index].supervisor_name = this.supervisors.find(s => s.id == this.editSupervisorId)?.name || "Not Assigned";
-                                this.deployments[index].adviser_name = this.advisers.find(a => a.id == this.editAdviserId)?.name || "Not Assigned";
-                                if (selectedSupervisor?.company_id) {
-                                    this.deployments[index].company_id = selectedSupervisor.company_id;
-                                    this.deployments[index].company_name = selectedSupervisor.company_name || this.deployments[index].company_name;
-                                }
-                                this.deployments[index].deployment_status = (this.editSupervisorId && this.editAdviserId) ? "complete" : ((this.editSupervisorId || this.editAdviserId) ? "incomplete" : "unassigned");
-                            }
-                            this.closeEditModal();
-                            const successMsg = document.createElement("div");
-                            successMsg.className = "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4";
-                            successMsg.innerHTML = `<div class="flex items-start"><svg class="h-5 w-5 text-green-400 dark:text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div class="ml-3"><h3 class="text-sm font-medium text-green-800 dark:text-green-300">Success</h3><p class="text-sm text-green-700 dark:text-green-400 mt-1">Deployment updated successfully.</p></div></div>`;
-                            document.querySelector(".space-y-6").prepend(successMsg);
-                            setTimeout(() => successMsg.remove(), 5000);
+                    try {
+                        const response = await fetch(`/coordinator/deployment-management/${this.editingDeployment.id}`, {
+                            method: "POST",
+                            headers: {
+                                "Accept": "application/json",
+                                "X-Requested-With": "XMLHttpRequest",
+                            },
+                            body: formData
+                        });
+
+                        const payload = await response.json().catch(() => ({}));
+
+                        if (!response.ok) {
+                            this.editError = payload?.message || Object.values(payload?.errors || {}).flat()[0] || "Unable to update deployment.";
+                            return;
                         }
-                    })
-                    .catch(error => console.error("Error:", error));
+
+                        const updatedDeployment = payload?.deployment || null;
+                        const index = this.deployments.findIndex(d => this.normalizeId(d && d.id) === this.normalizeId(this.editingDeployment && this.editingDeployment.id));
+
+                        if (index !== -1 && updatedDeployment) {
+                            this.deployments.splice(index, 1, updatedDeployment);
+                        }
+
+                        this.closeEditModal();
+                        const successMsg = document.createElement("div");
+                        successMsg.className = "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4";
+                        successMsg.innerHTML = `<div class="flex items-start"><svg class="h-5 w-5 text-green-400 dark:text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div class="ml-3"><h3 class="text-sm font-medium text-green-800 dark:text-green-300">Success</h3><p class="text-sm text-green-700 dark:text-green-400 mt-1">Deployment updated successfully.</p></div></div>`;
+                        document.querySelector(".space-y-6").prepend(successMsg);
+                        setTimeout(() => successMsg.remove(), 5000);
+                    } catch (error) {
+                        console.error("Error:", error);
+                        this.editError = "Unable to update deployment right now.";
+                    } finally {
+                        this.editSaving = false;
+                    }
                 }
             };
         }

@@ -1436,9 +1436,50 @@ class CoordinatorController extends Controller
         }
 
         $assignment->update($payload);
+        $assignment->loadMissing([
+            'student.studentProfile',
+            'supervisor.supervisorProfile.company',
+            'company',
+            'ojtAdviser',
+        ]);
+
+        $company = $assignment->resolvedCompany();
+        $companyId = $assignment->resolvedCompanyId();
+        $supervisorAssigned = ! empty($assignment->supervisor_id);
+        $adviserAssigned = ! empty($assignment->ojt_adviser_id);
+
+        $updatedDeployment = [
+            'id' => $assignment->id,
+            'student_id' => $assignment->student?->id,
+            'student_name' => $assignment->student?->name ?? 'Unknown Student',
+            'student_email' => $assignment->student?->email ?? '',
+            'student_program' => $assignment->student?->studentProfile?->program ?? ($assignment->student?->department ?? 'N/A'),
+            'student_section' => $assignment->student?->normalizedStudentSection() ?? ($assignment->student?->section ?? ''),
+            'supervisor_id' => $assignment->supervisor_id,
+            'supervisor_name' => $assignment->supervisor?->name ?? 'Not Assigned',
+            'adviser_id' => $assignment->ojt_adviser_id,
+            'adviser_name' => $assignment->ojtAdviser?->name ?? 'Not Assigned',
+            'company_id' => $companyId,
+            'company_name' => $company?->name ?? 'N/A',
+            'start_date' => $assignment->start_date?->format('Y-m-d'),
+            'end_date' => $assignment->end_date?->format('Y-m-d'),
+            'duration_label' => $assignment->start_date && $assignment->end_date
+                ? $assignment->start_date->format('M d, Y').' to '.$assignment->end_date->format('M d, Y')
+                : 'Not specified',
+            'status' => strtolower(trim((string) ($assignment->status ?? 'unknown'))),
+            'required_hours' => (int) ($assignment->required_hours ?? 0),
+            'rendered_hours' => round($assignment->approvedHoursTotal(), 2),
+            'is_fully_assigned' => $supervisorAssigned && $adviserAssigned,
+            'is_partially_assigned' => ($supervisorAssigned || $adviserAssigned) && ! ($supervisorAssigned && $adviserAssigned),
+            'is_unassigned' => ! $supervisorAssigned && ! $adviserAssigned,
+            'deployment_status' => $supervisorAssigned && $adviserAssigned ? 'complete' : (($supervisorAssigned || $adviserAssigned) ? 'incomplete' : 'unassigned'),
+        ];
 
         if ($request->expectsJson()) {
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'deployment' => $updatedDeployment,
+            ]);
         }
 
         return redirect()->route('coordinator.deployment.index')
