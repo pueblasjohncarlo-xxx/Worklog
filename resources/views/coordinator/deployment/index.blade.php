@@ -258,7 +258,7 @@
         <div id="editDeploymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 z-0 bg-black bg-opacity-50 transition-opacity pointer-events-none"></div>
-                <form x-show="editingDeployment" @submit.prevent="submitEditForm()" method="POST" :action="editFormAction" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <form x-show="editingDeployment" method="POST" :action="editFormAction" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                     @csrf
                     @method('PATCH')
                     <div class="bg-white dark:bg-gray-800 px-6 pt-5 pb-4 sm:p-6">
@@ -345,8 +345,8 @@
                         <button type="button" @click="closeEditModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
                             Cancel
                         </button>
-                        <button type="submit" :disabled="editSaving" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:cursor-not-allowed disabled:opacity-70">
-                            <span x-text="editSaving ? 'Saving...' : 'Save Changes'"></span>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
+                            Save Changes
                         </button>
                     </div>
                 </form>
@@ -524,7 +524,7 @@
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <button @click="openEditModal(@js($deployment))" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors">
+                                        <button type="button" @click.prevent="openEditModal(@js($deployment))" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors">
                                             <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
@@ -664,7 +664,6 @@
                     this.editStatus = deployment.status || "active";
                     this.editCompanyName = deployment.company_name || "";
                     this.editError = "";
-                    this.editSaving = false;
                     this.syncEditCompany();
                     document.getElementById("editDeploymentModal").classList.remove("hidden");
                 },
@@ -681,7 +680,6 @@
                     this.editStatus = "active";
                     this.editCompanyName = "";
                     this.editError = "";
-                    this.editSaving = false;
                     document.getElementById("editDeploymentModal").classList.add("hidden");
                 },
 
@@ -701,60 +699,8 @@
                     this.editCompanyName = selectedCompany?.name || selectedSupervisor?.company_name || (this.editSupervisorId ? "No company mapped from selected supervisor" : "");
                 },
 
-                async submitEditForm() {
-                    if (!this.editingDeployment || this.editSaving) return;
-                    this.editSaving = true;
-                    this.editError = "";
-
-                    const formData = new FormData();
-                    formData.append("supervisor_id", this.editSupervisorId);
-                    formData.append("ojt_adviser_id", this.editAdviserId);
-                    formData.append("company_id", this.editCompanyId);
-                    formData.append("start_date", this.editStartDate);
-                    formData.append("end_date", this.editEndDate);
-                    formData.append("required_hours", this.editRequiredHours);
-                    formData.append("status", this.editStatus);
-                    formData.append("_method", "PATCH");
-                    formData.append("_token", document.querySelector("meta[name=csrf-token]").getAttribute("content"));
-
-                    try {
-                        const response = await fetch(`/coordinator/deployment-management/${this.editingDeployment.id}`, {
-                            method: "POST",
-                            headers: {
-                                "Accept": "application/json",
-                                "X-Requested-With": "XMLHttpRequest",
-                                "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").getAttribute("content"),
-                            },
-                            credentials: "same-origin",
-                            body: formData
-                        });
-
-                        const payload = await response.json().catch(() => ({}));
-
-                        if (!response.ok) {
-                            this.editError = payload?.message || Object.values(payload?.errors || {}).flat()[0] || "Unable to update deployment.";
-                            return;
-                        }
-
-                        const updatedDeployment = payload?.deployment || null;
-                        const index = this.deployments.findIndex(d => this.normalizeId(d && d.id) === this.normalizeId(this.editingDeployment && this.editingDeployment.id));
-
-                        if (index !== -1 && updatedDeployment) {
-                            this.deployments.splice(index, 1, updatedDeployment);
-                        }
-
-                        this.closeEditModal();
-                        const successMsg = document.createElement("div");
-                        successMsg.className = "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4";
-                        successMsg.innerHTML = `<div class="flex items-start"><svg class="h-5 w-5 text-green-400 dark:text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><div class="ml-3"><h3 class="text-sm font-medium text-green-800 dark:text-green-300">Success</h3><p class="text-sm text-green-700 dark:text-green-400 mt-1">Deployment updated successfully.</p></div></div>`;
-                        document.querySelector(".space-y-6").prepend(successMsg);
-                        setTimeout(() => successMsg.remove(), 5000);
-                    } catch (error) {
-                        console.error("Error:", error);
-                        this.editError = "Unable to update deployment right now.";
-                    } finally {
-                        this.editSaving = false;
-                    }
+                submitEditForm() {
+                    return;
                 }
             };
         }
