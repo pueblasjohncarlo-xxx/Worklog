@@ -19,15 +19,7 @@ class OjtAdviserController extends Controller
     public function index(): View
     {
         $user = Auth::user();
-        $assignments = Assignment::query()
-            ->where('ojt_adviser_id', $user->id)
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
-            ->with(['student', 'company', 'supervisor'])
-            ->orderByDesc('updated_at')
-            ->get()
-            ->unique('student_id')
-            ->values();
+        $assignments = Assignment::rosterForAdviser($user->id, ['student', 'company', 'supervisor']);
 
         $totalStudents = $assignments->count();
 
@@ -48,7 +40,10 @@ class OjtAdviserController extends Controller
             }
 
             // Check if student has pending evaluation
-            $evaluation = PerformanceEvaluation::where('student_id', $assignment->student_id)->latest()->first();
+            $evaluation = PerformanceEvaluation::where('student_id', $assignment->student_id)
+                ->where('supervisor_id', $assignment->supervisor_id)
+                ->latest('evaluation_date')
+                ->first();
             if (!$evaluation || $evaluation->created_at->diffInDays(now()) > 30) {
                 $pendingEvaluationsCount++;
             }
@@ -78,7 +73,10 @@ class OjtAdviserController extends Controller
             $lastLog = WorkLog::where('assignment_id', $assignment->id)->latest('work_date')->first();
             $isIncomplete = !$lastLog || ($lastLog->time_in && ! $lastLog->time_out);
             
-            $evaluation = PerformanceEvaluation::where('student_id', $assignment->student_id)->latest()->first();
+            $evaluation = PerformanceEvaluation::where('student_id', $assignment->student_id)
+                ->where('supervisor_id', $assignment->supervisor_id)
+                ->latest('evaluation_date')
+                ->first();
             $isLowPerformance = $evaluation && $evaluation->average_score <= 2.5;
             
             return $isIncomplete || $isLowPerformance;
@@ -86,7 +84,10 @@ class OjtAdviserController extends Controller
 
         // ===== PENDING EVALUATIONS =====
         $pendingEvaluations = $assignments->filter(function ($assignment) {
-            $evaluation = PerformanceEvaluation::where('student_id', $assignment->student_id)->latest()->first();
+            $evaluation = PerformanceEvaluation::where('student_id', $assignment->student_id)
+                ->where('supervisor_id', $assignment->supervisor_id)
+                ->latest('evaluation_date')
+                ->first();
             return !$evaluation || $evaluation->created_at->diffInDays(now()) > 30;
         })->take(5);
 
@@ -144,24 +145,15 @@ class OjtAdviserController extends Controller
     public function students(): View
     {
         $user = Auth::user();
-        $assignments = Assignment::query()
-            ->where('ojt_adviser_id', $user->id)
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
-            ->with(['student.studentProfile', 'company', 'supervisor'])
-            ->orderByDesc('updated_at')
-            ->get()
-            ->unique('student_id')
-            ->values();
+        $assignments = Assignment::rosterForAdviser($user->id, ['student.studentProfile', 'company', 'supervisor']);
 
         return view('ojt_adviser.students.index', compact('assignments'));
     }
 
     public function studentLogs(User $student): View
     {
-        $assignment = Assignment::where('ojt_adviser_id', Auth::id())
-            ->where('student_id', $student->id)
-            ->firstOrFail();
+        $assignment = Assignment::resolveActiveForAdviserStudent((int) Auth::id(), (int) $student->id);
+        abort_unless($assignment, 404);
 
         $logs = WorkLog::where('assignment_id', $assignment->id)
             ->orderBy('work_date', 'desc')
@@ -172,9 +164,8 @@ class OjtAdviserController extends Controller
 
     public function studentJournals(User $student): View
     {
-        $assignment = Assignment::where('ojt_adviser_id', Auth::id())
-            ->where('student_id', $student->id)
-            ->firstOrFail();
+        $assignment = Assignment::resolveActiveForAdviserStudent((int) Auth::id(), (int) $student->id);
+        abort_unless($assignment, 404);
 
         $workLogs = WorkLog::where('assignment_id', $assignment->id)
             ->whereNotNull('description')
@@ -197,10 +188,7 @@ class OjtAdviserController extends Controller
 
     public function accomplishmentReports(): View
     {
-        $assignmentIds = Assignment::query()
-            ->where('ojt_adviser_id', Auth::id())
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+        $assignmentIds = Assignment::rosterForAdviser((int) Auth::id())
             ->pluck('id');
 
         $workLogs = WorkLog::with(['assignment.student', 'assignment.company'])
@@ -215,31 +203,23 @@ class OjtAdviserController extends Controller
     public function evaluations(): View
     {
         $user = Auth::user();
-        $assignments = Assignment::query()
-            ->where('ojt_adviser_id', $user->id)
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
-            ->with(['student', 'company', 'supervisor'])
-            ->orderByDesc('updated_at')
-            ->get()
-            ->unique('student_id')
-            ->values();
+        $assignments = Assignment::rosterForAdviser($user->id, ['student', 'company', 'supervisor']);
 
-        return view('ojt_adviser.evaluations.index', compact('assignments'));
+        $latestEvaluations = PerformanceEvaluation::query()
+            ->whereIn('student_id', $assignments->pluck('student_id')->all())
+            ->whereIn('supervisor_id', $assignments->pluck('supervisor_id')->filter()->unique()->all())
+            ->orderByDesc('evaluation_date')
+            ->get()
+            ->groupBy(fn (PerformanceEvaluation $evaluation) => $evaluation->student_id.'-'.$evaluation->supervisor_id)
+            ->map(fn ($group) => $group->first());
+
+        return view('ojt_adviser.evaluations.index', compact('assignments', 'latestEvaluations'));
     }
 
     public function reports(): View
     {
         $user = Auth::user();
-        $assignments = Assignment::query()
-            ->where('ojt_adviser_id', $user->id)
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
-            ->with(['student', 'company'])
-            ->orderByDesc('updated_at')
-            ->get()
-            ->unique('student_id')
-            ->values();
+        $assignments = Assignment::rosterForAdviser($user->id, ['student', 'company']);
 
         return view('ojt_adviser.reports.index', compact('assignments'));
     }
@@ -249,9 +229,7 @@ class OjtAdviserController extends Controller
         $adviserId = Auth::id();
 
         $assignmentIds = Assignment::query()
-            ->where('ojt_adviser_id', $adviserId)
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+            ->whereIn('id', Assignment::rosterForAdviser($adviserId)->pluck('id'))
             ->pluck('id');
 
         $dateFrom = $request->input('date_from');
@@ -327,9 +305,7 @@ class OjtAdviserController extends Controller
         abort_unless($user && $user->role === User::ROLE_OJT_ADVISER, 403);
 
         // Only allow exporting evaluations for students assigned to this adviser
-        $assigned = Assignment::where('ojt_adviser_id', $user->id)
-            ->where('student_id', $evaluation->student_id)
-            ->exists();
+        $assigned = Assignment::resolveActiveForAdviserStudent((int) $user->id, (int) $evaluation->student_id) !== null;
         abort_unless($assigned, 403);
 
         // Follow the same safety rule as coordinator: only export submitted evaluations
@@ -342,9 +318,11 @@ class OjtAdviserController extends Controller
             $student = $evaluation->student;
             $supervisor = $evaluation->supervisor;
             $date = $evaluation->evaluation_date->format('F d, Y');
-            $assignment = Assignment::where('student_id', $evaluation->student_id)
-                ->where('supervisor_id', $evaluation->supervisor_id)
-                ->with('company')->latest('start_date')->first();
+            $assignment = Assignment::resolveActiveForStudent(
+                (int) $evaluation->student_id,
+                supervisorId: (int) $evaluation->supervisor_id,
+                adviserId: (int) $user->id,
+            );
             $company = $assignment && $assignment->company ? $assignment->company->name : 'N/A';
 
             $html = "<html><head><meta charset='utf-8'><style>
@@ -390,12 +368,12 @@ class OjtAdviserController extends Controller
 
     public function evaluationStudent(User $student): View
     {
-        $assignment = Assignment::where('ojt_adviser_id', Auth::id())
-            ->where('student_id', $student->id)
-            ->with(['student', 'company', 'supervisor'])
-            ->firstOrFail();
+        $assignment = Assignment::resolveActiveForAdviserStudent((int) Auth::id(), (int) $student->id);
+        abort_unless($assignment, 404);
+        $assignment->loadMissing(['student', 'company', 'supervisor']);
 
         $evaluations = PerformanceEvaluation::where('student_id', $student->id)
+            ->where('supervisor_id', $assignment->supervisor_id)
             ->orderByDesc('evaluation_date')
             ->get();
 

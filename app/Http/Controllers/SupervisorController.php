@@ -19,15 +19,7 @@ class SupervisorController extends Controller
         $user = Auth::user();
 
         // Assignments under this supervisor
-        $assignments = Assignment::query()
-            ->where('supervisor_id', $user->id)
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
-            ->with(['student', 'company'])
-            ->orderByDesc('updated_at')
-            ->get()
-            ->unique('student_id')
-            ->values();
+        $assignments = Assignment::rosterForSupervisor($user->id, ['student', 'company']);
 
         $assignmentIds = $assignments->pluck('id');
 
@@ -187,9 +179,7 @@ class SupervisorController extends Controller
     public function accomplishmentReports(Request $request): View
     {
         $assignments = Assignment::query()
-            ->where('supervisor_id', Auth::id())
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+            ->whereIn('id', Assignment::rosterForSupervisor((int) Auth::id())->pluck('id'))
             ->pluck('id');
 
         $type = $request->query('type');

@@ -249,7 +249,7 @@ class MessageController extends Controller
     private function coordinatorCanMessage(User $user): bool
     {
         return in_array($user->role, [User::ROLE_SUPERVISOR, User::ROLE_OJT_ADVISER], true) ||
-            Assignment::where('student_id', $user->id)->exists();
+            Assignment::where('student_id', $user->id)->active()->exists();
     }
 
     private function supervisorCanMessage(User $user): bool

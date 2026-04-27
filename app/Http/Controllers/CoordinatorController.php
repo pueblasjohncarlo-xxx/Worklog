@@ -1364,7 +1364,9 @@ class CoordinatorController extends Controller
 
         foreach ($studentIds as $studentId) {
             // Prevent duplicate deployment records for already assigned students.
-            $exists = Assignment::where('student_id', $studentId)->exists();
+            $exists = Assignment::where('student_id', $studentId)
+                ->active()
+                ->exists();
 
             if (! $exists) {
                 Assignment::create([

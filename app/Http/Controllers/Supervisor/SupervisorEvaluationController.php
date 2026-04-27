@@ -24,12 +24,10 @@ class SupervisorEvaluationController extends Controller
     {
         $semester = $request->input('semester');
         $q = $request->input('q');
-        $studentIds = Assignment::query()
-            ->where('supervisor_id', Auth::id())
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
+        $studentIds = Assignment::rosterForSupervisor((int) Auth::id())
             ->pluck('student_id')
-            ->unique();
+            ->unique()
+            ->values();
 
         $studentsQuery = User::eligibleStudentForRoster()->whereIn('id', $studentIds)->orderBy('name');
         if ($q) {
@@ -52,13 +50,7 @@ class SupervisorEvaluationController extends Controller
 
     public function create(Request $request): View
     {
-        $students = Assignment::query()
-            ->where('supervisor_id', Auth::id())
-            ->active()
-            ->whereHas('student', fn ($q) => $q->eligibleStudentForRoster())
-            ->with('student')
-            ->orderByDesc('updated_at')
-            ->get()
+        $students = Assignment::rosterForSupervisor((int) Auth::id(), ['student'])
             ->pluck('student')
             ->unique('id')
             ->values();
@@ -79,9 +71,7 @@ class SupervisorEvaluationController extends Controller
     {
         $supervisorId = (int) Auth::id();
 
-        $activeStudentIds = Assignment::query()
-            ->where('supervisor_id', $supervisorId)
-            ->active()
+        $activeStudentIds = Assignment::rosterForSupervisor($supervisorId)
             ->pluck('student_id')
             ->unique()
             ->values();
@@ -128,12 +118,8 @@ class SupervisorEvaluationController extends Controller
         $evaluation->document_type = $ext ?: 'file';
         $evaluation->save();
 
-        $assignment = Assignment::with(['coordinator', 'ojtAdviser'])
-            ->where('student_id', $evaluation->student_id)
-            ->where('supervisor_id', $evaluation->supervisor_id)
-            ->where('status', 'active')
-            ->latest('start_date')
-            ->first();
+        $assignment = Assignment::resolveActiveForSupervisorStudent((int) $evaluation->supervisor_id, (int) $evaluation->student_id);
+        $assignment?->loadMissing(['coordinator', 'ojtAdviser']);
 
         $student = User::find($evaluation->student_id);
         if ($student) {
@@ -175,9 +161,8 @@ class SupervisorEvaluationController extends Controller
         $student = $evaluation->student;
         $supervisor = $evaluation->supervisor ?: Auth::user();
         $date = $evaluation->evaluation_date->format('F d, Y');
-        $assignment = Assignment::where('student_id', $evaluation->student_id)
-            ->where('supervisor_id', $evaluation->supervisor_id)
-            ->with('company')->latest('start_date')->first();
+        $assignment = Assignment::resolveActiveForSupervisorStudent((int) $evaluation->supervisor_id, (int) $evaluation->student_id);
+        $assignment?->loadMissing('company');
         $companyName = $assignment && $assignment->company ? $assignment->company->name : 'N/A';
         $safeName = Str::slug($student->name.'-'.$date);
         $fileName = "evaluation-{$safeName}.doc";
@@ -253,7 +238,7 @@ class SupervisorEvaluationController extends Controller
 
     public function student(User $student, Request $request): View
     {
-        abort_unless(Assignment::where('supervisor_id', Auth::id())->where('student_id', $student->id)->exists(), 403);
+        abort_unless(Assignment::resolveActiveForSupervisorStudent((int) Auth::id(), (int) $student->id) !== null, 403);
         $semester = $request->input('semester');
         $query = PerformanceEvaluation::where('supervisor_id', Auth::id())->where('student_id', $student->id)->orderByDesc('evaluation_date');
         if ($semester) {

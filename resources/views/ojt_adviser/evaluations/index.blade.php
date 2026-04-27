@@ -17,9 +17,8 @@
                     </thead>
                     <tbody class="divide-y divide-white/5">
                         @forelse($assignments as $assignment)
-                            @php 
-                                $evaluations = \App\Models\PerformanceEvaluation::where('student_id', $assignment->student_id)->get();
-                                $latestEval = $evaluations->sortByDesc('evaluation_date')->first();
+                            @php
+                                $latestEval = $latestEvaluations->get($assignment->student_id.'-'.$assignment->supervisor_id);
                             @endphp
                             <tr class="hover:bg-white/5 transition-colors">
                                 <td class="px-6 py-4">

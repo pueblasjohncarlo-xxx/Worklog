@@ -367,6 +367,8 @@ class User extends Authenticatable
     {
         return $query
             ->eligibleStudentForRoster()
-            ->whereDoesntHave('studentAssignments');
+            ->whereDoesntHave('studentAssignments', function (Builder $assignmentQuery) {
+                $assignmentQuery->active();
+            });
     }
 }

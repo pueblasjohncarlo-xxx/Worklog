@@ -134,9 +134,8 @@ class CoordinatorEvaluationController extends Controller
             $student = $evaluation->student;
             $supervisor = $evaluation->supervisor;
             $date = $evaluation->evaluation_date->format('F d, Y');
-            $assignment = Assignment::where('student_id', $evaluation->student_id)
-                ->where('supervisor_id', $evaluation->supervisor_id)
-                ->with('company')->latest('start_date')->first();
+            $assignment = Assignment::resolveActiveForSupervisorStudent((int) $evaluation->supervisor_id, (int) $evaluation->student_id);
+            $assignment?->loadMissing('company');
             $company = $assignment && $assignment->company ? $assignment->company->name : 'N/A';
             $html = "<html><head><meta charset='utf-8'><style>
                 body{font-family:Arial,Helvetica,sans-serif;font-size:12pt;color:#111}
@@ -184,11 +183,8 @@ class CoordinatorEvaluationController extends Controller
 
         $evaluation->loadMissing(['student', 'supervisor']);
 
-        $assignment = Assignment::where('student_id', $evaluation->student_id)
-            ->where('supervisor_id', $evaluation->supervisor_id)
-            ->with('company')
-            ->latest('start_date')
-            ->first();
+        $assignment = Assignment::resolveActiveForSupervisorStudent((int) $evaluation->supervisor_id, (int) $evaluation->student_id);
+        $assignment?->loadMissing('company');
 
         return response()->view('coordinator.evaluations.print', [
             'evaluation' => $evaluation,

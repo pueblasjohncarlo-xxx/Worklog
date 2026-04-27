@@ -45,9 +45,8 @@ class ProfileController extends Controller
 
         // Load role-specific data for students
         if ($user->role === 'student' && $user->studentAssignments()->exists()) {
-            $profileData['currentAssignment'] = $user->studentAssignments()
-                ->with(['company', 'supervisor', 'coordinator', 'ojtAdviser'])
-                ->first();
+            $profileData['currentAssignment'] = \App\Models\Assignment::resolveActiveForStudent((int) $user->id);
+            $profileData['currentAssignment']?->loadMissing(['company', 'supervisor', 'coordinator', 'ojtAdviser']);
             
             if ($profileData['currentAssignment']) {
                 $profileData['approvedHours'] = $profileData['currentAssignment']->totalApprovedHours();

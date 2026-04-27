@@ -15,10 +15,8 @@ class StudentReportController extends Controller
     public function index(Request $request): View
     {
         $user = Auth::user();
-        $assignment = Assignment::with(['company', 'supervisor'])
-            ->where('student_id', $user->id)
-            ->where('status', 'active')
-            ->first();
+        $assignment = Assignment::resolveActiveForStudent((int) $user->id);
+        $assignment?->loadMissing(['company', 'supervisor']);
 
         $workLogs = collect();
         $totalHours = 0;
@@ -82,10 +80,9 @@ class StudentReportController extends Controller
     public function export(Request $request)
     {
         $user = Auth::user();
-        $assignment = Assignment::with(['company', 'supervisor'])
-            ->where('student_id', $user->id)
-            ->where('status', 'active')
-            ->firstOrFail();
+        $assignment = Assignment::resolveActiveForStudent((int) $user->id);
+        abort_unless($assignment, 404);
+        $assignment->loadMissing(['company', 'supervisor']);
 
         $query = WorkLog::where('assignment_id', $assignment->id);
 

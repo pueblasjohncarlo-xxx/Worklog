@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\Auditable;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -18,13 +19,43 @@ class Assignment extends Model
         return $query->where('status', 'active');
     }
 
-    public static function resolveActiveForStudent(int $studentId): ?self
+    public function scopeLatestRelevant(Builder $query): Builder
     {
+        return $query
+            ->orderByRaw('CASE WHEN supervisor_id IS NULL THEN 1 ELSE 0 END')
+            ->orderByRaw('CASE WHEN ojt_adviser_id IS NULL THEN 1 ELSE 0 END')
+            ->orderByDesc('updated_at')
+            ->orderByDesc('start_date')
+            ->orderByDesc('id');
+    }
+
+    public static function resolveActiveForStudent(int $studentId, ?int $supervisorId = null, ?int $adviserId = null): ?self
+    {
+        $query = self::query()
+            ->where('student_id', $studentId)
+            ->active();
+
+        if ($supervisorId !== null) {
+            $query->where('supervisor_id', $supervisorId);
+        }
+
+        if ($adviserId !== null) {
+            $query->where('ojt_adviser_id', $adviserId);
+        }
+
+        $exactMatch = (clone $query)
+            ->latestRelevant()
+            ->first();
+
+        if ($exactMatch) {
+            return $exactMatch;
+        }
+
         $withSupervisor = self::query()
             ->where('student_id', $studentId)
             ->active()
             ->whereNotNull('supervisor_id')
-            ->latest('updated_at')
+            ->latestRelevant()
             ->first();
 
         if ($withSupervisor) {
@@ -34,8 +65,44 @@ class Assignment extends Model
         return self::query()
             ->where('student_id', $studentId)
             ->active()
-            ->latest('updated_at')
+            ->latestRelevant()
             ->first();
+    }
+
+    public static function resolveActiveForSupervisorStudent(int $supervisorId, int $studentId): ?self
+    {
+        return self::resolveActiveForStudent($studentId, supervisorId: $supervisorId);
+    }
+
+    public static function resolveActiveForAdviserStudent(int $adviserId, int $studentId): ?self
+    {
+        return self::resolveActiveForStudent($studentId, adviserId: $adviserId);
+    }
+
+    public static function rosterForSupervisor(int $supervisorId, array $with = []): Collection
+    {
+        return self::query()
+            ->with($with)
+            ->where('supervisor_id', $supervisorId)
+            ->active()
+            ->whereHas('student', fn (Builder $q) => $q->eligibleStudentForRoster())
+            ->latestRelevant()
+            ->get()
+            ->unique('student_id')
+            ->values();
+    }
+
+    public static function rosterForAdviser(int $adviserId, array $with = []): Collection
+    {
+        return self::query()
+            ->with($with)
+            ->where('ojt_adviser_id', $adviserId)
+            ->active()
+            ->whereHas('student', fn (Builder $q) => $q->eligibleStudentForRoster())
+            ->latestRelevant()
+            ->get()
+            ->unique('student_id')
+            ->values();
     }
 
     protected $fillable = [
