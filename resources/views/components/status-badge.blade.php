@@ -9,21 +9,21 @@
     $normalized = str_replace([' ', '-'], '_', $rawStatus);
 
     $meta = match ($normalized) {
-        'approved' => ['class' => 'wl-status-approved', 'icon' => '✓', 'label' => 'Approved'],
-        'submitted' => ['class' => 'wl-status-submitted', 'icon' => '↑', 'label' => 'Submitted'],
+        'approved' => ['class' => 'wl-status-approved', 'icon' => 'OK', 'label' => 'Approved'],
+        'submitted' => ['class' => 'wl-status-submitted', 'icon' => 'UP', 'label' => 'Submitted'],
         'pending' => ['class' => 'wl-status-pending', 'icon' => '!', 'label' => 'Pending'],
-        'draft' => ['class' => 'wl-status-draft', 'icon' => '•', 'label' => 'Draft'],
-        'rejected', 'declined' => ['class' => 'wl-status-rejected', 'icon' => '×', 'label' => 'Rejected'],
+        'draft' => ['class' => 'wl-status-draft', 'icon' => 'D', 'label' => 'Draft'],
+        'rejected', 'declined' => ['class' => 'wl-status-rejected', 'icon' => 'X', 'label' => 'Rejected'],
         'missing', 'overdue', 'missing_overdue' => ['class' => 'wl-status-missing', 'icon' => '!', 'label' => 'Missing / Overdue'],
-        'active' => ['class' => 'wl-status-active', 'icon' => '✓', 'label' => 'Active'],
-        'inactive' => ['class' => 'wl-status-inactive', 'icon' => '•', 'label' => 'Inactive'],
-        'complete', 'completed' => ['class' => 'wl-status-complete', 'icon' => '✓', 'label' => 'Complete'],
+        'active' => ['class' => 'wl-status-active', 'icon' => 'A', 'label' => 'Active'],
+        'inactive' => ['class' => 'wl-status-inactive', 'icon' => 'I', 'label' => 'Inactive'],
+        'complete', 'completed' => ['class' => 'wl-status-complete', 'icon' => 'C', 'label' => 'Complete'],
         'incomplete' => ['class' => 'wl-status-incomplete', 'icon' => '!', 'label' => 'Incomplete'],
-        'unassigned', 'not_assigned' => ['class' => 'wl-status-unassigned', 'icon' => '•', 'label' => 'Not Assigned'],
-        'read' => ['class' => 'wl-status-read', 'icon' => '✓', 'label' => 'Read'],
+        'unassigned', 'not_assigned' => ['class' => 'wl-status-unassigned', 'icon' => 'N', 'label' => 'Not Assigned'],
+        'read' => ['class' => 'wl-status-read', 'icon' => 'R', 'label' => 'Read'],
         'unread' => ['class' => 'wl-status-info', 'icon' => '!', 'label' => 'Unread'],
-        'on_track' => ['class' => 'wl-status-on_track', 'icon' => '✓', 'label' => 'On Track'],
-        'review', 'under_review' => ['class' => 'wl-status-info', 'icon' => 'i', 'label' => 'Under Review'],
+        'on_track' => ['class' => 'wl-status-on_track', 'icon' => 'T', 'label' => 'On Track'],
+        'review', 'under_review' => ['class' => 'wl-status-info', 'icon' => 'RV', 'label' => 'Under Review'],
         default => ['class' => 'wl-status-info', 'icon' => 'i', 'label' => ucfirst(str_replace('_', ' ', $normalized ?: 'status'))],
     };
 

@@ -221,7 +221,7 @@
     }
 
     .wl-status-badge-icon {
-        @apply inline-flex h-4 w-4 items-center justify-center rounded-full border border-current text-[10px] font-black;
+        @apply inline-flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border border-current text-[9px] font-black leading-none;
     }
 
     .wl-status-approved {

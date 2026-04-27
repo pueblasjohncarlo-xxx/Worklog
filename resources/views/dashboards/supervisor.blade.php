@@ -379,7 +379,20 @@
                                             </td>
                                             <td class="py-4 text-black font-medium">{{ $task->due_date ? $task->due_date->format('M d, Y') : '-' }}</td>
                                             <td class="py-4">
-                                                 <x-status-badge :status="$task->status" :label="ucwords(str_replace('_', ' ', $task->status))" size="sm" />
+                                                @php
+                                                    $taskStatusLabel = match ($task->status) {
+                                                        'in_progress' => 'In Progress',
+                                                        'approved' => 'Approved',
+                                                        'submitted' => 'Submitted',
+                                                        'rejected' => 'Rejected',
+                                                        'completed' => 'Completed',
+                                                        default => ucwords(str_replace('_', ' ', (string) $task->status)),
+                                                    };
+                                                @endphp
+                                                <div class="inline-flex flex-col items-start gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 shadow-sm">
+                                                    <span class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Task Status</span>
+                                                    <x-status-badge :status="$task->status" :label="$taskStatusLabel" size="sm" class="shadow-sm ring-1 ring-slate-300/80" />
+                                                </div>
                                             </td>
                                             <td class="py-4 text-right">
                                                 @if($task->status === 'approved')
