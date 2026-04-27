@@ -75,11 +75,25 @@
                             <span x-text="filter.label"></span>
                         </button>
                     </template>
+                    <button
+                        x-show="selectedSection !== 'all'"
+                        @click="selectedSection = 'all'"
+                        type="button"
+                        class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-indigo-400 hover:text-indigo-700 dark:border-slate-700 dark:bg-gray-900 dark:text-gray-200"
+                        style="display: none;"
+                    >
+                        Clear Section
+                    </button>
                 </div>
 
                 <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                     <template x-for="section in sectionCards" :key="section.section">
-                        <div class="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-900/50">
+                        <button
+                            @click="toggleSection(section.section)"
+                            type="button"
+                            :class="selectedSection === section.section ? 'border-indigo-500 bg-indigo-50/90 ring-2 ring-indigo-500/40 dark:border-indigo-400 dark:bg-indigo-950/40' : 'border-gray-200 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-900/50'"
+                            class="rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        >
                             <div class="flex items-start justify-between gap-3">
                                 <div>
                                     <p class="text-sm font-bold text-gray-900 dark:text-white" x-text="section.section"></p>
@@ -94,7 +108,10 @@
                                 <span class="rounded-full bg-amber-100 px-2.5 py-1 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" x-text="`Pending ${section.pending}`"></span>
                                 <span class="rounded-full bg-rose-100 px-2.5 py-1 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300" x-text="`Follow-up ${section.needs_follow_up}`"></span>
                             </div>
-                        </div>
+                            <p class="mt-4 text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300">
+                                Tap to filter section
+                            </p>
+                        </button>
                     </template>
                 </div>
 
@@ -291,6 +308,7 @@
                 sections,
                 searchQuery: '',
                 selectedType: 'all',
+                selectedSection: 'all',
                 modalType: 'all',
                 showModal: false,
                 activeStudent: null,
@@ -320,7 +338,10 @@
                             currentStatus,
                         ].join(' ').toLowerCase();
 
-                        return query === '' || haystack.includes(query);
+                        const matchesSearch = query === '' || haystack.includes(query);
+                        const matchesSection = this.selectedSection === 'all' || row.section_label === this.selectedSection;
+
+                        return matchesSearch && matchesSection;
                     });
                 },
                 get statusCounts() {
@@ -429,6 +450,9 @@
                     this.activeStudent = row;
                     this.modalType = this.selectedType === 'all' ? 'all' : this.selectedType;
                     this.showModal = true;
+                },
+                toggleSection(section) {
+                    this.selectedSection = this.selectedSection === section ? 'all' : section;
                 },
             };
         }
