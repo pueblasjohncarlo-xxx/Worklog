@@ -294,6 +294,30 @@
                                         </template>
                                     </select>
                                 </div>
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+                                        <input type="date" name="start_date" x-model="editStartDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                                        <input type="date" name="end_date" x-model="editEndDate" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Required Hours</label>
+                                        <input type="number" min="1" max="5000" name="required_hours" x-model="editRequiredHours" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Status</label>
+                                        <select name="status" x-model="editStatus" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                            <option value="completed">Completed</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/60">
                                     <div class="font-semibold text-slate-800 dark:text-slate-100">Resolved Company</div>
                                     <div class="mt-1 text-slate-600 dark:text-slate-300" x-text="editCompanyName || 'No company mapped from selected supervisor'"></div>
@@ -545,6 +569,10 @@
                 editFormAction: "",
                 editSupervisorId: "",
                 editAdviserId: "",
+                editStartDate: "",
+                editEndDate: "",
+                editRequiredHours: "",
+                editStatus: "active",
                 editCompanyName: "",
                 editError: "",
                 editSaving: false,
@@ -618,9 +646,14 @@
                     this.editFormAction = `/coordinator/deployment-management/${deployment.id}`;
                     this.editSupervisorId = deployment.supervisor_id || "";
                     this.editAdviserId = deployment.adviser_id || "";
+                    this.editStartDate = deployment.start_date || "";
+                    this.editEndDate = deployment.end_date || "";
+                    this.editRequiredHours = deployment.required_hours || "";
+                    this.editStatus = deployment.status || "active";
                     this.editCompanyName = deployment.company_name || "";
                     this.editError = "";
                     this.editSaving = false;
+                    this.syncEditCompany();
                     document.getElementById("editDeploymentModal").classList.remove("hidden");
                 },
 
@@ -629,6 +662,10 @@
                     this.editFormAction = "";
                     this.editSupervisorId = "";
                     this.editAdviserId = "";
+                    this.editStartDate = "";
+                    this.editEndDate = "";
+                    this.editRequiredHours = "";
+                    this.editStatus = "active";
                     this.editCompanyName = "";
                     this.editError = "";
                     this.editSaving = false;
@@ -654,6 +691,10 @@
                     const formData = new FormData();
                     formData.append("supervisor_id", this.editSupervisorId);
                     formData.append("ojt_adviser_id", this.editAdviserId);
+                    formData.append("start_date", this.editStartDate);
+                    formData.append("end_date", this.editEndDate);
+                    formData.append("required_hours", this.editRequiredHours);
+                    formData.append("status", this.editStatus);
                     formData.append("_method", "PATCH");
                     formData.append("_token", document.querySelector("meta[name=csrf-token]").getAttribute("content"));
 
@@ -663,7 +704,9 @@
                             headers: {
                                 "Accept": "application/json",
                                 "X-Requested-With": "XMLHttpRequest",
+                                "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").getAttribute("content"),
                             },
+                            credentials: "same-origin",
                             body: formData
                         });
 

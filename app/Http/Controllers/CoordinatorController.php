@@ -1386,12 +1386,23 @@ class CoordinatorController extends Controller
         $request->validate([
             'supervisor_id' => 'nullable|exists:users,id',
             'ojt_adviser_id' => 'nullable|exists:users,id',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'required_hours' => 'nullable|integer|min:1|max:5000',
+            'status' => 'nullable|string|in:active,inactive,completed',
         ]);
 
         $payload = [
             'supervisor_id' => $request->input('supervisor_id') ?: null,
             'ojt_adviser_id' => $request->input('ojt_adviser_id') ?: null,
+            'start_date' => $request->input('start_date') ?: null,
+            'end_date' => $request->input('end_date') ?: null,
+            'status' => $request->input('status') ?: ($assignment->status ?: 'active'),
         ];
+
+        if ($request->filled('required_hours')) {
+            $payload['required_hours'] = (int) $request->input('required_hours');
+        }
 
         if (! empty($payload['supervisor_id'])) {
             $supervisor = User::where('id', $payload['supervisor_id'])
