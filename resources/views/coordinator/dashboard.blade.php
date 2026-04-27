@@ -12,15 +12,6 @@
         class="space-y-6"
     >
         @php
-            $activityStatusMap = [
-                'approved' => ['status' => 'approved', 'label' => 'Approved'],
-                'pending' => ['status' => 'pending', 'label' => 'Pending'],
-                'submitted' => ['status' => 'submitted', 'label' => 'Submitted'],
-                'rejected' => ['status' => 'rejected', 'label' => 'Rejected'],
-                'draft' => ['status' => 'draft', 'label' => 'Draft'],
-            ];
-        @endphp
-        @php
             $summaryCards = [
                 ['label' => 'OJT Students', 'value' => $totalStudents ?? 0, 'href' => route('coordinator.student-overview'), 'tone' => 'indigo'],
                 ['label' => 'Active OJT', 'value' => $activeOJTs ?? 0, 'href' => route('coordinator.deployment.index'), 'tone' => 'sky'],
@@ -36,14 +27,13 @@
         <x-coordinator.summary-cards :cards="$summaryCards" />
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-slate-950/80 border border-indigo-300/35 rounded-xl p-6 shadow-xl">
+            <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-lg p-6 shadow-xl">
                 <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                     <svg class="h-5 w-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     OJT Students
                 </h3>
-                <p class="mb-4 text-sm font-medium text-slate-200">Count of OJT students by section. Labels and tooltips identify each value so the chart does not rely on color alone.</p>
                 <div class="relative h-64">
                     <canvas id="studentChart"
                         data-labels="{{ json_encode($sectionProgress?->pluck('section')->toArray() ?? []) }}"
@@ -52,27 +42,13 @@
                 </div>
             </div>
 
-            <div class="bg-slate-950/80 border border-emerald-300/35 rounded-xl p-6 shadow-xl">
+            <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-lg p-6 shadow-xl">
                 <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                     <svg class="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                     Daily Attendance Trends
                 </h3>
-                <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="rounded-lg border border-emerald-300/40 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-950">
-                        <div class="flex items-center gap-2">
-                            <span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-emerald-700 text-[11px] font-black">A</span>
-                            <span>Total Clock-ins</span>
-                        </div>
-                    </div>
-                    <div class="rounded-lg border border-rose-300/40 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-950">
-                        <div class="flex items-center gap-2">
-                            <span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-rose-700 text-[11px] font-black">!</span>
-                            <span>Incomplete Records</span>
-                        </div>
-                    </div>
-                </div>
                 <div class="relative h-64">
                     <canvas id="attendanceChart"
                         data-labels="{{ json_encode($attendanceTrend?->pluck('day')->toArray() ?? []) }}"
@@ -84,22 +60,11 @@
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div class="bg-slate-950/80 border border-indigo-300/35 rounded-xl p-6 shadow-xl xl:col-span-2">
+            <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-lg p-6 shadow-xl xl:col-span-2">
                 <div class="flex items-center justify-between gap-4 mb-6">
                     <h3 class="text-lg font-bold text-white">Accomplishment Report Status Overview</h3>
-                    <span class="wl-status-badge wl-status-info normal-case tracking-normal">
-                        <span class="wl-status-badge-icon" aria-hidden="true">i</span>
-                        <span>Click a section to view submitted and missing reports</span>
-                    </span>
-                </div>
-                <div class="mb-4 flex flex-wrap gap-3 text-sm">
-                    <span class="wl-status-badge wl-status-approved normal-case tracking-normal">
-                        <span class="wl-status-badge-icon" aria-hidden="true">✓</span>
-                        <span>Submitted</span>
-                    </span>
-                    <span class="wl-status-badge wl-status-rejected normal-case tracking-normal">
-                        <span class="wl-status-badge-icon" aria-hidden="true">×</span>
-                        <span>Not Submitted</span>
+                    <span class="text-xs text-indigo-200 bg-indigo-500/20 border border-indigo-400/30 rounded-full px-3 py-1">
+                        Click a section to view details
                     </span>
                 </div>
 
@@ -109,23 +74,19 @@
                             <button
                                 type="button"
                                 @click="openSection('{{ $section['section'] }}')"
-                                class="text-left p-4 rounded-xl border border-slate-300/20 bg-slate-900/70 hover:bg-slate-800 hover:border-indigo-300/45 transition"
+                                class="text-left p-4 rounded-lg border border-white/10 bg-white/5 hover:bg-indigo-500/15 hover:border-indigo-400/40 transition"
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="text-sm font-bold text-white">{{ $section['section'] }}</div>
-                                    <div class="text-xs font-semibold text-slate-200">{{ $section['total_students'] }} OJT students</div>
+                                    <div class="text-xs text-gray-300">{{ $section['total_students'] }} OJT students</div>
                                 </div>
-                                <div class="mt-4 space-y-3">
-                                    <div class="flex items-center justify-between gap-3 text-xs">
-                                        <span class="font-bold uppercase tracking-[0.14em] text-emerald-100">Submitted</span>
-                                        <span class="font-black text-white">{{ number_format($section['submitted_percentage'], 1) }}%</span>
+                                <div class="mt-3">
+                                    <div class="flex justify-between text-xs text-gray-300 mb-1">
+                                        <span>Submitted</span>
+                                        <span>{{ number_format($section['submitted_percentage'], 1) }}%</span>
                                     </div>
-                                    <div class="flex items-center justify-between gap-3 text-xs text-slate-200">
-                                        <span>{{ round(($section['total_students'] ?? 0) * (($section['submitted_percentage'] ?? 0) / 100)) }} of {{ $section['total_students'] }} OJT students</span>
-                                        <span class="font-semibold">Section details</span>
-                                    </div>
-                                    <div class="h-3 rounded-full bg-slate-700 overflow-hidden" aria-hidden="true">
-                                        <div class="h-full rounded-full border-r border-emerald-950/30 bg-[repeating-linear-gradient(135deg,#16a34a_0,#16a34a_10px,#22c55e_10px,#22c55e_20px)]" style="width: {{ $section['submitted_percentage'] }}%"></div>
+                                    <div class="h-2.5 rounded-full bg-white/10 overflow-hidden">
+                                        <div class="h-full bg-emerald-400" style="width: {{ $section['submitted_percentage'] }}%"></div>
                                     </div>
                                 </div>
                             </button>
@@ -138,16 +99,16 @@
                 @endif
             </div>
 
-            <div class="bg-slate-950/80 border border-amber-300/35 rounded-xl p-6 shadow-xl">
+            <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-lg p-6 shadow-xl">
                 <div class="flex items-center justify-between gap-3">
                     <h3 class="text-lg font-bold text-white">Required Hours</h3>
-                    <a href="{{ route('coordinator.settings.hours') }}" class="text-sm font-bold text-amber-100 underline-offset-2 hover:text-white hover:underline">Open settings</a>
+                    <a href="{{ route('coordinator.settings.hours') }}" class="text-xs text-indigo-200 hover:text-white">Open settings</a>
                 </div>
-                <p class="text-sm font-medium text-slate-200 mt-2">Set required OJT hours for active or all student assignments.</p>
+                <p class="text-sm text-gray-300 mt-2">Set required OJT hours for active or all student assignments.</p>
 
-                <div class="mt-4 p-4 rounded-xl border border-amber-300/30 bg-amber-50">
-                    <div class="text-xs font-black uppercase tracking-[0.16em] text-amber-900">Current default</div>
-                    <div class="text-2xl font-black text-slate-950">{{ $currentRequiredHours ?? 1600 }} hrs</div>
+                <div class="mt-4 p-3 rounded-lg border border-white/10 bg-white/5">
+                    <div class="text-xs uppercase tracking-wider text-gray-400">Current default</div>
+                    <div class="text-2xl font-black text-white">{{ $currentRequiredHours ?? 1600 }} hrs</div>
                 </div>
 
                 <form action="{{ route('coordinator.settings.hours.update') }}" method="POST" class="mt-4 space-y-3">
@@ -161,30 +122,29 @@
                             min="1"
                             max="5000"
                             value="{{ old('required_hours', $currentRequiredHours ?? 1600) }}"
-                            class="w-full rounded-md border border-slate-300 bg-white text-slate-950 px-3 py-2 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            class="w-full rounded-md border border-white/20 bg-white/10 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                             required
                         >
                     </div>
                     <div>
                         <label for="scope" class="block text-sm font-medium text-gray-200 mb-1">Scope</label>
-                        <select id="scope" name="scope" class="w-full rounded-md border border-slate-300 bg-white text-slate-950 px-3 py-2 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        <select id="scope" name="scope" class="w-full rounded-md border border-white/20 bg-white/10 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
                             <option value="active">Active assignments only</option>
                             <option value="all">All assignments</option>
                         </select>
                     </div>
-                    <button type="submit" class="w-full rounded-md bg-indigo-700 px-4 py-2 font-bold text-white transition hover:bg-indigo-800">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-md transition">
                         Update Required Hours
                     </button>
                 </form>
             </div>
         </div>
 
-        <div class="bg-slate-950/80 border border-cyan-300/35 rounded-xl p-6 shadow-xl">
+        <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-lg p-6 shadow-xl">
             <div class="flex items-center justify-between gap-4 mb-6">
                 <h3 class="text-lg font-bold text-white">OJT Adviser Dashboard</h3>
-                <span class="wl-status-badge wl-status-info normal-case tracking-normal">
-                    <span class="wl-status-badge-icon" aria-hidden="true">i</span>
-                    <span>Click an adviser to view assigned OJT students</span>
+                <span class="text-xs text-indigo-200 bg-indigo-500/20 border border-indigo-400/30 rounded-full px-3 py-1">
+                    Click an adviser to view assigned OJT students
                 </span>
             </div>
 
@@ -194,7 +154,7 @@
                         <button
                             type="button"
                             @click="openAdviser({{ $adviser['id'] }})"
-                            class="text-left border border-slate-300/20 rounded-xl p-4 bg-slate-900/70 hover:bg-slate-800 transition-all"
+                            class="text-left border border-white/10 rounded-lg p-4 bg-white/5 hover:bg-white/10 transition-all"
                         >
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-center gap-4 flex-1 min-w-0">
@@ -207,7 +167,7 @@
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <div class="text-base font-bold text-white truncate">{{ $adviser['name'] }}</div>
-                                        <div class="text-sm font-medium text-slate-200 truncate">{{ $adviser['email'] }}</div>
+                                        <div class="text-sm text-gray-400 truncate">{{ $adviser['email'] }}</div>
                                     </div>
                                 </div>
                                 <svg class="h-5 w-5 text-indigo-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,17 +175,17 @@
                                 </svg>
                             </div>
                             <div class="grid grid-cols-3 gap-2 mt-4 text-xs">
-                                <div class="rounded-lg border border-indigo-300/40 bg-indigo-50 px-2 py-2 text-center">
-                                    <div class="text-[11px] font-black uppercase tracking-[0.14em] text-indigo-950">Assigned</div>
-                                    <div class="mt-1 text-slate-950 font-black">{{ $adviser['assigned_students_count'] }}</div>
+                                <div class="rounded-md border border-indigo-400/20 bg-indigo-500/10 px-2 py-2 text-center">
+                                    <div class="text-indigo-200">Assigned</div>
+                                    <div class="text-white font-bold">{{ $adviser['assigned_students_count'] }}</div>
                                 </div>
-                                <div class="rounded-lg border border-emerald-300/40 bg-emerald-50 px-2 py-2 text-center">
-                                    <div class="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-950">On Track</div>
-                                    <div class="mt-1 text-slate-950 font-black">{{ $adviser['on_track_count'] }}</div>
+                                <div class="rounded-md border border-emerald-400/20 bg-emerald-500/10 px-2 py-2 text-center">
+                                    <div class="text-emerald-200">On Track</div>
+                                    <div class="text-white font-bold">{{ $adviser['on_track_count'] }}</div>
                                 </div>
-                                <div class="rounded-lg border border-rose-300/40 bg-rose-50 px-2 py-2 text-center">
-                                    <div class="text-[11px] font-black uppercase tracking-[0.14em] text-rose-950">Attention</div>
-                                    <div class="mt-1 text-slate-950 font-black">{{ $adviser['attention_count'] }}</div>
+                                <div class="rounded-md border border-rose-400/20 bg-rose-500/10 px-2 py-2 text-center">
+                                    <div class="text-rose-200">Attention</div>
+                                    <div class="text-white font-bold">{{ $adviser['attention_count'] }}</div>
                                 </div>
                             </div>
                         </button>
@@ -239,24 +199,21 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-slate-950/80 border border-rose-300/35 rounded-xl p-6 shadow-xl">
+            <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-lg p-6 shadow-xl">
                 <h3 class="text-lg font-bold text-white mb-4">OJT Students Needing Attention</h3>
                 @if(($studentsNeedingAttention?->count() ?? 0) > 0)
                     <div class="space-y-3 max-h-80 overflow-auto pr-1">
                         @foreach($studentsNeedingAttention->take(10) as $student)
-                            <div class="rounded-xl border border-rose-300/40 bg-rose-50 px-4 py-3">
+                            <div class="rounded-lg border border-rose-400/20 bg-rose-500/10 px-4 py-3">
                                 <div class="flex items-center justify-between gap-3">
                                     <div>
-                                        <div class="font-bold text-rose-950">{{ $student['name'] }}</div>
-                                        <div class="text-xs font-medium text-slate-700">{{ $student['section'] }} | {{ $student['company'] }}</div>
+                                        <div class="font-semibold text-white">{{ $student['name'] }}</div>
+                                        <div class="text-xs text-rose-100">{{ $student['section'] }} | {{ $student['company'] }}</div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="text-xs font-black uppercase tracking-[0.14em] text-rose-900">Progress</div>
-                                        <div class="text-sm font-black text-rose-950">{{ number_format($student['progress'], 1) }}%</div>
+                                        <div class="text-xs text-rose-100">Progress</div>
+                                        <div class="text-sm font-bold text-white">{{ number_format($student['progress'], 1) }}%</div>
                                     </div>
-                                </div>
-                                <div class="mt-3">
-                                    <x-status-badge status="incomplete" label="Needs Attention" size="sm" />
                                 </div>
                             </div>
                         @endforeach
@@ -266,26 +223,20 @@
                 @endif
             </div>
 
-            <div class="bg-slate-950/80 border border-indigo-300/35 rounded-xl p-6 shadow-xl">
+            <div class="bg-black/40 backdrop-blur-md border border-indigo-500/20 rounded-lg p-6 shadow-xl">
                 <h3 class="text-lg font-bold text-white mb-4">Recent Accomplishment Activity</h3>
                 @if(($recentActivity?->count() ?? 0) > 0)
                     <div class="space-y-3 max-h-80 overflow-auto pr-1">
                         @foreach($recentActivity as $item)
-                            @php
-                                $activityMeta = $activityStatusMap[strtolower($item['status'] ?? '')] ?? ['status' => 'info', 'label' => ucfirst($item['status'] ?? 'Status')];
-                            @endphp
-                            <div class="rounded-xl border border-slate-300/20 bg-slate-900/70 px-4 py-3">
+                            <div class="rounded-lg border border-white/10 bg-white/5 px-4 py-3">
                                 <div class="flex justify-between gap-4 text-sm">
                                     <div>
                                         <div class="font-semibold text-white">{{ $item['student'] }}</div>
-                                        <div class="text-slate-200">{{ $item['type'] }} | {{ $item['section'] }} | {{ $item['company'] }}</div>
+                                        <div class="text-gray-300">{{ $item['type'] }} | {{ $item['section'] }} | {{ $item['company'] }}</div>
                                     </div>
-                                    <div class="text-right text-slate-200">
+                                    <div class="text-right text-gray-300">
                                         <div>{{ $item['date'] }}</div>
-                                        <div class="mt-2 flex flex-col items-end gap-2">
-                                            <x-status-badge :status="$activityMeta['status']" :label="$activityMeta['label']" size="sm" />
-                                            <div class="text-xs font-semibold">{{ number_format($item['hours'], 2) }}h</div>
-                                        </div>
+                                        <div class="text-xs">{{ $item['status'] }} | {{ number_format($item['hours'], 2) }}h</div>
                                     </div>
                                 </div>
                             </div>
@@ -311,29 +262,19 @@
 
                     <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <template x-for="type in ['daily', 'weekly', 'monthly']" :key="type">
-                            <div class="rounded-xl border border-slate-300/20 bg-slate-800/80 p-4">
+                            <div class="rounded-lg border border-white/10 bg-white/5 p-4">
                                 <div class="text-sm font-bold uppercase tracking-wider" x-text="type"></div>
-                                <div class="mt-3">
-                                    <span class="wl-status-badge wl-status-approved normal-case tracking-normal">
-                                        <span class="wl-status-badge-icon" aria-hidden="true">OK</span>
-                                        <span>Submitted (<span x-text="selectedSection[type].submitted.length"></span>)</span>
-                                    </span>
-                                </div>
+                                <div class="mt-3 text-xs text-emerald-200">Submitted (<span x-text="selectedSection[type].submitted.length"></span>)</div>
                                 <div class="mt-2 space-y-1 max-h-40 overflow-auto">
                                     <template x-for="student in selectedSection[type].submitted" :key="student.student_id + '-s-' + type">
-                                        <div class="text-xs font-medium rounded bg-emerald-50 text-emerald-950 border border-emerald-300 px-2 py-1" x-text="student.name"></div>
+                                        <div class="text-xs rounded bg-emerald-500/10 border border-emerald-400/20 px-2 py-1" x-text="student.name"></div>
                                     </template>
                                 </div>
 
-                                <div class="mt-4">
-                                    <span class="wl-status-badge wl-status-rejected normal-case tracking-normal">
-                                        <span class="wl-status-badge-icon" aria-hidden="true">NO</span>
-                                        <span>Not Submitted (<span x-text="selectedSection[type].not_submitted.length"></span>)</span>
-                                    </span>
-                                </div>
+                                <div class="mt-4 text-xs text-rose-200">Not Submitted (<span x-text="selectedSection[type].not_submitted.length"></span>)</div>
                                 <div class="mt-2 space-y-1 max-h-40 overflow-auto">
                                     <template x-for="student in selectedSection[type].not_submitted" :key="student.student_id + '-n-' + type">
-                                        <div class="text-xs font-medium rounded bg-rose-50 text-rose-950 border border-rose-300 px-2 py-1" x-text="student.name"></div>
+                                        <div class="text-xs rounded bg-rose-500/10 border border-rose-400/20 px-2 py-1" x-text="student.name"></div>
                                     </template>
                                 </div>
                             </div>
@@ -357,20 +298,20 @@
 
                     <div class="p-6">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                            <div class="rounded-md border border-indigo-300/40 bg-indigo-50 px-3 py-2 text-slate-950">
-                                <div class="text-xs font-black uppercase tracking-[0.14em] text-indigo-950">Assigned</div>
+                            <div class="rounded-md border border-indigo-400/20 bg-indigo-500/10 px-3 py-2">
+                                <div class="text-xs text-indigo-100">Assigned</div>
                                 <div class="text-lg font-bold" x-text="selectedAdviser.assigned_students_count"></div>
                             </div>
-                            <div class="rounded-md border border-emerald-300/40 bg-emerald-50 px-3 py-2 text-slate-950">
-                                <div class="text-xs font-black uppercase tracking-[0.14em] text-emerald-950">On Track</div>
+                            <div class="rounded-md border border-emerald-400/20 bg-emerald-500/10 px-3 py-2">
+                                <div class="text-xs text-emerald-100">On Track</div>
                                 <div class="text-lg font-bold" x-text="selectedAdviser.on_track_count"></div>
                             </div>
-                            <div class="rounded-md border border-rose-300/40 bg-rose-50 px-3 py-2 text-slate-950">
-                                <div class="text-xs font-black uppercase tracking-[0.14em] text-rose-950">Needs Attention</div>
+                            <div class="rounded-md border border-rose-400/20 bg-rose-500/10 px-3 py-2">
+                                <div class="text-xs text-rose-100">Needs Attention</div>
                                 <div class="text-lg font-bold" x-text="selectedAdviser.attention_count"></div>
                             </div>
-                            <div class="rounded-md border border-cyan-300/40 bg-cyan-50 px-3 py-2 text-slate-950">
-                                <div class="text-xs font-black uppercase tracking-[0.14em] text-cyan-950">Completed</div>
+                            <div class="rounded-md border border-cyan-400/20 bg-cyan-500/10 px-3 py-2">
+                                <div class="text-xs text-cyan-100">Completed</div>
                                 <div class="text-lg font-bold" x-text="selectedAdviser.completed_count"></div>
                             </div>
                         </div>
@@ -388,7 +329,7 @@
                                     type="text"
                                     x-model="adviserSearchTerm"
                                     placeholder="Search by name, section, company, or status..."
-                                    class="w-full rounded-lg border border-slate-300 bg-white text-slate-950 placeholder-slate-500 pl-9 pr-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                    class="w-full rounded-lg border border-white/20 bg-white/10 text-white placeholder-slate-300 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                                 >
                             </div>
                         </div>
@@ -417,19 +358,20 @@
                                             <td class="px-4 py-3" x-text="student.section"></td>
                                             <td class="px-4 py-3" x-text="student.company"></td>
                                             <td class="px-4 py-3 text-xs">
-                                                <div class="flex flex-wrap gap-1">
-                                                    <span :class="reportSubmissionClass(student.daily_submitted)" x-text="`D ${reportSubmissionLabel(student.daily_submitted)}`"></span>
-                                                    <span :class="reportSubmissionClass(student.weekly_submitted)" x-text="`W ${reportSubmissionLabel(student.weekly_submitted)}`"></span>
-                                                    <span :class="reportSubmissionClass(student.monthly_submitted)" x-text="`M ${reportSubmissionLabel(student.monthly_submitted)}`"></span>
-                                                </div>
+                                                <span :class="student.daily_submitted ? 'text-emerald-300' : 'text-rose-300'">D</span>
+                                                <span :class="student.weekly_submitted ? 'text-emerald-300' : 'text-rose-300'"> / W</span>
+                                                <span :class="student.monthly_submitted ? 'text-emerald-300' : 'text-rose-300'"> / M</span>
                                             </td>
                                             <td class="px-4 py-3" x-text="student.progress + '%' "></td>
                                             <td class="px-4 py-3">
-                                                <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em]"
-                                                    :class="statusBadgeClass(student.status)">
-                                                    <span class="inline-flex h-4 w-4 items-center justify-center rounded-full border border-current text-[10px] font-black" aria-hidden="true" x-text="statusBadgeIcon(student.status)"></span>
-                                                    <span x-text="student.status"></span>
-                                                </span>
+                                                <span class="px-2 py-1 rounded-full text-xs border"
+                                                    :class="
+                                                        student.status === 'Completed' ? 'bg-cyan-500/15 border-cyan-300/30 text-cyan-200' :
+                                                        (student.status === 'On Track' ? 'bg-emerald-500/15 border-emerald-300/30 text-emerald-200' :
+                                                        (student.status === 'Needs Attention' ? 'bg-rose-500/15 border-rose-300/30 text-rose-200' : 'bg-amber-500/15 border-amber-300/30 text-amber-200'))
+                                                    "
+                                                    x-text="student.status"
+                                                ></span>
                                             </td>
                                         </tr>
                                     </template>
@@ -493,38 +435,6 @@
 
                         return haystack.includes(term);
                     });
-                },
-                statusBadgeClass(status) {
-                    switch ((status || '').toLowerCase()) {
-                        case 'completed':
-                            return 'bg-cyan-50 text-cyan-950 border-cyan-300';
-                        case 'on track':
-                            return 'bg-emerald-50 text-emerald-950 border-emerald-300';
-                        case 'needs attention':
-                            return 'bg-rose-50 text-rose-950 border-rose-300';
-                        default:
-                            return 'bg-amber-50 text-amber-950 border-amber-300';
-                    }
-                },
-                statusBadgeIcon(status) {
-                    switch ((status || '').toLowerCase()) {
-                        case 'completed':
-                            return 'C';
-                        case 'on track':
-                            return '✓';
-                        case 'needs attention':
-                            return '!';
-                        default:
-                            return 'i';
-                    }
-                },
-                reportSubmissionClass(isSubmitted) {
-                    return isSubmitted
-                        ? 'inline-flex items-center rounded-full border border-emerald-300 bg-emerald-50 px-2 py-1 font-bold text-emerald-950'
-                        : 'inline-flex items-center rounded-full border border-rose-300 bg-rose-50 px-2 py-1 font-bold text-rose-950';
-                },
-                reportSubmissionLabel(isSubmitted) {
-                    return isSubmitted ? 'Yes' : 'No';
                 }
             };
         }
@@ -544,11 +454,10 @@
                             datasets: [{
                                 label: 'OJT Students',
                                 data: hasData ? studentValues : [0],
-                                backgroundColor: 'rgba(37, 99, 235, 0.88)',
-                                borderColor: 'rgba(30, 64, 175, 1)',
+                                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                                borderColor: 'rgba(99, 102, 241, 1)',
                                 borderWidth: 2,
-                                borderRadius: 6,
-                                hoverBackgroundColor: 'rgba(30, 64, 175, 0.95)'
+                                borderRadius: 6
                             }]
                         },
                         options: {
@@ -556,24 +465,17 @@
                             maintainAspectRatio: false,
                             indexAxis: 'y',
                             plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return `Count: ${context.formattedValue} OJT students`;
-                                        }
-                                    }
-                                }
+                                legend: { display: false }
                             },
                             scales: {
                                 x: {
                                     beginAtZero: true,
                                     grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                                    ticks: { color: 'rgba(255, 255, 255, 0.92)', font: { weight: '700' } }
+                                    ticks: { color: 'rgba(255, 255, 255, 0.6)' }
                                 },
                                 y: {
                                     grid: { display: false },
-                                    ticks: { color: 'rgba(255, 255, 255, 0.96)', font: { weight: '700' } }
+                                    ticks: { color: 'rgba(255, 255, 255, 0.8)' }
                                 }
                             }
                         }
@@ -600,28 +502,27 @@
                             labels: hasLabels ? attendanceLabels : ['No Data'],
                             datasets: [
                                 {
-                                    label: 'Total Clock-ins (Approved/Recorded)',
+                                    label: 'Total Clock-ins',
                                     data: hasTotal ? totalData : [0],
-                                    borderColor: '#15803d',
-                                    backgroundColor: 'rgba(21, 128, 61, 0.12)',
-                                    borderWidth: 3,
+                                    borderColor: '#10b981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                    borderWidth: 2,
                                     fill: true,
                                     tension: 0.4,
-                                    pointBackgroundColor: '#15803d',
+                                    pointBackgroundColor: '#10b981',
                                     pointBorderColor: '#ffffff',
                                     pointBorderWidth: 2,
                                     pointRadius: 4
                                 },
                                 {
-                                    label: 'Incomplete Records',
+                                    label: 'Incomplete',
                                     data: hasLate ? lateData : [0],
-                                    borderColor: '#b91c1c',
-                                    backgroundColor: 'rgba(185, 28, 28, 0.08)',
-                                    borderWidth: 3,
-                                    borderDash: [8, 5],
+                                    borderColor: '#ef4444',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    borderWidth: 2,
                                     fill: true,
                                     tension: 0.4,
-                                    pointBackgroundColor: '#b91c1c',
+                                    pointBackgroundColor: '#ef4444',
                                     pointBorderColor: '#ffffff',
                                     pointBorderWidth: 2,
                                     pointRadius: 4
@@ -633,25 +534,18 @@
                             maintainAspectRatio: false,
                             plugins: {
                                 legend: {
-                                    labels: { color: 'rgba(255, 255, 255, 0.95)', font: { weight: '700' } }
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return `${context.dataset.label}: ${context.formattedValue}`;
-                                        }
-                                    }
+                                    labels: { color: 'rgba(255, 255, 255, 0.8)' }
                                 }
                             },
                             scales: {
                                 x: {
                                     grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                                    ticks: { color: 'rgba(255, 255, 255, 0.92)', font: { weight: '700' } }
+                                    ticks: { color: 'rgba(255, 255, 255, 0.6)' }
                                 },
                                 y: {
                                     beginAtZero: true,
                                     grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                                    ticks: { color: 'rgba(255, 255, 255, 0.92)', font: { weight: '700' } }
+                                    ticks: { color: 'rgba(255, 255, 255, 0.6)' }
                                 }
                             }
                         }
