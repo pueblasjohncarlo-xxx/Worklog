@@ -8,58 +8,58 @@
             .app-sidebar, header, nav, .no-print { display: none !important; }
             main { padding: 0 !important; }
             .print-reset { box-shadow: none !important; border: none !important; }
-            body { background: #fff !important; }
+            body { background: #fff !important; color: #0f172a !important; }
         }
     </style>
 
     <div class="space-y-6">
         <div class="student-light-card p-6 print-reset">
-            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
-                    <h2 class="text-xl font-black text-slate-900">Mapping of OJT Hours</h2>
-                    <p class="text-sm font-medium text-slate-600">Attendance-based monthly summary paired with your accomplishment reports.</p>
+                    <h2 class="text-xl font-black text-slate-950">Mapping of OJT Hours</h2>
+                    <p class="text-sm font-semibold text-slate-700">Attendance-based monthly summary paired with your accomplishment reports.</p>
                 </div>
 
-                <div class="no-print flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
-                    <form method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+                <div class="no-print flex flex-col items-stretch gap-3 sm:flex-row sm:items-end">
+                    <form method="GET" class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-end">
                         <div>
-                            <label for="from" class="block text-xs font-bold text-slate-600 uppercase tracking-wider">From</label>
+                            <label for="from" class="block text-xs font-black uppercase tracking-wider text-slate-700">From</label>
                             <input id="from" name="from" type="month" value="{{ $fromKey }}" class="mt-1 rounded-md border-slate-300 bg-white text-slate-900" />
                         </div>
                         <div>
-                            <label for="to" class="block text-xs font-bold text-slate-600 uppercase tracking-wider">To</label>
+                            <label for="to" class="block text-xs font-black uppercase tracking-wider text-slate-700">To</label>
                             <input id="to" name="to" type="month" value="{{ $toKey }}" class="mt-1 rounded-md border-slate-300 bg-white text-slate-900" />
                         </div>
-                        <button type="submit" class="h-[42px] px-4 rounded-md bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700">Apply</button>
+                        <button type="submit" class="h-[42px] rounded-md bg-indigo-600 px-4 text-sm font-bold text-white hover:bg-indigo-700">Apply</button>
                     </form>
                     @if($assignment && $mapping)
-                        <a href="{{ route('student.mapping.export', ['from' => $fromKey, 'to' => $toKey, 'format' => 'pdf']) }}" class="h-[42px] inline-flex items-center justify-center px-4 rounded-md bg-rose-600 text-white text-sm font-bold hover:bg-rose-700">
+                        <a href="{{ route('student.mapping.export', ['from' => $fromKey, 'to' => $toKey, 'format' => 'pdf']) }}" class="inline-flex h-[42px] items-center justify-center rounded-md bg-rose-600 px-4 text-sm font-bold text-white hover:bg-rose-700">
                             Export PDF
                         </a>
-                        <a href="{{ route('student.mapping.export', ['from' => $fromKey, 'to' => $toKey, 'format' => 'doc']) }}" class="h-[42px] inline-flex items-center justify-center px-4 rounded-md bg-sky-600 text-white text-sm font-bold hover:bg-sky-700">
+                        <a href="{{ route('student.mapping.export', ['from' => $fromKey, 'to' => $toKey, 'format' => 'doc']) }}" class="inline-flex h-[42px] items-center justify-center rounded-md bg-sky-600 px-4 text-sm font-bold text-white hover:bg-sky-700">
                             Export Word
                         </a>
                     @endif
-                    <button type="button" onclick="window.print()" class="h-[42px] px-4 rounded-md bg-gray-900 text-white text-sm font-bold hover:bg-black">Print</button>
+                    <button type="button" onclick="window.print()" class="h-[42px] rounded-md bg-gray-900 px-4 text-sm font-bold text-white hover:bg-black">Print</button>
                 </div>
             </div>
 
             @if(!$assignment)
-                <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-950">
                     No active assignment found. Mapping will appear once you have an active OJT assignment.
                 </div>
             @else
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="text-sm text-gray-700 dark:text-gray-200 space-y-1">
-                        <div><span class="font-bold">Student Name:</span> {{ $assignment->student?->name ?? '—' }}</div>
-                        <div><span class="font-bold">Section:</span> {{ $assignment->student?->normalizedStudentSection() ?? ($assignment->student?->section ?? '—') }}</div>
-                        <div><span class="font-bold">Company:</span> {{ $assignment->company?->name ?? '—' }}</div>
-                        <div><span class="font-bold">Department:</span> {{ $assignment->student?->department ?? ($assignment->student?->studentProfile?->program ?? '—') }}</div>
+                <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="space-y-2 text-sm text-slate-800">
+                        <div><span class="font-black text-slate-950">Student Name:</span> <span class="font-semibold">{{ $assignment->student?->name ?? '-' }}</span></div>
+                        <div><span class="font-black text-slate-950">Section:</span> <span class="font-semibold">{{ $assignment->student?->normalizedStudentSection() ?? ($assignment->student?->section ?? '-') }}</span></div>
+                        <div><span class="font-black text-slate-950">Company:</span> <span class="font-semibold">{{ $assignment->company?->name ?? '-' }}</span></div>
+                        <div><span class="font-black text-slate-950">Department:</span> <span class="font-semibold">{{ $assignment->student?->department ?? ($assignment->student?->studentProfile?->program ?? '-') }}</span></div>
                     </div>
-                    <div class="text-sm text-gray-700 dark:text-gray-200 space-y-1">
-                        <div><span class="font-bold">Course/Program:</span> {{ $assignment->student?->studentProfile?->program ?? '—' }}</div>
-                        <div><span class="font-bold">Student No.:</span> {{ $assignment->student?->studentProfile?->student_number ?? '—' }}</div>
-                        <div><span class="font-bold">Date Submitted:</span> {{ $submittedAt->format('F d, Y') }}</div>
+                    <div class="space-y-2 text-sm text-slate-800">
+                        <div><span class="font-black text-slate-950">Course/Program:</span> <span class="font-semibold">{{ $assignment->student?->studentProfile?->program ?? '-' }}</span></div>
+                        <div><span class="font-black text-slate-950">Student No.:</span> <span class="font-semibold">{{ $assignment->student?->studentProfile?->student_number ?? '-' }}</span></div>
+                        <div><span class="font-black text-slate-950">Date Submitted:</span> <span class="font-semibold">{{ $submittedAt->format('F d, Y') }}</span></div>
                     </div>
                 </div>
             @endif

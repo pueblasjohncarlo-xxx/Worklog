@@ -52,19 +52,19 @@
             </form>
         </div>
 
-        <div class="max-h-64 overflow-y-auto">
+        <div class="max-h-72 overflow-y-auto bg-white">
             <div x-show="!jsReady">
                 @forelse($initialItems as $item)
-                    <a href="{{ $item['read_url'] }}" class="block border-b border-slate-100 px-4 py-3 transition-colors hover:bg-slate-50 focus:bg-slate-50 focus:outline-none last:border-0">
+                    <a href="{{ $item['read_url'] }}" class="block border-b border-slate-100 px-4 py-3.5 transition-colors hover:bg-slate-50 focus:bg-slate-50 focus:outline-none last:border-0">
                         <div class="flex items-center justify-between gap-3">
-                            <p class="text-sm font-semibold text-slate-900">{{ $item['title'] ?? 'Notification' }}</p>
+                            <p class="text-sm font-bold leading-5 text-slate-950">{{ $item['title'] ?? 'Notification' }}</p>
                             <x-status-badge status="unread" size="sm" />
                         </div>
-                        <p class="mt-1 text-xs leading-5 text-slate-700">{{ $item['content'] ?? '' }}</p>
-                        <p class="mt-2 text-xs font-medium text-slate-500">{{ $item['created_at_human'] ?? '' }}</p>
+                        <p class="mt-1.5 text-xs font-medium leading-5 text-slate-700">{{ $item['content'] ?? '' }}</p>
+                        <p class="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{{ $item['created_at_human'] ?? '' }}</p>
                     </a>
                 @empty
-                    <div class="px-4 py-4 text-center text-sm font-medium text-slate-600">
+                    <div class="px-4 py-5 text-center text-sm font-semibold text-slate-600">
                         No new notifications
                     </div>
                 @endforelse
@@ -74,22 +74,22 @@
                 <template x-if="items && items.length">
                     <div>
                         <template x-for="item in items" :key="item.id">
-                            <a :href="item.read_url" class="block border-b border-slate-100 px-4 py-3 transition-colors hover:bg-slate-50 focus:bg-slate-50 focus:outline-none last:border-0">
+                            <a :href="item.read_url" class="block border-b border-slate-100 px-4 py-3.5 transition-colors hover:bg-slate-50 focus:bg-slate-50 focus:outline-none last:border-0">
                                 <div class="flex items-center justify-between gap-3">
-                                    <p class="text-sm font-semibold text-slate-900" x-text="item.title || 'Notification'"></p>
+                                    <p class="text-sm font-bold leading-5 text-slate-950" x-text="item.title || 'Notification'"></p>
                                     <span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px]">
                                         <span class="wl-status-badge-icon" aria-hidden="true">!</span>
                                         <span>Unread</span>
                                     </span>
                                 </div>
-                                <p class="mt-1 text-xs leading-5 text-slate-700" x-text="item.content || ''"></p>
-                                <p class="mt-2 text-xs font-medium text-slate-500" x-text="item.created_at_human || ''"></p>
+                                <p class="mt-1.5 text-xs font-medium leading-5 text-slate-700" x-text="item.content || ''"></p>
+                                <p class="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500" x-text="item.created_at_human || ''"></p>
                             </a>
                         </template>
                     </div>
                 </template>
                 <template x-if="!items || !items.length">
-                    <div class="px-4 py-4 text-center text-sm font-medium text-slate-600">
+                    <div class="px-4 py-5 text-center text-sm font-semibold text-slate-600">
                         No new notifications
                     </div>
                 </template>

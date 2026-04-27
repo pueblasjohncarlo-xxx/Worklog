@@ -10,33 +10,33 @@
         --wl-text-muted: #475569;
         --wl-border-strong: #94a3b8;
         --wl-focus-ring: #4338ca;
-        --wl-status-approved-bg: #dcfce7;
-        --wl-status-approved-text: #14532d;
-        --wl-status-approved-border: #15803d;
+        --wl-status-approved-bg: #d1fae5;
+        --wl-status-approved-text: #065f46;
+        --wl-status-approved-border: #047857;
         --wl-status-pending-bg: #fef3c7;
-        --wl-status-pending-text: #92400e;
-        --wl-status-pending-border: #d97706;
+        --wl-status-pending-text: #78350f;
+        --wl-status-pending-border: #b45309;
         --wl-status-submitted-bg: #dbeafe;
-        --wl-status-submitted-text: #1e3a8a;
-        --wl-status-submitted-border: #2563eb;
+        --wl-status-submitted-text: #1e40af;
+        --wl-status-submitted-border: #1d4ed8;
         --wl-status-rejected-bg: #fee2e2;
-        --wl-status-rejected-text: #991b1b;
-        --wl-status-rejected-border: #dc2626;
+        --wl-status-rejected-text: #7f1d1d;
+        --wl-status-rejected-border: #b91c1c;
         --wl-status-draft-bg: #e2e8f0;
-        --wl-status-draft-text: #334155;
-        --wl-status-draft-border: #64748b;
+        --wl-status-draft-text: #1e293b;
+        --wl-status-draft-border: #475569;
         --wl-status-missing-bg: #ffedd5;
-        --wl-status-missing-text: #9a3412;
-        --wl-status-missing-border: #ea580c;
+        --wl-status-missing-text: #7c2d12;
+        --wl-status-missing-border: #c2410c;
         --wl-status-active-bg: #dcfce7;
         --wl-status-active-text: #166534;
-        --wl-status-active-border: #16a34a;
+        --wl-status-active-border: #15803d;
         --wl-status-inactive-bg: #e5e7eb;
-        --wl-status-inactive-text: #374151;
-        --wl-status-inactive-border: #6b7280;
-        --wl-status-info-bg: #ede9fe;
-        --wl-status-info-text: #4c1d95;
-        --wl-status-info-border: #7c3aed;
+        --wl-status-inactive-text: #1f2937;
+        --wl-status-inactive-border: #4b5563;
+        --wl-status-info-bg: #e0e7ff;
+        --wl-status-info-text: #312e81;
+        --wl-status-info-border: #4f46e5;
     }
 
     html {
@@ -216,8 +216,9 @@
 
 @layer components {
     .wl-status-badge {
-        @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em];
+        @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.14em];
         line-height: 1.2;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
     }
 
     .wl-status-badge-icon {

@@ -25,7 +25,8 @@
 
         .subtitle {
             margin: 0;
-            color: #475569;
+            color: #334155;
+            font-weight: 600;
         }
 
         .meta-grid {
@@ -41,7 +42,8 @@
         }
 
         .meta-label {
-            font-weight: 700;
+            font-weight: 800;
+            color: #0f172a;
         }
 
         .export-note {
@@ -71,6 +73,8 @@
         .mapping-shell th {
             background: #f8fafc;
             font-size: 11px;
+            color: #334155;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
@@ -96,11 +100,12 @@
         .mapping-shell .month-total {
             margin-top: 4px;
             font-size: 12px;
-            color: #475569;
+            color: #334155;
+            font-weight: 700;
         }
 
         .mapping-shell .hours {
-            color: #b91c1c;
+            color: #1d4ed8;
             font-weight: 800;
         }
 
@@ -111,7 +116,8 @@
 
         .mapping-shell .day-number {
             font-size: 10px;
-            color: #64748b;
+            color: #475569;
+            font-weight: 700;
             margin-bottom: 4px;
         }
 
