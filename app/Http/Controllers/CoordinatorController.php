@@ -1022,13 +1022,24 @@ class CoordinatorController extends Controller
         $topSummary = $this->buildCoordinatorTopSummary();
 
         $assignments = Assignment::query()
-            ->with(['student.studentProfile', 'supervisor', 'company', 'ojtAdviser'])
+            ->with([
+                'student.studentProfile',
+                'supervisor.supervisorProfile.company',
+                'company',
+                'ojtAdviser',
+            ])
+            ->active()
             ->whereHas('student', function ($query) {
-                $query->where('role', User::ROLE_STUDENT);
+                $query->eligibleStudentForRoster();
             })
             ->orderByDesc('updated_at')
             ->orderByDesc('created_at')
             ->get();
+
+        // Guard the table against duplicate active deployments for the same student.
+        $assignments = $assignments
+            ->unique('student_id')
+            ->values();
 
         // Get only deployable students and group by section for Select2
         $students = User::eligibleStudentForDeployment()
@@ -1061,6 +1072,9 @@ class CoordinatorController extends Controller
             $student = $assignment->student;
             $supervisorAssigned = !empty($assignment->supervisor_id);
             $adviserAssigned = !empty($assignment->ojt_adviser_id);
+            $company = $assignment->company ?? $assignment->supervisor?->supervisorProfile?->company;
+            $companyId = $assignment->company_id ?? $assignment->supervisor?->supervisorProfile?->company_id;
+            $status = strtolower(trim((string) ($assignment->status ?? 'unknown')));
 
             return [
                 'id' => $assignment->id,
@@ -1072,11 +1086,11 @@ class CoordinatorController extends Controller
                 'supervisor_name' => $assignment->supervisor?->name ?? 'Not Assigned',
                 'adviser_id' => $assignment->ojt_adviser_id,
                 'adviser_name' => $assignment->ojtAdviser?->name ?? 'Not Assigned',
-                'company_id' => $assignment->company_id,
-                'company_name' => $assignment->company?->name ?? 'N/A',
+                'company_id' => $companyId,
+                'company_name' => $company?->name ?? 'N/A',
                 'start_date' => $assignment->start_date?->format('Y-m-d'),
                 'end_date' => $assignment->end_date?->format('Y-m-d'),
-                'status' => (string) ($assignment->status ?? 'unknown'),
+                'status' => $status,
                 'required_hours' => (int) ($assignment->required_hours ?? 0),
                 'is_fully_assigned' => $supervisorAssigned && $adviserAssigned,
                 'is_partially_assigned' => ($supervisorAssigned || $adviserAssigned) && !($supervisorAssigned && $adviserAssigned),
@@ -1084,6 +1098,43 @@ class CoordinatorController extends Controller
                 'deployment_status' => $supervisorAssigned && $adviserAssigned ? 'complete' : (($supervisorAssigned || $adviserAssigned) ? 'incomplete' : 'unassigned'),
             ];
         })->values();
+
+        $filterCompanies = $deploymentData
+            ->filter(fn (array $deployment) => !empty($deployment['company_id']))
+            ->map(fn (array $deployment) => [
+                'id' => $deployment['company_id'],
+                'name' => $deployment['company_name'],
+            ])
+            ->unique('id')
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+
+        $filterSupervisors = $deploymentData
+            ->filter(fn (array $deployment) => !empty($deployment['supervisor_id']))
+            ->map(fn (array $deployment) => [
+                'id' => $deployment['supervisor_id'],
+                'name' => $deployment['supervisor_name'],
+            ])
+            ->unique('id')
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+
+        $filterAdvisers = $deploymentData
+            ->filter(fn (array $deployment) => !empty($deployment['adviser_id']))
+            ->map(fn (array $deployment) => [
+                'id' => $deployment['adviser_id'],
+                'name' => $deployment['adviser_name'],
+            ])
+            ->unique('id')
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+
+        $statusOptions = $deploymentData
+            ->pluck('status')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
 
         return view('coordinator.deployment.index', [
             'topSummary' => $topSummary,
@@ -1093,6 +1144,10 @@ class CoordinatorController extends Controller
             'supervisors' => $supervisors,
             'ojtAdvisers' => $ojtAdvisers,
             'companies' => $companies,
+            'filterCompanies' => $filterCompanies,
+            'filterSupervisors' => $filterSupervisors,
+            'filterAdvisers' => $filterAdvisers,
+            'statusOptions' => $statusOptions,
             'totalDeployed' => $totalDeployed,
             'supervisorOnly' => $supervisorOnly,
             'adviserOnly' => $adviserOnly,

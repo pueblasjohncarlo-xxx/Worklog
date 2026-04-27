@@ -334,8 +334,8 @@
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
                     <select x-model="selectedCompany" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                         <option value="">All Companies</option>
-                        @foreach($companies as $company)
-                            <option value="{{ $company->id }}">{{ $company->name }}</option>
+                        @foreach($filterCompanies as $company)
+                            <option value="{{ $company['id'] }}">{{ $company['name'] }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -345,8 +345,9 @@
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Status</label>
                     <select x-model="selectedStatus" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                         <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="completed">Completed</option>
+                        @foreach($statusOptions as $statusOption)
+                            <option value="{{ $statusOption }}">{{ ucfirst($statusOption) }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -366,8 +367,8 @@
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Supervisor</label>
                     <select x-model="selectedSupervisor" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                         <option value="">All Supervisors</option>
-                        @foreach($supervisors as $supervisor)
-                            <option value="{{ $supervisor->id }}">{{ $supervisor->name }}</option>
+                        @foreach($filterSupervisors as $supervisor)
+                            <option value="{{ $supervisor['id'] }}">{{ $supervisor['name'] }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -377,8 +378,8 @@
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Adviser</label>
                     <select x-model="selectedAdviser" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                         <option value="">All Advisers</option>
-                        @foreach($ojtAdvisers as $adviser)
-                            <option value="{{ $adviser->id }}">{{ $adviser->name }}</option>
+                        @foreach($filterAdvisers as $adviser)
+                            <option value="{{ $adviser['id'] }}">{{ $adviser['name'] }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -392,7 +393,7 @@
                     <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">No deployments yet. Create one above!</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">No active deployments found.</p>
                 </div>
             @else
                 <div class="overflow-x-auto">
@@ -420,7 +421,7 @@
                                 @endphp
                                 <tr
                                     class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ $rowClass }}"
-                                    x-show="isDeploymentVisible({{ $deployment['id'] }})"
+                                    x-bind:class="deployments.length > 0 && !isDeploymentVisible({{ $deployment['id'] }}) ? 'hidden' : ''"
                                 >
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($deployment['deployment_status'] === 'complete')
@@ -544,25 +545,30 @@
                     return String(value);
                 },
 
+                normalizeText(value) {
+                    return String(value === null || value === undefined ? "" : value).trim().toLowerCase();
+                },
+
                 isDeploymentVisible(id) {
                     const targetId = this.normalizeId(id);
                     return this.getFilteredDeployments().some(a => this.normalizeId(a && a.id) === targetId);
                 },
 
                 getFilteredDeployments() {
-                    const search = String(this.searchTerm || "").toLowerCase();
+                    const search = this.normalizeText(this.searchTerm);
 
                     return (this.deployments || []).filter(a => {
-                        const studentName = String((a && a.student_name) || "").toLowerCase();
-                        const studentEmail = String((a && a.student_email) || "").toLowerCase();
-                        const supervisorName = String((a && a.supervisor_name) || "").toLowerCase();
-                        const adviserName = String((a && a.adviser_name) || "").toLowerCase();
-                        const companyName = String((a && a.company_name) || "").toLowerCase();
-                        const studentProgram = String((a && a.student_program) || "").toLowerCase();
-                        const statusLabel = String((a && a.status) || "").toLowerCase();
-                        const deploymentStatus = String((a && a.deployment_status) || "").toLowerCase();
+                        const studentName = this.normalizeText(a && a.student_name);
+                        const studentEmail = this.normalizeText(a && a.student_email);
+                        const supervisorName = this.normalizeText(a && a.supervisor_name);
+                        const adviserName = this.normalizeText(a && a.adviser_name);
+                        const companyName = this.normalizeText(a && a.company_name);
+                        const studentProgram = this.normalizeText(a && a.student_program);
+                        const statusLabel = this.normalizeText(a && a.status);
+                        const deploymentStatus = this.normalizeText(a && a.deployment_status);
 
                         const matchesSearch =
+                            search === "" ||
                             studentName.includes(search) ||
                             studentEmail.includes(search) ||
                             supervisorName.includes(search) ||
@@ -572,8 +578,8 @@
                             statusLabel.includes(search) ||
                             deploymentStatus.includes(search);
                         const matchesCompany = this.selectedCompany === "" || this.normalizeId(a && a.company_id) === this.normalizeId(this.selectedCompany);
-                        const matchesStatus = this.selectedStatus === "" || String((a && a.status) || "") === String(this.selectedStatus);
-                        const matchesDeployStatus = this.selectedDeploymentStatus === "" || String((a && a.deployment_status) || "") === String(this.selectedDeploymentStatus);
+                        const matchesStatus = this.selectedStatus === "" || statusLabel === this.normalizeText(this.selectedStatus);
+                        const matchesDeployStatus = this.selectedDeploymentStatus === "" || deploymentStatus === this.normalizeText(this.selectedDeploymentStatus);
                         const matchesSupervisor = this.selectedSupervisor === "" || this.normalizeId(a && a.supervisor_id) === this.normalizeId(this.selectedSupervisor);
                         const matchesAdviser = this.selectedAdviser === "" || this.normalizeId(a && a.adviser_id) === this.normalizeId(this.selectedAdviser);
 
