@@ -258,7 +258,7 @@
         <div id="editDeploymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 z-0 bg-black bg-opacity-50 transition-opacity pointer-events-none"></div>
-                <form x-show="editingDeployment" x-ref="editForm" method="POST" action="" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <form x-show="editingDeployment" x-ref="editForm" method="POST" :action="editFormAction" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                     @csrf
                     @method('PATCH')
                     <div class="bg-white dark:bg-gray-800 px-6 pt-5 pb-4 sm:p-6">
