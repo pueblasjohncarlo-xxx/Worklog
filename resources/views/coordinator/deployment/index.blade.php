@@ -35,7 +35,7 @@
     <script id="deployment-advisers" type="application/json">@json($advisersForJs)</script>
     <script id="deployment-companies" type="application/json">@json($companiesForJs)</script>
 
-    <div class="space-y-6" x-data="coordinatorDeploymentManager()">
+    <div class="space-y-6" x-data="coordinatorDeploymentManager()" x-init="init()">
         <!-- Status Messages -->
         @if ($errors->any())
             <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
@@ -284,7 +284,7 @@
         <div id="editDeploymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 z-0 bg-black bg-opacity-50 transition-opacity pointer-events-none"></div>
-                <form x-show="editingDeployment" x-cloak x-ref="editForm" method="POST" :action="editFormAction" onsubmit="return window.submitDeploymentEditForm(event)" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl ring-1 ring-gray-200 dark:ring-gray-700 transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <form x-ref="editForm" method="POST" :action="editFormAction" onsubmit="return window.submitDeploymentEditForm(event)" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl ring-1 ring-gray-200 dark:ring-gray-700 transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                     @csrf
                     @method('PATCH')
                     <div class="bg-white dark:bg-gray-800 px-6 pt-5 pb-4 sm:p-6">
@@ -299,7 +299,7 @@
                         <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Student</label>
-                                    <p class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm font-semibold" x-text="editingDeployment ? editingDeployment.student_name : ''"></p>
+                                    <p data-edit-student-name class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm font-semibold" x-text="editingDeployment ? editingDeployment.student_name : ''"></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Supervisor</label>
@@ -321,7 +321,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Company</label>
-                                    <div class="rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" x-text="editCompanyName || 'No company selected yet'"></div>
+                                    <div data-edit-company-label class="rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" x-text="editCompanyName || 'No company selected yet'"></div>
                                     <input type="hidden" name="company_id" :value="editCompanyId">
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Changing the supervisor will auto-fill the matching company.</p>
                                 </div>
@@ -353,10 +353,10 @@
                                     <div class="font-semibold text-slate-800 dark:text-slate-100">Resolved Company</div>
                                     <div class="mt-1 text-slate-600 dark:text-slate-300" x-text="editCompanyName || 'No company selected yet'"></div>
                                 </div>
-                                <div x-show="editError" x-cloak class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300" x-text="editError"></div>
+                                <div x-show="editError" x-cloak data-edit-error class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300" x-text="editError"></div>
                                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
                                     <p class="text-xs text-blue-800 dark:text-blue-200">
-                                        <strong>Completion Status:</strong> This deployment will be marked as <span class="font-bold" x-text="editCompletionLabel()"></span>
+                                        <strong>Completion Status:</strong> This deployment will be marked as <span data-edit-completion-label class="font-bold" x-text="editCompletionLabel()"></span>
                                     </p>
                                 </div>
                         </div>
@@ -548,7 +548,7 @@
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <button type="button" @click='openEditModal(@js($deployment))' class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                                        <button type="button" data-deployment-id="{{ $deployment['id'] }}" data-deployment='@json($deployment)' onclick="window.openDeploymentEditModal(this.dataset.deployment)" class="relative z-10 pointer-events-auto inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
                                             <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
@@ -774,7 +774,7 @@
 
             const supervisorSelect = form.querySelector('select[name="supervisor_id"]');
             const adviserSelect = form.querySelector('select[name="ojt_adviser_id"]');
-            const companySelect = form.querySelector('select[name="company_id"]');
+            const companyInput = form.querySelector('input[name="company_id"]');
             const startDateInput = form.querySelector('input[name="start_date"]');
             const endDateInput = form.querySelector('input[name="end_date"]');
             const requiredHoursInput = form.querySelector('input[name="required_hours"]');
@@ -788,7 +788,7 @@
 
             if (supervisorSelect) supervisorSelect.value = deployment.supervisor_id || '';
             if (adviserSelect) adviserSelect.value = deployment.adviser_id || '';
-            if (companySelect) companySelect.value = deployment.company_id || '';
+            if (companyInput) companyInput.value = deployment.company_id || '';
             if (startDateInput) startDateInput.value = deployment.start_date || '';
             if (endDateInput) endDateInput.value = deployment.end_date || '';
             if (requiredHoursInput) requiredHoursInput.value = deployment.required_hours || '';

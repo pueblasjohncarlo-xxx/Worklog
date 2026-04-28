@@ -680,11 +680,96 @@ class CoordinatorController extends Controller
             ];
         })->values();
 
+        $sectionAssignments = Assignment::query()
+            ->with([
+                'student.studentProfile',
+                'ojtAdviser.ojtAdviserProfile',
+            ])
+            ->active()
+            ->whereHas('student', fn ($query) => $query->eligibleStudentForRoster())
+            ->latestRelevant()
+            ->get()
+            ->unique('student_id')
+            ->values();
+
+        $monitoredSections = [
+            User::STUDENT_SECTION_BSIT_4A,
+            User::STUDENT_SECTION_BSIT_4B,
+            User::STUDENT_SECTION_BSIT_4C,
+            User::STUDENT_SECTION_BSIT_4D,
+        ];
+
+        $sectionAdvisoryOverview = collect($monitoredSections)->map(function (string $section) use ($sectionAssignments) {
+            $sectionRows = $sectionAssignments
+                ->filter(fn (Assignment $assignment) => ($assignment->student?->normalizedStudentSection() ?? User::STUDENT_SECTION_BSIT_4A) === $section)
+                ->values();
+
+            $assignedRows = $sectionRows
+                ->filter(fn (Assignment $assignment) => ! empty($assignment->ojt_adviser_id))
+                ->values();
+
+            $adviserGroups = $assignedRows
+                ->groupBy('ojt_adviser_id')
+                ->map(function ($assignments) {
+                    /** @var Assignment $firstAssignment */
+                    $firstAssignment = $assignments->first();
+                    $adviser = $firstAssignment?->ojtAdviser;
+
+                    return [
+                        'id' => $adviser?->id,
+                        'name' => $adviser?->name ?? 'Unknown Adviser',
+                        'email' => $adviser?->email ?? 'N/A',
+                        'phone' => $adviser?->ojtAdviserProfile?->phone ?? null,
+                        'department' => $adviser?->ojtAdviserProfile?->department ?? ($adviser?->department ?? null),
+                        'student_count' => $assignments->count(),
+                        'students' => $assignments->map(function (Assignment $assignment) {
+                            $student = $assignment->student;
+
+                            return [
+                                'id' => $student?->id,
+                                'name' => $student?->name ?? 'Unknown Student',
+                                'email' => $student?->email ?? 'N/A',
+                                'section' => $student?->normalizedStudentSection() ?? ($student?->section ?? ''),
+                                'program' => $student?->studentProfile?->program ?? ($student?->department ?? 'N/A'),
+                            ];
+                        })->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values(),
+                    ];
+                })
+                ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values();
+
+            $unassignedStudents = $sectionRows
+                ->filter(fn (Assignment $assignment) => empty($assignment->ojt_adviser_id))
+                ->map(function (Assignment $assignment) {
+                    $student = $assignment->student;
+
+                    return [
+                        'id' => $student?->id,
+                        'name' => $student?->name ?? 'Unknown Student',
+                        'email' => $student?->email ?? 'N/A',
+                        'program' => $student?->studentProfile?->program ?? ($student?->department ?? 'N/A'),
+                    ];
+                })
+                ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values();
+
+            return [
+                'section' => $section,
+                'total_students' => $sectionRows->count(),
+                'assigned_students' => $assignedRows->count(),
+                'unassigned_students_count' => $unassignedStudents->count(),
+                'advisers' => $adviserGroups,
+                'unassigned_students' => $unassignedStudents,
+                'has_assignment' => $adviserGroups->isNotEmpty(),
+            ];
+        })->values();
+
         $companies = Company::orderBy('name')->get();
 
         return view('coordinator.adviser-overview', [
             'advisersData' => $advisersData,
             'companies' => $companies,
+            'sectionAdvisoryOverview' => $sectionAdvisoryOverview,
         ]);
     }
 

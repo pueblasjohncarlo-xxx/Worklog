@@ -40,6 +40,106 @@
             this.selectedEvalStatus = "";
         }
     }'>
+        <!-- Section Advisory Overview -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Section Advisory Overview</h3>
+                    <p class="text-sm text-gray-700 dark:text-gray-200">Monitor which OJT Adviser is handling each BSIT section using live adviser-student assignment records.</p>
+                </div>
+                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-300">
+                    BSIT-4A to BSIT-4D
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                @foreach(($sectionAdvisoryOverview ?? collect()) as $sectionOverview)
+                    <div class="rounded-2xl border border-gray-200 bg-gray-50/90 p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900/40">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <h4 class="text-lg font-black text-gray-900 dark:text-white">{{ $sectionOverview['section'] }}</h4>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-300">
+                                    {{ $sectionOverview['assigned_students'] }} assigned of {{ $sectionOverview['total_students'] }} active OJT student(s)
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200">
+                                    {{ count($sectionOverview['advisers']) }} adviser(s)
+                                </span>
+                                @if($sectionOverview['unassigned_students_count'] > 0)
+                                    <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+                                        {{ $sectionOverview['unassigned_students_count'] }} unassigned
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        @if($sectionOverview['has_assignment'])
+                            <div class="mt-4 space-y-4">
+                                @foreach($sectionOverview['advisers'] as $adviserGroup)
+                                    <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800/80">
+                                        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                            <div>
+                                                <div class="text-base font-black text-gray-900 dark:text-white">{{ $adviserGroup['name'] }}</div>
+                                                <div class="mt-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $adviserGroup['email'] }}</div>
+                                                <div class="mt-1 text-xs font-semibold text-gray-600 dark:text-gray-400">
+                                                    {{ $adviserGroup['phone'] ?: 'No contact number available' }}
+                                                    @if(!empty($adviserGroup['department']))
+                                                        | {{ $adviserGroup['department'] }}
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
+                                                {{ $adviserGroup['student_count'] }} student(s)
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <div class="text-xs font-bold uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Students under this adviser</div>
+                                            <div class="mt-2 flex flex-wrap gap-2">
+                                                @foreach($adviserGroup['students'] as $student)
+                                                    <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900/50">
+                                                        <div class="font-semibold text-gray-900 dark:text-white">{{ $student['name'] }}</div>
+                                                        <div class="text-xs text-gray-600 dark:text-gray-300">{{ $student['email'] }}</div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+
+                                @if($sectionOverview['unassigned_students_count'] > 0)
+                                    <div class="rounded-xl border border-dashed border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+                                        <div class="text-sm font-black text-amber-900 dark:text-amber-200">Students still waiting for adviser assignment</div>
+                                        <div class="mt-2 flex flex-wrap gap-2">
+                                            @foreach($sectionOverview['unassigned_students'] as $student)
+                                                <div class="rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm dark:border-amber-800/70 dark:bg-amber-950/20">
+                                                    <div class="font-semibold text-amber-900 dark:text-amber-100">{{ $student['name'] }}</div>
+                                                    <div class="text-xs text-amber-800 dark:text-amber-200">{{ $student['email'] }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            <div class="mt-4 rounded-xl border border-dashed border-gray-300 bg-white px-4 py-5 text-center dark:border-gray-700 dark:bg-gray-800/60">
+                                <div class="text-sm font-black text-gray-900 dark:text-white">No adviser assigned</div>
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                    This section does not currently have any active adviser assignment records.
+                                </p>
+                                @if($sectionOverview['total_students'] > 0)
+                                    <p class="mt-2 text-xs font-semibold text-amber-700 dark:text-amber-300">
+                                        {{ $sectionOverview['total_students'] }} active OJT student(s) in this section still need adviser assignment.
+                                    </p>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
         <!-- Adviser Selector Card -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
