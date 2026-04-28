@@ -21,7 +21,6 @@
             <script src="https://cdn.tailwindcss.com"></script>
             <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
         @endif
-        @include('layouts.partials.theme-mode')
 
         <!-- Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -30,13 +29,13 @@
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <style>
             /* Select2 Dark Mode Customization */
-            .dark .select2-container--default .select2-selection--multiple {
+            .select2-container--default .select2-selection--multiple {
                 background-color: #1f2937;
                 border-color: #374151;
                 border-radius: 0.375rem;
                 min-height: 2.5rem;
             }
-            .dark .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            .select2-container--default .select2-selection--multiple .select2-selection__choice {
                 background-color: #4f46e5;
                 border: none;
                 color: white;
@@ -44,32 +43,32 @@
                 padding: 2px 8px;
                 margin-top: 6px;
             }
-            .dark .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
                 color: white;
                 margin-right: 5px;
                 border-right: 1px solid rgba(255,255,255,0.3);
             }
-            .dark .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
                 background-color: #4338ca;
                 color: white;
             }
-            .dark .select2-dropdown {
+            .select2-dropdown {
                 background-color: #1f2937;
                 border-color: #374151;
                 color: #e5e7eb;
             }
-            .dark .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+            .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
                 background-color: #4f46e5;
                 color: white;
             }
-            .dark .select2-container--default .select2-results__option--selectable {
+            .select2-container--default .select2-results__option--selectable {
                 color: #e5e7eb;
             }
-            .dark .select2-container--default .select2-search--inline .select2-search__field {
+            .select2-container--default .select2-search--inline .select2-search__field {
                 color: #e5e7eb;
                 font-family: inherit;
             }
-            .dark .select2-container--default .select2-results__group {
+            .select2-container--default .select2-results__group {
                 color: #9ca3af;
                 font-weight: bold;
                 padding: 6px 6px;
@@ -97,7 +96,7 @@
         </style>
         @include('layouts.partials.ui-visibility-hardening')
     </head>
-    <body class="worklog-ui-hardening worklog-theme-shell font-sans antialiased min-h-screen bg-fixed shimmer-bg overflow-x-hidden">
+    <body class="worklog-ui-hardening font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed shimmer-bg overflow-x-hidden">
         <div x-data="{ sidebarOpen: false }" class="min-h-screen flex flex-col md:flex-row">
             @include('layouts.coordinator-sidebar')
 

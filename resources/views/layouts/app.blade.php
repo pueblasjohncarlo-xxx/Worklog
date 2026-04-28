@@ -22,11 +22,10 @@
             <script src="https://cdn.tailwindcss.com"></script>
             <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
         @endif
-        @include('layouts.partials.theme-mode')
         @include('layouts.partials.ui-visibility-hardening')
         
     </head>
-    <body class="worklog-ui-hardening worklog-theme-shell font-sans antialiased min-h-screen bg-fixed shimmer-bg">
+    <body class="worklog-ui-hardening font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 min-h-screen bg-fixed shimmer-bg">
         <div class="min-h-screen">
             @include('layouts.navigation')
 

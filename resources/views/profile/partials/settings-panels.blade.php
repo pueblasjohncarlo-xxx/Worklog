@@ -171,7 +171,6 @@
                     <option value="light" @selected($settings['preferences']['theme'] === 'light')>Light</option>
                     <option value="dark" @selected($settings['preferences']['theme'] === 'dark')>Dark</option>
                 </select>
-                <p class="mt-2 text-xs text-slate-400">Applies across WorkLog pages, cards, forms, tables, and dropdowns after you save.</p>
             </div>
             <div>
                 <label for="preferences_start_page" class="text-xs font-bold uppercase tracking-[0.22em] text-slate-300">Start Page</label>
@@ -190,24 +189,6 @@
         <button type="submit" class="inline-flex items-center rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400">Save Preferences</button>
     </form>
 </section>
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const themeSelect = document.getElementById('preferences_theme');
-
-        if (!themeSelect) {
-            return;
-        }
-
-        themeSelect.addEventListener('change', function () {
-            if (window.WorkLogTheme && typeof window.WorkLogTheme.apply === 'function') {
-                window.WorkLogTheme.apply(themeSelect.value);
-            }
-        });
-    });
-</script>
-@endpush
 
 <section class="rounded-2xl border border-white/10 bg-white/5 p-5">
     <div class="mb-4">
