@@ -523,7 +523,7 @@
 
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($deployment['supervisor_name'] !== 'Not Assigned')
-                                            <span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">{{ $deployment['supervisor_name'] }}</span>
+                                            <span class="inline-flex items-center rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white shadow-sm ring-1 ring-slate-700 dark:bg-slate-100 dark:text-slate-950 dark:ring-slate-300">{{ $deployment['supervisor_name'] }}</span>
                                         @else
                                             <x-status-badge status="unassigned" label="Not Assigned" size="sm" />
                                         @endif
@@ -531,7 +531,7 @@
 
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($deployment['adviser_name'] !== 'Not Assigned')
-                                            <span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">{{ $deployment['adviser_name'] }}</span>
+                                            <span class="inline-flex items-center rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white shadow-sm ring-1 ring-slate-700 dark:bg-slate-100 dark:text-slate-950 dark:ring-slate-300">{{ $deployment['adviser_name'] }}</span>
                                         @else
                                             <x-status-badge status="unassigned" label="Not Assigned" size="sm" />
                                         @endif
