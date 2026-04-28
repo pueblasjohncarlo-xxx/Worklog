@@ -30,6 +30,31 @@
 
         @if(request('view') === 'reports')
             <!-- Reports View -->
+            @php
+                $reports = $workLogs->where('type', '!=', 'attendance')->sortByDesc('created_at')->values();
+                $reportPayload = $reports->map(function ($report) use ($assignment) {
+                    return [
+                        'id' => $report->id,
+                        'title' => ucfirst($report->type) . ' Report',
+                        'type' => ucfirst($report->type),
+                        'date' => $report->work_date?->format('M d, Y') ?? 'No date',
+                        'status' => ucfirst((string) $report->status),
+                        'company' => $assignment?->company?->name ?? 'No company assigned',
+                        'supervisor' => $assignment?->supervisor?->name ?? 'No supervisor assigned',
+                        'filename' => $report->attachment_path ? basename($report->attachment_path) : 'Generated report',
+                        'view_url' => $report->attachment_path ? route('student.worklogs.attachment', $report) . '?inline=1' : route('student.worklogs.print', $report),
+                        'search_blob' => strtolower(implode(' ', array_filter([
+                            auth()->user()?->name,
+                            ucfirst($report->type) . ' report',
+                            $report->work_date?->format('M d, Y'),
+                            (string) $report->status,
+                            $assignment?->company?->name,
+                            $assignment?->supervisor?->name,
+                            $report->attachment_path ? basename($report->attachment_path) : 'generated report',
+                        ]))),
+                    ];
+                });
+            @endphp
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="student-light-card p-6">
                     <p class="student-card-title mb-1">Submitted Reports</p>
@@ -42,30 +67,68 @@
             </div>
 
             <!-- Reports List -->
-            <div class="student-light-card overflow-hidden">
+            <div
+                class="student-light-card overflow-hidden"
+                x-data="studentAccomplishmentReportSearch(@js($reportPayload))"
+            >
                 <div class="px-6 py-4 border-b border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-900">Your Submitted Reports</h3>
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">Your Submitted Reports</h3>
+                            <p class="mt-1 text-xs font-medium text-slate-600">Search instantly by report type, date, status, company, supervisor, or filename.</p>
+                        </div>
+                        <div class="w-full lg:w-[24rem]">
+                            <label for="student-report-search" class="sr-only">Search accomplishment reports</label>
+                            <div class="relative">
+                                <svg class="pointer-events-none absolute left-3 top-3.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <input
+                                    id="student-report-search"
+                                    type="search"
+                                    x-model.debounce.100ms="searchQuery"
+                                    placeholder="Search by type, date, status, company, or filename"
+                                    class="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                                >
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                @php
-                    $reports = $workLogs->where('type', '!=', 'attendance')->sortByDesc('created_at');
-                @endphp
                 @if($reports->count() > 0)
+                    <div class="flex items-center justify-between px-6 py-3 text-xs font-semibold text-slate-600">
+                        <span>Showing <span class="font-black text-slate-900" x-text="filteredReports.length"></span> of <span class="font-black text-slate-900" x-text="reports.length"></span> reports</span>
+                        <button
+                            x-show="searchQuery"
+                            x-cloak
+                            @click="searchQuery = ''"
+                            type="button"
+                            class="rounded-full border border-slate-300 px-3 py-1 text-slate-700 transition hover:border-indigo-400 hover:text-indigo-700"
+                        >
+                            Clear Search
+                        </button>
+                    </div>
                     <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                        @foreach($reports as $report)
+                        <template x-for="report in filteredReports" :key="report.id">
                             <div class="p-6 hover:bg-slate-50 transition-colors">
                                 <div class="flex items-start justify-between gap-4">
                                     <div class="flex-1">
-                                        <h4 class="font-bold text-slate-900 capitalize">{{ ucfirst($report->type) }} Report</h4>
-                                        <p class="text-sm text-slate-700 mt-1">
-                                            Date: {{ $report->work_date->format('M d, Y') }}
+                                        <h4 class="font-bold text-slate-900" x-text="report.title"></h4>
+                                        <p class="mt-1 text-sm text-slate-700">
+                                            Date: <span x-text="report.date"></span>
                                         </p>
                                         <p class="text-sm text-slate-700">
-                                            Status: 
-                                            <x-status-badge :status="$report->status" size="sm" />
+                                            Type: <span class="font-semibold" x-text="report.type"></span>
+                                        </p>
+                                        <p class="text-sm text-slate-700">
+                                            Status:
+                                            <span :class="statusClass(report.status)" class="ml-1 inline-flex rounded-full px-2.5 py-1 text-xs font-bold" x-text="report.status"></span>
+                                        </p>
+                                        <p class="text-sm text-slate-700">
+                                            File: <span x-text="report.filename"></span>
                                         </p>
                                     </div>
                                     <a
-                                        href="{{ $report->attachment_path ? route('student.worklogs.attachment', $report) . '?inline=1' : route('student.worklogs.print', $report) }}"
+                                        :href="report.view_url"
                                         target="_blank"
                                         class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg text-sm hover:bg-indigo-700 transition-colors whitespace-nowrap"
                                     >
@@ -73,7 +136,11 @@
                                     </a>
                                 </div>
                             </div>
-                        @endforeach
+                        </template>
+                    </div>
+                    <div x-show="filteredReports.length === 0" class="p-8 text-center text-slate-600" style="display: none;">
+                        <p class="font-semibold text-slate-900">No accomplishment reports found.</p>
+                        <p class="mt-1 text-sm">Try a different type, date, status, company, supervisor, or filename.</p>
                     </div>
                 @else
                     <div class="p-8 text-center text-slate-600">
@@ -240,4 +307,37 @@
             @endif
         @endif
     </div>
+
+    @if(request('view') === 'reports')
+        <script>
+            function studentAccomplishmentReportSearch(reports) {
+                return {
+                    reports: Array.isArray(reports) ? reports : [],
+                    searchQuery: '',
+                    get filteredReports() {
+                        const query = (this.searchQuery || '').trim().toLowerCase();
+
+                        return this.reports.filter((report) => {
+                            return query === '' || (report.search_blob || '').includes(query);
+                        });
+                    },
+                    statusClass(status) {
+                        if (status === 'Approved') {
+                            return 'bg-emerald-100 text-emerald-700';
+                        }
+
+                        if (status === 'Submitted') {
+                            return 'bg-blue-100 text-blue-700';
+                        }
+
+                        if (status === 'Rejected') {
+                            return 'bg-rose-100 text-rose-700';
+                        }
+
+                        return 'bg-amber-100 text-amber-800';
+                    },
+                };
+            }
+        </script>
+    @endif
 </x-student-layout>

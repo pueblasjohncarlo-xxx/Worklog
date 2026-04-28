@@ -195,7 +195,7 @@ class OjtAdviserController extends Controller
             ->whereIn('assignment_id', $assignmentIds)
             ->whereNull('time_in')
             ->orderByDesc('work_date')
-            ->paginate(30);
+            ->get();
 
         return view('ojt_adviser.accomplishment-reports.index', compact('workLogs'));
     }

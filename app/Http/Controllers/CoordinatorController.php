@@ -824,6 +824,8 @@ class CoordinatorController extends Controller
             ->with([
                 'student',
                 'company',
+                'supervisor',
+                'ojtAdviser',
                 'workLogs' => function ($query) use ($reportTypes) {
                     $query->whereNull('time_in')
                         ->whereIn('type', $reportTypes)
@@ -902,6 +904,8 @@ class CoordinatorController extends Controller
                 'department' => $department,
                 'section_label' => sprintf('%s (%s)', $section, $department),
                 'company' => $companyName,
+                'supervisor_name' => $assignment->supervisor?->name ?? 'No supervisor assigned',
+                'adviser_name' => $assignment->ojtAdviser?->name ?? 'No adviser assigned',
                 'approved_hours' => round((float) $assignment->totalApprovedHours(), 1),
                 'overall_status' => $overallStatus,
                 'type_statuses' => $typeStatuses,
@@ -920,6 +924,7 @@ class CoordinatorController extends Controller
                         'type' => $log->type,
                         'date' => $log->work_date?->format('M d, Y') ?? 'No date',
                         'status' => $statusLabel,
+                        'filename' => $log->attachment_path ? basename($log->attachment_path) : null,
                         'attachment_url' => $log->attachment_path ? route('coordinator.worklogs.attachment', $log->id) : null,
                         'print_url' => route('coordinator.worklogs.print', $log->id),
                     ];

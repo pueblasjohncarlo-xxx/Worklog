@@ -29,7 +29,7 @@
                                 id="ar-search"
                                 x-model.debounce.150ms="searchQuery"
                                 type="text"
-                                placeholder="Search by student, section, company, report type, or status..."
+                                placeholder="Search by student, section, company, adviser, supervisor, type, status, or filename..."
                                 class="w-full rounded-xl border border-gray-300 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
                             >
                         </div>
@@ -330,10 +330,18 @@
                             row.department,
                             row.section_label,
                             row.company,
+                            row.supervisor_name,
+                            row.adviser_name,
                             row.overall_status,
                             `daily ${row.type_statuses.daily.label}`,
                             `weekly ${row.type_statuses.weekly.label}`,
                             `monthly ${row.type_statuses.monthly.label}`,
+                            ...(Array.isArray(row.reports) ? row.reports.flatMap((report) => [
+                                report.type,
+                                report.date,
+                                report.status,
+                                report.filename || '',
+                            ]) : []),
                             this.selectedType === 'all' ? 'all reports' : `${this.selectedType} report`,
                             currentStatus,
                         ].join(' ').toLowerCase();

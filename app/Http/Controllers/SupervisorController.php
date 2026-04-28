@@ -208,7 +208,7 @@ class SupervisorController extends Controller
             $workLogsQuery->whereDate('created_at', Carbon::parse($sentDate));
         }
 
-        $workLogs = $workLogsQuery->paginate(30)->withQueryString();
+        $workLogs = $workLogsQuery->get();
 
         return view('supervisor.accomplishment-reports.index', compact('workLogs', 'type', 'status', 'sentDate'));
     }
