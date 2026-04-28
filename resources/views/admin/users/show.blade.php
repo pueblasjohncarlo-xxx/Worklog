@@ -140,12 +140,12 @@
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Password</label>
                                 
-                                @if($user->encrypted_password)
+                                @if($decryptedPassword !== null)
                                     <div x-data="{ show: false }" class="relative">
                                         <div class="flex">
                                             <input 
                                                 :type="show ? 'text' : 'password'" 
-                                                value="{{ \Illuminate\Support\Facades\Crypt::decryptString($user->encrypted_password) }}" 
+                                                value="{{ $decryptedPassword }}" 
                                                 readonly 
                                                 class="block w-full rounded-l-md border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm sm:text-sm focus:ring-0 focus:border-gray-300"
                                             >
@@ -162,6 +162,11 @@
                                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                             Decrypted
                                         </p>
+                                    </div>
+                                @elseif($passwordDecryptError)
+                                    <div class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
+                                        <div class="font-mono text-sm text-amber-900 dark:text-amber-100">Stored password cannot be decrypted</div>
+                                        <div class="text-xs text-amber-700 dark:text-amber-300 mt-1">This record may have been encrypted with an older application key. Reset the password to restore visibility.</div>
                                     </div>
                                 @elseif($user->role === 'student' && !$user->has_requested_account)
                                     <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-700">

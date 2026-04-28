@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Company;
 use App\Models\SupervisorProfile;
 use App\Models\User;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -260,8 +261,27 @@ class AdminUserController extends Controller
     {
         $this->authorize('view', $user);
 
+        $decryptedPassword = null;
+        $passwordDecryptError = false;
+
+        if ($user->encrypted_password) {
+            try {
+                $decryptedPassword = Crypt::decryptString($user->encrypted_password);
+            } catch (DecryptException $exception) {
+                $passwordDecryptError = true;
+
+                Log::warning('Unable to decrypt stored user password for admin view.', [
+                    'user_id' => $user->id,
+                    'viewer_id' => Auth::id(),
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
         return view('admin.users.show', [
             'user' => $user,
+            'decryptedPassword' => $decryptedPassword,
+            'passwordDecryptError' => $passwordDecryptError,
         ]);
     }
 

@@ -503,6 +503,98 @@
                 .deployment-management-page .records-table-wrapper .text-gray-600 {
                     opacity: 1 !important;
                 }
+
+                /* Keep the Create New Deployment form in a forced light, high-contrast field theme. */
+                .deployment-create-form,
+                .deployment-create-form .deployment-input,
+                .deployment-create-form .deployment-select,
+                .deployment-create-form input[type="date"],
+                .deployment-create-form select,
+                .deployment-create-form option,
+                .deployment-create-form optgroup,
+                .deployment-create-form .select2-container--default .select2-selection--single,
+                .deployment-create-form .select2-container--default .select2-selection--multiple,
+                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__rendered,
+                .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__rendered,
+                .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field,
+                .deployment-create-form .select2-container--default .select2-search--dropdown .select2-search__field,
+                .deployment-create-form .select2-dropdown,
+                .deployment-create-form .select2-results__option,
+                .deployment-create-form .select2-results__group {
+                    color: #0f172a !important;
+                    -webkit-text-fill-color: #0f172a !important;
+                    opacity: 1 !important;
+                    color-scheme: light;
+                }
+
+                .deployment-create-form .deployment-input,
+                .deployment-create-form .deployment-select,
+                .deployment-create-form .select2-container--default .select2-selection--single,
+                .deployment-create-form .select2-container--default .select2-selection--multiple,
+                .dark .deployment-create-form .deployment-input,
+                .dark .deployment-create-form .deployment-select,
+                .dark .deployment-create-form .select2-container--default .select2-selection--single,
+                .dark .deployment-create-form .select2-container--default .select2-selection--multiple {
+                    background: #ffffff !important;
+                    background-color: #ffffff !important;
+                    border-color: #cbd5e1 !important;
+                }
+
+                .deployment-create-form .deployment-input::placeholder,
+                .deployment-create-form .deployment-select::placeholder,
+                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__placeholder,
+                .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field,
+                .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field::placeholder,
+                .deployment-create-form .select2-container--default .select2-search--dropdown .select2-search__field::placeholder,
+                .dark .deployment-create-form .deployment-input::placeholder,
+                .dark .deployment-create-form .deployment-select::placeholder,
+                .dark .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__placeholder,
+                .dark .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field,
+                .dark .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field::placeholder,
+                .dark .deployment-create-form .select2-container--default .select2-search--dropdown .select2-search__field::placeholder {
+                    color: #475569 !important;
+                    -webkit-text-fill-color: #475569 !important;
+                    opacity: 1 !important;
+                }
+
+                .deployment-create-form .deployment-select:disabled,
+                .dark .deployment-create-form .deployment-select:disabled,
+                .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single,
+                .deployment-create-form .select2-container--default .select2-selection--single[aria-disabled="true"],
+                .dark .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single,
+                .dark .deployment-create-form .select2-container--default .select2-selection--single[aria-disabled="true"] {
+                    background: #e5e7eb !important;
+                    background-color: #e5e7eb !important;
+                    color: #0f172a !important;
+                    -webkit-text-fill-color: #0f172a !important;
+                    border-color: #cbd5e1 !important;
+                    opacity: 1 !important;
+                }
+
+                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__arrow b,
+                .dark .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__arrow b,
+                .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single .select2-selection__arrow b,
+                .dark .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single .select2-selection__arrow b {
+                    border-color: #475569 transparent transparent transparent !important;
+                }
+
+                .deployment-create-form input[type="date"]::-webkit-datetime-edit,
+                .deployment-create-form input[type="date"]::-webkit-datetime-edit-text,
+                .deployment-create-form input[type="date"]::-webkit-datetime-edit-month-field,
+                .deployment-create-form input[type="date"]::-webkit-datetime-edit-day-field,
+                .deployment-create-form input[type="date"]::-webkit-datetime-edit-year-field {
+                    color: #0f172a !important;
+                    -webkit-text-fill-color: #0f172a !important;
+                }
+
+                .deployment-create-form #student_ids + .select2 .select2-selection__rendered,
+                .deployment-create-form #supervisor_id + .select2 .select2-selection__rendered,
+                .deployment-create-form #ojt_adviser_id + .select2 .select2-selection__rendered,
+                .deployment-create-form #company_id_display + .select2 .select2-selection__rendered {
+                    color: #0f172a !important;
+                    -webkit-text-fill-color: #0f172a !important;
+                    opacity: 1 !important;
+                }
             </style>
 
             <form id="deploymentForm" method="POST" action="{{ route('coordinator.deployment.store') }}" class="deployment-create-form space-y-4">
@@ -517,7 +609,7 @@
                             <select
                                 id="student_ids"
                                 name="student_ids[]"
-                                class="deployment-select w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
+                                class="deployment-select w-full rounded-lg border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
                                 multiple="multiple"
                                 required
                             >
@@ -548,7 +640,7 @@
                         <select
                             id="supervisor_id"
                             name="supervisor_id"
-                            class="deployment-select w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
+                            class="deployment-select w-full rounded-lg border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
                             required
                         >
                             <option value="">Select supervisor</option>
@@ -573,7 +665,7 @@
                         <select
                             id="ojt_adviser_id"
                             name="ojt_adviser_id"
-                            class="deployment-select w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
+                            class="deployment-select w-full rounded-lg border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
                         >
                             <option value="">Select adviser (optional)</option>
                             @foreach ($ojtAdvisers as $adviser)
@@ -588,7 +680,7 @@
                         <p class="deployment-helper-text mb-2 text-xs">This field is read-only and synced from the selected supervisor.</p>
                         <select
                             id="company_id_display"
-                            class="deployment-select w-full rounded-lg border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-600 focus:border-indigo-500 focus:ring-indigo-500 cursor-not-allowed"
+                            class="deployment-select w-full rounded-lg border-gray-300 bg-gray-100 text-gray-900 disabled:text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 cursor-not-allowed"
                             disabled
                         >
                             <option value="">Select company</option>
@@ -614,7 +706,7 @@
                             name="start_date"
                             type="date"
                             value="{{ old('start_date') }}"
-                            class="deployment-input w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
+                            class="deployment-input w-full rounded-lg border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
                         >
                     </div>
                     <div>
@@ -625,7 +717,7 @@
                             name="end_date"
                             type="date"
                             value="{{ old('end_date') }}"
-                            class="deployment-input w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
+                            class="deployment-input w-full rounded-lg border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
                         >
                     </div>
                 </div>
