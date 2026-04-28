@@ -297,9 +297,15 @@
                             <h3 class="ml-4 text-lg font-semibold text-gray-900 dark:text-white">Edit Deployment</h3>
                         </div>
                         <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Student</label>
-                                    <p data-edit-student-name class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm font-semibold" x-text="editingDeployment ? editingDeployment.student_name : ''"></p>
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Student</label>
+                                        <p data-edit-student-name class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm font-semibold" x-text="editingDeployment ? editingDeployment.student_name : ''"></p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Current OJT Adviser</label>
+                                        <p data-edit-adviser-name class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm font-semibold" x-text="editingDeployment ? (editingDeployment.adviser_name || 'Not Assigned') : 'Not Assigned'"></p>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Supervisor</label>
@@ -312,6 +318,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">OJT Adviser</label>
+                                    <p class="mt-1 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">Update the adviser assigned to this deployment record if needed.</p>
                                     <select x-model="editAdviserId" name="ojt_adviser_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select adviser</option>
                                         @foreach($ojtAdvisers as $adviser)
@@ -780,6 +787,7 @@
             const requiredHoursInput = form.querySelector('input[name="required_hours"]');
             const statusSelect = form.querySelector('select[name="status"]');
             const studentLabel = form.querySelector('[data-edit-student-name]');
+            const adviserNameLabel = form.querySelector('[data-edit-adviser-name]');
             const companyLabel = form.querySelector('[data-edit-company-label]');
             const completionLabel = form.querySelector('[data-edit-completion-label]');
             const errorLabel = form.querySelector('[data-edit-error]');
@@ -794,6 +802,7 @@
             if (requiredHoursInput) requiredHoursInput.value = deployment.required_hours || '';
             if (statusSelect) statusSelect.value = deployment.status || 'active';
             if (studentLabel) studentLabel.textContent = deployment.student_name || 'Unknown Student';
+            if (adviserNameLabel) adviserNameLabel.textContent = deployment.adviser_name || 'Not Assigned';
             if (companyLabel) companyLabel.textContent = deployment.company_name || 'No company selected yet';
             if (completionLabel) {
                 completionLabel.textContent = (deployment.supervisor_id && deployment.adviser_id)
@@ -904,11 +913,15 @@
                 form.action = '';
                 form.reset();
                 const studentLabel = form.querySelector('[data-edit-student-name]');
+                const adviserNameLabel = form.querySelector('[data-edit-adviser-name]');
                 const companyLabel = form.querySelector('[data-edit-company-label]');
                 const completionLabel = form.querySelector('[data-edit-completion-label]');
                 const errorLabel = form.querySelector('[data-edit-error]');
                 if (studentLabel) {
                     studentLabel.textContent = '';
+                }
+                if (adviserNameLabel) {
+                    adviserNameLabel.textContent = 'Not Assigned';
                 }
                 if (companyLabel) {
                     companyLabel.textContent = 'No company selected yet';
