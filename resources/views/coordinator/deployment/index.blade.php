@@ -97,6 +97,11 @@
                     color: #0f172a;
                 }
 
+                .deployment-management-page .deployment-create-form,
+                .deployment-management-page .deployment-create-form * {
+                    caret-color: #1d4ed8;
+                }
+
                 .deployment-create-form .deployment-field-label {
                     color: #111827;
                     font-weight: 800;
@@ -124,6 +129,8 @@
                     font-weight: 700;
                     border-color: #cbd5e1;
                     background-color: #ffffff;
+                    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease, color 150ms ease;
+                    -webkit-text-fill-color: #111827;
                 }
 
                 .deployment-create-form .deployment-input::placeholder {
@@ -137,10 +144,36 @@
                     color: #f9fafb;
                     border-color: #475569;
                     background-color: #111827;
+                    -webkit-text-fill-color: #f9fafb;
                 }
 
                 .dark .deployment-create-form .deployment-input::placeholder {
                     color: #e2e8f0;
+                }
+
+                .deployment-create-form .deployment-input:hover,
+                .deployment-create-form .deployment-select:hover,
+                .deployment-management-page .filters-section input:hover,
+                .deployment-management-page .filters-section select:hover {
+                    border-color: #94a3b8;
+                }
+
+                .deployment-create-form .deployment-input:focus,
+                .deployment-create-form .deployment-select:focus,
+                .deployment-management-page .filters-section input:focus,
+                .deployment-management-page .filters-section select:focus {
+                    border-color: #4f46e5 !important;
+                    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.16) !important;
+                    outline: none;
+                }
+
+                .deployment-create-form .deployment-input:read-only,
+                .deployment-create-form .deployment-select[readonly],
+                .deployment-management-page input[readonly],
+                .deployment-management-page select[readonly] {
+                    background-color: #f8fafc;
+                    color: #0f172a;
+                    -webkit-text-fill-color: #0f172a;
                 }
 
                 .deployment-create-form .deployment-select:disabled {
@@ -154,6 +187,15 @@
                 .dark .deployment-create-form .deployment-select:disabled {
                     color: #f8fafc;
                     background-color: #475569;
+                    -webkit-text-fill-color: #f8fafc;
+                }
+
+                .dark .deployment-create-form .deployment-input:read-only,
+                .dark .deployment-create-form .deployment-select[readonly],
+                .dark .deployment-management-page input[readonly],
+                .dark .deployment-management-page select[readonly] {
+                    background-color: #1e293b;
+                    color: #f8fafc;
                     -webkit-text-fill-color: #f8fafc;
                 }
 
@@ -173,6 +215,7 @@
                 .deployment-management-page textarea {
                     color: #111827;
                     font-weight: 600;
+                    -webkit-text-fill-color: #111827;
                 }
 
                 .deployment-management-page input::placeholder,
@@ -188,6 +231,7 @@
                 .dark .deployment-management-page select,
                 .dark .deployment-management-page textarea {
                     color: #f8fafc;
+                    -webkit-text-fill-color: #f8fafc;
                 }
 
                 .dark .deployment-management-page input::placeholder,
@@ -220,6 +264,7 @@
                 .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single .select2-selection__rendered {
                     color: #111827 !important;
                     font-weight: 700;
+                    opacity: 1 !important;
                 }
 
                 .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__rendered {
@@ -236,6 +281,12 @@
                     opacity: 1;
                 }
 
+                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__clear,
+                .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__clear {
+                    color: #475569 !important;
+                    font-weight: 900 !important;
+                }
+
                 .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single,
                 .deployment-create-form .select2-container--default .select2-selection--single[aria-disabled="true"] {
                     background: #e5e7eb !important;
@@ -249,6 +300,12 @@
                     border-color: #a5b4fc !important;
                     color: #312e81 !important;
                     font-weight: 700;
+                }
+
+                .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+                    color: #312e81 !important;
+                    font-weight: 900 !important;
+                    margin-right: 0.35rem !important;
                 }
 
                 .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__arrow b {
@@ -301,6 +358,11 @@
                     padding-bottom: 0.6rem !important;
                 }
 
+                .select2-results__group {
+                    color: #1e293b !important;
+                    font-weight: 800 !important;
+                }
+
                 .select2-results__option[aria-selected="true"] {
                     background: #e0e7ff !important;
                     color: #312e81 !important;
@@ -349,6 +411,11 @@
                     color: #cbd5e1 !important;
                 }
 
+                .dark .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__clear,
+                .dark .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__clear {
+                    color: #e2e8f0 !important;
+                }
+
                 .dark .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single,
                 .dark .deployment-create-form .select2-container--default .select2-selection--single[aria-disabled="true"] {
                     background: #334155 !important;
@@ -362,6 +429,10 @@
 
                 .dark .select2-results__option {
                     background: #1f2937 !important;
+                    color: #f8fafc !important;
+                }
+
+                .dark .select2-results__group {
                     color: #f8fafc !important;
                 }
 
@@ -384,11 +455,19 @@
                     color: #0f172a;
                 }
 
+                .deployment-management-page table tbody tr:hover td {
+                    color: #0f172a;
+                }
+
                 .dark .deployment-management-page table thead th {
                     color: #e5e7eb !important;
                 }
 
                 .dark .deployment-management-page table tbody td {
+                    color: #f8fafc;
+                }
+
+                .dark .deployment-management-page table tbody tr:hover td {
                     color: #f8fafc;
                 }
 
@@ -405,6 +484,23 @@
                 .dark .deployment-management-page .text-slate-500,
                 .dark .deployment-management-page .text-slate-600 {
                     color: #cbd5e1 !important;
+                    opacity: 1 !important;
+                }
+
+                .deployment-management-page .filters-section label,
+                .deployment-management-page .filters-section .filter-label {
+                    color: #334155 !important;
+                    font-weight: 700 !important;
+                }
+
+                .dark .deployment-management-page .filters-section label,
+                .dark .deployment-management-page .filters-section .filter-label {
+                    color: #e5e7eb !important;
+                }
+
+                .deployment-management-page .records-table-wrapper .text-gray-900,
+                .deployment-management-page .records-table-wrapper .text-gray-700,
+                .deployment-management-page .records-table-wrapper .text-gray-600 {
                     opacity: 1 !important;
                 }
             </style>
@@ -699,7 +795,7 @@
         </div>
 
         <!-- Filters Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="filters-section bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Deployment Records</h3>
                 <div class="flex items-center gap-4">
@@ -773,7 +869,7 @@
         </div>
 
         <!-- Deployments Table -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="records-table-wrapper bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             @if($deploymentData->isEmpty())
                 <div class="p-12 text-center">
                     <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
