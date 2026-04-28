@@ -157,7 +157,7 @@ class OjtAdviserController extends Controller
 
         $logs = WorkLog::where('assignment_id', $assignment->id)
             ->orderBy('work_date', 'desc')
-            ->paginate(15);
+            ->get();
 
         return view('ojt_adviser.students.logs', compact('student', 'logs'));
     }

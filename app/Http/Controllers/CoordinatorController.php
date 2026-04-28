@@ -611,14 +611,19 @@ class CoordinatorController extends Controller
             ->with([
                 'ojtAdviserProfile',
                 'ojtAdviserAssignments' => function ($query) {
-                    $query->with(['student.studentProfile', 'company', 'supervisor', 'workLogs', 'tasks']);
+                    $query->with(['student.studentProfile', 'company', 'supervisor', 'workLogs', 'tasks'])
+                        ->active()
+                        ->whereHas('student', fn ($studentQuery) => $studentQuery->eligibleStudentForRoster())
+                        ->latestRelevant();
                 },
             ])
             ->orderBy('name')
             ->get();
 
         $advisersData = $advisers->map(function (User $adviser) {
-            $assignments = $adviser->ojtAdviserAssignments;
+            $assignments = $adviser->ojtAdviserAssignments
+                ->unique('student_id')
+                ->values();
 
             $studentData = $assignments->map(function ($assignment) {
                 $requiredHours = $assignment->required_hours ?? 0;

@@ -67,6 +67,7 @@ class DashboardController extends Controller
                     'ojtAdviser:id,name,email,profile_photo_path',
                     'supervisor:id,name',
                     'workLogs:id,assignment_id,type,work_date,time_in,hours,status',
+                    'tasks:id,assignment_id,status',
                 ])
                 ->where('status', 'active')
                 ->when($approvedStudentIds->isNotEmpty(), function ($query) use ($approvedStudentIds) {
@@ -153,11 +154,33 @@ class DashboardController extends Controller
                 }
 
                 $missingTypes = collect($reportStatusByType)->filter(fn ($status) => ! $status)->count();
+                $reportsSubmittedCount = collect($reportStatusByType)->filter()->count();
                 $hasRecentAttendance = $logs->contains(function ($log) {
                     return ! is_null($log->time_in)
                         && $log->work_date
                         && Carbon::parse($log->work_date)->greaterThanOrEqualTo(Carbon::now()->subDays(7));
                 });
+
+                $latestAttendanceLog = $logs
+                    ->filter(fn ($log) => ! is_null($log->time_in) && $log->work_date)
+                    ->sortByDesc(fn ($log) => Carbon::parse($log->work_date)->timestamp)
+                    ->first();
+
+                $tasks = $assignment->tasks ?? collect();
+                $taskTotal = $tasks->count();
+                $taskCompletedCount = $tasks->filter(fn ($task) => in_array($task->status, ['approved', 'completed'], true))->count();
+                $taskPendingCount = max(0, $taskTotal - $taskCompletedCount);
+
+                $attentionReasons = collect();
+                if ($progress < 5) {
+                    $attentionReasons->push('Low hours progress');
+                }
+                if ($missingTypes >= 2) {
+                    $attentionReasons->push('Missing accomplishment reports');
+                }
+                if (! $hasRecentAttendance) {
+                    $attentionReasons->push('No recent attendance/work log');
+                }
 
                 $studentStatus = 'In Progress';
                 if ($progress >= 100) {
@@ -178,10 +201,23 @@ class DashboardController extends Controller
                     'required_hours' => $requiredHours,
                     'rendered_hours' => round($approvedHours, 2),
                     'progress' => $progress,
+                    'progress_formula' => 'Progress = approved rendered hours / required hours x 100',
                     'daily_submitted' => $reportStatusByType['daily'],
                     'weekly_submitted' => $reportStatusByType['weekly'],
                     'monthly_submitted' => $reportStatusByType['monthly'],
+                    'reports_submitted_count' => $reportsSubmittedCount,
+                    'reports_required_count' => count($reportTypes),
                     'has_recent_attendance' => $hasRecentAttendance,
+                    'attendance_status' => $hasRecentAttendance ? 'Recent attendance found' : 'No recent attendance in last 7 days',
+                    'latest_attendance_date' => $latestAttendanceLog?->work_date ? Carbon::parse($latestAttendanceLog->work_date)->format('M d, Y') : null,
+                    'task_completed_count' => $taskCompletedCount,
+                    'task_total_count' => $taskTotal,
+                    'task_pending_count' => $taskPendingCount,
+                    'task_status' => $taskTotal > 0
+                        ? ($taskCompletedCount === $taskTotal ? 'All tracked tasks complete' : "{$taskCompletedCount}/{$taskTotal} tracked tasks complete")
+                        : 'No tracked tasks recorded',
+                    'evaluation_status' => $logs->where('status', 'pending')->count() > 0 ? 'Pending review items' : 'No pending review items',
+                    'attention_reasons' => $attentionReasons->values()->all(),
                     'status' => $studentStatus,
                 ];
 
