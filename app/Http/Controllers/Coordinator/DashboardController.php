@@ -197,7 +197,10 @@ class DashboardController extends Controller
                     'name' => $student->name,
                     'email' => $student->email,
                     'section' => $section,
+                    'department' => $student->normalizedStudentDepartment() ?? User::STUDENT_MAJOR_COMPUTER_TECHNOLOGY,
                     'company' => $assignment->company?->name ?? 'N/A',
+                    'supervisor' => $assignment->supervisor?->name ?? 'No supervisor assigned',
+                    'adviser' => $assignment->ojtAdviser?->name ?? 'No adviser assigned',
                     'required_hours' => $requiredHours,
                     'rendered_hours' => round($approvedHours, 2),
                     'progress' => $progress,
@@ -218,6 +221,7 @@ class DashboardController extends Controller
                         : 'No tracked tasks recorded',
                     'evaluation_status' => $logs->where('status', 'pending')->count() > 0 ? 'Pending review items' : 'No pending review items',
                     'attention_reasons' => $attentionReasons->values()->all(),
+                    'issue_summary' => $attentionReasons->isNotEmpty() ? $attentionReasons->implode(' | ') : 'Needs manual review',
                     'status' => $studentStatus,
                 ];
 

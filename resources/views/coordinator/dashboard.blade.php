@@ -205,49 +205,77 @@
                     <div class="rounded-lg border border-indigo-400/20 bg-indigo-500/10 px-4 py-3 text-xs leading-6 text-indigo-100">
                         <div class="font-bold uppercase tracking-[0.16em] text-indigo-200">How progress is calculated</div>
                         <div class="mt-1">Progress is based on approved rendered hours versus required hours: <span class="font-black text-white">approved rendered hours / required hours x 100</span>.</div>
-                        <div class="mt-1">Use each student card below to verify supporting signals like accomplishment reports, recent attendance/work logs, task completion, and review status.</div>
+                        <div class="mt-1">Open a section group below to verify supporting signals like accomplishment reports, recent attendance/work logs, task completion, and review status.</div>
                     </div>
                 </div>
                 @if(($studentsNeedingAttentionBySection?->count() ?? 0) > 0)
                     <div class="space-y-4 max-h-80 overflow-auto pr-1">
                         @foreach($studentsNeedingAttentionBySection as $section => $students)
-                            <div class="rounded-xl border border-white/10 bg-white/5 p-3">
-                                <div class="mb-3 flex items-center justify-between gap-3 rounded-lg border border-indigo-400/20 bg-indigo-500/10 px-3 py-2">
-                                    <div>
-                                        <div class="text-sm font-black uppercase tracking-[0.18em] text-white">{{ $section }}</div>
-                                        <div class="text-xs text-indigo-100">{{ $students->count() }} student(s) need follow-up in this section</div>
+                            <div x-data="{ open: false, search: '' }" class="rounded-xl border border-white/10 bg-white/5 p-3">
+                                <button type="button" @click="open = !open" class="w-full rounded-lg border border-indigo-400/20 bg-indigo-500/10 px-3 py-3 text-left transition hover:bg-indigo-500/15">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div>
+                                            <div class="text-sm font-black uppercase tracking-[0.18em] text-white">{{ $section }}</div>
+                                            <div class="text-xs text-indigo-100">{{ $students->count() }} student(s) need follow-up in this section</div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="rounded-full border border-indigo-300/30 bg-indigo-400/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-indigo-100">
+                                                Section Group
+                                            </span>
+                                            <span class="text-xs font-bold uppercase tracking-[0.14em] text-white" x-text="open ? 'Hide details' : 'Open details'"></span>
+                                        </div>
                                     </div>
-                                    <span class="rounded-full border border-indigo-300/30 bg-indigo-400/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-indigo-100">
-                                        Section Group
-                                    </span>
-                                </div>
+                                </button>
 
-                                <div class="space-y-3">
-                                    @foreach($students as $student)
-                                        <details class="rounded-lg border border-rose-400/20 bg-rose-500/10 px-4 py-3 group">
-                                            <summary class="list-none cursor-pointer">
+                                <div x-show="open" x-transition class="mt-3 space-y-3">
+                                    <div class="rounded-lg border border-white/10 bg-black/20 px-3 py-3">
+                                        <label for="attention-search-{{ $section }}" class="sr-only">Search students needing attention</label>
+                                        <input
+                                            id="attention-search-{{ $section }}"
+                                            x-model="search"
+                                            type="text"
+                                            placeholder="Search by student, section, company, supervisor, adviser, status, or issue..."
+                                            class="w-full rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                        >
+                                        <p class="mt-2 text-xs text-slate-300">Real-time filter for this section group only.</p>
+                                    </div>
+
+                                    <div class="space-y-3">
+                                        @foreach($students as $student)
+                                            @php
+                                                $studentSearch = strtolower(implode(' ', [
+                                                    $section,
+                                                    $student['department'] ?? '',
+                                                    $student['name'] ?? '',
+                                                    $student['company'] ?? '',
+                                                    $student['supervisor'] ?? '',
+                                                    $student['adviser'] ?? '',
+                                                    $student['status'] ?? '',
+                                                    $student['issue_summary'] ?? '',
+                                                    implode(' ', $student['attention_reasons'] ?? []),
+                                                ]));
+                                            @endphp
+                                            <div x-show="!search || @js($studentSearch).includes(search.toLowerCase())" class="rounded-lg border border-rose-400/20 bg-rose-500/10 px-4 py-3">
                                                 <div class="flex items-start justify-between gap-3">
                                                     <div>
                                                         <div class="font-semibold text-white">{{ $student['name'] }}</div>
-                                                        <div class="text-xs text-rose-100">{{ $student['section'] }} | {{ $student['company'] }}</div>
-                                                        @if(!empty($student['attention_reasons']))
-                                                            <div class="mt-2 flex flex-wrap gap-2">
-                                                                @foreach($student['attention_reasons'] as $reason)
-                                                                    <span class="inline-flex items-center rounded-full border border-rose-300/30 bg-rose-400/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-rose-100">
-                                                                        {{ $reason }}
-                                                                    </span>
-                                                                @endforeach
-                                                            </div>
-                                                        @endif
+                                                        <div class="text-xs text-rose-100">{{ $student['section'] }} | {{ $student['department'] }} | {{ $student['company'] }}</div>
                                                     </div>
                                                     <div class="text-right shrink-0">
                                                         <div class="text-xs text-rose-100">Progress</div>
                                                         <div class="text-sm font-bold text-white">{{ number_format($student['progress'], 1) }}%</div>
-                                                        <div class="mt-1 text-[11px] text-rose-100 group-open:hidden">Open details</div>
                                                     </div>
-                                                </div>
+                                        </div>
 
-                                                <div class="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                                                <div class="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
+                                                    <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                                                        <div class="text-rose-100/80">Supervisor</div>
+                                                        <div class="mt-1 font-bold text-white">{{ $student['supervisor'] }}</div>
+                                                    </div>
+                                                    <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                                                        <div class="text-rose-100/80">OJT Adviser</div>
+                                                        <div class="mt-1 font-bold text-white">{{ $student['adviser'] }}</div>
+                                                    </div>
                                                     <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
                                                         <div class="text-rose-100/80">Hours</div>
                                                         <div class="mt-1 font-bold text-white">{{ number_format($student['rendered_hours'], 2) }}/{{ number_format($student['required_hours']) }}</div>
@@ -257,48 +285,29 @@
                                                         <div class="mt-1 font-bold text-white">{{ $student['reports_submitted_count'] }}/{{ $student['reports_required_count'] }}</div>
                                                     </div>
                                                     <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
-                                                        <div class="text-rose-100/80">Attendance</div>
-                                                        <div class="mt-1 font-bold text-white">{{ $student['has_recent_attendance'] ? 'Recent' : 'Missing' }}</div>
+                                                        <div class="text-rose-100/80">Attendance / Work Logs</div>
+                                                        <div class="mt-1 font-bold text-white">{{ $student['attendance_status'] }}</div>
+                                                        <div class="mt-1 text-slate-200">Latest: {{ $student['latest_attendance_date'] ?: 'No recent attendance log found' }}</div>
                                                     </div>
                                                     <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
-                                                        <div class="text-rose-100/80">Tasks</div>
-                                                        <div class="mt-1 font-bold text-white">{{ $student['task_completed_count'] }}/{{ $student['task_total_count'] }}</div>
+                                                        <div class="text-rose-100/80">Tasks / Review</div>
+                                                        <div class="mt-1 font-bold text-white">{{ $student['task_status'] }}</div>
+                                                        <div class="mt-1 text-slate-200">{{ $student['evaluation_status'] }}</div>
                                                     </div>
                                                 </div>
-                                            </summary>
 
-                                            <div class="mt-4 rounded-xl border border-white/10 bg-black/20 p-4 text-xs text-slate-100">
-                                                <div class="font-bold uppercase tracking-[0.16em] text-indigo-200">Progress Formula</div>
-                                                <div class="mt-1">{{ $student['progress_formula'] }}</div>
-
-                                                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                                    <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-3">
-                                                        <div class="font-bold text-white">Hours Breakdown</div>
-                                                        <div class="mt-1 text-slate-200">Rendered Hours: {{ number_format($student['rendered_hours'], 2) }}</div>
-                                                        <div class="text-slate-200">Required Hours: {{ number_format($student['required_hours']) }}</div>
+                                                @if(!empty($student['attention_reasons']))
+                                                    <div class="mt-3 flex flex-wrap gap-2">
+                                                        @foreach($student['attention_reasons'] as $reason)
+                                                            <span class="inline-flex items-center rounded-full border border-rose-300/30 bg-rose-400/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-rose-100">
+                                                                {{ $reason }}
+                                                            </span>
+                                                        @endforeach
                                                     </div>
-                                                    <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-3">
-                                                        <div class="font-bold text-white">Accomplishment Reports</div>
-                                                        <div class="mt-1 text-slate-200">Submitted in required windows: {{ $student['reports_submitted_count'] }}/{{ $student['reports_required_count'] }}</div>
-                                                        <div class="text-slate-200">Daily: {{ $student['daily_submitted'] ? 'Submitted' : 'Missing' }}</div>
-                                                        <div class="text-slate-200">Weekly: {{ $student['weekly_submitted'] ? 'Submitted' : 'Missing' }}</div>
-                                                        <div class="text-slate-200">Monthly: {{ $student['monthly_submitted'] ? 'Submitted' : 'Missing' }}</div>
-                                                    </div>
-                                                    <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-3">
-                                                        <div class="font-bold text-white">Attendance / Work Logs</div>
-                                                        <div class="mt-1 text-slate-200">{{ $student['attendance_status'] }}</div>
-                                                        <div class="text-slate-200">Latest attendance log: {{ $student['latest_attendance_date'] ?: 'No recent attendance log found' }}</div>
-                                                    </div>
-                                                    <div class="rounded-lg border border-white/10 bg-white/5 px-3 py-3">
-                                                        <div class="font-bold text-white">Tasks / Review</div>
-                                                        <div class="mt-1 text-slate-200">{{ $student['task_status'] }}</div>
-                                                        <div class="text-slate-200">Pending tasks: {{ $student['task_pending_count'] }}</div>
-                                                        <div class="text-slate-200">Evaluation / review status: {{ $student['evaluation_status'] }}</div>
-                                                    </div>
-                                                </div>
+                                                @endif
                                             </div>
-                                        </details>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
