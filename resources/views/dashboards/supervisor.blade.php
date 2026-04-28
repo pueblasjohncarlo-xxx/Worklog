@@ -240,6 +240,28 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
                                     @foreach($pendingTaskReviews as $task)
+                                        @php
+                                            $hasSubmission = ! empty($task->attachment_path)
+                                                && ($task->submitted_at !== null || in_array($task->status, ['submitted', 'approved', 'rejected'], true));
+
+                                            $taskReviewStatusLabel = match ($task->status) {
+                                                'approved' => 'Approved',
+                                                'submitted' => 'Submitted',
+                                                'rejected' => 'Rejected',
+                                                'completed' => 'Done',
+                                                'pending' => 'Pending',
+                                                default => ucwords(str_replace('_', ' ', (string) $task->status)),
+                                            };
+
+                                            $taskReviewStatusClass = match ($task->status) {
+                                                'approved', 'completed' => '!border-emerald-700 !bg-emerald-100 !text-emerald-950 shadow-sm',
+                                                'submitted' => '!border-sky-700 !bg-sky-100 !text-sky-950 shadow-sm',
+                                                'rejected' => '!border-rose-700 !bg-rose-100 !text-rose-950 shadow-sm',
+                                                'pending' => '!border-amber-700 !bg-amber-100 !text-amber-950 shadow-sm',
+                                                'in_progress' => '!border-indigo-700 !bg-indigo-100 !text-indigo-950 shadow-sm',
+                                                default => '!border-slate-700 !bg-slate-100 !text-slate-950 shadow-sm',
+                                            };
+                                        @endphp
                                         <tr class="group hover:bg-gray-50 transition-colors">
                                             <td class="py-4 font-bold text-black">
                                                 {{ $task->assignment?->student?->name ?? 'Unknown Student' }}
@@ -256,10 +278,28 @@
                                                 @endif
                                             </td>
                                             <td class="py-4">
-                                                <x-status-badge :status="$task->status" size="sm" />
+                                                <x-status-badge
+                                                    :status="$task->status"
+                                                    :label="$taskReviewStatusLabel"
+                                                    size="sm"
+                                                    :class="$taskReviewStatusClass . ' min-w-[7.5rem] justify-center font-black'"
+                                                />
                                             </td>
                                             <td class="py-4 text-right space-x-2">
-                                                <div class="flex items-center justify-end gap-2" x-data="{ showRejectModal: false, showFeedbackModal: false }">
+                                                <div class="flex flex-wrap items-center justify-end gap-2" x-data="{ showRejectModal: false, showFeedbackModal: false }">
+                                                    @if($hasSubmission)
+                                                        <a href="{{ route('supervisor.tasks.submission.view', $task) }}" target="_blank" class="inline-flex min-h-[2.25rem] items-center rounded-lg border border-sky-700 bg-sky-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 active:bg-sky-900">
+                                                            View File
+                                                        </a>
+                                                        <a href="{{ route('supervisor.tasks.submission.download', $task) }}" class="inline-flex min-h-[2.25rem] items-center rounded-lg border border-slate-700 bg-slate-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 active:bg-slate-900">
+                                                            Download Attachment
+                                                        </a>
+                                                    @else
+                                                        <span class="inline-flex min-h-[2.25rem] items-center rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-700">
+                                                            No attachment
+                                                        </span>
+                                                    @endif
+
                                                     <form action="{{ route('supervisor.tasks.approve', $task) }}" method="POST" class="flex items-center gap-2">
                                                         @csrf
                                                         <div class="flex items-center gap-1">
