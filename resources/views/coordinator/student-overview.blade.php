@@ -128,7 +128,7 @@
                                                                 </div>
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                                                                {{ $student->department ?? 'N/A' }}
+                                                                {{ $student->studentProgramDisplay() }}
                                                             </td>
                                                             <td class="px-6 py-4 whitespace-nowrap">
                                                                 @if($assignment)

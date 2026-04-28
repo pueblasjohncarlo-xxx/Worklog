@@ -23,7 +23,7 @@
                     <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
                         <div class="text-xs uppercase font-bold text-gray-500">Section / Dept</div>
                         <div class="text-sm font-semibold text-gray-900 mt-1">
-                            {{ $assignment->student->section ?? $assignment->student->department ?? 'N/A' }}
+                            {{ $assignment->student->studentProgramDisplay() }}
                         </div>
                     </div>
                     <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">

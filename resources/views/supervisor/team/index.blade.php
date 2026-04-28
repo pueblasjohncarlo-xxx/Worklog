@@ -56,7 +56,7 @@
                         @foreach($teamMembers as $member)
                             @php
                                 $percentage = min(100, ($member['total_hours'] / ($member['required_hours'] ?: 1)) * 100);
-                                $section = $member['student']->section ?? $member['student']->department ?? 'N/A';
+                                $section = $member['student']->studentProgramDisplay();
                                 $status = $percentage >= 100 ? 'Completed' : ($percentage < 5 ? 'Needs Attention' : 'On Track');
                                 $searchText = mb_strtolower(trim(implode(' ', [
                                     $member['student']->name ?? '',

@@ -32,7 +32,7 @@
                                 </td>
                                 <td class="px-6 py-4 align-top">
                                     <span class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-sm font-semibold text-sky-900 dark:border-sky-800/60 dark:bg-sky-900/20 dark:text-sky-100">
-                                        {{ $assignment->student->studentProfile->department ?? $assignment->student->department ?? 'N/A' }}
+                                        {{ $assignment->student->studentProgramDisplay() }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 align-top">

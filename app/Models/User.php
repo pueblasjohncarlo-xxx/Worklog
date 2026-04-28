@@ -261,6 +261,31 @@ class User extends Authenticatable
         return self::inferStudentDepartmentFromSection($this->normalizedStudentSection());
     }
 
+    public function studentProgramDisplay(): string
+    {
+        $section = $this->normalizedStudentSection();
+        $department = $this->normalizedStudentDepartment();
+
+        if ($section && $department) {
+            return sprintf('%s (%s)', $section, $department);
+        }
+
+        if ($section) {
+            return $section;
+        }
+
+        if ($department) {
+            return $department;
+        }
+
+        $profileProgram = trim((string) optional($this->studentProfile)->program);
+        if ($profileProgram !== '') {
+            return $profileProgram;
+        }
+
+        return 'N/A';
+    }
+
     public function getNameAttribute($value): string
     {
         $structuredName = $this->buildStructuredFullName();
