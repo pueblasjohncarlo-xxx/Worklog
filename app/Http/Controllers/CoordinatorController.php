@@ -1138,6 +1138,15 @@ class CoordinatorController extends Controller
             ->with('supervisorProfile.company')
             ->orderBy('name')
             ->get();
+        $defaultSupervisorCompanies = Company::query()
+            ->whereIn('default_supervisor_id', $supervisors->pluck('id')->filter()->all())
+            ->get()
+            ->keyBy(fn (Company $company) => (int) $company->default_supervisor_id);
+        $supervisors->each(function (User $supervisor) use ($defaultSupervisorCompanies) {
+            $resolvedCompany = $this->resolveSupervisorCompany($supervisor, $defaultSupervisorCompanies);
+            $supervisor->setAttribute('deployment_company_id', $resolvedCompany?->id);
+            $supervisor->setAttribute('deployment_company_name', $resolvedCompany?->name);
+        });
         $ojtAdvisers = User::where('role', User::ROLE_OJT_ADVISER)->orderBy('name')->get();
         $companies = Company::orderBy('name')->get();
 
@@ -1418,7 +1427,7 @@ class CoordinatorController extends Controller
             ])->withInput();
         }
 
-        $missingCompanySupervisor = $supervisors->first(fn (User $supervisor) => ! $supervisor->supervisorProfile?->company_id);
+        $missingCompanySupervisor = $supervisors->first(fn (User $supervisor) => ! $this->resolveSupervisorCompanyId($supervisor));
         if ($missingCompanySupervisor) {
             return redirect()->back()->withErrors([
                 'supervisor_id' => 'Selected supervisor '.$missingCompanySupervisor->name.' has no assigned company. Please update supervisor profile first.',
@@ -1426,7 +1435,7 @@ class CoordinatorController extends Controller
         }
 
         $companyIds = $supervisors
-            ->map(fn (User $supervisor) => (int) $supervisor->supervisorProfile->company_id)
+            ->map(fn (User $supervisor) => (int) $this->resolveSupervisorCompanyId($supervisor))
             ->unique()
             ->values();
 
@@ -1517,7 +1526,7 @@ class CoordinatorController extends Controller
                 ], 422);
             }
 
-            $supervisorCompanyId = $supervisor->supervisorProfile?->company_id;
+            $supervisorCompanyId = $this->resolveSupervisorCompanyId($supervisor);
 
             if ($supervisorCompanyId) {
                 if (! empty($requestedCompanyId) && (int) $requestedCompanyId !== (int) $supervisorCompanyId) {
@@ -1597,6 +1606,44 @@ class CoordinatorController extends Controller
 
         return redirect()->route('coordinator.deployment.index')
             ->with('status', 'Deployment updated successfully.');
+    }
+
+    private function resolveSupervisorCompany(User $supervisor, $defaultSupervisorCompanies = null): ?Company
+    {
+        if ($supervisor->supervisorProfile?->company) {
+            return $supervisor->supervisorProfile->company;
+        }
+
+        if (! empty($supervisor->supervisorProfile?->company_id)) {
+            return Company::find((int) $supervisor->supervisorProfile->company_id);
+        }
+
+        if ($defaultSupervisorCompanies instanceof \Illuminate\Support\Collection) {
+            $defaultCompany = $defaultSupervisorCompanies->get((int) $supervisor->id);
+            if ($defaultCompany instanceof Company) {
+                return $defaultCompany;
+            }
+        } else {
+            $defaultCompany = Company::query()
+                ->where('default_supervisor_id', $supervisor->id)
+                ->first();
+
+            if ($defaultCompany) {
+                return $defaultCompany;
+            }
+        }
+
+        $assignmentCompanyId = $supervisor->supervisorAssignments()
+            ->whereNotNull('company_id')
+            ->latest('id')
+            ->value('company_id');
+
+        return $assignmentCompanyId ? Company::find((int) $assignmentCompanyId) : null;
+    }
+
+    private function resolveSupervisorCompanyId(User $supervisor): ?int
+    {
+        return $this->resolveSupervisorCompany($supervisor)?->id;
     }
 
     public function updateRequiredHours(Request $request, Assignment $assignment): RedirectResponse

@@ -3,7 +3,80 @@
         User Details
     </x-slot>
 
-    <div class="space-y-6">
+    <style>
+        .admin-user-details-page .details-card-title {
+            color: #111827 !important;
+            font-weight: 800 !important;
+        }
+
+        .admin-user-details-page .details-card-label {
+            color: #475569 !important;
+            font-weight: 800 !important;
+        }
+
+        .admin-user-details-page .details-card-value {
+            color: #111827 !important;
+            font-weight: 600 !important;
+        }
+
+        .admin-user-details-page .details-muted {
+            color: #475569 !important;
+            opacity: 1 !important;
+        }
+
+        .admin-user-details-page .text-gray-400,
+        .admin-user-details-page .text-gray-500,
+        .admin-user-details-page .text-gray-600 {
+            opacity: 1 !important;
+        }
+
+        .admin-user-details-page .text-gray-400 {
+            color: #6b7280 !important;
+        }
+
+        .admin-user-details-page .text-gray-500,
+        .admin-user-details-page .text-gray-600 {
+            color: #475569 !important;
+        }
+
+        .admin-user-details-page .details-strong {
+            color: #111827 !important;
+            font-weight: 700 !important;
+        }
+
+        .admin-user-details-page .details-warning-title {
+            color: #92400e !important;
+            font-weight: 700 !important;
+        }
+
+        .admin-user-details-page .details-warning-text {
+            color: #b45309 !important;
+        }
+
+        .admin-user-details-page .details-danger-copy {
+            color: #374151 !important;
+            font-weight: 500 !important;
+        }
+
+        .admin-user-details-page .details-empty-state {
+            color: #475569 !important;
+            font-weight: 500 !important;
+        }
+
+        .admin-user-details-page .details-button-secondary {
+            color: #374151 !important;
+            font-weight: 700 !important;
+        }
+
+        .admin-user-details-page .details-button-secondary:disabled,
+        .admin-user-details-page .details-button-primary:disabled,
+        .admin-user-details-page .details-button-danger:disabled {
+            opacity: 0.65 !important;
+            color: inherit !important;
+        }
+    </style>
+
+    <div class="space-y-6 admin-user-details-page">
         <!-- Header Card -->
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -12,9 +85,9 @@
                         {{ substr($user->name, 0, 1) }}
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $user->name }}</h2>
+                        <h2 class="details-card-title text-2xl font-bold text-gray-900 dark:text-white">{{ $user->name }}</h2>
                         <div class="flex items-center gap-2 mt-1">
-                            <span class="text-sm font-medium text-gray-500 dark:text-gray-400 capitalize">{{ $user->role }}</span>
+                            <span class="details-muted text-sm font-medium text-gray-500 dark:text-gray-400 capitalize">{{ $user->role }}</span>
                             @if($user->role === 'student')
                                 @if(!$user->has_requested_account)
                                     <span class="px-2 py-0.5 text-xs font-bold rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
@@ -48,7 +121,7 @@
                         </form>
                     @endif
                     
-                    <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                    <a href="{{ route('admin.users.index') }}" class="details-button-secondary inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
                         Back
                     </a>
                 </div>
@@ -61,31 +134,31 @@
                 <!-- Profile Information -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-6 border-b border-gray-100 dark:border-gray-700 pb-2">Profile Information</h3>
+                        <h3 class="details-card-title text-lg font-semibold mb-6 border-b border-gray-100 dark:border-gray-700 pb-2">Profile Information</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
                             <div>
-                                <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Email Address</label>
-                                <div class="text-base text-gray-900 dark:text-white font-medium break-all">{{ $user->email }}</div>
+                                <label class="details-card-label block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Email Address</label>
+                                <div class="details-card-value text-base text-gray-900 dark:text-white font-medium break-all">{{ $user->email }}</div>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Date Joined</label>
-                                <div class="text-base text-gray-900 dark:text-white font-medium">{{ $user->created_at->format('F d, Y') }}</div>
+                                <label class="details-card-label block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Date Joined</label>
+                                <div class="details-card-value text-base text-gray-900 dark:text-white font-medium">{{ $user->created_at->format('F d, Y') }}</div>
                             </div>
                             
                             @if($user->role === 'student')
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Section</label>
-                                    <div class="text-base text-gray-900 dark:text-white font-medium">{{ $user->section ?? 'N/A' }}</div>
+                                    <label class="details-card-label block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Section</label>
+                                    <div class="details-card-value text-base text-gray-900 dark:text-white font-medium">{{ $user->section ?? 'N/A' }}</div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Department</label>
-                                    <div class="text-base text-gray-900 dark:text-white font-medium">{{ $user->department ?? 'N/A' }}</div>
+                                    <label class="details-card-label block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Department</label>
+                                    <div class="details-card-value text-base text-gray-900 dark:text-white font-medium">{{ $user->department ?? 'N/A' }}</div>
                                 </div>
                             @endif
                             
                             <div>
-                                <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Last Login</label>
-                                <div class="text-base text-gray-900 dark:text-white font-medium">
+                                <label class="details-card-label block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Last Login</label>
+                                <div class="details-card-value text-base text-gray-900 dark:text-white font-medium">
                                     {{ $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Never' }}
                                 </div>
                             </div>
@@ -97,7 +170,7 @@
                 @if($user->role === 'student')
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-6 border-b border-gray-100 dark:border-gray-700 pb-2">Current Assignment</h3>
+                        <h3 class="details-card-title text-lg font-semibold mb-6 border-b border-gray-100 dark:border-gray-700 pb-2">Current Assignment</h3>
                         @php
                             $assignment = $user->studentAssignments()->where('status', 'active')->first();
                         @endphp
@@ -106,22 +179,22 @@
                             <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <div class="text-xs text-indigo-500 dark:text-indigo-400 uppercase font-bold tracking-wider">Company</div>
-                                        <div class="text-lg font-bold text-gray-900 dark:text-white mt-1">{{ $assignment->company->name }}</div>
+                                        <div class="details-card-label text-xs text-indigo-500 dark:text-indigo-400 uppercase font-bold tracking-wider">Company</div>
+                                        <div class="details-strong text-lg font-bold text-gray-900 dark:text-white mt-1">{{ $assignment->company->name }}</div>
                                     </div>
                                     <div>
-                                        <div class="text-xs text-indigo-500 dark:text-indigo-400 uppercase font-bold tracking-wider">Supervisor</div>
-                                        <div class="text-lg font-bold text-gray-900 dark:text-white mt-1">{{ $assignment->supervisor->name }}</div>
+                                        <div class="details-card-label text-xs text-indigo-500 dark:text-indigo-400 uppercase font-bold tracking-wider">Supervisor</div>
+                                        <div class="details-strong text-lg font-bold text-gray-900 dark:text-white mt-1">{{ $assignment->supervisor->name }}</div>
                                     </div>
                                     <div>
-                                        <div class="text-xs text-indigo-500 dark:text-indigo-400 uppercase font-bold tracking-wider">Start Date</div>
-                                        <div class="text-base font-medium text-gray-900 dark:text-white mt-1">{{ $assignment->start_date ? $assignment->start_date->format('M d, Y') : 'N/A' }}</div>
+                                        <div class="details-card-label text-xs text-indigo-500 dark:text-indigo-400 uppercase font-bold tracking-wider">Start Date</div>
+                                        <div class="details-card-value text-base font-medium text-gray-900 dark:text-white mt-1">{{ $assignment->start_date ? $assignment->start_date->format('M d, Y') : 'N/A' }}</div>
                                     </div>
                                 </div>
                             </div>
                         @else
                             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 text-center">
-                                <p class="text-gray-500 dark:text-gray-400 italic">No active assignment found.</p>
+                                <p class="details-empty-state text-gray-500 dark:text-gray-400 italic">No active assignment found.</p>
                             </div>
                         @endif
                     </div>
@@ -134,11 +207,11 @@
                 <!-- Security Card -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">Security</h3>
+                        <h3 class="details-card-title text-lg font-semibold mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">Security</h3>
                         
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Password</label>
+                                <label class="details-card-label block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Password</label>
                                 
                                 @if($decryptedPassword !== null)
                                     <div x-data="{ show: false }" class="relative">
@@ -152,7 +225,7 @@
                                             <button 
                                                 type="button" 
                                                 @click="show = !show" 
-                                                class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-300 cursor-pointer"
+                                                class="details-button-secondary inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-300 cursor-pointer"
                                             >
                                                 <svg x-show="!show" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                                 <svg x-show="show" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.574-2.59M5.275 5.275C6.938 4.464 9.32 4 12 4c4.478 0 8.268 2.943 9.542 7a10.05 10.05 0 01-1.127 2.22m-1.92 1.92a9.96 9.96 0 01-3.66 1.76M9.172 9.172a4 4 0 015.656 5.656" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" /></svg>
@@ -165,13 +238,13 @@
                                     </div>
                                 @elseif($passwordDecryptError)
                                     <div class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md border border-amber-200 dark:border-amber-800">
-                                        <div class="font-mono text-sm text-amber-900 dark:text-amber-100">Stored password cannot be decrypted</div>
-                                        <div class="text-xs text-amber-700 dark:text-amber-300 mt-1">This record may have been encrypted with an older application key. Reset the password to restore visibility.</div>
+                                        <div class="details-warning-title font-mono text-sm text-amber-900 dark:text-amber-100">Stored password cannot be decrypted</div>
+                                        <div class="details-warning-text text-xs text-amber-700 dark:text-amber-300 mt-1">This record may have been encrypted with an older application key. Reset the password to restore visibility.</div>
                                     </div>
                                 @elseif($user->role === 'student' && !$user->has_requested_account)
                                     <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-700">
-                                        <div class="font-mono text-sm text-gray-800 dark:text-gray-200">{{ strtolower($user->lastname ?: $user->name) . '123' }}</div>
-                                        <div class="text-xs text-gray-400 mt-1">Default Password</div>
+                                        <div class="details-strong font-mono text-sm text-gray-800 dark:text-gray-200">{{ strtolower($user->lastname ?: $user->name) . '123' }}</div>
+                                        <div class="details-muted text-xs text-gray-400 mt-1">Default Password</div>
                                     </div>
                                 @else
                                     <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-700">
@@ -182,7 +255,7 @@
                             </div>
 
                             <div x-data="{ showReset: false }">
-                                <button @click="showReset = true" type="button" class="w-full inline-flex justify-center items-center px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-md font-semibold text-xs text-indigo-700 uppercase tracking-widest hover:bg-indigo-100 focus:outline-none focus:border-indigo-300 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                <button @click="showReset = true" type="button" class="details-button-primary w-full inline-flex justify-center items-center px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-md font-semibold text-xs text-indigo-700 uppercase tracking-widest hover:bg-indigo-100 focus:outline-none focus:border-indigo-300 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
                                     Reset Password
                                 </button>
 
@@ -232,14 +305,14 @@
                 <!-- Danger Zone -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-red-100 dark:border-red-900/30">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4 text-red-600 dark:text-red-400">Danger Zone</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        <h3 class="details-card-title text-lg font-semibold mb-4 text-red-600 dark:text-red-400">Danger Zone</h3>
+                        <p class="details-danger-copy text-sm text-gray-500 dark:text-gray-400 mb-4">
                             Permanently delete this user and all associated data. This action cannot be undone.
                         </p>
                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <button type="submit" class="details-button-danger w-full inline-flex justify-center items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150">
                                 Delete User Account
                             </button>
                         </form>

@@ -10,8 +10,8 @@
             return [
                 'id' => $s->id,
                 'name' => $s->name,
-                'company_id' => optional($s->supervisorProfile)->company_id,
-                'company_name' => optional(optional($s->supervisorProfile)->company)->name,
+                'company_id' => $s->deployment_company_id ?? optional($s->supervisorProfile)->company_id,
+                'company_name' => $s->deployment_company_name ?? optional(optional($s->supervisorProfile)->company)->name,
             ];
         })->values();
 
@@ -647,8 +647,8 @@
                             @foreach ($supervisors as $supervisor)
                                 <option
                                     value="{{ $supervisor->id }}"
-                                    data-company-id="{{ $supervisor->supervisorProfile?->company_id ?? '' }}"
-                                    data-company-name="{{ $supervisor->supervisorProfile?->company?->name ?? '' }}"
+                                    data-company-id="{{ $supervisor->deployment_company_id ?? $supervisor->supervisorProfile?->company_id ?? '' }}"
+                                    data-company-name="{{ $supervisor->deployment_company_name ?? $supervisor->supervisorProfile?->company?->name ?? '' }}"
                                     @selected((string) old('supervisor_id') === (string) $supervisor->id)
                                 >{{ $supervisor->name }}</option>
                             @endforeach

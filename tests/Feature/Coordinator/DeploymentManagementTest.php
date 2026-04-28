@@ -13,6 +13,47 @@ class DeploymentManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_deployment_index_resolves_company_from_default_supervisor_mapping(): void
+    {
+        $coordinator = User::create([
+            'name' => 'Coordinator User',
+            'email' => 'coordinator-default@example.test',
+            'password' => bcrypt('password'),
+            'role' => User::ROLE_COORDINATOR,
+            'status' => 'approved',
+            'is_approved' => true,
+            'has_requested_account' => true,
+        ]);
+
+        $supervisor = User::create([
+            'name' => 'steven',
+            'email' => 'steven@example.test',
+            'password' => bcrypt('password'),
+            'role' => User::ROLE_SUPERVISOR,
+            'status' => 'approved',
+            'is_approved' => true,
+            'has_requested_account' => true,
+        ]);
+
+        SupervisorProfile::create([
+            'user_id' => $supervisor->id,
+            'company_id' => null,
+            'position_title' => 'Supervisor',
+            'department' => 'IT',
+            'phone' => '555-3000',
+        ]);
+
+        Company::create([
+            'name' => 'timex',
+            'default_supervisor_id' => $supervisor->id,
+        ]);
+
+        $response = $this->actingAs($coordinator)->get(route('coordinator.deployment.index'));
+
+        $response->assertOk();
+        $response->assertSee('data-company-name="timex"', false);
+    }
+
     public function test_coordinator_can_update_a_deployment_record(): void
     {
         $coordinator = User::create([
