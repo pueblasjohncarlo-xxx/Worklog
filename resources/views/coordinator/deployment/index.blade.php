@@ -81,8 +81,16 @@
         <x-coordinator.summary-cards :cards="$summaryCards" />
 
         <!-- Create New Deployment Form -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create New Deployment</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg ring-1 ring-gray-200/70 dark:ring-gray-700/80 p-6">
+            <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h3 class="text-xl font-black tracking-tight text-gray-900 dark:text-white">Create New Deployment</h3>
+                    <p class="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">Assign active OJT students to a supervisor, adviser, and company in one step. Students with active deployments are automatically excluded from the selector.</p>
+                </div>
+                <div class="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-xs font-semibold text-indigo-800 dark:border-indigo-800/60 dark:bg-indigo-900/30 dark:text-indigo-200">
+                    Required fields are marked with <span class="font-black">*</span>.
+                </div>
+            </div>
             
             <form id="deploymentForm" method="POST" action="{{ route('coordinator.deployment.store') }}" class="space-y-4">
                 @csrf
@@ -90,7 +98,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- OJT Students Search -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Student(s)</label>
+                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">OJT Student(s) <span class="text-rose-600 dark:text-rose-400">*</span></label>
+                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Choose one or more eligible students. Already deployed students are hidden automatically.</p>
                         @if($groupedStudents->isNotEmpty())
                             <select
                                 id="student_ids"
@@ -102,13 +111,16 @@
                                 @foreach ($groupedStudents as $group => $students)
                                     <optgroup label="{{ $group }}">
                                         @foreach ($students as $student)
-                                            <option value="{{ $student->id }}" data-email="{{ $student->email }}">
+                                            <option value="{{ $student->id }}" data-email="{{ $student->email }}" @selected(collect(old('student_ids', []))->contains($student->id))>
                                                 {{ $student->display_name_last_first }}
                                             </option>
                                         @endforeach
                                     </optgroup>
                                 @endforeach
                             </select>
+                            @error('student_ids')
+                                <p class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">{{ $message }}</p>
+                            @enderror
                         @else
                             <div class="w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-3 text-sm text-gray-600 dark:text-gray-300">
                                 No eligible students are available for deployment.
@@ -118,7 +130,8 @@
 
                     <!-- Supervisor -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supervisor *</label>
+                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Supervisor <span class="text-rose-600 dark:text-rose-400">*</span></label>
+                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Selecting a supervisor will automatically load the assigned company.</p>
                         <select
                             id="supervisor_id"
                             name="supervisor_id"
@@ -131,14 +144,19 @@
                                     value="{{ $supervisor->id }}"
                                     data-company-id="{{ $supervisor->supervisorProfile?->company_id ?? '' }}"
                                     data-company-name="{{ $supervisor->supervisorProfile?->company?->name ?? '' }}"
+                                    @selected((string) old('supervisor_id') === (string) $supervisor->id)
                                 >{{ $supervisor->name }}</option>
                             @endforeach
                         </select>
+                        @error('supervisor_id')
+                            <p class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- OJT Adviser -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Adviser</label>
+                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">OJT Adviser</label>
+                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Optional, but assigning an adviser helps complete the deployment record.</p>
                         <select
                             id="ojt_adviser_id"
                             name="ojt_adviser_id"
@@ -146,14 +164,15 @@
                         >
                             <option value="">Select adviser (optional)</option>
                             @foreach ($ojtAdvisers as $adviser)
-                                <option value="{{ $adviser->id }}">{{ $adviser->name }}</option>
+                                <option value="{{ $adviser->id }}" @selected((string) old('ojt_adviser_id') === (string) $adviser->id)>{{ $adviser->name }}</option>
                             @endforeach
                         </select>
                     </div>
 
                     <!-- Company -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company *</label>
+                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Company <span class="text-rose-600 dark:text-rose-400">*</span></label>
+                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">This field is read-only and synced from the selected supervisor.</p>
                         <select
                             id="company_id_display"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 cursor-not-allowed"
@@ -167,25 +186,32 @@
                         <input type="hidden" id="company_id" name="company_id" value="{{ old('company_id') }}" required>
                         <p id="supervisor-company-status" class="mt-1 text-xs text-gray-600 dark:text-gray-300">Select a supervisor to view assigned company.</p>
                         <p id="supervisor-company-validation" class="mt-1 text-xs text-red-600 dark:text-red-400 hidden"></p>
+                        @error('company_id')
+                            <p class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Start Date</label>
+                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Leave blank if the deployment start will be confirmed later.</p>
                         <input
                             id="start_date"
                             name="start_date"
                             type="date"
+                            value="{{ old('start_date') }}"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                         >
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">End Date</label>
+                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Must be the same as or later than the start date.</p>
                         <input
                             id="end_date"
                             name="end_date"
                             type="date"
+                            value="{{ old('end_date') }}"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                         >
                     </div>
@@ -258,7 +284,7 @@
         <div id="editDeploymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 z-0 bg-black bg-opacity-50 transition-opacity pointer-events-none"></div>
-                <form x-show="editingDeployment" x-ref="editForm" method="POST" :action="editFormAction" onsubmit="return window.submitDeploymentEditForm(event)" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <form x-show="editingDeployment" x-cloak x-ref="editForm" method="POST" :action="editFormAction" onsubmit="return window.submitDeploymentEditForm(event)" class="relative z-10 inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl ring-1 ring-gray-200 dark:ring-gray-700 transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                     @csrf
                     @method('PATCH')
                     <div class="bg-white dark:bg-gray-800 px-6 pt-5 pb-4 sm:p-6">
@@ -272,12 +298,12 @@
                         </div>
                         <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Student</label>
-                                    <p class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm" data-edit-student-name></p>
+                                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Student</label>
+                                    <p class="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white text-sm font-semibold" x-text="editingDeployment ? editingDeployment.student_name : ''"></p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supervisor *</label>
-                                    <select name="supervisor_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Supervisor</label>
+                                    <select x-model="editSupervisorId" @change="syncEditCompany()" name="supervisor_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select supervisor</option>
                                         @foreach($supervisors as $supervisor)
                                             <option value="{{ $supervisor->id }}">{{ $supervisor->name }}</option>
@@ -285,8 +311,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Adviser</label>
-                                    <select name="ojt_adviser_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">OJT Adviser</label>
+                                    <select x-model="editAdviserId" name="ojt_adviser_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select adviser</option>
                                         @foreach($ojtAdvisers as $adviser)
                                             <option value="{{ $adviser->id }}">{{ $adviser->name }}</option>
@@ -294,33 +320,29 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
-                                    <select name="company_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="">Select company</option>
-                                        @foreach($companies as $company)
-                                            <option value="{{ $company->id }}">{{ $company->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Company</label>
+                                    <div class="rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" x-text="editCompanyName || 'No company selected yet'"></div>
+                                    <input type="hidden" name="company_id" :value="editCompanyId">
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Changing the supervisor will auto-fill the matching company.</p>
                                 </div>
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
-                                        <input type="date" name="start_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Start Date</label>
+                                        <input x-model="editStartDate" type="date" name="start_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-                                        <input type="date" name="end_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">End Date</label>
+                                        <input x-model="editEndDate" type="date" name="end_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Required Hours</label>
-                                        <input type="number" min="1" max="5000" name="required_hours" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Required Hours</label>
+                                        <input x-model="editRequiredHours" type="number" min="1" max="5000" name="required_hours" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">OJT Status</label>
-                                        <select name="status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
+                                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">OJT Status</label>
+                                        <select x-model="editStatus" name="status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500">
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
                                             <option value="completed">Completed</option>
@@ -329,22 +351,22 @@
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/60">
                                     <div class="font-semibold text-slate-800 dark:text-slate-100">Resolved Company</div>
-                                    <div class="mt-1 text-slate-600 dark:text-slate-300" data-edit-company-label>No company selected yet</div>
+                                    <div class="mt-1 text-slate-600 dark:text-slate-300" x-text="editCompanyName || 'No company selected yet'"></div>
                                 </div>
-                                <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300 hidden" data-edit-error></div>
+                                <div x-show="editError" x-cloak class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300" x-text="editError"></div>
                                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
                                     <p class="text-xs text-blue-800 dark:text-blue-200">
-                                        <strong>Completion Status:</strong> This deployment will be marked as <span data-edit-completion-label class="font-bold">Unassigned</span>
+                                        <strong>Completion Status:</strong> This deployment will be marked as <span class="font-bold" x-text="editCompletionLabel()"></span>
                                     </p>
                                 </div>
                         </div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700 px-6 py-3 flex gap-2 justify-end">
-                        <button type="button" onclick="window.closeDeploymentEditModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
+                        <button type="button" @click="closeEditModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm font-medium">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
-                            Save Changes
+                        <button type="submit" :disabled="editSaving" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors text-sm font-medium">
+                            <span x-text="editSaving ? 'Saving...' : 'Save Changes'"></span>
                         </button>
                     </div>
                 </form>
@@ -356,7 +378,10 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Deployment Records</h3>
-                <button @click="clearFilters()" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Clear Filters</button>
+                <div class="flex items-center gap-4">
+                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">Showing <span class="font-black text-indigo-600 dark:text-indigo-400" x-text="getFilteredDeployments().length"></span> deployment(s)</p>
+                    <button @click="clearFilters()" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Clear Filters</button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
@@ -483,7 +508,7 @@
                                             <div class="ml-3">
                                                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $deployment['student_name'] }}</p>
                                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                    {{ $deployment['student_section'] ?: 'No section' }} · {{ $deployment['student_program'] }}
+                                                    {{ $deployment['student_section'] ?: 'No section' }} | {{ $deployment['student_program'] }}
                                                 </p>
                                             </div>
                                         </div>
@@ -523,7 +548,7 @@
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <button type="button" data-deployment='@json($deployment)' onclick="window.openDeploymentEditModal(this.dataset.deployment)" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors">
+                                        <button type="button" @click='openEditModal(@js($deployment))' class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
                                             <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
@@ -564,6 +589,9 @@
 
         function coordinatorDeploymentManager() {
             return {
+                init() {
+                    window.__deploymentManager = this;
+                },
                 deployments: readDeploymentJson('deployment-data', []),
                 supervisors: readDeploymentJson('deployment-supervisors', []),
                 advisers: readDeploymentJson('deployment-advisers', []),
@@ -666,6 +694,7 @@
                     this.editStatus = deployment.status || "active";
                     this.editCompanyName = deployment.company_name || "";
                     this.editError = "";
+                    this.editSaving = false;
                     this.syncEditCompany();
                     document.getElementById("editDeploymentModal").classList.remove("hidden");
                 },
@@ -685,6 +714,7 @@
                     this.editStatus = "active";
                     this.editCompanyName = "";
                     this.editError = "";
+                    this.editSaving = false;
                     document.getElementById("editDeploymentModal").classList.add("hidden");
                 },
 
@@ -711,6 +741,20 @@
         }
 
         window.openDeploymentEditModal = function(deployment) {
+            if (window.__deploymentManager?.openEditModal) {
+                if (typeof deployment === 'string') {
+                    try {
+                        deployment = JSON.parse(deployment);
+                    } catch (error) {
+                        console.error('Unable to parse deployment payload.', error);
+                        return;
+                    }
+                }
+
+                window.__deploymentManager.openEditModal(deployment);
+                return;
+            }
+
             if (typeof deployment === 'string') {
                 try {
                     deployment = JSON.parse(deployment);
@@ -768,10 +812,10 @@
             event.preventDefault();
 
             const form = event.currentTarget;
-            const modal = document.getElementById('editDeploymentModal');
             const errorLabel = form.querySelector('[data-edit-error]');
             const submitButton = form.querySelector('button[type="submit"]');
             const deploymentId = form.action.split('/').filter(Boolean).pop();
+            const manager = window.__deploymentManager;
 
             if (!form || !deploymentId) {
                 return false;
@@ -780,6 +824,11 @@
             if (errorLabel) {
                 errorLabel.textContent = '';
                 errorLabel.classList.add('hidden');
+            }
+
+            if (manager) {
+                manager.editError = '';
+                manager.editSaving = true;
             }
 
             if (submitButton) {
@@ -811,46 +860,26 @@
                         errorLabel.textContent = message;
                         errorLabel.classList.remove('hidden');
                     }
+                    if (manager) {
+                        manager.editError = message;
+                    }
                     return false;
                 }
 
-                const updatedDeployment = payload?.deployment;
-                if (updatedDeployment) {
-                    const row = document.querySelector(`tr[data-deployment-id="${updatedDeployment.id}"]`);
-                    if (row) {
-                        const cells = row.querySelectorAll('td');
-                        if (cells[0]) {
-                            cells[0].innerHTML = updatedDeployment.deployment_status === 'complete'
-                                ? '<div class="generic">C Complete</div><div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">OJT: ' + (updatedDeployment.status ? updatedDeployment.status.charAt(0).toUpperCase() + updatedDeployment.status.slice(1) : '') + '</div>'
-                                : (updatedDeployment.deployment_status === 'incomplete'
-                                    ? '<div class="generic">! Incomplete</div><div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">OJT: ' + (updatedDeployment.status ? updatedDeployment.status.charAt(0).toUpperCase() + updatedDeployment.status.slice(1) : '') + '</div>'
-                                    : '<div class="generic">N Unassigned</div><div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">OJT: ' + (updatedDeployment.status ? updatedDeployment.status.charAt(0).toUpperCase() + updatedDeployment.status.slice(1) : '') + '</div>');
-                        }
-                        if (cells[2]) {
-                            cells[2].innerHTML = updatedDeployment.supervisor_name !== 'Not Assigned'
-                                ? `<span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">${updatedDeployment.supervisor_name}</span>`
-                                : '<span class="wl-status-badge wl-status-unassigned px-2.5 py-1 text-[11px] normal-case tracking-normal">Not Assigned</span>';
-                        }
-                        if (cells[3]) {
-                            cells[3].innerHTML = updatedDeployment.adviser_name !== 'Not Assigned'
-                                ? `<span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">${updatedDeployment.adviser_name}</span>`
-                                : '<span class="wl-status-badge wl-status-unassigned px-2.5 py-1 text-[11px] normal-case tracking-normal">Not Assigned</span>';
-                        }
-                        if (cells[4]) {
-                            cells[4].textContent = updatedDeployment.company_name || '';
-                        }
-                        if (cells[5]) {
-                            cells[5].textContent = updatedDeployment.duration_label || '';
-                        }
-                        if (cells[6]) {
-                            cells[6].innerHTML = `<div class="space-y-1"><div class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">${Number(updatedDeployment.rendered_hours || 0).toFixed(2)} rendered</div><div class="text-[11px] font-medium text-gray-600 dark:text-gray-300">Required: ${Number(updatedDeployment.required_hours || 0).toLocaleString()} hrs</div></div>`;
-                        }
-                    }
+                if (manager && payload?.deployment) {
+                    manager.deployments = (manager.deployments || []).map((item) => {
+                        return manager.normalizeId(item?.id) === manager.normalizeId(payload.deployment.id)
+                            ? payload.deployment
+                            : item;
+                    });
                 }
 
-                window.closeDeploymentEditModal();
+                window.location.reload();
                 return false;
             } finally {
+                if (manager) {
+                    manager.editSaving = false;
+                }
                 if (submitButton) {
                     submitButton.disabled = false;
                     submitButton.textContent = submitButton.dataset.originalText || 'Save Changes';
@@ -859,6 +888,11 @@
         };
 
         window.closeDeploymentEditModal = function() {
+            if (window.__deploymentManager?.closeEditModal) {
+                window.__deploymentManager.closeEditModal();
+                return;
+            }
+
             const modal = document.getElementById('editDeploymentModal');
 
             if (!modal) {
