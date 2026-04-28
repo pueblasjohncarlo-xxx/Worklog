@@ -5,7 +5,11 @@
 
     <div class="space-y-6">
         <div class="flex justify-between items-center">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Latest News</h2>
+            <h2 class="text-xl font-bold tracking-tight text-white">
+                <span class="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 shadow-sm ring-1 ring-slate-700/80 transition-colors dark:bg-slate-100 dark:text-slate-950 dark:ring-slate-300">
+                    Latest News
+                </span>
+            </h2>
         </div>
 
         <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md border border-gray-200 dark:border-gray-700">

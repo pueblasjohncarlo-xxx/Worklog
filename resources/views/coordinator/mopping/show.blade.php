@@ -42,7 +42,7 @@
                             </div>
                             <button type="submit" class="h-[42px] rounded-md bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700">Apply</button>
                         </form>
-                        <button type="button" onclick="window.print()" class="h-[42px] rounded-md bg-gray-900 px-4 text-sm font-semibold text-white hover:bg-black">Print</button>
+                        <button type="button" onclick="window.print()" class="h-[42px] rounded-md bg-indigo-700 px-4 text-sm font-bold text-white shadow-sm ring-1 ring-indigo-500 transition-colors hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 active:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-300 dark:text-slate-950 dark:ring-indigo-200 dark:hover:bg-indigo-200 dark:focus:ring-indigo-300 dark:focus:ring-offset-gray-800 dark:active:bg-indigo-400">Print</button>
                     </div>
                 </div>
 
@@ -155,12 +155,12 @@
                                             <td class="px-4 py-3 text-sm font-black text-gray-900 dark:text-gray-100">{{ ucfirst($log->status === 'rejected' ? 'declined' : ($log->status ?? 'unknown')) }}</td>
                                             <td class="space-x-2 px-4 py-3 text-right text-sm">
                                                 @if($log->attachment_path)
-                                                    <a href="{{ route('coordinator.worklogs.attachment', ['workLog' => $log->id, 'inline' => 1, 'v' => optional($log->updated_at)->timestamp ?? $log->id]) }}" target="_blank" class="font-black text-indigo-700 hover:underline dark:text-indigo-300">View</a>
+                                                    <a href="{{ route('coordinator.worklogs.attachment', ['workLog' => $log->id, 'inline' => 1, 'v' => optional($log->updated_at)->timestamp ?? $log->id]) }}" target="_blank" class="inline-flex items-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-bold text-white shadow-sm ring-1 ring-slate-700 transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-950 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-950 dark:ring-slate-300 dark:hover:bg-white dark:focus:ring-slate-500 dark:focus:ring-offset-gray-800 dark:active:bg-slate-200">View</a>
                                                 @else
-                                                    <a href="{{ route('coordinator.worklogs.print', $log->id) }}" target="_blank" class="font-black text-indigo-700 hover:underline dark:text-indigo-300">View</a>
+                                                    <a href="{{ route('coordinator.worklogs.print', $log->id) }}" target="_blank" class="inline-flex items-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-bold text-white shadow-sm ring-1 ring-slate-700 transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-950 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-950 dark:ring-slate-300 dark:hover:bg-white dark:focus:ring-slate-500 dark:focus:ring-offset-gray-800 dark:active:bg-slate-200">View</a>
                                                 @endif
                                                 @if($log->attachment_path)
-                                                    <a href="{{ route('coordinator.worklogs.attachment', ['workLog' => $log->id, 'v' => optional($log->updated_at)->timestamp ?? $log->id]) }}" class="font-black text-gray-800 hover:underline dark:text-gray-200">Download</a>
+                                                    <a href="{{ route('coordinator.worklogs.attachment', ['workLog' => $log->id, 'v' => optional($log->updated_at)->timestamp ?? $log->id]) }}" class="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-xs font-bold text-slate-900 shadow-sm ring-1 ring-slate-300 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-500 dark:focus:ring-offset-gray-800 dark:active:bg-slate-600">Download</a>
                                                 @endif
                                             </td>
                                         </tr>

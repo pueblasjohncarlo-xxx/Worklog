@@ -242,7 +242,7 @@
                                     @foreach($pendingTaskReviews as $task)
                                         <tr class="group hover:bg-gray-50 transition-colors">
                                             <td class="py-4 font-bold text-black">
-                                                {{ $assignment->student->name }}
+                                                {{ $task->assignment?->student?->name ?? 'Unknown Student' }}
                                             </td>
                                             <td class="py-4 text-black font-medium">
                                                 <div class="font-bold">{{ $task->title }}</div>
@@ -264,21 +264,21 @@
                                                         @csrf
                                                         <div class="flex items-center gap-1">
                                                             <input type="text" name="grade" list="grades-{{ $task->id }}" placeholder="Score" required
-                                                                class="w-24 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-emerald-500 focus:border-emerald-500 text-center font-bold text-gray-900 bg-white placeholder-gray-500" 
+                                                                class="w-24 rounded-lg border border-slate-300 bg-white px-2 py-2 text-center text-xs font-bold text-slate-950 placeholder-slate-500 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1" 
                                                                 title="Enter Grade/Score">
                                                             <datalist id="grades-{{ $task->id }}">
                                                                 <option value="10/10">
                                                                 <option value="50/50">
                                                                 <option value="100/100">
                                                             </datalist>
-                                                            <button type="submit" class="px-3 py-1 bg-emerald-600 text-white border border-emerald-600 rounded text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm">
+                                                            <button type="submit" class="inline-flex min-h-[2.25rem] items-center rounded-lg border border-emerald-700 bg-emerald-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 active:bg-emerald-900">
                                                                 Approve
                                                             </button>
                                                         </div>
                                                     </form>
                                                     
                                                     <!-- Feedback Button (Yellow/Orange) -->
-                                                    <button @click="showFeedbackModal = true" type="button" class="px-3 py-2 bg-amber-600 text-white border border-amber-600 rounded text-xs font-bold hover:bg-amber-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
+                                                    <button @click="showFeedbackModal = true" type="button" class="inline-flex min-h-[2.25rem] items-center rounded-lg border border-amber-700 bg-amber-600 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 active:bg-amber-800">
                                                         Notes
                                                     </button>
 
@@ -351,58 +351,104 @@
                     @if($recentTasks->isEmpty())
                         <p class="text-gray-500 font-medium">No recent tasks assigned.</p>
                     @else
-                         <div class="overflow-x-auto">
+                         <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
                             <table class="w-full text-left text-sm">
-                                <thead class="border-b border-gray-200">
+                                <thead class="border-b border-slate-200 bg-slate-100/90">
                                     <tr>
-                                        <th class="py-3 font-black text-black uppercase tracking-wider">Title</th>
-                                        <th class="py-3 font-black text-black uppercase tracking-wider">Student</th>
-                                        <th class="py-3 font-black text-black uppercase tracking-wider">Due Date</th>
-                                        <th class="py-3 font-black text-black uppercase tracking-wider">Status</th>
-                                        <th class="py-3 font-black text-black uppercase tracking-wider text-right">Actions</th>
+                                        <th class="px-4 py-3 font-black text-slate-900 uppercase tracking-[0.16em]">Title</th>
+                                        <th class="px-4 py-3 font-black text-slate-900 uppercase tracking-[0.16em]">Student</th>
+                                        <th class="px-4 py-3 font-black text-slate-900 uppercase tracking-[0.16em]">Due Date</th>
+                                        <th class="px-4 py-3 font-black text-slate-900 uppercase tracking-[0.16em]">Grade</th>
+                                        <th class="px-4 py-3 font-black text-slate-900 uppercase tracking-[0.16em]">Status</th>
+                                        <th class="px-4 py-3 font-black text-slate-900 uppercase tracking-[0.16em] text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200">
+                                <tbody class="divide-y divide-slate-200 bg-white">
                                     @foreach($recentTasks as $task)
+                                        @php
+                                            $recentTaskStatusLabel = match ($task->status) {
+                                                'in_progress' => 'In Progress',
+                                                'approved' => 'Approved',
+                                                'submitted' => 'Submitted',
+                                                'rejected' => 'Rejected',
+                                                'completed' => 'Completed',
+                                                default => ucwords(str_replace('_', ' ', (string) $task->status)),
+                                            };
+
+                                            $canEditRecentTask = in_array($task->status, ['pending', 'in_progress'], true) && $task->submitted_at === null;
+                                            $hasSubmission = ! empty($task->attachment_path) && ($task->submitted_at !== null || in_array($task->status, ['submitted', 'approved', 'rejected'], true));
+                                            $hasDueDate = ! empty($task->due_date);
+                                            $isOverdue = in_array($task->status, ['pending', 'in_progress'], true) && $hasDueDate && $task->due_date->isPast();
+                                        @endphp
                                         <tr class="group hover:bg-gray-50 transition-colors">
-                                            <td class="py-4 font-black text-black">
-                                                {{ $task->title }}
-                                                @if($task->grade)
-                                                    <div class="text-xs text-emerald-800 font-black mt-1">Grade: {{ $task->grade }}</div>
-                                                @endif
+                                            <td class="px-4 py-4 align-top">
+                                                <div class="space-y-2">
+                                                    <div class="font-black text-slate-950">{{ $task->title }}</div>
+                                                    <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700">
+                                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 ring-1 ring-slate-200">
+                                                            {{ $task->semester ? strtoupper($task->semester) . ' Semester' : 'Semester N/A' }}
+                                                        </span>
+                                                        @if($isOverdue)
+                                                            <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-amber-900 ring-1 ring-amber-300">
+                                                                ! Overdue
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </td>
-                                            <td class="py-4 text-black font-bold">
-                                                <div class="flex items-center gap-2">
+                                            <td class="px-4 py-4 align-top text-slate-950 font-bold">
+                                                <div class="flex flex-wrap items-center gap-2">
                                                     <span>{{ $task->assignment->student->name }}</span>
                                                     <x-user-role-badge role="student" />
                                                 </div>
                                             </td>
-                                            <td class="py-4 text-black font-medium">{{ $task->due_date ? $task->due_date->format('M d, Y') : '-' }}</td>
-                                            <td class="py-4">
-                                                @php
-                                                    $taskStatusLabel = match ($task->status) {
-                                                        'in_progress' => 'In Progress',
-                                                        'approved' => 'Approved',
-                                                        'submitted' => 'Submitted',
-                                                        'rejected' => 'Rejected',
-                                                        'completed' => 'Completed',
-                                                        default => ucwords(str_replace('_', ' ', (string) $task->status)),
-                                                    };
-                                                @endphp
-                                                <div class="inline-flex min-w-[9.5rem] flex-col items-start gap-1 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 shadow-sm">
-                                                    <span class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">Task Status</span>
-                                                    <x-status-badge :status="$task->status" :label="$taskStatusLabel" size="sm" class="shadow-sm ring-1 ring-slate-400/70" />
+                                            <td class="px-4 py-4 align-top text-slate-900">
+                                                <div class="font-bold">{{ $task->due_date ? $task->due_date->format('M d, Y') : 'No due date' }}</div>
+                                                <div class="mt-1 text-xs font-semibold text-slate-600">
+                                                    {{ $task->due_date ? $task->due_date->format('D') : 'Flexible schedule' }}
                                                 </div>
                                             </td>
-                                            <td class="py-4 text-right">
-                                                @if($task->status === 'approved')
-                                                    <form action="{{ route('supervisor.tasks.unapprove', $task) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        <button type="submit" class="inline-flex items-center rounded-lg bg-rose-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2" onclick="return confirm('Are you sure you want to cancel the approval for this task?');">
-                                                            Cancel Approval
-                                                        </button>
-                                                    </form>
-                                                @endif
+                                            <td class="px-4 py-4 align-top">
+                                                <div class="inline-flex min-w-[7.5rem] flex-col items-start gap-1 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 shadow-sm">
+                                                    <span class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">Grade</span>
+                                                    <span class="text-sm font-black text-slate-950">{{ $task->grade ?: 'Not graded' }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 align-top">
+                                                <div class="inline-flex min-w-[10rem] flex-col items-start gap-1 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 shadow-sm">
+                                                    <span class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">Task Status</span>
+                                                    <x-status-badge :status="$task->status" :label="$recentTaskStatusLabel" size="sm" class="shadow-sm ring-1 ring-slate-400/70" />
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 align-top text-right">
+                                                <div class="flex flex-wrap justify-end gap-2">
+                                                    @if($canEditRecentTask)
+                                                        <a href="{{ route('supervisor.tasks.edit', $task) }}" class="inline-flex min-h-[2.25rem] items-center rounded-lg border border-slate-800 bg-slate-800 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 active:bg-black">
+                                                            Edit
+                                                        </a>
+                                                    @endif
+
+                                                    @if($hasSubmission)
+                                                        <a href="{{ route('supervisor.tasks.submission.view', $task) }}" target="_blank" class="inline-flex min-h-[2.25rem] items-center rounded-lg border border-sky-700 bg-sky-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 active:bg-sky-900">
+                                                            View Submission
+                                                        </a>
+                                                    @endif
+
+                                                    @if($task->status === 'approved')
+                                                        <form action="{{ route('supervisor.tasks.unapprove', $task) }}" method="POST" class="inline">
+                                                            @csrf
+                                                            <button type="submit" class="inline-flex min-h-[2.25rem] items-center rounded-lg border border-rose-700 bg-rose-700 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 active:bg-rose-900" onclick="return confirm('Are you sure you want to cancel the approval for this task?');">
+                                                                Cancel Approval
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
+                                                    @if(! $canEditRecentTask && ! $hasSubmission && $task->status !== 'approved')
+                                                        <span class="inline-flex min-h-[2.25rem] items-center rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-700">
+                                                            No actions
+                                                        </span>
+                                                    @endif
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

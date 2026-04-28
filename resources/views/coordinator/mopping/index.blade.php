@@ -69,10 +69,10 @@
                                     </td>
                                     <td class="px-4 py-4 text-right">
                                         <div class="inline-flex items-center gap-2">
-                                            <a href="{{ route('coordinator.mapping.show', ['assignment' => $assignment->id, 'from' => $monthKey, 'to' => $monthKey, 'month' => $monthKey]) }}" class="inline-flex items-center rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black">
+                                            <a href="{{ route('coordinator.mapping.show', ['assignment' => $assignment->id, 'from' => $monthKey, 'to' => $monthKey, 'month' => $monthKey]) }}" class="inline-flex items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-bold text-white shadow-sm ring-1 ring-slate-700 transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-950 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-950 dark:ring-slate-300 dark:hover:bg-white dark:focus:ring-slate-500 dark:focus:ring-offset-gray-800 dark:active:bg-slate-200">
                                                 View
                                             </a>
-                                            <a href="{{ route('coordinator.mapping.show', ['assignment' => $assignment->id, 'from' => $monthKey, 'to' => $monthKey, 'month' => $monthKey, 'print' => 1]) }}" target="_blank" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">
+                                            <a href="{{ route('coordinator.mapping.show', ['assignment' => $assignment->id, 'from' => $monthKey, 'to' => $monthKey, 'month' => $monthKey, 'print' => 1]) }}" target="_blank" class="inline-flex items-center rounded-md bg-indigo-700 px-3 py-2 text-sm font-bold text-white shadow-sm ring-1 ring-indigo-500 transition-colors hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 active:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-300 dark:text-slate-950 dark:ring-indigo-200 dark:hover:bg-indigo-200 dark:focus:ring-indigo-300 dark:focus:ring-offset-gray-800 dark:active:bg-indigo-400">
                                                 Print
                                             </a>
                                         </div>

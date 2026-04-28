@@ -105,7 +105,11 @@
 
         <!-- Administrative Sections -->
         <div class="space-y-4">
-            <h3 class="px-1 text-xl font-bold text-gray-900 dark:text-gray-100">Administrative Roles</h3>
+            <h3 class="px-1 text-xl font-bold tracking-tight text-white">
+                <span class="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 shadow-sm ring-1 ring-slate-700/80 transition-colors dark:bg-slate-100 dark:text-slate-950 dark:ring-slate-300">
+                    Administrative Roles
+                </span>
+            </h3>
             
             <!-- Admins -->
             <div x-data="{ open: true }" class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -191,7 +195,11 @@
         <!-- OJT Student Sections -->
         <div class="space-y-4 border-t border-gray-200 pt-4 dark:border-gray-700">
             <div class="flex items-center justify-between px-1">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">OJT Student Roster</h3>
+                <h3 class="text-xl font-bold tracking-tight text-white">
+                    <span class="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 shadow-sm ring-1 ring-slate-700/80 transition-colors dark:bg-slate-100 dark:text-slate-950 dark:ring-slate-300">
+                        OJT Student Roster
+                    </span>
+                </h3>
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Grouped by Section</span>
             </div>
 
