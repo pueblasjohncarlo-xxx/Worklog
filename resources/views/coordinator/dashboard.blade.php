@@ -241,6 +241,11 @@
                                     </div>
 
                                     <div class="space-y-3">
+                                        <div class="rounded-lg border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-100">
+                                            <span class="font-bold uppercase tracking-[0.14em] text-emerald-200">Section Details</span>
+                                            <span class="ml-2">Showing students from {{ $section }} who currently need coordinator follow-up.</span>
+                                        </div>
+
                                         @foreach($students as $student)
                                             @php
                                                 $studentSearch = strtolower(implode(' ', [
@@ -307,6 +312,16 @@
                                                 @endif
                                             </div>
                                         @endforeach
+
+                                        <div
+                                            x-show="search && !Array.from($el.parentElement.querySelectorAll('[x-show]')).some((node) => {
+                                                if (node === $el) return false;
+                                                return node.style.display !== 'none';
+                                            })"
+                                            class="rounded-lg border border-dashed border-white/15 bg-black/20 px-4 py-5 text-center text-sm text-slate-300"
+                                        >
+                                            No students matched your search in {{ $section }}.
+                                        </div>
                                     </div>
                                 </div>
                             </div>
