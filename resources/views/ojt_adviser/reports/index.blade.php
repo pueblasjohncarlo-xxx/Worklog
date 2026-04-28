@@ -58,31 +58,31 @@
         </div>
 
         <!-- Student Progress Summary -->
-        <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-xl backdrop-blur-md">
-            <div class="p-6 border-b border-white/10">
+        <div class="rounded-2xl overflow-hidden border border-slate-200/80 bg-white shadow-xl ring-1 ring-slate-200/70 dark:border-slate-700/80 dark:bg-slate-900 dark:ring-slate-700/70">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-700">
                 <h3 class="text-lg font-bold text-white">OJT Completion Status</h3>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-black/30">
+                    <thead class="bg-slate-100 dark:bg-slate-800">
                         <tr>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Student</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Company</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Target Hours</th>
-                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-[0.18em] border-b border-slate-200 dark:border-slate-700">Student</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-[0.18em] border-b border-slate-200 dark:border-slate-700">Company</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-[0.18em] border-b border-slate-200 dark:border-slate-700">Target Hours</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-[0.18em] border-b border-slate-200 dark:border-slate-700">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/5">
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
                         @foreach($assignments as $assignment)
-                            <tr class="hover:bg-white/5 transition-colors">
-                                <td class="px-6 py-4 text-gray-200">{{ $assignment->student->name }}</td>
-                                <td class="px-6 py-4 text-gray-400">{{ $assignment->company->name }}</td>
-                                <td class="px-6 py-4 text-indigo-400 font-bold">{{ $assignment->required_hours }}h</td>
+                            <tr class="bg-white even:bg-slate-50/80 hover:bg-indigo-50/70 transition-colors dark:bg-slate-900 dark:even:bg-slate-800/70 dark:hover:bg-slate-800">
+                                <td class="px-6 py-4 font-semibold text-slate-900 dark:text-slate-100">{{ $assignment->student->name }}</td>
+                                <td class="px-6 py-4 text-slate-700 dark:text-slate-300">{{ $assignment->company->name }}</td>
+                                <td class="px-6 py-4 text-indigo-700 dark:text-indigo-300 font-black">{{ $assignment->required_hours }}h</td>
                                 <td class="px-6 py-4">
                                     @if($assignment->progressPercentage() >= 100)
-                                        <span class="text-emerald-400 font-bold">COMPLETED</span>
+                                        <span class="text-emerald-700 dark:text-emerald-300 font-black">COMPLETED</span>
                                     @else
-                                        <span class="text-amber-400 font-bold">IN PROGRESS ({{ $assignment->progressPercentage() }}%)</span>
+                                        <span class="text-amber-700 dark:text-amber-300 font-black">IN PROGRESS ({{ $assignment->progressPercentage() }}%)</span>
                                     @endif
                                 </td>
                             </tr>

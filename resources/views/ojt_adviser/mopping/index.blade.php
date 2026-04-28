@@ -68,7 +68,7 @@
                                         @endif
                                     </td>
                                     <td class="px-4 py-4 text-right">
-                                        <a href="{{ route('ojt_adviser.mapping.show', ['assignment' => $assignment->id, 'from' => $monthKey, 'to' => $monthKey, 'month' => $monthKey]) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-gray-900 text-white text-sm font-semibold hover:bg-black">
+                                        <a href="{{ route('ojt_adviser.mapping.show', ['assignment' => $assignment->id, 'from' => $monthKey, 'to' => $monthKey, 'month' => $monthKey]) }}" class="inline-flex items-center px-3 py-2 rounded-md bg-gray-900 !text-white text-sm font-bold hover:bg-black hover:!text-white focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-950 active:!text-white disabled:opacity-60 disabled:!text-white">
                                             View
                                         </a>
                                     </td>
