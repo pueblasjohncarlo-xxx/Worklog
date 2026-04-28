@@ -271,6 +271,17 @@ class DashboardController extends Controller
                 ->filter(fn ($row) => $row['status'] === 'Needs Attention')
                 ->values();
 
+            $studentsNeedingAttentionBySection = collect(User::STUDENT_SECTIONS)
+                ->mapWithKeys(function (string $section) use ($studentsNeedingAttention) {
+                    return [
+                        $section => $studentsNeedingAttention
+                            ->filter(fn ($row) => ($row['section'] ?? '') === $section)
+                            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                            ->values(),
+                    ];
+                })
+                ->filter(fn (Collection $rows) => $rows->isNotEmpty());
+
             $incompleteLogsCount = $studentDashboardRows->filter(function ($row) {
                 return ! $row['daily_submitted'] || ! $row['weekly_submitted'] || ! $row['monthly_submitted'];
             })->count();
@@ -302,6 +313,16 @@ class DashboardController extends Controller
                         'section' => $section,
                     ];
                 });
+
+            $recentActivityBySection = collect(User::STUDENT_SECTIONS)
+                ->mapWithKeys(function (string $section) use ($recentActivity) {
+                    return [
+                        $section => $recentActivity
+                            ->filter(fn ($row) => ($row['section'] ?? '') === $section)
+                            ->values(),
+                    ];
+                })
+                ->filter(fn (Collection $rows) => $rows->isNotEmpty());
 
             $adviserBuckets = $activeAssignments
                 ->filter(fn ($assignment) => ! is_null($assignment->ojt_adviser_id))
@@ -358,9 +379,11 @@ class DashboardController extends Controller
             'pendingAccomplishmentReports' => $pendingAccomplishmentReports,
             'incompleteLogsCount' => $incompleteLogsCount,
             'studentsNeedingAttention' => $studentsNeedingAttention,
+            'studentsNeedingAttentionBySection' => $studentsNeedingAttentionBySection ?? collect(),
             'sectionProgress' => $sectionProgress,
             'attendanceTrend' => $attendanceTrend,
             'recentActivity' => $recentActivity,
+            'recentActivityBySection' => $recentActivityBySection ?? collect(),
             'sectionReportOverview' => $sectionReportOverview,
             'ojtAdvisers' => $ojtAdvisers,
             'currentRequiredHours' => $currentRequiredHours,

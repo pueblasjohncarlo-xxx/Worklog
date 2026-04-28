@@ -14,11 +14,18 @@ class StudentAnnouncementController extends Controller
     public function index(): View
     {
         $user = Auth::user();
+        $recipientTargetingEnabled = Announcement::recipientsTableExists();
 
         $assignment = Assignment::resolveActiveForStudent($user->id);
         $supervisorId = $assignment?->supervisor_id;
 
-        $announcements = Announcement::with(['user', 'recipients:id,name'])
+        $withRelations = ['user'];
+
+        if ($recipientTargetingEnabled) {
+            $withRelations[] = 'recipients:id,name';
+        }
+
+        $announcements = Announcement::with($withRelations)
             ->where(function ($query) {
             // Announcements from Coordinators (audience 'all' or 'students')
                 $query->whereHas('user', function ($q) {
@@ -28,13 +35,16 @@ class StudentAnnouncementController extends Controller
                 // Announcements from MY Supervisor (legacy all-student posts or targeted recipient posts)
                 if ($supervisorId) {
                     $query->where('user_id', $supervisorId)
-                        ->where('audience', 'students')
-                        ->where(function ($supervisorAnnouncements) use ($user) {
+                        ->where('audience', 'students');
+
+                    if (Announcement::recipientsTableExists()) {
+                        $query->where(function ($supervisorAnnouncements) use ($user) {
                             $supervisorAnnouncements->whereDoesntHave('recipients')
                                 ->orWhereHas('recipients', function ($recipientQuery) use ($user) {
                                     $recipientQuery->where('users.id', $user->id);
                                 });
                         });
+                    }
                 }
             })
             ->latest()

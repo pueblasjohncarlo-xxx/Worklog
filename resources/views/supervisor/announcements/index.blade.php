@@ -49,9 +49,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                         </svg>
                                         @if($announcement->user_id === auth()->id())
-                                            @php
-                                                $recipientCount = $announcement->recipients->count();
-                                            @endphp
+                                            @php($recipientCount = $recipientTargetingEnabled ? $announcement->recipients->count() : 0)
                                             To:
                                             {{ $recipientCount > 0 ? $recipientCount.' selected student'.($recipientCount === 1 ? '' : 's') : 'Assigned OJT Students' }}
                                         @else
@@ -87,7 +85,7 @@
                                                     </span>
                                                     @if($announcement->user_id === auth()->id())
                                                         <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 ring-1 ring-slate-200 dark:bg-slate-700 dark:text-slate-100 dark:ring-slate-600">
-                                                            Recipients: {{ $announcement->recipients->count() > 0 ? $announcement->recipients->count().' selected' : 'Assigned OJT Students' }}
+                                                            Recipients: {{ $recipientTargetingEnabled && $announcement->recipients->count() > 0 ? $announcement->recipients->count().' selected' : 'Assigned OJT Students' }}
                                                         </span>
                                                     @else
                                                         <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 ring-1 ring-slate-200 dark:bg-slate-700 dark:text-slate-100 dark:ring-slate-600">
@@ -114,7 +112,7 @@
                                             {{ $announcement->content }}
                                         </div>
 
-                                        @if($announcement->user_id === auth()->id() && $announcement->recipients->isNotEmpty())
+                                        @if($recipientTargetingEnabled && $announcement->user_id === auth()->id() && $announcement->recipients->isNotEmpty())
                                             <div>
                                                 <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-600 dark:text-slate-300">Selected Students</p>
                                                 <div class="mt-2 flex flex-wrap gap-2">

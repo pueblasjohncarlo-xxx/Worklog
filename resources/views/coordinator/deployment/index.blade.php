@@ -211,10 +211,21 @@
                     box-shadow: none !important;
                 }
 
+                .deployment-create-form .select2-container {
+                    width: 100% !important;
+                }
+
                 .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__rendered,
-                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__rendered {
+                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__rendered,
+                .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single .select2-selection__rendered {
                     color: #111827 !important;
                     font-weight: 700;
+                }
+
+                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__rendered {
+                    line-height: 42px !important;
+                    padding-left: 0.85rem !important;
+                    padding-right: 2.25rem !important;
                 }
 
                 .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__placeholder,
@@ -223,6 +234,14 @@
                     color: #475569 !important;
                     font-weight: 700;
                     opacity: 1;
+                }
+
+                .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single,
+                .deployment-create-form .select2-container--default .select2-selection--single[aria-disabled="true"] {
+                    background: #e5e7eb !important;
+                    border-color: #cbd5e1 !important;
+                    color: #0f172a !important;
+                    opacity: 1 !important;
                 }
 
                 .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -234,6 +253,10 @@
 
                 .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__arrow b {
                     border-color: #475569 transparent transparent transparent !important;
+                }
+
+                .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single .select2-selection__arrow b {
+                    border-color: #334155 transparent transparent transparent !important;
                 }
 
                 .deployment-management-page .select2-container--default.select2-container--focus .select2-selection--single,
@@ -312,6 +335,29 @@
 
                 .dark .select2-container--default .select2-search--dropdown .select2-search__field::placeholder {
                     color: #cbd5e1 !important;
+                }
+
+                .dark .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__rendered,
+                .dark .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__rendered,
+                .dark .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single .select2-selection__rendered {
+                    color: #f8fafc !important;
+                }
+
+                .dark .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__placeholder,
+                .dark .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field,
+                .dark .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field::placeholder {
+                    color: #cbd5e1 !important;
+                }
+
+                .dark .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single,
+                .dark .deployment-create-form .select2-container--default .select2-selection--single[aria-disabled="true"] {
+                    background: #334155 !important;
+                    border-color: #64748b !important;
+                    color: #f8fafc !important;
+                }
+
+                .dark .deployment-create-form .select2-container--default.select2-container--disabled .select2-selection--single .select2-selection__arrow b {
+                    border-color: #e2e8f0 transparent transparent transparent !important;
                 }
 
                 .dark .select2-results__option {
@@ -865,6 +911,10 @@
             }
         }
 
+        const deploymentSupervisorLookup = Object.fromEntries(
+            readDeploymentJson('deployment-supervisors', []).map((supervisor) => [String(supervisor.id), supervisor])
+        );
+
         function coordinatorDeploymentManager() {
             return {
                 init() {
@@ -1218,9 +1268,20 @@
                     closeOnSelect: false,
                 });
             }
-            $('#supervisor_id').select2({ width: '100%' });
-            $('#ojt_adviser_id').select2({ width: '100%' });
-            $('#company_id_display').select2({ width: '100%' });
+            $('#supervisor_id').select2({
+                width: '100%',
+                placeholder: 'Select supervisor',
+            });
+            $('#ojt_adviser_id').select2({
+                width: '100%',
+                placeholder: 'Select adviser (optional)',
+                allowClear: true,
+            });
+            $('#company_id_display').select2({
+                width: '100%',
+                placeholder: 'Select company',
+                minimumResultsForSearch: Infinity,
+            });
 
             $('#supervisor_id').on('change', syncCompanyFromSupervisor);
             syncCompanyFromSupervisor();
@@ -1268,7 +1329,7 @@
         function setCompanyValue(companyId) {
             const value = companyId ? String(companyId) : '';
             $('#company_id').val(value);
-            $('#company_id_display').val(value).trigger('change.select2');
+            $('#company_id_display').val(value).trigger('change.select2').trigger('change');
         }
 
         function syncCompanyFromSupervisor() {
@@ -1285,8 +1346,18 @@
                 $(`#supervisor_id option[value="${supervisorId}"]`)
             );
 
-            const selectedCompanyIds = [...new Set(selectedSupervisorOptions.map((option) => {
-                return option.data('company-id') ? String(option.data('company-id')) : '';
+            const selectedSupervisorRecords = selectedSupervisorIds.map((supervisorId, index) => {
+                const option = selectedSupervisorOptions[index];
+                const mappedSupervisor = deploymentSupervisorLookup[String(supervisorId)] || {};
+
+                return {
+                    company_id: mappedSupervisor.company_id || option.data('company-id') || '',
+                    company_name: mappedSupervisor.company_name || option.data('company-name') || '',
+                };
+            });
+
+            const selectedCompanyIds = [...new Set(selectedSupervisorRecords.map((record) => {
+                return record.company_id ? String(record.company_id) : '';
             }))];
 
             if (selectedCompanyIds.includes('')) {
@@ -1303,7 +1374,7 @@
                 return false;
             }
 
-            const resolvedCompanyName = String(selectedSupervisorOptions[0].data('company-name') || '').trim();
+            const resolvedCompanyName = String(selectedSupervisorRecords[0].company_name || '').trim();
 
             setCompanyValue(selectedCompanyIds[0]);
             setSupervisorValidationMessage('');

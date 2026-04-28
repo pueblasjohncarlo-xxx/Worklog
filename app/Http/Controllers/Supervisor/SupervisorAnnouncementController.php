@@ -18,7 +18,14 @@ class SupervisorAnnouncementController extends Controller
 {
     public function index(): View
     {
-        $announcements = Announcement::with(['user', 'recipients:id,name'])
+        $recipientTargetingEnabled = Announcement::recipientsTableExists();
+        $withRelations = ['user'];
+
+        if ($recipientTargetingEnabled) {
+            $withRelations[] = 'recipients:id,name';
+        }
+
+        $announcements = Announcement::with($withRelations)
             ->where('user_id', Auth::id())
             ->orWhere(function ($query) {
                 // Announcements from Coordinators (audience 'all' or 'supervisors')
@@ -29,7 +36,7 @@ class SupervisorAnnouncementController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('supervisor.announcements.index', compact('announcements'));
+        return view('supervisor.announcements.index', compact('announcements', 'recipientTargetingEnabled'));
     }
 
     public function create(): View
@@ -56,6 +63,13 @@ class SupervisorAnnouncementController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if (! Announcement::recipientsTableExists()) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('status', 'Recipient targeting is temporarily unavailable until the latest announcements migration is applied.');
+        }
+
         $supervisorId = (int) Auth::id();
         $activeStudentIds = Assignment::rosterForSupervisor($supervisorId)
             ->pluck('student_id')

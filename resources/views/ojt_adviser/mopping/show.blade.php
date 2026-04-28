@@ -34,7 +34,7 @@
                             </div>
                             <button type="submit" class="h-[42px] px-4 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700">Apply</button>
                         </form>
-                        <button type="button" onclick="window.print()" class="h-[42px] px-4 rounded-md bg-gray-900 text-white text-sm font-semibold hover:bg-black">Print</button>
+                        <button type="button" onclick="window.print()" class="h-[42px] px-4 rounded-md border border-slate-700 bg-slate-950 !text-white text-sm font-bold tracking-wide shadow-sm transition-colors hover:bg-slate-800 hover:!text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 active:bg-black active:!text-white dark:border-slate-500 dark:bg-slate-100 dark:!text-slate-950 dark:hover:bg-white dark:hover:!text-slate-950 dark:active:bg-slate-200">Print</button>
                     </div>
                 </div>
 

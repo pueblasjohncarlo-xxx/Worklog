@@ -21,6 +21,7 @@
             <script src="https://cdn.tailwindcss.com"></script>
             <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
         @endif
+        @include('layouts.partials.theme-mode')
         
         <!-- Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -59,7 +60,7 @@
         </style>
         @include('layouts.partials.ui-visibility-hardening')
     </head>
-    <body class="worklog-ui-hardening admin-shell font-sans antialiased bg-gradient-to-br from-purple-900 via-indigo-950 to-black text-gray-100 h-auto bg-fixed shimmer-bg overflow-x-hidden">
+    <body class="worklog-ui-hardening worklog-theme-shell admin-shell font-sans antialiased h-auto bg-fixed shimmer-bg overflow-x-hidden">
         <div x-data="{ sidebarOpen: false }" class="flex flex-row items-start">
             <!-- Sidebar -->
             @include('layouts.admin-sidebar')
