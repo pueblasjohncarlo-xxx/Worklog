@@ -92,19 +92,131 @@
                 </div>
             </div>
             
-            <form id="deploymentForm" method="POST" action="{{ route('coordinator.deployment.store') }}" class="space-y-4">
+            <style>
+                .deployment-create-form .deployment-field-label {
+                    color: #111827;
+                    font-weight: 800;
+                }
+
+                .dark .deployment-create-form .deployment-field-label {
+                    color: #f9fafb;
+                }
+
+                .deployment-create-form .deployment-helper-text,
+                .deployment-create-form .deployment-status-note {
+                    color: #334155;
+                    font-weight: 600;
+                }
+
+                .dark .deployment-create-form .deployment-helper-text,
+                .dark .deployment-create-form .deployment-status-note {
+                    color: #d1d5db;
+                }
+
+                .deployment-create-form .deployment-input,
+                .deployment-create-form .deployment-select {
+                    color: #111827;
+                    font-weight: 600;
+                }
+
+                .deployment-create-form .deployment-input::placeholder {
+                    color: #475569;
+                    font-weight: 600;
+                    opacity: 1;
+                }
+
+                .dark .deployment-create-form .deployment-input,
+                .dark .deployment-create-form .deployment-select {
+                    color: #f9fafb;
+                }
+
+                .dark .deployment-create-form .deployment-input::placeholder {
+                    color: #cbd5e1;
+                }
+
+                .deployment-create-form .deployment-select:disabled {
+                    color: #0f172a;
+                    background-color: #e5e7eb;
+                    font-weight: 700;
+                    opacity: 1;
+                    -webkit-text-fill-color: #0f172a;
+                }
+
+                .dark .deployment-create-form .deployment-select:disabled {
+                    color: #f8fafc;
+                    background-color: #475569;
+                    -webkit-text-fill-color: #f8fafc;
+                }
+
+                .deployment-create-form .deployment-error-text {
+                    color: #b91c1c;
+                    font-weight: 700;
+                }
+
+                .dark .deployment-create-form .deployment-error-text {
+                    color: #fca5a5;
+                }
+
+                .deployment-create-form .select2-container--default .select2-selection--multiple,
+                .deployment-create-form .select2-container--default .select2-selection--single {
+                    min-height: 44px;
+                    border-color: #cbd5e1 !important;
+                    background: #ffffff !important;
+                    color: #111827 !important;
+                }
+
+                .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__rendered,
+                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__rendered {
+                    color: #111827 !important;
+                    font-weight: 600;
+                }
+
+                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__placeholder,
+                .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field::placeholder {
+                    color: #475569 !important;
+                    font-weight: 600;
+                    opacity: 1;
+                }
+
+                .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__choice {
+                    background: #e0e7ff !important;
+                    border-color: #a5b4fc !important;
+                    color: #312e81 !important;
+                    font-weight: 700;
+                }
+
+                .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__arrow b {
+                    border-color: #475569 transparent transparent transparent !important;
+                }
+
+                .select2-dropdown {
+                    border-color: #cbd5e1 !important;
+                }
+
+                .select2-results__option {
+                    color: #111827 !important;
+                    font-weight: 600;
+                }
+
+                .select2-results__option--highlighted[aria-selected] {
+                    background: #312e81 !important;
+                    color: #ffffff !important;
+                }
+            </style>
+
+            <form id="deploymentForm" method="POST" action="{{ route('coordinator.deployment.store') }}" class="deployment-create-form space-y-4">
                 @csrf
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- OJT Students Search -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">OJT Student(s) <span class="text-rose-600 dark:text-rose-400">*</span></label>
-                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Choose one or more eligible students. Already deployed students are hidden automatically.</p>
+                        <label class="deployment-field-label mb-1 block text-sm">OJT Student(s) <span class="text-rose-600 dark:text-rose-400">*</span></label>
+                        <p class="deployment-helper-text mb-2 text-xs">Choose one or more eligible students. Already deployed students are hidden automatically.</p>
                         @if($groupedStudents->isNotEmpty())
                             <select
                                 id="student_ids"
                                 name="student_ids[]"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                class="deployment-select w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
                                 multiple="multiple"
                                 required
                             >
@@ -119,10 +231,10 @@
                                 @endforeach
                             </select>
                             @error('student_ids')
-                                <p class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">{{ $message }}</p>
+                                <p class="deployment-error-text mt-2 text-xs">{{ $message }}</p>
                             @enderror
                         @else
-                            <div class="w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-3 text-sm text-gray-600 dark:text-gray-300">
+                            <div class="w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-3 text-sm font-semibold text-gray-800 dark:text-gray-100">
                                 No eligible students are available for deployment.
                             </div>
                         @endif
@@ -130,12 +242,12 @@
 
                     <!-- Supervisor -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Supervisor <span class="text-rose-600 dark:text-rose-400">*</span></label>
-                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Selecting a supervisor will automatically load the assigned company.</p>
+                        <label class="deployment-field-label mb-1 block text-sm">Supervisor <span class="text-rose-600 dark:text-rose-400">*</span></label>
+                        <p class="deployment-helper-text mb-2 text-xs">Selecting a supervisor will automatically load the assigned company.</p>
                         <select
                             id="supervisor_id"
                             name="supervisor_id"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                            class="deployment-select w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
                             required
                         >
                             <option value="">Select supervisor</option>
@@ -149,18 +261,18 @@
                             @endforeach
                         </select>
                         @error('supervisor_id')
-                            <p class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">{{ $message }}</p>
+                            <p class="deployment-error-text mt-2 text-xs">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- OJT Adviser -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">OJT Adviser</label>
-                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Optional, but assigning an adviser helps complete the deployment record.</p>
+                        <label class="deployment-field-label mb-1 block text-sm">OJT Adviser</label>
+                        <p class="deployment-helper-text mb-2 text-xs">Optional, but assigning an adviser helps complete the deployment record.</p>
                         <select
                             id="ojt_adviser_id"
                             name="ojt_adviser_id"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                            class="deployment-select w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
                         >
                             <option value="">Select adviser (optional)</option>
                             @foreach ($ojtAdvisers as $adviser)
@@ -171,11 +283,11 @@
 
                     <!-- Company -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Company <span class="text-rose-600 dark:text-rose-400">*</span></label>
-                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">This field is read-only and synced from the selected supervisor.</p>
+                        <label class="deployment-field-label mb-1 block text-sm">Company <span class="text-rose-600 dark:text-rose-400">*</span></label>
+                        <p class="deployment-helper-text mb-2 text-xs">This field is read-only and synced from the selected supervisor.</p>
                         <select
                             id="company_id_display"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 cursor-not-allowed"
+                            class="deployment-select w-full rounded-lg border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-600 focus:border-indigo-500 focus:ring-indigo-500 cursor-not-allowed"
                             disabled
                         >
                             <option value="">Select company</option>
@@ -184,35 +296,35 @@
                             @endforeach
                         </select>
                         <input type="hidden" id="company_id" name="company_id" value="{{ old('company_id') }}" required>
-                        <p id="supervisor-company-status" class="mt-1 text-xs text-gray-600 dark:text-gray-300">Select a supervisor to view assigned company.</p>
-                        <p id="supervisor-company-validation" class="mt-1 text-xs text-red-600 dark:text-red-400 hidden"></p>
+                        <p id="supervisor-company-status" class="deployment-status-note mt-1 text-xs">Select a supervisor to view assigned company.</p>
+                        <p id="supervisor-company-validation" class="deployment-error-text mt-1 hidden text-xs"></p>
                         @error('company_id')
-                            <p class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">{{ $message }}</p>
+                            <p class="deployment-error-text mt-2 text-xs">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Start Date</label>
-                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Leave blank if the deployment start will be confirmed later.</p>
+                        <label class="deployment-field-label mb-1 block text-sm">Start Date</label>
+                        <p class="deployment-helper-text mb-2 text-xs">Leave blank if the deployment start will be confirmed later.</p>
                         <input
                             id="start_date"
                             name="start_date"
                             type="date"
                             value="{{ old('start_date') }}"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                            class="deployment-input w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
                         >
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">End Date</label>
-                        <p class="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">Must be the same as or later than the start date.</p>
+                        <label class="deployment-field-label mb-1 block text-sm">End Date</label>
+                        <p class="deployment-helper-text mb-2 text-xs">Must be the same as or later than the start date.</p>
                         <input
                             id="end_date"
                             name="end_date"
                             type="date"
                             value="{{ old('end_date') }}"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                            class="deployment-input w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
                         >
                     </div>
                 </div>

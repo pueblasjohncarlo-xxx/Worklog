@@ -379,6 +379,16 @@
                                             $hasSubmission = ! empty($task->attachment_path) && ($task->submitted_at !== null || in_array($task->status, ['submitted', 'approved', 'rejected'], true));
                                             $hasDueDate = ! empty($task->due_date);
                                             $isOverdue = in_array($task->status, ['pending', 'in_progress'], true) && $hasDueDate && $task->due_date->isPast();
+                                            $recentTaskStatusClass = $isOverdue
+                                                ? '!border-amber-700 !bg-amber-100 !text-amber-950 shadow-sm'
+                                                : match ($task->status) {
+                                                    'approved', 'completed' => '!border-emerald-700 !bg-emerald-100 !text-emerald-950 shadow-sm',
+                                                    'submitted' => '!border-sky-700 !bg-sky-100 !text-sky-950 shadow-sm',
+                                                    'rejected' => '!border-rose-700 !bg-rose-100 !text-rose-950 shadow-sm',
+                                                    'in_progress' => '!border-indigo-700 !bg-indigo-100 !text-indigo-950 shadow-sm',
+                                                    'pending' => '!border-amber-700 !bg-amber-100 !text-amber-950 shadow-sm',
+                                                    default => '!border-slate-700 !bg-slate-100 !text-slate-950 shadow-sm',
+                                                };
                                         @endphp
                                         <tr class="group hover:bg-gray-50 transition-colors">
                                             <td class="px-4 py-4 align-top">
@@ -415,9 +425,9 @@
                                                 </div>
                                             </td>
                                             <td class="px-4 py-4 align-top">
-                                                <div class="inline-flex min-w-[10rem] flex-col items-start gap-1 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 shadow-sm">
-                                                    <span class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">Task Status</span>
-                                                    <x-status-badge :status="$task->status" :label="$recentTaskStatusLabel" size="sm" class="shadow-sm ring-1 ring-slate-400/70" />
+                                                <div class="inline-flex min-w-[10rem] flex-col items-start gap-2 rounded-xl border border-slate-400 bg-white px-3 py-2.5 shadow-sm ring-1 ring-slate-200">
+                                                    <span class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-700">Task Status</span>
+                                                    <x-status-badge :status="$isOverdue ? 'overdue' : $task->status" :label="$isOverdue ? 'Overdue' : $recentTaskStatusLabel" size="sm" :class="$recentTaskStatusClass" />
                                                 </div>
                                             </td>
                                             <td class="px-4 py-4 align-top text-right">

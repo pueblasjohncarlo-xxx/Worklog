@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Announcement extends Model
 {
@@ -19,8 +21,14 @@ class Announcement extends Model
         'original_filename',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function recipients(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'announcement_user', 'announcement_id', 'user_id')
+            ->withTimestamps();
     }
 }

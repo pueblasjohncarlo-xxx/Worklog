@@ -48,7 +48,15 @@
                                         <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                         </svg>
-                                        To: {{ ucfirst($announcement->audience) }}
+                                        @if($announcement->user_id === auth()->id())
+                                            @php
+                                                $recipientCount = $announcement->recipients->count();
+                                            @endphp
+                                            To:
+                                            {{ $recipientCount > 0 ? $recipientCount.' selected student'.($recipientCount === 1 ? '' : 's') : 'Assigned OJT Students' }}
+                                        @else
+                                            To: {{ ucfirst($announcement->audience) }}
+                                        @endif
                                     </p>
                                 </div>
                                 <div class="mt-2 flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 sm:mt-0">
@@ -77,9 +85,15 @@
                                                     <span class="inline-flex items-center rounded-full px-2.5 py-1 {{ $announcement->type === 'announcement' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' : 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' }}">
                                                         {{ ucfirst($announcement->type) }}
                                                     </span>
-                                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 ring-1 ring-slate-200 dark:bg-slate-700 dark:text-slate-100 dark:ring-slate-600">
-                                                        Audience: {{ ucfirst($announcement->audience) }}
-                                                    </span>
+                                                    @if($announcement->user_id === auth()->id())
+                                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 ring-1 ring-slate-200 dark:bg-slate-700 dark:text-slate-100 dark:ring-slate-600">
+                                                            Recipients: {{ $announcement->recipients->count() > 0 ? $announcement->recipients->count().' selected' : 'Assigned OJT Students' }}
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 ring-1 ring-slate-200 dark:bg-slate-700 dark:text-slate-100 dark:ring-slate-600">
+                                                            Audience: {{ ucfirst($announcement->audience) }}
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             </div>
                                             <button @click="openDetails = false" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-600 dark:hover:bg-slate-700">
@@ -99,6 +113,19 @@
                                         <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-800 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200">
                                             {{ $announcement->content }}
                                         </div>
+
+                                        @if($announcement->user_id === auth()->id() && $announcement->recipients->isNotEmpty())
+                                            <div>
+                                                <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-600 dark:text-slate-300">Selected Students</p>
+                                                <div class="mt-2 flex flex-wrap gap-2">
+                                                    @foreach($announcement->recipients as $recipient)
+                                                        <span class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white dark:bg-slate-100 dark:text-slate-950">
+                                                            {{ $recipient->name }}
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
 
                                         @if($announcement->attachment)
                                             <div class="flex flex-wrap items-center gap-3">

@@ -200,143 +200,129 @@
                                 ->get()
                                 ->groupBy('type');
                         }
+
+                        $reportHistoryPayload = $recentReports
+                            ->flatten(1)
+                            ->map(function ($report) {
+                                return [
+                                    'id' => $report->id,
+                                    'type' => (string) $report->type,
+                                    'type_label' => ucfirst((string) $report->type),
+                                    'date' => $report->work_date?->format('M d, Y') ?? 'No date',
+                                    'status' => (string) $report->status,
+                                    'status_label' => ucfirst((string) $report->status),
+                                    'description' => (string) ($report->description ?? ''),
+                                    'hours' => number_format((float) $report->hours, 2),
+                                    'hours_search' => (string) ((float) $report->hours),
+                                    'filename' => $report->attachment_path ? basename($report->attachment_path) : 'Generated report',
+                                    'print_url' => route('student.worklogs.print', $report->id),
+                                    'edit_url' => in_array($report->status, ['draft', 'rejected'], true) ? route('student.worklogs.edit', $report->id) : null,
+                                    'skills' => (string) ($report->skills_applied ?? ''),
+                                    'reflection' => (string) ($report->reflection ?? ''),
+                                    'comment' => (string) ($report->reviewer_comment ?? ''),
+                                    'search_blob' => strtolower(implode(' ', array_filter([
+                                        $report->work_date?->format('M d, Y'),
+                                        $report->type,
+                                        $report->status,
+                                        $report->description,
+                                        number_format((float) $report->hours, 2),
+                                        (string) ((float) $report->hours),
+                                        $report->attachment_path ? basename($report->attachment_path) : 'generated report',
+                                    ]))),
+                                ];
+                            })
+                            ->values();
                     @endphp
 
-                    <div x-data="{ tab: 'daily' }" class="space-y-4">
-                        <div class="flex border-b border-gray-100 dark:border-gray-700">
-                            <button @click="tab = 'daily'" :class="tab === 'daily' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-2 text-xs font-black uppercase tracking-widest border-b-2 transition-all">Daily</button>
-                            <button @click="tab = 'weekly'" :class="tab === 'weekly' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-2 text-xs font-black uppercase tracking-widest border-b-2 transition-all">Weekly</button>
-                            <button @click="tab = 'monthly'" :class="tab === 'monthly' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-4 py-2 text-xs font-black uppercase tracking-widest border-b-2 transition-all">Monthly</button>
+                    <div x-data="studentReportHistory(@js($reportHistoryPayload))" class="space-y-4">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                                <div>
+                                    <p class="text-sm font-black text-slate-900 dark:text-white">Search Report History</p>
+                                    <p class="mt-1 text-xs font-semibold text-slate-700 dark:text-slate-300">Search by date, report type, status, description, hours, or filename while keeping the selected tab active.</p>
+                                </div>
+                                <div class="w-full lg:w-[22rem]">
+                                    <label for="report-history-search" class="sr-only">Search report history</label>
+                                    <div class="relative">
+                                        <svg class="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-slate-500 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        <input
+                                            id="report-history-search"
+                                            type="search"
+                                            x-model.debounce.100ms="searchQuery"
+                                            placeholder="Search by date, type, status, hours, or filename"
+                                            class="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-300"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 flex items-center justify-between gap-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                <span>Showing <span class="font-black text-slate-950 dark:text-white" x-text="filteredReports.length"></span> of <span class="font-black text-slate-950 dark:text-white" x-text="activeTabTotal"></span> reports in <span class="uppercase" x-text="tab"></span></span>
+                                <button
+                                    x-show="searchQuery"
+                                    x-cloak
+                                    @click="searchQuery = ''"
+                                    type="button"
+                                    class="rounded-full border border-slate-300 bg-white px-3 py-1 text-slate-800 transition hover:border-indigo-400 hover:text-indigo-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                                >
+                                    Clear Search
+                                </button>
+                            </div>
                         </div>
 
-                        <template x-if="tab === 'daily'">
-                            <div class="space-y-4">
-                                @forelse($recentReports->get('daily', []) as $report)
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">{{ $report->work_date->format('M d, Y') }}</span>
-                                            <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest
-                                                {{ $report->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                                {{ $report->status === 'submitted' ? 'bg-blue-100 text-blue-700' : '' }}
-                                                {{ $report->status === 'draft' ? 'bg-gray-100 text-gray-700' : '' }}
-                                                {{ $report->status === 'rejected' ? 'bg-rose-100 text-rose-700' : '' }}
-                                            ">
-                                                {{ $report->status }}
-                                            </span>
-                                        </div>
-                                        <p class="text-sm text-gray-800 dark:text-gray-200 line-clamp-2 italic">"{{ $report->description }}"</p>
-                                        <div class="mt-2 flex justify-between items-center">
-                                            <span class="text-[10px] font-bold text-indigo-600">{{ $report->hours }} Hours</span>
-                                            <div class="flex gap-2">
-                                                <button 
-                                                    data-id="{{ $report->id }}"
-                                                    data-type="{{ $report->type }}" 
-                                                    data-date="{{ $report->work_date->format('M d, Y') }}" 
-                                                    data-content="{{ $report->description }}" 
-                                                    data-skills="{{ $report->skills_applied }}"
-                                                    data-reflection="{{ $report->reflection }}"
-                                                    data-comment="{{ $report->reviewer_comment }}"
-                                                    onclick="openJournalModal(this)" 
-                                                    class="text-[10px] font-bold text-indigo-700 hover:text-indigo-900 uppercase tracking-widest"
-                                                >
-                                                    View Details
-                                                </button>
-                                                <a href="{{ route('student.worklogs.print', $report->id) }}" class="text-[10px] font-bold text-slate-700 hover:text-slate-900 uppercase tracking-widest">Print</a>
-                                                @if($report->status === 'draft' || $report->status === 'rejected')
-                                                    <a href="{{ route('student.worklogs.edit', $report->id) }}" class="text-[10px] font-bold text-emerald-700 hover:text-emerald-900 uppercase tracking-widest">Edit</a>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <p class="text-sm text-slate-700 italic text-center py-8 dark:text-slate-300">No daily reports found.</p>
-                                @endforelse
-                            </div>
-                        </template>
+                        <div class="flex border-b border-slate-200 dark:border-slate-700">
+                            <button @click="tab = 'daily'" :class="tab === 'daily' ? 'border-indigo-600 bg-indigo-50 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-100' : 'border-transparent text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white'" class="rounded-t-xl border-b-2 px-4 py-3 text-xs font-black uppercase tracking-[0.18em] transition-all">Daily</button>
+                            <button @click="tab = 'weekly'" :class="tab === 'weekly' ? 'border-emerald-600 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-100' : 'border-transparent text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white'" class="rounded-t-xl border-b-2 px-4 py-3 text-xs font-black uppercase tracking-[0.18em] transition-all">Weekly</button>
+                            <button @click="tab = 'monthly'" :class="tab === 'monthly' ? 'border-amber-600 bg-amber-50 text-amber-800 dark:bg-amber-900/30 dark:text-amber-100' : 'border-transparent text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white'" class="rounded-t-xl border-b-2 px-4 py-3 text-xs font-black uppercase tracking-[0.18em] transition-all">Monthly</button>
+                        </div>
 
-                        <template x-if="tab === 'weekly'">
-                            <div class="space-y-4">
-                                @forelse($recentReports->get('weekly', []) as $report)
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">{{ $report->work_date->format('M d, Y') }}</span>
-                                            <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest
-                                                {{ $report->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                                {{ $report->status === 'submitted' ? 'bg-blue-100 text-blue-700' : '' }}
-                                                {{ $report->status === 'draft' ? 'bg-gray-100 text-gray-700' : '' }}
-                                                {{ $report->status === 'rejected' ? 'bg-rose-100 text-rose-700' : '' }}
-                                            ">
-                                                {{ $report->status }}
-                                            </span>
-                                        </div>
-                                        <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 italic">"{{ $report->description }}"</p>
-                                            <div class="mt-2 flex justify-end gap-2">
-                                                <button 
-                                                    data-id="{{ $report->id }}"
-                                                    data-type="{{ $report->type }}" 
-                                                    data-date="{{ $report->work_date->format('M d, Y') }}" 
-                                                    data-content="{{ $report->description }}" 
-                                                    data-skills="{{ $report->skills_applied }}"
-                                                    data-reflection="{{ $report->reflection }}"
-                                                    data-comment="{{ $report->reviewer_comment }}"
-                                                    onclick="openJournalModal(this)" 
-                                                    class="text-[10px] font-bold text-indigo-600 hover:text-indigo-900 uppercase tracking-widest"
-                                                >
-                                                    View Details
-                                                </button>
-                                                <a href="{{ route('student.worklogs.print', $report->id) }}" class="text-[10px] font-bold text-slate-600 hover:text-slate-900 uppercase tracking-widest">Print</a>
-                                                @if($report->status === 'draft' || $report->status === 'rejected')
-                                                    <a href="{{ route('student.worklogs.edit', $report->id) }}" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-900 uppercase tracking-widest">Edit</a>
-                                                @endif
+                        <div class="space-y-4">
+                            <template x-for="report in filteredReports" :key="`${report.type}-${report.id}`">
+                                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
+                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                        <div class="space-y-2">
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <span class="text-[11px] font-black uppercase tracking-[0.18em] text-slate-700 dark:text-slate-200" x-text="report.date"></span>
+                                                <span :class="typeBadgeClass(report.type)" class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em]" x-text="report.type_label"></span>
                                             </div>
-                                    </div>
-                                @empty
-                                    <p class="text-sm text-slate-700 italic text-center py-8 dark:text-slate-300">No weekly reports found.</p>
-                                @endforelse
-                            </div>
-                        </template>
+                                            <p class="text-sm font-semibold italic leading-6 text-slate-900 dark:text-slate-100" x-text="`\"${report.description}\"`"></p>
+                                            <div class="flex flex-wrap items-center gap-3 text-xs font-bold">
+                                                <span class="text-indigo-700 dark:text-indigo-300" x-text="`${report.hours} Hours`"></span>
+                                                <span class="text-slate-700 dark:text-slate-300" x-text="`File: ${report.filename}`"></span>
+                                            </div>
+                                        </div>
 
-                        <template x-if="tab === 'monthly'">
-                            <div class="space-y-4">
-                                @forelse($recentReports->get('monthly', []) as $report)
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">{{ $report->work_date->format('M d, Y') }}</span>
-                                            <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest
-                                                {{ $report->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                                {{ $report->status === 'submitted' ? 'bg-blue-100 text-blue-700' : '' }}
-                                                {{ $report->status === 'draft' ? 'bg-gray-100 text-gray-700' : '' }}
-                                                {{ $report->status === 'rejected' ? 'bg-rose-100 text-rose-700' : '' }}
-                                            ">
-                                                {{ $report->status }}
-                                            </span>
-                                        </div>
-                                        <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 italic">"{{ $report->description }}"</p>
-                                            <div class="mt-2 flex justify-end gap-2">
-                                                <button 
-                                                    data-id="{{ $report->id }}"
-                                                    data-type="{{ $report->type }}" 
-                                                    data-date="{{ $report->work_date->format('M d, Y') }}" 
-                                                    data-content="{{ $report->description }}" 
-                                                    data-skills="{{ $report->skills_applied }}"
-                                                    data-reflection="{{ $report->reflection }}"
-                                                    data-comment="{{ $report->reviewer_comment }}"
-                                                    onclick="openJournalModal(this)" 
-                                                    class="text-[10px] font-bold text-indigo-600 hover:text-indigo-900 uppercase tracking-widest"
+                                        <div class="flex min-w-[10rem] flex-col items-start gap-3 sm:items-end">
+                                            <span :class="statusBadgeClass(report.status)" class="inline-flex rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em]" x-text="report.status_label"></span>
+                                            <div class="flex flex-wrap gap-2 sm:justify-end">
+                                                <button
+                                                    type="button"
+                                                    @click="openReport(report)"
+                                                    class="inline-flex items-center rounded-lg bg-indigo-700 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-indigo-800"
                                                 >
                                                     View Details
                                                 </button>
-                                                <a href="{{ route('student.worklogs.print', $report->id) }}" class="text-[10px] font-bold text-slate-600 hover:text-slate-900 uppercase tracking-widest">Print</a>
-                                                @if($report->status === 'draft' || $report->status === 'rejected')
-                                                    <a href="{{ route('student.worklogs.edit', $report->id) }}" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-900 uppercase tracking-widest">Edit</a>
-                                                @endif
+                                                <a :href="report.print_url" class="inline-flex items-center rounded-lg bg-slate-800 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-black">
+                                                    Print
+                                                </a>
+                                                <template x-if="report.edit_url">
+                                                    <a :href="report.edit_url" class="inline-flex items-center rounded-lg bg-emerald-700 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-emerald-800">
+                                                        Edit
+                                                    </a>
+                                                </template>
                                             </div>
+                                        </div>
                                     </div>
-                                @empty
-                                    <p class="text-sm text-slate-700 italic text-center py-8 dark:text-slate-300">No monthly reports found.</p>
-                                @endforelse
+                                </div>
+                            </template>
+
+                            <div x-show="filteredReports.length === 0" class="rounded-2xl border border-dashed border-slate-300 px-6 py-10 text-center dark:border-slate-600" style="display: none;">
+                                <p class="text-sm font-black text-slate-900 dark:text-white">No reports found</p>
+                                <p class="mt-1 text-xs font-semibold text-slate-700 dark:text-slate-300">Try a different date, type, status, description, hours, or filename.</p>
                             </div>
-                        </template>
+                        </div>
                     </div>
                 </div>
 
@@ -395,6 +381,63 @@
                 </div>
 
                 <script>
+                    function studentReportHistory(reports) {
+                        return {
+                            tab: 'daily',
+                            searchQuery: '',
+                            reports: Array.isArray(reports) ? reports : [],
+                            get activeTabTotal() {
+                                return this.reports.filter((report) => report.type === this.tab).length;
+                            },
+                            get filteredReports() {
+                                const query = (this.searchQuery || '').trim().toLowerCase();
+
+                                return this.reports.filter((report) => {
+                                    const matchesTab = report.type === this.tab;
+                                    const matchesSearch = query === '' || (report.search_blob || '').includes(query);
+                                    return matchesTab && matchesSearch;
+                                });
+                            },
+                            statusBadgeClass(status) {
+                                if (status === 'approved') {
+                                    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-100';
+                                }
+
+                                if (status === 'submitted') {
+                                    return 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-100';
+                                }
+
+                                if (status === 'rejected') {
+                                    return 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-100';
+                                }
+
+                                return 'bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100';
+                            },
+                            typeBadgeClass(type) {
+                                if (type === 'daily') {
+                                    return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-100';
+                                }
+
+                                if (type === 'weekly') {
+                                    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-100';
+                                }
+
+                                return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-100';
+                            },
+                            openReport(report) {
+                                const proxyButton = document.createElement('button');
+                                proxyButton.setAttribute('data-id', report.id);
+                                proxyButton.setAttribute('data-type', report.type);
+                                proxyButton.setAttribute('data-date', report.date);
+                                proxyButton.setAttribute('data-content', report.description);
+                                proxyButton.setAttribute('data-skills', report.skills || '');
+                                proxyButton.setAttribute('data-reflection', report.reflection || '');
+                                proxyButton.setAttribute('data-comment', report.comment || '');
+                                openJournalModal(proxyButton);
+                            },
+                        };
+                    }
+
                     function openJournalModal(button) {
                         const id = button.getAttribute('data-id');
                         const type = button.getAttribute('data-type');

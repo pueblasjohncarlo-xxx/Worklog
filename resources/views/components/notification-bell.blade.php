@@ -37,35 +37,61 @@
     <div x-show="open"
          x-transition.origin.top.right
          @click.away="open = false"
-         class="origin-top-right absolute right-0 mt-2 w-80 rounded-2xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-900/10 focus:outline-none z-50"
+         class="origin-top-right absolute right-0 mt-2 w-96 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950 shadow-2xl ring-1 ring-black/40 focus:outline-none z-50"
          role="menu" 
          aria-orientation="vertical" 
          aria-labelledby="user-menu-button" 
          tabindex="-1"
          style="display: none;">
         
-        <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex justify-between items-center gap-3">
-            <span class="text-sm font-black text-slate-900">Notifications</span>
+        <div class="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-900 px-4 py-3.5">
+            <div>
+                <span class="text-sm font-black uppercase tracking-[0.18em] text-white">Notifications</span>
+                <p class="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-300">
+                    <span x-text="unreadCount"></span> unread item<span x-text="unreadCount === 1 ? '' : 's'"></span>
+                </p>
+            </div>
             <form x-show="unreadCount > 0" action="{{ route('notifications.mark-all-read') }}" method="POST" @if($initialUnreadCount === 0) style="display: none;" @endif>
                 @csrf
-                <button type="submit" class="rounded-md px-2 py-1 text-xs font-bold text-indigo-800 transition-colors hover:bg-indigo-100 hover:text-indigo-950 focus:bg-indigo-100 focus:outline-none">Mark all read</button>
+                <button type="submit" class="rounded-lg border border-sky-400/30 bg-sky-500/15 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-sky-100 transition-colors hover:bg-sky-500/25 hover:text-white focus:bg-sky-500/25 focus:outline-none">Mark all read</button>
             </form>
         </div>
 
-        <div class="max-h-72 overflow-y-auto bg-white">
+        <div class="max-h-80 overflow-y-auto bg-slate-950">
             <div x-show="!jsReady">
                 @forelse($initialItems as $item)
-                    <a href="{{ $item['read_url'] }}" class="block border-b border-slate-100 px-4 py-3.5 transition-colors hover:bg-slate-50 focus:bg-slate-50 focus:outline-none last:border-0">
-                        <div class="flex items-center justify-between gap-3">
-                            <p class="text-sm font-bold leading-5 text-slate-950">{{ $item['title'] ?? 'Notification' }}</p>
-                            <x-status-badge status="unread" size="sm" />
+                    <a href="{{ $item['read_url'] }}" class="group block border-b border-slate-800 bg-slate-950 px-4 py-4 transition-colors hover:bg-slate-900 focus:bg-slate-900 focus:outline-none last:border-0">
+                        <div class="flex items-start gap-3">
+                            <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-400/20 bg-sky-500/10 text-sky-200">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-start justify-between gap-3">
+                                    <p class="text-sm font-black leading-5 text-white group-hover:text-sky-100">{{ $item['title'] ?? 'Notification' }}</p>
+                                    <span class="inline-flex shrink-0 items-center rounded-full border border-sky-400/30 bg-sky-500/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-sky-100">
+                                        <span class="mr-1.5 inline-block h-2 w-2 rounded-full bg-sky-300"></span>
+                                        Unread
+                                    </span>
+                                </div>
+                                <p class="mt-1.5 text-xs font-semibold leading-5 text-slate-200">{{ $item['content'] ?? '' }}</p>
+                                <div class="mt-3 flex items-center justify-between gap-3">
+                                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ $item['created_at_human'] ?? '' }}</p>
+                                    <span class="text-[11px] font-black uppercase tracking-[0.12em] text-sky-200">Open</span>
+                                </div>
+                            </div>
                         </div>
-                        <p class="mt-1.5 text-xs font-medium leading-5 text-slate-700">{{ $item['content'] ?? '' }}</p>
-                        <p class="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{{ $item['created_at_human'] ?? '' }}</p>
                     </a>
                 @empty
-                    <div class="px-4 py-5 text-center text-sm font-semibold text-slate-600">
-                        No new notifications
+                    <div class="px-6 py-8 text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-700 bg-slate-900 text-slate-200">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </div>
+                        <p class="mt-4 text-sm font-black text-white">No new notifications</p>
+                        <p class="mt-1 text-xs font-semibold text-slate-300">You are all caught up right now.</p>
                     </div>
                 @endforelse
             </div>
@@ -74,30 +100,48 @@
                 <template x-if="items && items.length">
                     <div>
                         <template x-for="item in items" :key="item.id">
-                            <a :href="item.read_url" class="block border-b border-slate-100 px-4 py-3.5 transition-colors hover:bg-slate-50 focus:bg-slate-50 focus:outline-none last:border-0">
-                                <div class="flex items-center justify-between gap-3">
-                                    <p class="text-sm font-bold leading-5 text-slate-950" x-text="item.title || 'Notification'"></p>
-                                    <span class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px]">
-                                        <span class="wl-status-badge-icon" aria-hidden="true">!</span>
-                                        <span>Unread</span>
-                                    </span>
+                            <a :href="item.read_url" class="group block border-b border-slate-800 bg-slate-950 px-4 py-4 transition-colors hover:bg-slate-900 focus:bg-slate-900 focus:outline-none last:border-0">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-400/20 bg-sky-500/10 text-sky-200">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <p class="text-sm font-black leading-5 text-white group-hover:text-sky-100" x-text="item.title || 'Notification'"></p>
+                                            <span class="inline-flex shrink-0 items-center rounded-full border border-sky-400/30 bg-sky-500/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-sky-100">
+                                                <span class="mr-1.5 inline-block h-2 w-2 rounded-full bg-sky-300"></span>
+                                                Unread
+                                            </span>
+                                        </div>
+                                        <p class="mt-1.5 text-xs font-semibold leading-5 text-slate-200" x-text="item.content || ''"></p>
+                                        <div class="mt-3 flex items-center justify-between gap-3">
+                                            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400" x-text="item.created_at_human || ''"></p>
+                                            <span class="text-[11px] font-black uppercase tracking-[0.12em] text-sky-200">Open</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <p class="mt-1.5 text-xs font-medium leading-5 text-slate-700" x-text="item.content || ''"></p>
-                                <p class="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500" x-text="item.created_at_human || ''"></p>
                             </a>
                         </template>
                     </div>
                 </template>
                 <template x-if="!items || !items.length">
-                    <div class="px-4 py-5 text-center text-sm font-semibold text-slate-600">
-                        No new notifications
+                    <div class="px-6 py-8 text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-700 bg-slate-900 text-slate-200">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </div>
+                        <p class="mt-4 text-sm font-black text-white">No new notifications</p>
+                        <p class="mt-1 text-xs font-semibold text-slate-300">You are all caught up right now.</p>
                     </div>
                 </template>
             </div>
         </div>
 
-        <div class="px-4 py-3 border-t border-slate-200 bg-slate-50">
-            <a href="{{ route('notifications.index') }}" class="block rounded-md px-3 py-2 text-center text-xs font-bold text-indigo-800 transition-colors hover:bg-indigo-100 hover:text-indigo-950 focus:bg-indigo-100 focus:outline-none">
+        <div class="border-t border-slate-800 bg-slate-900 px-4 py-3">
+            <a href="{{ route('notifications.index') }}" class="block rounded-xl border border-slate-700 bg-slate-800 px-3 py-3 text-center text-xs font-black uppercase tracking-[0.16em] text-white transition-colors hover:bg-slate-700 hover:text-sky-100 focus:bg-slate-700 focus:outline-none active:bg-slate-700">
                 View all notifications
             </a>
         </div>
