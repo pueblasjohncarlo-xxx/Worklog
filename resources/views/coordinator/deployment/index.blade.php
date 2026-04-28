@@ -35,7 +35,7 @@
     <script id="deployment-advisers" type="application/json">@json($advisersForJs)</script>
     <script id="deployment-companies" type="application/json">@json($companiesForJs)</script>
 
-    <div class="space-y-6" x-data="coordinatorDeploymentManager()" x-init="init()">
+    <div class="space-y-6 deployment-management-page" x-data="coordinatorDeploymentManager()" x-init="init()">
         <!-- Status Messages -->
         @if ($errors->any())
             <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
@@ -93,6 +93,10 @@
             </div>
             
             <style>
+                .deployment-management-page {
+                    color: #0f172a;
+                }
+
                 .deployment-create-form .deployment-field-label {
                     color: #111827;
                     font-weight: 800;
@@ -105,33 +109,38 @@
                 .deployment-create-form .deployment-helper-text,
                 .deployment-create-form .deployment-status-note {
                     color: #334155;
-                    font-weight: 600;
+                    font-weight: 700;
+                    line-height: 1.5;
                 }
 
                 .dark .deployment-create-form .deployment-helper-text,
                 .dark .deployment-create-form .deployment-status-note {
-                    color: #d1d5db;
+                    color: #e5e7eb;
                 }
 
                 .deployment-create-form .deployment-input,
                 .deployment-create-form .deployment-select {
                     color: #111827;
-                    font-weight: 600;
+                    font-weight: 700;
+                    border-color: #cbd5e1;
+                    background-color: #ffffff;
                 }
 
                 .deployment-create-form .deployment-input::placeholder {
                     color: #475569;
-                    font-weight: 600;
+                    font-weight: 700;
                     opacity: 1;
                 }
 
                 .dark .deployment-create-form .deployment-input,
                 .dark .deployment-create-form .deployment-select {
                     color: #f9fafb;
+                    border-color: #475569;
+                    background-color: #111827;
                 }
 
                 .dark .deployment-create-form .deployment-input::placeholder {
-                    color: #cbd5e1;
+                    color: #e2e8f0;
                 }
 
                 .deployment-create-form .deployment-select:disabled {
@@ -157,24 +166,62 @@
                     color: #fca5a5;
                 }
 
+                .deployment-management-page input[type="text"],
+                .deployment-management-page input[type="date"],
+                .deployment-management-page input[type="number"],
+                .deployment-management-page select,
+                .deployment-management-page textarea {
+                    color: #111827;
+                    font-weight: 600;
+                }
+
+                .deployment-management-page input::placeholder,
+                .deployment-management-page textarea::placeholder {
+                    color: #475569;
+                    opacity: 1;
+                    font-weight: 600;
+                }
+
+                .dark .deployment-management-page input[type="text"],
+                .dark .deployment-management-page input[type="date"],
+                .dark .deployment-management-page input[type="number"],
+                .dark .deployment-management-page select,
+                .dark .deployment-management-page textarea {
+                    color: #f8fafc;
+                }
+
+                .dark .deployment-management-page input::placeholder,
+                .dark .deployment-management-page textarea::placeholder {
+                    color: #cbd5e1;
+                }
+
+                .deployment-management-page option,
+                .deployment-management-page optgroup {
+                    color: #0f172a;
+                    background-color: #ffffff;
+                    font-weight: 600;
+                }
+
                 .deployment-create-form .select2-container--default .select2-selection--multiple,
                 .deployment-create-form .select2-container--default .select2-selection--single {
                     min-height: 44px;
                     border-color: #cbd5e1 !important;
                     background: #ffffff !important;
                     color: #111827 !important;
+                    box-shadow: none !important;
                 }
 
                 .deployment-create-form .select2-container--default .select2-selection--multiple .select2-selection__rendered,
                 .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__rendered {
                     color: #111827 !important;
-                    font-weight: 600;
+                    font-weight: 700;
                 }
 
                 .deployment-create-form .select2-container--default .select2-selection--single .select2-selection__placeholder,
-                .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field::placeholder {
+                .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field::placeholder,
+                .deployment-create-form .select2-container--default .select2-search--inline .select2-search__field {
                     color: #475569 !important;
-                    font-weight: 600;
+                    font-weight: 700;
                     opacity: 1;
                 }
 
@@ -189,18 +236,130 @@
                     border-color: #475569 transparent transparent transparent !important;
                 }
 
+                .deployment-management-page .select2-container--default.select2-container--focus .select2-selection--single,
+                .deployment-management-page .select2-container--default.select2-container--focus .select2-selection--multiple,
+                .deployment-management-page .select2-container--default.select2-container--open .select2-selection--single,
+                .deployment-management-page .select2-container--default.select2-container--open .select2-selection--multiple {
+                    border-color: #4f46e5 !important;
+                    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.18) !important;
+                }
+
                 .select2-dropdown {
-                    border-color: #cbd5e1 !important;
+                    border: 1px solid #94a3b8 !important;
+                    background: #ffffff !important;
+                    color: #0f172a !important;
+                    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.2) !important;
+                }
+
+                .select2-container--default .select2-search--dropdown {
+                    background: #ffffff !important;
+                    padding: 0.5rem !important;
+                }
+
+                .select2-container--default .select2-search--dropdown .select2-search__field {
+                    border: 1px solid #94a3b8 !important;
+                    background: #ffffff !important;
+                    color: #0f172a !important;
+                    font-weight: 700 !important;
+                    border-radius: 0.5rem !important;
+                    padding: 0.55rem 0.75rem !important;
+                }
+
+                .select2-container--default .select2-search--dropdown .select2-search__field::placeholder {
+                    color: #475569 !important;
+                    opacity: 1 !important;
                 }
 
                 .select2-results__option {
                     color: #111827 !important;
-                    font-weight: 600;
+                    font-weight: 700;
+                    background: #ffffff !important;
+                    padding-top: 0.6rem !important;
+                    padding-bottom: 0.6rem !important;
+                }
+
+                .select2-results__option[aria-selected="true"] {
+                    background: #e0e7ff !important;
+                    color: #312e81 !important;
+                }
+
+                .select2-results__option[aria-disabled="true"] {
+                    color: #64748b !important;
+                    background: #f8fafc !important;
                 }
 
                 .select2-results__option--highlighted[aria-selected] {
                     background: #312e81 !important;
                     color: #ffffff !important;
+                }
+
+                .dark .select2-dropdown {
+                    border-color: #475569 !important;
+                    background: #111827 !important;
+                    color: #f8fafc !important;
+                    box-shadow: 0 16px 34px rgba(2, 6, 23, 0.58) !important;
+                }
+
+                .dark .select2-container--default .select2-search--dropdown {
+                    background: #111827 !important;
+                }
+
+                .dark .select2-container--default .select2-search--dropdown .select2-search__field {
+                    border-color: #64748b !important;
+                    background: #0f172a !important;
+                    color: #f8fafc !important;
+                }
+
+                .dark .select2-container--default .select2-search--dropdown .select2-search__field::placeholder {
+                    color: #cbd5e1 !important;
+                }
+
+                .dark .select2-results__option {
+                    background: #1f2937 !important;
+                    color: #f8fafc !important;
+                }
+
+                .dark .select2-results__option[aria-selected="true"] {
+                    background: #312e81 !important;
+                    color: #ffffff !important;
+                }
+
+                .dark .select2-results__option[aria-disabled="true"] {
+                    background: #111827 !important;
+                    color: #94a3b8 !important;
+                }
+
+                .deployment-management-page table thead th {
+                    color: #334155 !important;
+                    font-weight: 800 !important;
+                }
+
+                .deployment-management-page table tbody td {
+                    color: #0f172a;
+                }
+
+                .dark .deployment-management-page table thead th {
+                    color: #e5e7eb !important;
+                }
+
+                .dark .deployment-management-page table tbody td {
+                    color: #f8fafc;
+                }
+
+                .deployment-management-page .text-gray-500,
+                .deployment-management-page .text-gray-600,
+                .deployment-management-page .text-slate-500,
+                .deployment-management-page .text-slate-600 {
+                    color: #475569 !important;
+                    opacity: 1 !important;
+                }
+
+                .dark .deployment-management-page .text-gray-500,
+                .dark .deployment-management-page .text-gray-600,
+                .dark .deployment-management-page .text-slate-500,
+                .dark .deployment-management-page .text-slate-600 {
+                    color: #cbd5e1 !important;
+                    opacity: 1 !important;
                 }
             </style>
 

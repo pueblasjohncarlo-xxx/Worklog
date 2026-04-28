@@ -23,10 +23,12 @@
                     'rejected' => 'Declined',
                     default => 'Draft',
                 };
+                $typeValue = strtolower((string) $log->type);
 
                 return [
                     'id' => $log->id,
                     'type' => ucfirst((string) $log->type),
+                    'type_value' => $typeValue,
                     'date' => $log->work_date?->format('M d, Y') ?? 'N/A',
                     'status' => $statusLabel,
                     'filename' => $log->attachment_path ? basename($log->attachment_path) : 'Generated report',
@@ -150,18 +152,29 @@
 
                 <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-200 dark:border-gray-700" x-transition>
                     <div class="bg-gray-50 dark:bg-gray-900/80 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                            <span class="px-2 py-1 rounded text-sm bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300" x-text="activeGroup?.student_name || ''"></span>
-                            <span>Accomplishment Reports</span>
-                        </h3>
+                        <div class="w-full space-y-4">
+                            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                    <span class="px-2 py-1 rounded text-sm bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300" x-text="activeGroup?.student_name || ''"></span>
+                                    <span>Accomplishment Reports</span>
+                                </h3>
 
-                        <div class="relative w-full sm:w-72">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
+                                <div class="relative w-full sm:w-72">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                    <input x-model="modalSearch" type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-shadow" placeholder="Search type, date, status, filename">
+                                </div>
                             </div>
-                            <input x-model="modalSearch" type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-shadow" placeholder="Search type, date, status, filename">
+
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" @click="modalType = 'all'" :class="modalType === 'all' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700'" class="rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] transition">All</button>
+                                <button type="button" @click="modalType = 'daily'" :class="modalType === 'daily' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-700 border-gray-300 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700'" class="rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] transition">Daily</button>
+                                <button type="button" @click="modalType = 'weekly'" :class="modalType === 'weekly' ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-gray-700 border-gray-300 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700'" class="rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] transition">Weekly</button>
+                                <button type="button" @click="modalType = 'monthly'" :class="modalType === 'monthly' ? 'bg-violet-600 text-white border-violet-600' : 'bg-white text-gray-700 border-gray-300 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700'" class="rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] transition">Monthly</button>
+                            </div>
                         </div>
                     </div>
 
@@ -226,6 +239,7 @@
                 showModal: false,
                 activeGroup: null,
                 modalSearch: '',
+                modalType: 'all',
                 get filteredGroups() {
                     const query = (this.searchQuery || '').trim().toLowerCase();
 
@@ -238,12 +252,16 @@
                     const logs = Array.isArray(this.activeGroup?.logs) ? this.activeGroup.logs : [];
 
                     return logs.filter((log) => {
-                        return query === '' || (log.search_blob || '').includes(query);
+                        const matchesSearch = query === '' || (log.search_blob || '').includes(query);
+                        const matchesType = this.modalType === 'all' || log.type_value === this.modalType;
+
+                        return matchesSearch && matchesType;
                     });
                 },
                 openGroup(group) {
                     this.activeGroup = group;
                     this.modalSearch = '';
+                    this.modalType = 'all';
                     this.showModal = true;
                 },
                 statusClass(status) {

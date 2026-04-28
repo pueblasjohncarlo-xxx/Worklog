@@ -1,11 +1,11 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Settings') }}
+        <h2 class="text-lg font-black uppercase tracking-[0.16em] text-gray-900 dark:text-gray-100">
+            {{ __('Profile Information') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account, role details, and profile photo. Changes save automatically as you edit.") }}
+        <p class="mt-2 text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400">
+            {{ __("Update your account details, role information, and profile photo. Changes save automatically while you edit, so every field should stay easy to review.") }}
         </p>
     </header>
 
@@ -24,7 +24,7 @@
         @csrf
         @method('patch')
 
-        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-5">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div class="flex items-center gap-4">
                     <img
@@ -35,8 +35,9 @@
                         class="h-20 w-20 rounded-full object-cover border-2 border-indigo-300 dark:border-indigo-500 shadow-md"
                     >
                     <div>
-                        <div class="text-sm font-bold text-gray-900 dark:text-gray-100" data-user-name-id="{{ $user->id }}">{{ $user->name }}</div>
-                        <div class="text-xs uppercase tracking-widest text-indigo-600 dark:text-indigo-300">{{ ucfirst(str_replace('_', ' ', $user->role)) }}</div>
+                        <div class="text-sm font-black text-gray-900 dark:text-gray-100" data-user-name-id="{{ $user->id }}">{{ $user->name }}</div>
+                        <div class="text-xs font-black uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-300">{{ ucfirst(str_replace('_', ' ', $user->role)) }}</div>
+                        <div class="mt-1 text-xs font-semibold text-gray-600 dark:text-gray-400">Use this section to keep your identity, contact details, and role profile current.</div>
                     </div>
                 </div>
 
@@ -45,7 +46,7 @@
                         Change Photo
                     </label>
                     <input id="photo" name="photo" type="file" class="hidden" accept="image/*" />
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF, or WEBP up to 4 MB.</p>
+                    <p class="mt-2 text-xs font-semibold text-gray-500 dark:text-gray-400">PNG, JPG, GIF, or WEBP up to 4 MB.</p>
                 </div>
             </div>
             <x-input-error class="mt-3" :messages="$errors->get('photo')" />
@@ -105,6 +106,11 @@
                 <x-text-input id="section" name="section" type="text" class="mt-1 block w-full" :value="old('section', $user->section)" />
                 <x-input-error class="mt-2" :messages="$errors->get('section')" />
             </div>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/30 px-4 py-3">
+            <p class="text-xs font-black uppercase tracking-[0.16em] text-gray-700 dark:text-gray-200">Account Details</p>
+            <p class="mt-1 text-sm font-semibold text-gray-600 dark:text-gray-400">Review names, email, personal details, and role-specific fields below. Saved values will sync across visible profile areas.</p>
         </div>
 
         @if ($user->role === \App\Models\User::ROLE_STUDENT)

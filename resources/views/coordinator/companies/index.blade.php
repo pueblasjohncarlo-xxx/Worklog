@@ -219,7 +219,7 @@
                     </details>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-xs font-semibold uppercase tracking-wide text-white hover:bg-indigo-700">Add Company</button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-xs font-bold uppercase tracking-wide !text-white hover:bg-indigo-700 hover:!text-white focus:!text-white active:!text-white disabled:!text-white disabled:opacity-60">Add Company</button>
                     </div>
                 </form>
             </div>

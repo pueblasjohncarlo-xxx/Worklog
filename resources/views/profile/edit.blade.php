@@ -13,7 +13,71 @@
 @endphp
 
 <x-dynamic-component :component="$layout" header="Settings">
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="max-w-7xl mx-auto space-y-6 profile-settings-shell">
+        <style>
+            .profile-settings-shell .profile-card,
+            .profile-settings-shell section {
+                color: #f8fafc;
+            }
+
+            .profile-settings-shell h1,
+            .profile-settings-shell h2,
+            .profile-settings-shell h3,
+            .profile-settings-shell label,
+            .profile-settings-shell .text-gray-900,
+            .profile-settings-shell .text-gray-800,
+            .profile-settings-shell .text-slate-900,
+            .profile-settings-shell .text-slate-800 {
+                color: #f8fafc !important;
+            }
+
+            .profile-settings-shell .text-gray-700,
+            .profile-settings-shell .text-gray-600,
+            .profile-settings-shell .text-gray-500,
+            .profile-settings-shell .text-slate-600,
+            .profile-settings-shell .text-slate-500,
+            .profile-settings-shell .text-slate-400 {
+                color: #cbd5e1 !important;
+                opacity: 1 !important;
+            }
+
+            .profile-settings-shell input,
+            .profile-settings-shell select,
+            .profile-settings-shell textarea {
+                border-color: rgba(148, 163, 184, 0.38) !important;
+                background-color: rgba(15, 23, 42, 0.88) !important;
+                color: #f8fafc !important;
+                font-weight: 600;
+            }
+
+            .profile-settings-shell input::placeholder,
+            .profile-settings-shell textarea::placeholder {
+                color: #94a3b8 !important;
+                opacity: 1;
+            }
+
+            .profile-settings-shell option,
+            .profile-settings-shell optgroup {
+                color: #0f172a;
+                background-color: #ffffff;
+                font-weight: 600;
+            }
+
+            .profile-settings-shell .rounded-2xl.border.border-gray-200,
+            .profile-settings-shell .rounded-2xl.border.border-gray-200.dark\:border-gray-700,
+            .profile-settings-shell .rounded-2xl.border.border-white\/10,
+            .profile-settings-shell .rounded-xl.border.border-white\/10,
+            .profile-settings-shell .rounded-xl.border.border-gray-200 {
+                border-color: rgba(148, 163, 184, 0.22) !important;
+            }
+
+            .profile-settings-shell .bg-gray-50,
+            .profile-settings-shell .bg-white\/5,
+            .profile-settings-shell .bg-slate-950\/70,
+            .profile-settings-shell .bg-slate-950\/80 {
+                box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+            }
+        </style>
         <section class="rounded-3xl border border-white/10 bg-slate-950/75 shadow-2xl shadow-black/30 overflow-hidden">
             <div class="border-b border-white/10 bg-gradient-to-r from-sky-500/15 via-indigo-500/10 to-emerald-500/15 px-6 py-6 sm:px-8">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">

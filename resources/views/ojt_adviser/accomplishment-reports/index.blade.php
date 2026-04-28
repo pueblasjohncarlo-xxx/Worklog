@@ -17,12 +17,15 @@
                 default => 'Draft',
             };
 
+            $typeValue = strtolower((string) $log->type);
+
             return [
                 'id' => $log->id,
                 'student_name' => $student?->name ?? 'N/A',
                 'section' => $student?->section ?? 'N/A',
                 'company' => $company?->name ?? 'N/A',
                 'type' => strtoupper((string) $log->type),
+                'type_value' => $typeValue,
                 'date' => $log->work_date?->format('M d, Y') ?? 'N/A',
                 'status' => $statusLabel,
                 'filename' => $log->attachment_path ? basename($log->attachment_path) : 'No file',
@@ -74,8 +77,23 @@
                         </div>
                     </div>
 
+                    <div class="grid gap-3 md:grid-cols-4">
+                        <template x-for="filter in typeFilters" :key="filter.value">
+                            <button
+                                type="button"
+                                @click="selectedType = filter.value"
+                                :class="selectedType === filter.value ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:border-indigo-400 hover:text-indigo-700'"
+                                class="rounded-2xl border px-4 py-3 text-left transition"
+                            >
+                                <div class="text-xs font-black uppercase tracking-[0.16em]" x-text="filter.label"></div>
+                                <div class="mt-2 text-2xl font-black" x-text="typeCount(filter.value)"></div>
+                                <div class="mt-1 text-xs font-semibold" x-text="filterDescription(filter.value)"></div>
+                            </button>
+                        </template>
+                    </div>
+
                     <div class="flex items-center justify-between text-xs font-semibold text-gray-600">
-                        <span>Showing <span class="font-black text-gray-900" x-text="filteredReports.length"></span> of <span class="font-black text-gray-900" x-text="reports.length"></span> reports</span>
+                        <span>Showing <span class="font-black text-gray-900" x-text="filteredReports.length"></span> of <span class="font-black text-gray-900" x-text="reports.length"></span> reports in <span class="font-black text-indigo-700" x-text="activeFilterLabel"></span></span>
                         <button
                             x-show="searchQuery"
                             x-cloak
@@ -87,7 +105,7 @@
                         </button>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto rounded-2xl border border-gray-200">
                         <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="border-b bg-gray-50">
@@ -101,7 +119,7 @@
                             </thead>
                             <tbody>
                                 <template x-for="report in filteredReports" :key="report.id">
-                                    <tr class="border-b">
+                                    <tr class="border-b align-top hover:bg-gray-50/80 transition">
                                         <td class="px-3 py-3">
                                             <div class="font-semibold text-gray-900" x-text="report.student_name"></div>
                                             <div class="text-xs text-gray-500" x-text="report.section"></div>
@@ -117,13 +135,12 @@
                                         <td class="px-3 py-3">
                                             <template x-if="report.view_url">
                                                 <div class="flex flex-wrap items-center gap-2">
-                                                    <a :href="report.view_url" target="_blank" class="text-indigo-600 hover:underline font-semibold">View File</a>
-                                                    <span class="text-gray-300">|</span>
-                                                    <a :href="report.download_url" class="text-emerald-700 hover:underline font-semibold">Download</a>
+                                                    <a :href="report.view_url" target="_blank" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-indigo-700">View File</a>
+                                                    <a :href="report.download_url" class="inline-flex items-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-700">Download</a>
                                                 </div>
                                             </template>
                                             <template x-if="!report.view_url">
-                                                <span class="text-gray-500 font-medium">No file</span>
+                                                <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">No file</span>
                                             </template>
                                         </td>
                                     </tr>
@@ -147,12 +164,41 @@
             return {
                 reports: Array.isArray(reports) ? reports : [],
                 searchQuery: '',
+                selectedType: 'all',
+                typeFilters: [
+                    { value: 'all', label: 'All' },
+                    { value: 'daily', label: 'Daily' },
+                    { value: 'weekly', label: 'Weekly' },
+                    { value: 'monthly', label: 'Monthly' },
+                ],
                 get filteredReports() {
                     const query = (this.searchQuery || '').trim().toLowerCase();
 
                     return this.reports.filter((report) => {
-                        return query === '' || (report.search_blob || '').includes(query);
+                        const matchesSearch = query === '' || (report.search_blob || '').includes(query);
+                        const matchesType = this.selectedType === 'all' || report.type_value === this.selectedType;
+
+                        return matchesSearch && matchesType;
                     });
+                },
+                typeCount(type) {
+                    if (type === 'all') {
+                        return this.reports.length;
+                    }
+
+                    return this.reports.filter((report) => report.type_value === type).length;
+                },
+                filterDescription(type) {
+                    if (type === 'all') {
+                        return 'Every submitted report';
+                    }
+
+                    return `Only ${type} accomplishment reports`;
+                },
+                get activeFilterLabel() {
+                    const active = this.typeFilters.find((filter) => filter.value === this.selectedType);
+
+                    return active ? active.label : 'All';
                 },
                 statusClass(status) {
                     if (status === 'Approved') {

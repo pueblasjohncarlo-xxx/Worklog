@@ -15,7 +15,14 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm text-amber-700 font-bold uppercase tracking-wider">
-                            Pahinumdom: Ang pag-edit niini mobalik sa "Draft" status ug kinahanglan nimo i-submit og balik para ma-approve.
+                            Editing this log will remove its current approval and return it to the review queue.
+                        </p>
+                        <p class="mt-1 text-xs font-semibold text-amber-800">
+                            @if($isAttendanceStyleLog ?? false)
+                                Once you save, this hours log will be sent back to your assigned supervisor for approval again.
+                            @else
+                                Once you save, this report will return to draft so you can review it before submitting again.
+                            @endif
                         </p>
                     </div>
                 </div>
@@ -371,29 +378,33 @@
                     <!-- Form Actions -->
                     <div class="flex items-center justify-between gap-4 pt-6 border-t border-gray-50 dark:border-gray-700">
                         <a
-                            href="{{ route('student.dashboard') }}"
+                            href="{{ route('student.reports.index') }}"
                             class="flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 uppercase tracking-widest transition-colors"
                         >
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
-                            Cancel Changes
+                            Back to Hours Log
                         </a>
                         <div class="flex items-center gap-3">
                             <button
                                 type="submit"
+                                onclick="return confirm('{{ ($isAttendanceStyleLog ?? false) ? 'Save these changes and send this hours log back to your supervisor for approval?' : 'Save your changes to this work log?' }}')"
                                 class="inline-flex items-center px-10 py-4 rounded-2xl bg-indigo-600 text-sm font-black uppercase tracking-widest text-white hover:bg-indigo-700 shadow-xl shadow-indigo-200 dark:shadow-none transition-all hover:-translate-y-0.5"
                             >
-                                Save Changes
+                                {{ ($isAttendanceStyleLog ?? false) ? 'Save & Re-Approve' : 'Save Changes' }}
                             </button>
-                            <button
-                                type="submit"
-                                name="submit_after_save"
-                                value="1"
-                                class="inline-flex items-center px-10 py-4 rounded-2xl bg-emerald-600 text-sm font-black uppercase tracking-widest text-white hover:bg-emerald-700 shadow-xl shadow-emerald-200 dark:shadow-none transition-all hover:-translate-y-0.5"
-                            >
-                                Save & Submit
-                            </button>
+                            @unless($isAttendanceStyleLog ?? false)
+                                <button
+                                    type="submit"
+                                    name="submit_after_save"
+                                    value="1"
+                                    onclick="return confirm('Save your changes and submit this report for review now?')"
+                                    class="inline-flex items-center px-10 py-4 rounded-2xl bg-emerald-600 text-sm font-black uppercase tracking-widest text-white hover:bg-emerald-700 shadow-xl shadow-emerald-200 dark:shadow-none transition-all hover:-translate-y-0.5"
+                                >
+                                    Save & Submit
+                                </button>
+                            @endunless
                         </div>
                     </div>
                 </form>

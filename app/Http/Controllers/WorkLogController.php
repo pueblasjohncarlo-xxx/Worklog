@@ -19,6 +19,27 @@ use Illuminate\View\View;
 
 class WorkLogController extends Controller
 {
+    private function isAttendanceStyleLog(WorkLog $workLog): bool
+    {
+        return $workLog->time_in !== null || $workLog->time_out !== null;
+    }
+
+    private function calculateAttendanceHours(?string $timeIn, ?string $timeOut): float
+    {
+        if (blank($timeIn) || blank($timeOut)) {
+            return 0.0;
+        }
+
+        $start = Carbon::createFromFormat('H:i', $timeIn);
+        $end = Carbon::createFromFormat('H:i', $timeOut);
+
+        if ($end->lessThan($start)) {
+            $end->addDay();
+        }
+
+        return round($start->floatDiffInHours($end), 2);
+    }
+
     public function create(Request $request): View
     {
         $user = Auth::user();
@@ -155,6 +176,7 @@ class WorkLogController extends Controller
 
         return view('student.worklogs.edit', [
             'workLog' => $workLog,
+            'isAttendanceStyleLog' => $this->isAttendanceStyleLog($workLog),
         ]);
     }
 
@@ -172,9 +194,17 @@ class WorkLogController extends Controller
         }
 
         $data = $request->validated();
+        $isAttendanceStyleLog = $this->isAttendanceStyleLog($workLog);
 
         if (! array_key_exists('description', $data) || $data['description'] === null) {
             $data['description'] = $workLog->description ?? 'Submitted via accomplishment report template attachment.';
+        }
+
+        if ($isAttendanceStyleLog) {
+            $data['hours'] = $this->calculateAttendanceHours(
+                $data['time_in'] ?? null,
+                $data['time_out'] ?? null
+            );
         }
 
         if ($request->hasFile('attachment')) {
@@ -189,15 +219,30 @@ class WorkLogController extends Controller
             $data['attachment_disk'] = 'local';
         }
 
-        // If editing a submitted/approved log, reset to draft
-        $data['status'] = 'draft';
-        // Reset approval info
+        // Reset approval info whenever a student changes an existing log.
         $data['reviewer_id'] = null;
         $data['reviewed_at'] = null;
         $data['grade'] = null;
         $data['reviewer_comment'] = null;
 
+        if ($isAttendanceStyleLog) {
+            $data['status'] = 'submitted';
+            $data['submitted_to'] = 'supervisor';
+        } else {
+            $data['status'] = 'draft';
+        }
+
         $workLog->update($data);
+
+        if ($isAttendanceStyleLog) {
+            $assignment->loadMissing(['supervisor']);
+            if ($assignment->supervisor) {
+                $assignment->supervisor->notify(new WorkLogSubmittedNotification($workLog->fresh()));
+            }
+
+            return redirect()->route('student.reports.index')
+                ->with('status', 'Hours log updated successfully and sent back to your supervisor for approval.');
+        }
 
         if ($request->boolean('submit_after_save')) {
             return $this->submit($request, $workLog->id);

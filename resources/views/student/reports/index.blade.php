@@ -258,10 +258,18 @@
                                         <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-xs">Hours</th>
                                         <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-xs">Status</th>
                                         <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-xs">Description</th>
+                                        <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-xs text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-200">
                                     @foreach($workLogs as $log)
+                                        @php
+                                            $isAttendanceStyleLog = $log->time_in !== null || $log->time_out !== null;
+                                            $canEditHoursLog = $isAttendanceStyleLog;
+                                            $editConfirmation = $log->status === 'approved'
+                                                ? 'Editing this approved hours log will send it back to your supervisor for approval again. Continue?'
+                                                : 'Edit this hours log entry? Saving changes will place it back in the supervisor approval queue.';
+                                        @endphp
                                         <tr class="hover:bg-slate-50 transition-colors">
                                             <td class="px-6 py-4 font-semibold text-slate-800">{{ $log->work_date->format('M d, Y') }}</td>
                                             <td class="px-6 py-4 text-slate-700">{{ $log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('h:i A') : '-' }}</td>
@@ -272,6 +280,21 @@
                                             </td>
                                             <td class="px-6 py-4 text-slate-700 max-w-xs truncate" title="{{ $log->description }}">
                                                 {{ $log->description ?? '-' }}
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                @if($canEditHoursLog)
+                                                    <a
+                                                        href="{{ route('student.worklogs.edit', $log->id) }}"
+                                                        onclick="return confirm('{{ $editConfirmation }}')"
+                                                        class="inline-flex items-center rounded-lg bg-slate-900 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-white transition hover:bg-black focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                    >
+                                                        Edit
+                                                    </a>
+                                                @else
+                                                    <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                                                        View in Reports
+                                                    </span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
