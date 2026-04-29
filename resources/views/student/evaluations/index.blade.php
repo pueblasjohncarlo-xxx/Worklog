@@ -67,7 +67,6 @@
                                 <th class="px-6 py-4 text-xs font-black uppercase tracking-[0.16em] text-slate-700">Evaluation</th>
                                 <th class="px-6 py-4 text-xs font-black uppercase tracking-[0.16em] text-slate-700">Supervisor</th>
                                 <th class="px-6 py-4 text-xs font-black uppercase tracking-[0.16em] text-slate-700">Submitted</th>
-                                <th class="px-6 py-4 text-xs font-black uppercase tracking-[0.16em] text-slate-700">Score</th>
                                 <th class="px-6 py-4 text-xs font-black uppercase tracking-[0.16em] text-slate-700">Status</th>
                                 <th class="px-6 py-4 text-xs font-black uppercase tracking-[0.16em] text-slate-700 text-right">Actions</th>
                             </tr>
@@ -91,11 +90,6 @@
                                     </td>
                                     <td class="px-6 py-4 align-top text-slate-700">
                                         {{ $evaluation->submitted_at?->format('M d, Y h:i A') ?? 'Not yet submitted' }}
-                                    </td>
-                                    <td class="px-6 py-4 align-top">
-                                        <span class="inline-flex min-w-[7rem] justify-center rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-black text-slate-950">
-                                            {{ (float) ($evaluation->final_rating ?? 0) > 0 ? number_format((float) $evaluation->final_rating, 2).'/5' : 'Awaiting score' }}
-                                        </span>
                                     </td>
                                     <td class="px-6 py-4 align-top">
                                         <x-status-badge
