@@ -6,7 +6,7 @@
 
     <div class="space-y-8">
         <!-- Quick Action Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             <a href="{{ route('student.tasks.index') }}" class="student-dark-card p-8 flex flex-col items-center justify-center group hover:scale-[1.02] transition-transform">
                 <div class="p-4 bg-indigo-500/20 rounded-2xl mb-4 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                     <svg class="h-12 w-12 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,6 +32,15 @@
                     </svg>
                 </div>
                 <span class="text-2xl font-black text-white uppercase tracking-tight drop-shadow-sm">HOURS LOG</span>
+            </a>
+
+            <a href="{{ route('student.evaluations.index') }}" class="bg-slate-100/95 backdrop-blur-md border border-slate-300/70 p-8 rounded-xl shadow-[0_8px_24px_rgba(15,23,42,0.18)] flex flex-col items-center justify-center group hover:scale-[1.02] transition-transform">
+                <div class="p-4 bg-slate-900 rounded-2xl mb-4 group-hover:scale-110 transition-transform text-white shadow-[0_0_15px_rgba(15,23,42,0.22)]">
+                    <svg class="h-12 w-12 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-7 4h8a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v13a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span class="text-2xl font-black text-slate-950 uppercase tracking-tight">EVALUATIONS</span>
             </a>
         </div>
 

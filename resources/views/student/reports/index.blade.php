@@ -26,6 +26,9 @@
                    }}">
                 Reports
             </a>
+            <a href="{{ route('student.evaluations.index') }}" class="student-tab student-tab-inactive">
+                Performance Evaluations
+            </a>
         </div>
 
         @if(request('view') === 'reports')

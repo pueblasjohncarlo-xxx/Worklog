@@ -74,6 +74,14 @@
             <span class="font-medium text-lg">Reports</span>
         </a>
 
+        <a href="{{ route('student.evaluations.index') }}"
+           class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors {{ request()->routeIs('student.evaluations.*') ? 'bg-indigo-900 text-white shadow-lg' : 'hover:bg-gray-900 text-gray-200' }}">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-7 4h8a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v13a2 2 0 002 2z" />
+            </svg>
+            <span class="font-medium text-lg">Evaluations</span>
+        </a>
+
     </nav>
 
     <!-- Footer / Profile -->

@@ -13,6 +13,7 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\JournalController;
+use App\Http\Controllers\Student\StudentEvaluationController;
 use App\Http\Controllers\Student\TaskController as StudentTaskController;
 use App\Http\Controllers\Student\MappingController as StudentMappingController;
 use App\Http\Controllers\StudentController;
@@ -126,6 +127,10 @@ Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
     // Student Reports
     Route::get('/student/reports', [StudentReportController::class, 'index'])->name('student.reports.index');
     Route::get('/student/reports/export', [StudentReportController::class, 'export'])->name('student.reports.export');
+    Route::get('/student/evaluations', [StudentEvaluationController::class, 'index'])->name('student.evaluations.index');
+    Route::get('/student/evaluations/{evaluation}', [StudentEvaluationController::class, 'show'])->name('student.evaluations.show');
+    Route::get('/student/evaluations/{evaluation}/download', [StudentEvaluationController::class, 'download'])->name('student.evaluations.download');
+    Route::get('/student/evaluations/{evaluation}/print', [StudentEvaluationController::class, 'print'])->name('student.evaluations.print');
 });
 
 use App\Http\Controllers\Supervisor\SupervisorEvaluationController;
