@@ -136,7 +136,7 @@
                             <th class="py-2 pr-4 font-semibold uppercase tracking-wider">Expires</th>
                             <th class="py-2 pr-4 font-semibold uppercase tracking-wider">Status</th>
                             <th class="py-2 pr-4 font-semibold uppercase tracking-wider">By</th>
-                            <th class="py-2 font-semibold uppercase tracking-wider">Action</th>
+                            <th class="py-2 font-bold uppercase tracking-wider text-gray-900 dark:text-gray-100">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -165,10 +165,10 @@
                                     @if ($status === 'pending')
                                         <form action="{{ route('invitations.revoke', $invitation) }}" method="POST" onsubmit="return confirm('Revoke this invitation?');">
                                             @csrf
-                                            <button type="submit" class="text-xs font-bold uppercase tracking-wide text-rose-700 hover:text-rose-900 dark:text-rose-300 dark:hover:text-rose-200">Revoke</button>
+                                            <button type="submit" class="inline-flex items-center rounded-md border border-rose-700 bg-rose-700 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-white shadow-sm transition-colors hover:bg-rose-800 hover:border-rose-800 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 active:bg-rose-900 disabled:cursor-not-allowed disabled:opacity-60">Revoke</button>
                                         </form>
                                     @else
-                                        <span class="text-xs text-gray-700 dark:text-gray-200">-</span>
+                                        <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">No action</span>
                                     @endif
                                 </td>
                             </tr>

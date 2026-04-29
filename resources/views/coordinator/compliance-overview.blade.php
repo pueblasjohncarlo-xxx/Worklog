@@ -92,7 +92,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Hours</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tasks</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-900 dark:text-gray-100 uppercase tracking-[0.14em]">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -154,7 +154,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <a href="#" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm font-medium">
+                                    <a href="#" class="inline-flex items-center rounded-lg border border-indigo-700 bg-indigo-700 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-white shadow-sm transition-colors hover:bg-indigo-800 hover:border-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-indigo-900">
                                         View Details
                                     </a>
                                 </td>

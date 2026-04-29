@@ -981,7 +981,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Duration</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Hours</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-900 dark:text-gray-100 uppercase tracking-[0.14em]">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -1000,14 +1000,14 @@
                                 >
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($deployment['deployment_status'] === 'complete')
-                                            <x-status-badge status="complete" label="Complete" size="sm" />
+                                            <x-status-badge status="complete" label="Complete" size="sm" class="!border-emerald-700 !bg-emerald-100 !text-emerald-950 shadow-sm" />
                                         @elseif($deployment['deployment_status'] === 'incomplete')
-                                            <x-status-badge status="incomplete" label="Incomplete" size="sm" />
+                                            <x-status-badge status="incomplete" label="Incomplete" size="sm" class="!border-amber-700 !bg-amber-100 !text-amber-950 shadow-sm" />
                                         @else
-                                            <x-status-badge status="unassigned" label="Unassigned" size="sm" />
+                                            <x-status-badge status="unassigned" label="Unassigned" size="sm" class="!border-slate-600 !bg-slate-100 !text-slate-950 shadow-sm" />
                                         @endif
 
-                                        <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                        <div class="mt-1 text-[11px] font-bold text-gray-700 dark:text-gray-200">
                                             OJT: {{ ucfirst((string) ($deployment['status'] ?? '')) }}
                                         </div>
                                     </td>
@@ -1050,17 +1050,17 @@
 
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="space-y-1">
-                                            <div class="wl-status-badge wl-status-info px-2.5 py-1 text-[11px] normal-case tracking-normal">
+                                            <div class="inline-flex items-center rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-[11px] font-black normal-case tracking-normal text-indigo-950 shadow-sm dark:border-indigo-400/60 dark:bg-indigo-900/30 dark:text-indigo-100">
                                                 {{ number_format((float) $deployment['rendered_hours'], 2) }} rendered
                                             </div>
-                                            <div class="text-[11px] font-medium text-gray-600 dark:text-gray-300">
+                                            <div class="text-[11px] font-bold text-gray-800 dark:text-gray-100">
                                                 Required: {{ number_format((int) $deployment['required_hours']) }} hrs
                                             </div>
                                         </div>
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <button type="button" data-deployment-id="{{ $deployment['id'] }}" data-deployment='@json($deployment)' onclick="window.openDeploymentEditModal(this.dataset.deployment)" class="relative z-10 pointer-events-auto inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                                        <button type="button" data-deployment-id="{{ $deployment['id'] }}" data-deployment='@json($deployment)' onclick="window.openDeploymentEditModal(this.dataset.deployment)" class="relative z-10 pointer-events-auto inline-flex items-center rounded-lg border border-indigo-700 bg-indigo-700 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-white shadow-sm transition-colors hover:bg-indigo-800 hover:border-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-indigo-900 disabled:cursor-not-allowed disabled:opacity-60">
                                             <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>

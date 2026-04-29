@@ -409,7 +409,7 @@
                                             </template>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                                            <button @click="openDetails(supervisor)" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">View Details</button>
+                                            <button @click="openDetails(supervisor)" class="inline-flex items-center rounded-lg border border-indigo-700 bg-indigo-700 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-white shadow-sm transition-colors hover:bg-indigo-800 hover:border-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-indigo-900 disabled:cursor-not-allowed disabled:opacity-60">View Details</button>
                                         </td>
                                     </tr>
                                 </template>

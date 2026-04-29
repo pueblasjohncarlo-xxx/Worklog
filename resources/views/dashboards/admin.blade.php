@@ -15,7 +15,7 @@
         <!-- ===== ROW 1: CORE METRICS & QUICKS STATS (NOW TOP) ===== -->
         <div class="flex flex-col xl:flex-row gap-4">
             <!-- Summary Grid -->
-            <div class="xl:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="xl:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Total Users -->
                 <a href="{{ route('admin.users.index') }}" class="group block bg-gradient-to-br from-indigo-600/20 to-indigo-600/10 border border-indigo-500/30 rounded-lg p-3 cursor-pointer hover:border-indigo-500/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 transition-all">
                     <div class="flex items-center justify-between">
@@ -40,25 +40,10 @@
                     </div>
                 </a>
 
-                <!-- Pending -->
-                <a href="{{ route('admin.worklogs.pending') }}" class="group block bg-gradient-to-br from-red-600/20 to-red-600/10 border border-red-500/30 rounded-lg p-3 cursor-pointer hover:border-red-500/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 transition-all">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-[10px] text-red-200 font-bold uppercase tracking-wider">Pending</p>
-                            <p class="text-xl font-black text-white mt-0.5">{{ $pendingReviews }}</p>
-                            <p class="text-[10px] text-red-300">To Review</p>
-                        </div>
-                        <svg class="h-6 w-6 text-red-400/40" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>
-                    </div>
-                </a>
             </div>
 
             <!-- Mini Fast-Access Stats (Side Info) -->
-            <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <a href="{{ route('admin.worklogs.pending') }}" class="group block bg-slate-950/30 border border-white/10 rounded p-1.5 text-center cursor-pointer transition-all hover:bg-red-500/10 hover:border-red-400/50 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400">
-                    <p class="text-[9px] text-red-200 font-bold uppercase tracking-wider">Log Subm.</p>
-                    <p class="text-sm font-black text-white leading-none mt-1 group-hover:text-red-50">{{ $workLogs }}</p>
-                </a>
+            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <a href="{{ route('admin.users.index') }}" class="group block bg-slate-950/30 border border-white/10 rounded p-1.5 text-center cursor-pointer transition-all hover:bg-emerald-500/10 hover:border-emerald-400/50 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
                     <p class="text-[9px] text-emerald-200 font-bold uppercase tracking-wider">Roles</p>
                     <p class="text-sm font-black text-white leading-none mt-1 group-hover:text-emerald-50">{{ count($userDistribution) }}</p>
@@ -133,7 +118,23 @@
                         labels: userDistributionLabels,
                         datasets: [{
                             data: userDistributionData,
-                            backgroundColor: userDistributionLabels.map(label => window.getWorklogChartColor(label, '#6366f1')),
+                            backgroundColor: userDistributionLabels.map(label => {
+                                const rolePalette = {
+                                    admin: '#b45309',
+                                    coordinator: '#0f766e',
+                                    supervisor: '#1d4ed8',
+                                    student: '#7c3aed',
+                                    ojt_adviser: '#be123c',
+                                };
+                                const normalized = String(label || '')
+                                    .toLowerCase()
+                                    .replace(/\s+/g, '_')
+                                    .replace(/[^\w]/g, '_')
+                                    .replace(/_+/g, '_')
+                                    .replace(/^_|_$/g, '');
+
+                                return rolePalette[normalized] || window.getWorklogChartColor(label, '#475569');
+                            }),
                             borderWidth: 0,
                             hoverOffset: 15
                         }]
